@@ -14,39 +14,33 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-surface/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+      <div className="mx-auto flex h-13 max-w-xl items-center justify-between px-4">
+        <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
           <span
-            className="inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold"
+            className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold"
             style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
           >
             学
           </span>
           slubstack
         </Link>
-        <div className="flex items-center gap-3 text-sm">
-          <Stat
-            icon={<Flame size={15} className="text-orange-500" />}
-            label={`${hydrated ? streak : 0}`}
-            title="Streak"
-          />
-          <Stat
-            icon={<Sparkles size={15} className="text-amber-500" />}
-            label={`${hydrated ? xp : 0}`}
-            title="XP"
-          />
+
+        <div className="flex items-center gap-1.5">
+          <Chip icon={<Flame size={13} className="text-orange-500" />} label={hydrated ? streak : 0} title="Streak" />
+          <Chip icon={<Sparkles size={13} className="text-amber-500" />} label={hydrated ? xp : 0} title="XP" />
           <Link
             href="/stats"
-            className="rounded-full border border-border px-2 py-1 text-xs text-muted hover:text-fg"
+            className="rounded-full border border-border px-2.5 py-1 text-[11px] font-semibold tabular-nums text-muted transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            title="Level"
           >
             Lv {level}
           </Link>
           <Link
             href="/stats"
-            className="rounded-full border border-border p-2 text-muted hover:text-fg"
+            className="ml-0.5 flex h-7 w-7 items-center justify-center rounded-full border border-border text-muted transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
             aria-label="Account and stats"
           >
-            <User size={14} />
+            <User size={13} />
           </Link>
         </div>
       </div>
@@ -54,14 +48,14 @@ export function TopBar() {
   );
 }
 
-function Stat({ icon, label, title }: { icon: React.ReactNode; label: string; title: string }) {
+function Chip({ icon, label, title }: { icon: React.ReactNode; label: number; title: string }) {
   return (
     <span
       title={title}
-      className="inline-flex items-center gap-1 rounded-full bg-bg px-2 py-1 tabular-nums"
+      className="inline-flex items-center gap-1 rounded-full bg-bg px-2 py-1 text-[11px] tabular-nums"
     >
       {icon}
-      <span>{label}</span>
+      <span className="font-medium">{label}</span>
     </span>
   );
 }

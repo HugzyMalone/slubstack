@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Lock, Star } from "lucide-react";
+import { CheckCircle2, Lock } from "lucide-react";
 import { ALL_UNITS } from "@/lib/content";
 import { useGameStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -30,17 +30,15 @@ export function SkillTree() {
         </div>
       </header>
 
-      <ol className="relative mt-2 space-y-6 pl-8">
+      <ol className="relative mt-2 space-y-4 pl-8">
         <div
-          className="absolute left-4 top-4 bottom-4 w-[2px] rounded-full"
+          className="absolute left-4 top-4 bottom-4 w-px rounded-full"
           style={{ background: "var(--border)" }}
         />
         {ALL_UNITS.map((unit, i) => {
           const state: "locked" | "active" | "done" =
             !hydrated
-              ? i === 0
-                ? "active"
-                : "locked"
+              ? i === 0 ? "active" : "locked"
               : completedUnits.includes(unit.id)
                 ? "done"
                 : i === unlockedIndex
@@ -50,45 +48,46 @@ export function SkillTree() {
           return (
             <motion.li
               key={unit.id}
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04 }}
+              transition={{ delay: i * 0.04, ease: "easeOut" }}
               className="relative"
             >
-              <Node state={state} index={i} />
+              <Node state={state} />
+
               {state === "locked" ? (
-                <div
-                  className="ml-4 flex cursor-not-allowed items-center gap-3 rounded-2xl border border-border bg-surface/60 p-4 opacity-70"
-                  aria-disabled
-                >
-                  <span className="text-2xl">{unit.emoji}</span>
-                  <div>
-                    <div className="font-medium">{unit.title}</div>
-                    <div className="text-xs text-muted">{unit.subtitle}</div>
+                <div className="ml-4 flex cursor-not-allowed items-center gap-3 rounded-2xl border border-border bg-surface/50 px-4 py-3.5 opacity-50">
+                  <span className="text-xl">{unit.emoji}</span>
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-muted">{unit.title}</div>
+                    <div className="truncate text-xs text-muted/70">{unit.subtitle}</div>
                   </div>
                 </div>
               ) : (
                 <Link
                   href={`/learn/${unit.id}`}
                   className={cn(
-                    "ml-4 flex items-center gap-3 rounded-2xl border bg-surface p-4 transition active:scale-[0.99]",
+                    "ml-4 flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all duration-150 active:scale-[0.98]",
                     state === "active"
-                      ? "border-[var(--accent)] shadow-[0_0_0_2px_var(--accent-soft)]"
-                      : "border-border hover:bg-border/40",
+                      ? "border-[var(--accent)]/40 bg-surface shadow-md shadow-[var(--accent)]/10 ring-1 ring-[var(--accent)]/20"
+                      : "border-border bg-surface hover:border-border/80 hover:shadow-sm",
                   )}
                 >
-                  <span className="text-2xl">{unit.emoji}</span>
-                  <div className="flex-1">
-                    <div className="font-medium">{unit.title}</div>
-                    <div className="text-xs text-muted">{unit.subtitle}</div>
+                  <span className="text-xl">{unit.emoji}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold">{unit.title}</div>
+                    <div className="truncate text-xs text-muted">{unit.subtitle}</div>
                   </div>
                   {state === "done" && (
-                    <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                      Done
-                    </span>
+                    <CheckCircle2 size={17} className="shrink-0 text-emerald-500" />
                   )}
                   {state === "active" && (
-                    <span className="text-xs font-medium text-[var(--accent)]">Start</span>
+                    <span
+                      className="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                      style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+                    >
+                      Start
+                    </span>
                   )}
                 </Link>
               )}
@@ -100,23 +99,19 @@ export function SkillTree() {
   );
 }
 
-function Node({ state, index }: { state: "locked" | "active" | "done"; index: number }) {
-  const color =
-    state === "done"
-      ? "bg-emerald-500 text-white"
-      : state === "active"
-        ? "bg-[var(--accent)] text-[var(--accent-fg)]"
-        : "bg-border text-muted";
-  const Icon =
-    state === "done" ? Star : state === "locked" ? Lock : null;
+function Node({ state }: { state: "locked" | "active" | "done" }) {
   return (
     <span
       className={cn(
-        "absolute -left-8 top-3 flex h-8 w-8 items-center justify-center rounded-full ring-4 ring-bg",
-        color,
+        "absolute -left-8 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full ring-4 ring-bg transition-colors",
+        state === "done"
+          ? "bg-emerald-500 text-white"
+          : state === "active"
+            ? "bg-[var(--accent)] text-[var(--accent-fg)]"
+            : "bg-border text-muted/50",
       )}
     >
-      {Icon ? <Icon size={15} /> : <span className="text-xs font-bold">{index + 1}</span>}
+      {state === "locked" && <Lock size={10} />}
     </span>
   );
 }
