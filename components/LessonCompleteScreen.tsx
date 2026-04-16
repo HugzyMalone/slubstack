@@ -81,7 +81,7 @@ export function LessonCompleteScreen({ gained, firstTryCorrect, total }: Props) 
           href="/review"
           className="w-full rounded-xl border border-border px-4 py-3 text-center text-sm font-medium hover:bg-border/40"
         >
-          Review more cards
+          Study flashcards
         </Link>
       </motion.div>
     </div>

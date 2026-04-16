@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
-import { shuffle, cn } from "@/lib/utils";
+import { shuffle } from "@/lib/utils";
 import { CardFooter } from "./CardShell";
 
 type Props = {
@@ -28,7 +28,7 @@ export function BuildPhrase({ card, onResult }: Props) {
       .slice(0, decoyCount)
       .map((text, i) => ({ id: `d-${i}`, text }));
     return shuffle([...realTiles, ...decoys]);
-  }, [card.id, card.hanzi]);
+  }, [card.hanzi]);
 
   const [picked, setPicked] = useState<Tile[]>([]);
   const [submitted, setSubmitted] = useState(false);

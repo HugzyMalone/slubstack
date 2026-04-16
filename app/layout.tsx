@@ -4,6 +4,7 @@ import { Noto_Sans_SC } from "next/font/google";
 import "./globals.css";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
+import { CloudSync } from "@/components/CloudSync";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,6 +55,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-dvh flex-col">
         <TopBar />
+        <CloudSync />
         <main className="flex-1">{children}</main>
         <BottomNav />
       </body>

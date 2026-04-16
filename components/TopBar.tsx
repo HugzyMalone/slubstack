@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Flame, Sparkles } from "lucide-react";
+import { Flame, Sparkles, User } from "lucide-react";
 import { useGameStore } from "@/lib/store";
 import { levelFromXp } from "@/lib/xp";
-import { useEffect, useState } from "react";
+import { useHydrated } from "@/lib/hooks";
 
 export function TopBar() {
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-
+  const hydrated = useHydrated();
   const xp = useGameStore((s) => s.xp);
   const streak = useGameStore((s) => s.streak);
   const level = hydrated ? levelFromXp(xp) : 0;
@@ -42,6 +40,13 @@ export function TopBar() {
             className="rounded-full border border-border px-2 py-1 text-xs text-muted hover:text-fg"
           >
             Lv {level}
+          </Link>
+          <Link
+            href="/stats"
+            className="rounded-full border border-border p-2 text-muted hover:text-fg"
+            aria-label="Account and stats"
+          >
+            <User size={14} />
           </Link>
         </div>
       </div>

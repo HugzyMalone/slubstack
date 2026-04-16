@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Repeat2, User } from "lucide-react";
+import { Home, Layers3, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -17,8 +17,18 @@ export function BottomNav() {
 
   const tabs = [
     { href: "/", label: "Learn", Icon: Home, match: (p: string) => p === "/" },
-    { href: "/review", label: "Review", Icon: Repeat2, match: (p: string) => p.startsWith("/review") },
-    { href: "/stats", label: "Stats", Icon: User, match: (p: string) => p.startsWith("/stats") },
+    {
+      href: "/review",
+      label: "Flashcards",
+      Icon: Layers3,
+      match: (p: string) => p.startsWith("/review"),
+    },
+    {
+      href: "/leaderboard",
+      label: "Leaderboard",
+      Icon: Trophy,
+      match: (p: string) => p.startsWith("/leaderboard"),
+    },
   ];
 
   return (

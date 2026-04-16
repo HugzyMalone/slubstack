@@ -84,7 +84,7 @@ export function MultipleChoice({ card, distractors, onResult }: Props) {
               </span>
             ) : (
               <span className="font-medium text-rose-800 dark:text-rose-200">
-                {card.hanzi} means "{card.english}"
+                {card.hanzi} means &quot;{card.english}&quot;
               </span>
             )
           ) : null

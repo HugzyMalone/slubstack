@@ -5,14 +5,12 @@ import { motion } from "framer-motion";
 import { Lock, Star } from "lucide-react";
 import { ALL_UNITS } from "@/lib/content";
 import { useGameStore } from "@/lib/store";
-import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Panda } from "@/components/Panda";
+import { useHydrated } from "@/lib/hooks";
 
 export function SkillTree() {
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-
+  const hydrated = useHydrated();
   const completedUnits = useGameStore((s) => s.completedUnits);
   const seenCardIds = useGameStore((s) => s.seenCardIds);
 

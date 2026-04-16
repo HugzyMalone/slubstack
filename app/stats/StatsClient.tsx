@@ -1,34 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Flame, Sparkles, BookOpen, Target } from "lucide-react";
 import { useGameStore } from "@/lib/store";
 import { levelFromXp, xpToNextLevel } from "@/lib/xp";
 import { ALL_CARDS } from "@/lib/content";
 import { Panda } from "@/components/Panda";
 import { isDue } from "@/lib/srs";
+import { useHydrated, useNow } from "@/lib/hooks";
 
 export function StatsClient() {
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-
+  const hydrated = useHydrated();
   const xp = useGameStore((s) => s.xp);
   const streak = useGameStore((s) => s.streak);
   const seen = useGameStore((s) => s.seenCardIds);
   const completed = useGameStore((s) => s.completedUnits);
   const srs = useGameStore((s) => s.srs);
   const reset = useGameStore((s) => s.reset);
+  const now = useNow(hydrated);
 
   if (!hydrated) return null;
 
   const level = levelFromXp(xp);
   const { current, next, progress } = xpToNextLevel(xp);
-  const now = Date.now();
   const due = Object.values(srs).filter((s) => isDue(s, now)).length;
   const totalCards = ALL_CARDS.length;
 
   return (
-    <div className="mx-auto max-w-xl px-4 pb-28 pt-4">
+    <div>
       <div className="rounded-3xl border border-border bg-surface p-6 text-center">
         <Panda mood="happy" size={100} />
         <div className="mt-3 text-xs uppercase tracking-widest text-muted">Level</div>
@@ -73,7 +71,7 @@ export function StatsClient() {
       {due > 0 && (
         <div className="mt-4 rounded-2xl border border-border bg-surface p-4">
           <div className="text-sm">
-            <span className="font-semibold">{due}</span> card{due === 1 ? "" : "s"} due for review.
+            <span className="font-semibold">{due}</span> flashcard{due === 1 ? "" : "s"} ready to study.
           </div>
         </div>
       )}
