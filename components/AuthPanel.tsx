@@ -125,7 +125,7 @@ export function AuthPanel() {
     const redirectTo =
       typeof window === "undefined"
         ? undefined
-        : `${window.location.origin}/auth/callback?next=/stats`;
+        : `${window.location.origin}/auth/callback?next=/onboarding`;
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
