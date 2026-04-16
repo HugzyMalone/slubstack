@@ -1,11 +1,9 @@
-import { AuthPanel } from "@/components/AuthPanel";
-import { StatsClient } from "./StatsClient";
+import { ProfileClient } from "./ProfileClient";
+import { getLeaderboard } from "@/lib/supabase/queries";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 
-export default function StatsPage() {
-  return (
-    <div className="mx-auto max-w-xl px-4 pb-28 pt-4">
-      <StatsClient />
-      <AuthPanel />
-    </div>
-  );
+export default async function StatsPage() {
+  const configured = isSupabaseConfigured();
+  const entries = configured ? await getLeaderboard(50) : [];
+  return <ProfileClient entries={entries} configured={configured} />;
 }

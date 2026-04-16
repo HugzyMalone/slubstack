@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Layers3, Trophy } from "lucide-react";
+import { Home, Layers3, UserCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function BottomNav() {
@@ -19,10 +19,10 @@ export function BottomNav() {
       match: (p: string) => p.startsWith("/review"),
     },
     {
-      href: "/leaderboard",
-      label: "Leaderboard",
-      Icon: Trophy,
-      match: (p: string) => p.startsWith("/leaderboard"),
+      href: "/stats",
+      label: "Profile",
+      Icon: UserCircle2,
+      match: (p: string) => p.startsWith("/stats") || p.startsWith("/leaderboard"),
     },
   ];
 

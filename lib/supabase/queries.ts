@@ -3,6 +3,7 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 export type LeaderboardEntry = {
   userId: string;
   username: string;
+  avatar: string | null;
   xp: number;
   streak: number;
   wordsLearned: number;
@@ -36,15 +37,14 @@ export async function getLeaderboard(limit = 50): Promise<LeaderboardEntry[]> {
     .order("streak", { ascending: false })
     .limit(limit);
 
-  if (error || !data) {
-    return [];
-  }
+  if (error || !data) return [];
 
   return (data as LeaderboardRow[]).map((row) => {
     const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
     return {
       userId: row.user_id,
       username: profile?.username ?? "Learner",
+      avatar: profile?.avatar_url ?? null,
       xp: row.xp ?? 0,
       streak: row.streak ?? 0,
       wordsLearned: row.words_learned ?? 0,
