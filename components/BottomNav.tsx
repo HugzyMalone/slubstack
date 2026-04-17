@@ -13,6 +13,7 @@ export function BottomNav() {
     pathname?.startsWith("/learn/") ||
     pathname?.startsWith("/mandarin/learn/") ||
     pathname?.startsWith("/german/learn/") ||
+    pathname?.startsWith("/spanish/learn/") ||
     pathname === "/review-run"
   ) {
     return null;
@@ -21,7 +22,9 @@ export function BottomNav() {
   // Flashcards link follows the current language section
   const flashcardsHref = pathname?.startsWith("/german")
     ? "/german/review"
-    : "/mandarin/review";
+    : pathname?.startsWith("/spanish")
+      ? "/spanish/review"
+      : "/mandarin/review";
 
   const tabs = [
     {
@@ -29,13 +32,17 @@ export function BottomNav() {
       label: "Home",
       Icon: Home,
       match: (p: string) =>
-        p === "/" || p === "/mandarin" || p === "/german" || p === "/trivia",
+        p === "/" || p === "/mandarin" || p === "/german" || p === "/spanish" || p === "/trivia",
     },
     {
       href: flashcardsHref,
       label: "Flashcards",
       Icon: Layers3,
-      match: (p: string) => p.startsWith("/mandarin/review") || p.startsWith("/german/review") || p.startsWith("/review"),
+      match: (p: string) =>
+        p.startsWith("/mandarin/review") ||
+        p.startsWith("/german/review") ||
+        p.startsWith("/spanish/review") ||
+        p.startsWith("/review"),
     },
     {
       href: "/stats",
@@ -46,7 +53,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/90 backdrop-blur-md">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/90 backdrop-blur-md lg:hidden">
       <div className="mx-auto flex h-16 max-w-xl items-stretch px-3 pb-[env(safe-area-inset-bottom)]">
         {tabs.map(({ href, label, Icon, match }) => {
           const active = match(pathname ?? "");

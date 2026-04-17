@@ -41,30 +41,14 @@ const ACTOR_CONFIGS: { name: string; decoys: string[] }[] = [
   { name: "Viola Davis", decoys: ["Octavia Spencer", "Taraji P. Henson", "Angela Bassett"] },
 ];
 
-async function fetchActors(): Promise<ActorData[]> {
-  const results = await Promise.allSettled(
-    ACTOR_CONFIGS.map(async ({ name, decoys }) => {
-      const res = await fetch(
-        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`,
-        { next: { revalidate: 86400 } }
-      );
-      if (!res.ok) return null;
-      const data = await res.json();
-      const image: string | undefined = data.thumbnail?.source;
-      if (!image) return null;
-      // Use a larger size by replacing the width in the URL
-      const bigImage = image.replace(/\/\d+px-/, "/400px-");
-      const proxied = `/api/img?url=${encodeURIComponent(bigImage)}`;
-      return { name, image: proxied, decoys } satisfies ActorData;
-    })
-  );
-
-  return results
-    .filter((r): r is PromiseFulfilledResult<ActorData> => r.status === "fulfilled" && r.value !== null)
-    .map((r) => r.value);
+function buildActors(): ActorData[] {
+  return ACTOR_CONFIGS.map(({ name, decoys }) => {
+    const filename = name.replace(/ /g, "_").toLowerCase() + ".jpg";
+    return { name, image: `/actors/${filename}`, decoys };
+  });
 }
 
-export default async function ActorsPage() {
-  const actors = await fetchActors();
+export default function ActorsPage() {
+  const actors = buildActors();
   return <ActorBlitz actors={actors} />;
 }

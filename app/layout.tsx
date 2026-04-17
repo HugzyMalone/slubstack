@@ -5,6 +5,7 @@ import "./globals.css";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
 import { CloudSync } from "@/components/CloudSync";
+import { AppSidebar } from "@/components/AppSidebar";
 import { GameStoreProvider, mandarinStore } from "@/lib/store";
 
 const geistSans = Geist({
@@ -56,10 +57,13 @@ export default function RootLayout({
     >
       <body className="flex min-h-dvh flex-col">
         <GameStoreProvider store={mandarinStore}>
-          <TopBar />
-          <CloudSync />
-          <main className="flex-1">{children}</main>
-          <BottomNav />
+          <AppSidebar />
+          <div className="flex flex-1 flex-col lg:ml-60">
+            <TopBar />
+            <CloudSync />
+            <main className="flex-1">{children}</main>
+            <BottomNav />
+          </div>
         </GameStoreProvider>
       </body>
     </html>

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "es-greetings",
+    "index": 0,
+    "title": "Greetings",
+    "subtitle": "Hello, goodbye & everyday phrases",
+    "emoji": "👋",
+    "category": "es-greetings",
+    "cardIds": ["es-greet-01","es-greet-02","es-greet-03","es-greet-04","es-greet-05","es-greet-06","es-greet-07","es-greet-08","es-greet-09","es-greet-10","es-greet-11","es-greet-12","es-greet-13","es-greet-14","es-greet-15","es-greet-16"]
+  },
+  {
+    "id": "es-numbers",
+    "index": 1,
+    "title": "Numbers",
+    "subtitle": "Count from 1 to 15",
+    "emoji": "🔢",
+    "category": "es-numbers",
+    "cardIds": ["es-num-01","es-num-02","es-num-03","es-num-04","es-num-05","es-num-06","es-num-07","es-num-08","es-num-09","es-num-10","es-num-11","es-num-12","es-num-13","es-num-14","es-num-15"]
+  },
+  {
+    "id": "es-colors",
+    "index": 2,
+    "title": "Colors",
+    "subtitle": "Rojo, azul, verde y más",
+    "emoji": "🎨",
+    "category": "es-colors",
+    "cardIds": ["es-color-01","es-color-02","es-color-03","es-color-04","es-color-05","es-color-06","es-color-07","es-color-08","es-color-09","es-color-10","es-color-11","es-color-12"]
+  },
+  {
+    "id": "es-food",
+    "index": 3,
+    "title": "Food & Drink",
+    "subtitle": "Agua, pan, pollo y más",
+    "emoji": "🍽️",
+    "category": "es-food",
+    "cardIds": ["es-food-01","es-food-02","es-food-03","es-food-04","es-food-05","es-food-06","es-food-07","es-food-08","es-food-09","es-food-10","es-food-11","es-food-12","es-food-13","es-food-14","es-food-15","es-food-16"]
+  },
+  {
+    "id": "es-verbs",
+    "index": 4,
+    "title": "Verbs",
+    "subtitle": "Hablar, comer, ir y más",
+    "emoji": "⚡",
+    "category": "es-verbs",
+    "cardIds": ["es-verb-01","es-verb-02","es-verb-03","es-verb-04","es-verb-05","es-verb-06","es-verb-07","es-verb-08","es-verb-09","es-verb-10","es-verb-11","es-verb-12","es-verb-13","es-verb-14","es-verb-15","es-verb-16"]
+  }
+]

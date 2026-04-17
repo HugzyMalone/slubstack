@@ -2,6 +2,8 @@ import mandarinVocab from "@/content/mandarin/vocab.json";
 import mandarinUnits from "@/content/mandarin/units.json";
 import germanVocab from "@/content/german/vocab.json";
 import germanUnits from "@/content/german/units.json";
+import spanishVocab from "@/content/spanish/vocab.json";
+import spanishUnits from "@/content/spanish/units.json";
 
 export type Category = string;
 
@@ -24,7 +26,7 @@ export type Unit = {
   cardIds: string[];
 };
 
-export type Language = "mandarin" | "german";
+export type Language = "mandarin" | "german" | "spanish";
 
 export type LanguageContent = {
   cards: Card[];
@@ -33,7 +35,7 @@ export type LanguageContent = {
   getCardsForUnit: (unitId: string) => Card[];
   getUnit: (id: string) => Unit | undefined;
   /** Interaction types allowed for this language's sessions. */
-  allowedInteractions: ("flip" | "multiple-choice" | "build" | "type")[];
+  allowedInteractions: ("flip" | "multiple-choice" | "build" | "type" | "match")[];
 };
 
 function buildContent(
@@ -70,17 +72,25 @@ function buildContent(
 const MANDARIN_CONTENT = buildContent(
   mandarinVocab,
   mandarinUnits,
-  ["flip", "multiple-choice", "build", "type"],
+  ["multiple-choice", "build", "type", "match"],
 );
 
 const GERMAN_CONTENT = buildContent(
   germanVocab,
   germanUnits,
-  ["flip", "multiple-choice", "type"],
+  ["multiple-choice", "type", "match"],
+);
+
+const SPANISH_CONTENT = buildContent(
+  spanishVocab,
+  spanishUnits,
+  ["multiple-choice", "type", "match"],
 );
 
 export function getLanguageContent(lang: Language): LanguageContent {
-  return lang === "german" ? GERMAN_CONTENT : MANDARIN_CONTENT;
+  if (lang === "german") return GERMAN_CONTENT;
+  if (lang === "spanish") return SPANISH_CONTENT;
+  return MANDARIN_CONTENT;
 }
 
 // Backwards-compat exports for files not yet migrated

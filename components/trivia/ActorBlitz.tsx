@@ -26,7 +26,6 @@ interface Props {
   actors: ActorData[];
 }
 
-// Preload an image URL into the browser cache
 function preload(src: string) {
   const img = new window.Image();
   img.src = src;
@@ -49,8 +48,9 @@ export function ActorBlitz({ actors }: Props) {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [advancing, setAdvancing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
-  // Preload all actor images as soon as they arrive
   useEffect(() => {
     actors.forEach((a) => preload(a.image));
   }, [actors]);
@@ -78,7 +78,6 @@ export function ActorBlitz({ actors }: Props) {
     setGameState("countdown");
   }, [actors, timeMode]);
 
-  // Countdown
   useEffect(() => {
     if (gameState !== "countdown") return;
     if (countdown <= 0) { setGameState("playing"); return; }
@@ -86,21 +85,20 @@ export function ActorBlitz({ actors }: Props) {
     return () => clearTimeout(t);
   }, [gameState, countdown]);
 
-  // Setup options + preload next 3 when actor changes
   useEffect(() => {
     if (gameState !== "playing" || !currentActor) return;
     setOptions(makeOptions(currentActor));
     setSelected(null);
     setFeedback(null);
     setAdvancing(false);
-    // Preload upcoming images
+    setImageLoaded(false);
+    setImageError(false);
     for (let i = 1; i <= 3; i++) {
       const next = queue[(currentIdx + i) % queue.length];
       if (next) preload(next.image);
     }
   }, [gameState, currentIdx, currentActor, makeOptions, queue]);
 
-  // Timer
   useEffect(() => {
     if (gameState !== "playing") return;
     if (timeLeft <= 0) { setGameState("results"); return; }
@@ -131,10 +129,10 @@ export function ActorBlitz({ actors }: Props) {
       if (isCorrect) {
         setScore((s) => s + 1);
         setStreak((s) => { const ns = s + 1; setBestStreak((bs) => Math.max(bs, ns)); return ns; });
-        setTimeout(advance, 450);
+        setTimeout(advance, 300);
       } else {
         setStreak(0);
-        setTimeout(advance, 1100);
+        setTimeout(advance, 700);
       }
     },
     [selected, currentActor, advancing, advance]
@@ -167,10 +165,10 @@ export function ActorBlitz({ actors }: Props) {
               <button
                 key={t}
                 onClick={() => setTimeMode(t)}
-                className="flex-1 rounded-xl border py-3 text-sm font-bold transition-all"
+                className="flex-1 rounded-xl border py-3 text-sm font-bold transition-colors duration-150"
                 style={
                   timeMode === t
-                    ? { background: "#8b5cf6", borderColor: "#8b5cf6", color: "#fff" }
+                    ? { background: "var(--game)", borderColor: "var(--game)", color: "#fff" }
                     : { borderColor: "var(--border)", color: "var(--muted)" }
                 }
               >
@@ -188,8 +186,8 @@ export function ActorBlitz({ actors }: Props) {
         <button
           onClick={startGame}
           disabled={actors.length === 0}
-          className="mt-6 w-full rounded-2xl py-4 text-base font-bold text-white transition-all active:scale-[0.97] disabled:opacity-50"
-          style={{ background: "#8b5cf6" }}
+          className="mt-6 w-full rounded-2xl py-4 text-base font-bold text-white transition-colors duration-150 active:scale-[0.97] disabled:opacity-50"
+          style={{ background: "var(--game)" }}
         >
           {actors.length === 0 ? "Loading actors…" : "Let's Go! →"}
         </button>
@@ -203,7 +201,7 @@ export function ActorBlitz({ actors }: Props) {
     const label = countdown > 0 ? String(countdown) : "GO!";
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-bg">
-        <div className="text-8xl font-black transition-all duration-300" style={{ color: countdown > 0 ? "var(--fg)" : "#8b5cf6" }}>
+        <div className="text-8xl font-black transition-all duration-300" style={{ color: countdown > 0 ? "var(--fg)" : "var(--game)" }}>
           {label}
         </div>
         <div className="mt-4 text-muted text-sm">Get ready…</div>
@@ -221,7 +219,7 @@ export function ActorBlitz({ actors }: Props) {
       <div className="mx-auto max-w-md px-4 pb-24 pt-8">
         <div className="text-center mb-6">
           <div className="text-5xl mb-2">🎬</div>
-          <div className="text-4xl font-black" style={{ color: "#8b5cf6" }}>
+          <div className="text-4xl font-black" style={{ color: "var(--game)" }}>
             {score}<span className="text-xl font-semibold text-muted"> / {total}</span>
           </div>
           <div className="text-lg font-semibold mt-1">{grade}</div>
@@ -241,10 +239,10 @@ export function ActorBlitz({ actors }: Props) {
         </div>
 
         <div className="flex gap-3 mb-6">
-          <button onClick={shareResult} className="flex-1 rounded-2xl border border-border bg-surface py-3 text-sm font-semibold transition-all active:scale-[0.97]">
+          <button onClick={shareResult} className="flex-1 rounded-2xl border border-border bg-surface py-3 text-sm font-semibold transition-colors duration-100 active:scale-[0.97]">
             {copied ? "✅ Copied!" : "📋 Copy score"}
           </button>
-          <button onClick={startGame} className="flex-1 rounded-2xl py-3 text-sm font-bold text-white transition-all active:scale-[0.97]" style={{ background: "#8b5cf6" }}>
+          <button onClick={startGame} className="flex-1 rounded-2xl py-3 text-sm font-bold text-white transition-colors duration-100 active:scale-[0.97]" style={{ background: "var(--game)" }}>
             Play again
           </button>
         </div>
@@ -276,10 +274,10 @@ export function ActorBlitz({ actors }: Props) {
   if (!currentActor) return null;
 
   const timerPct = (timeLeft / timeMode) * 100;
-  const timerColor = timeLeft <= 5 ? "#e11d48" : timeLeft <= 15 ? "#f97316" : "#8b5cf6";
+  const timerColor = timeLeft <= 5 ? "#e11d48" : timeLeft <= 15 ? "#f97316" : "var(--game)";
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-56px-60px)] max-w-md mx-auto px-4 pt-3 pb-3 select-none">
+    <div className="flex flex-col h-[calc(100dvh-56px-60px)] lg:h-[calc(100dvh-56px)] max-w-md mx-auto px-4 pt-3 pb-3 select-none">
       {/* Timer bar + stats */}
       <div className="shrink-0 mb-3">
         <div className="flex items-center justify-between mb-1.5">
@@ -294,16 +292,32 @@ export function ActorBlitz({ actors }: Props) {
         </div>
       </div>
 
-      {/* Actor image — plain <img> served directly from Wikimedia CDN, no proxy */}
-      <div className="shrink-0 relative w-full rounded-2xl overflow-hidden bg-surface border border-border" style={{ height: "min(42vh, 300px)" }}>
+      {/* Actor image */}
+      <div
+        key={currentActor.image}
+        className="shrink-0 relative w-full rounded-2xl overflow-hidden bg-surface border border-border fade-in"
+        style={{ height: "min(42vh, 300px)" }}
+      >
+        {/* Skeleton shown while loading */}
+        {!imageLoaded && !imageError && (
+          <div className="absolute inset-0 animate-pulse bg-border" />
+        )}
+        {/* Fallback on error */}
+        {imageError && (
+          <div className="absolute inset-0 flex items-center justify-center text-4xl text-muted">
+            🎬
+          </div>
+        )}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          key={currentActor.image}
           src={currentActor.image}
           alt="Who is this?"
           className="absolute inset-0 h-full w-full object-cover object-top"
           fetchPriority="high"
           decoding="async"
+          onLoad={() => setImageLoaded(true)}
+          onError={() => setImageError(true)}
+          style={{ opacity: imageLoaded ? 1 : 0, transition: "opacity 0.15s ease" }}
         />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
         <div className="absolute bottom-2 left-3 text-white text-xs font-semibold opacity-70">Who is this actor?</div>
@@ -325,7 +339,7 @@ export function ActorBlitz({ actors }: Props) {
               key={option}
               onClick={() => handleAnswer(option)}
               disabled={selected !== null}
-              className="rounded-xl border px-3 py-3.5 text-sm font-semibold transition-all duration-150 active:scale-[0.97] disabled:cursor-default leading-tight"
+              className="rounded-xl border px-3 py-3.5 text-sm font-semibold transition-colors duration-100 active:scale-[0.97] disabled:cursor-default leading-tight"
               style={{ background: bg, borderColor, color: textColor }}
             >
               {option}

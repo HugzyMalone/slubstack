@@ -11,6 +11,7 @@ import { FlipCard } from "@/components/cards/FlipCard";
 import { MultipleChoice } from "@/components/cards/MultipleChoice";
 import { BuildPhrase } from "@/components/cards/BuildPhrase";
 import { TypeAnswer } from "@/components/cards/TypeAnswer";
+import { MatchPairs } from "@/components/cards/MatchPairs";
 import { LessonCompleteScreen } from "@/components/LessonCompleteScreen";
 
 type Props = {
@@ -108,6 +109,14 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
           )}
           {current.kind === "type" && (
             <TypeAnswer card={current.card} onResult={handleResult} onFeedback={handleFeedback} />
+          )}
+          {current.kind === "match" && (
+            <MatchPairs
+              card={current.card}
+              distractors={current.distractors ?? []}
+              onResult={handleResult}
+              onFeedback={handleFeedback}
+            />
           )}
         </div>
       </AnimatePresence>

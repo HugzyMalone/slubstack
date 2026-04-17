@@ -56,8 +56,8 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-surface/80 backdrop-blur-md">
-      <div className="mx-auto flex h-13 max-w-xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+      <div className="mx-auto flex h-13 max-w-xl lg:max-w-none items-center justify-between px-4 lg:px-6">
+        <Link href="/" className="flex items-center gap-1.5 text-sm font-semibold tracking-tight lg:hidden">
           <PandaImage size={28} />
           slubstack
         </Link>

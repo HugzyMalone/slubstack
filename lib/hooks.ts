@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore, useState, useEffect } from "react";
 
 function subscribeToNothing() {
   return () => {};
@@ -9,13 +9,14 @@ export function useHydrated() {
 }
 
 export function useNow(enabled = true, intervalMs = 60_000) {
-  return useSyncExternalStore(
-    (onStoreChange) => {
-      if (!enabled) return () => {};
-      const timer = window.setInterval(onStoreChange, intervalMs);
-      return () => window.clearInterval(timer);
-    },
-    () => Date.now(),
-    () => 0,
-  );
+  const [now, setNow] = useState(0);
+
+  useEffect(() => {
+    if (!enabled) return;
+    setNow(Date.now());
+    const timer = window.setInterval(() => setNow(Date.now()), intervalMs);
+    return () => window.clearInterval(timer);
+  }, [enabled, intervalMs]);
+
+  return now;
 }

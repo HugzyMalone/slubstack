@@ -3,7 +3,7 @@ import { ALL_CARDS, getCardsForUnit } from "@/lib/content";
 import { INITIAL_SRS, isDue, type SrsState } from "@/lib/srs";
 import { shuffle } from "@/lib/utils";
 
-export type InteractionKind = "flip" | "multiple-choice" | "build" | "type";
+export type InteractionKind = "flip" | "multiple-choice" | "build" | "type" | "match";
 
 export type SessionItem = {
   card: Card;
@@ -11,17 +11,32 @@ export type SessionItem = {
   distractors?: Card[];
 };
 
-const INTERACTION_ORDER: InteractionKind[] = [
+// Lesson sessions: no flip cards — only interactive games
+const LESSON_ORDER: InteractionKind[] = [
+  "multiple-choice",
+  "type",
+  "build",
+  "match",
+  "multiple-choice",
+  "type",
+  "multiple-choice",
+  "match",
+  "type",
+  "multiple-choice",
+];
+
+// Flashcard review: includes flip for self-rated review
+const REVIEW_ORDER: InteractionKind[] = [
   "flip",
   "multiple-choice",
-  "build",
+  "type",
+  "flip",
+  "multiple-choice",
   "flip",
   "type",
   "multiple-choice",
   "flip",
-  "build",
-  "multiple-choice",
-  "flip",
+  "type",
 ];
 
 function pickDistractors(correct: Card, pool: Card[], n = 3): Card[] {
@@ -46,9 +61,9 @@ export function buildUnitSession(
 ): SessionItem[] {
   const allCards = content?.cards ?? ALL_CARDS;
   const getCards = content?.getCardsForUnit ?? getCardsForUnit;
-  const allowed = content?.allowedInteractions ?? ["flip", "multiple-choice", "build", "type"];
+  const allowed: InteractionKind[] = content?.allowedInteractions ?? ["multiple-choice", "build", "type", "match"];
 
-  const interactionOrder = INTERACTION_ORDER.filter((k) => allowed.includes(k));
+  const interactionOrder = LESSON_ORDER.filter((k) => allowed.includes(k));
 
   const unitCards = getCards(unitId);
   const now = Date.now();
@@ -78,7 +93,7 @@ export function buildUnitSession(
 
   return pool.map((card, i) => {
     const kind = interactionOrder[i % interactionOrder.length];
-    return kind === "multiple-choice"
+    return kind === "multiple-choice" || kind === "match"
       ? { card, kind, distractors: pickDistractors(card, allCards) }
       : { card, kind };
   });
@@ -99,7 +114,7 @@ export function buildReviewSession(
   const pool = shuffle(due).slice(0, size);
 
   return pool.map((card, i) => {
-    const kind = INTERACTION_ORDER[i % INTERACTION_ORDER.length];
+    const kind = REVIEW_ORDER[i % REVIEW_ORDER.length];
     return kind === "multiple-choice"
       ? { card, kind, distractors: pickDistractors(card, allCards) }
       : { card, kind };
