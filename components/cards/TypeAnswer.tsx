@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
 import { CardFooter } from "./CardShell";
@@ -25,7 +25,6 @@ function norm(s: string) {
 }
 
 function acceptedAnswers(english: string): string[] {
-  // Split on "/" for alternates; strip parentheticals that describe register etc.
   return english
     .split(/\/|,/)
     .map((s) => s.replace(/\([^)]*\)/g, "").trim())
@@ -37,22 +36,13 @@ export function TypeAnswer({ card, onResult, onFeedback }: Props) {
   const [value, setValue] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [firstTryFailed, setFirstTryFailed] = useState(false);
-  const ref = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    ref.current?.focus();
-  }, []);
 
   const accepted = acceptedAnswers(card.english);
   const correct = accepted.some((a) => norm(value) === a);
 
   function submit() {
     if (submitted) {
-      onResult({
-        quality: correct ? (firstTryFailed ? 2 : 4) : 0,
-        correct,
-        firstTry: !firstTryFailed,
-      });
+      onResult({ quality: correct ? (firstTryFailed ? 2 : 4) : 0, correct, firstTry: !firstTryFailed });
       return;
     }
     if (correct) {
@@ -80,28 +70,49 @@ export function TypeAnswer({ card, onResult, onFeedback }: Props) {
         <div className="mt-2 text-base text-muted">{card.pinyin}</div>
       </div>
 
-      <div className="mx-auto mt-4 max-w-sm">
-        <input
-          ref={ref}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && value.trim().length > 0) submit();
-          }}
-          disabled={submitted}
-          placeholder="Type in English…"
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="none"
-          spellCheck="false"
-          className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-base outline-none ring-0 placeholder:text-muted focus:border-[var(--accent)]"
-        />
-      </div>
+      {/* Input + inline Check — stays visible above keyboard, no fixed footer before submit */}
+      {!submitted && (
+        <div className="mx-auto mt-4 max-w-sm space-y-2">
+          <div className="flex gap-2">
+            <input
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && value.trim().length > 0) submit(); }}
+              placeholder="Type in English…"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              inputMode="text"
+              enterKeyHint="go"
+              className="flex-1 rounded-xl border border-border bg-surface px-4 py-3 text-base outline-none placeholder:text-muted focus:border-[var(--accent)]"
+            />
+            <button
+              onClick={submit}
+              disabled={value.trim().length === 0}
+              className="shrink-0 rounded-xl px-4 py-3 text-sm font-semibold transition-colors duration-150 active:scale-[0.97] disabled:pointer-events-none"
+              style={{
+                background: value.trim().length === 0 ? "color-mix(in srgb, var(--fg) 10%, transparent)" : "var(--accent)",
+                color: value.trim().length === 0 ? "var(--muted)" : "var(--accent-fg)",
+              }}
+            >
+              Check
+            </button>
+          </div>
 
-      <CardFooter
-        variant={submitted ? (correct ? "correct" : "wrong") : "idle"}
-        feedback={
-          submitted ? (
+          {firstTryFailed && (
+            <div className="rounded-xl border border-amber-300/50 bg-amber-50/60 dark:border-amber-700/40 dark:bg-amber-950/20 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
+              Not quite — try again.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Footer only appears after submission — keyboard will be dismissed by then */}
+      {submitted && (
+        <CardFooter
+          variant={correct ? "correct" : "wrong"}
+          feedback={
             correct ? (
               <span className="font-medium text-emerald-800 dark:text-emerald-200">
                 Correct — {card.english}
@@ -111,16 +122,10 @@ export function TypeAnswer({ card, onResult, onFeedback }: Props) {
                 Answer: {card.english}
               </span>
             )
-          ) : firstTryFailed ? (
-            <span className="text-amber-700 dark:text-amber-300">Not quite — try again.</span>
-          ) : null
-        }
-        primary={{
-          label: submitted ? "Continue" : "Check",
-          onClick: submit,
-          disabled: !submitted && value.trim().length === 0,
-        }}
-      />
+          }
+          primary={{ label: "Continue", onClick: submit }}
+        />
+      )}
     </>
   );
 }
