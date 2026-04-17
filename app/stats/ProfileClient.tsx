@@ -21,9 +21,7 @@ const ANIMALS = [
   "🦒","🦓","🐘","🐲",
 ];
 
-type Props = { entries: LeaderboardEntry[]; configured: boolean };
-
-export function ProfileClient({ entries, configured }: Props) {
+export function ProfileClient() {
   const [tab, setTab] = useState<"account" | "leaderboard" | "settings">("account");
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState("");
@@ -32,6 +30,8 @@ export function ProfileClient({ entries, configured }: Props) {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const reset = useGameStore((s) => s.reset);
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -101,6 +101,17 @@ export function ProfileClient({ entries, configured }: Props) {
     setTab("account");
   }
 
+  function openTab(t: "account" | "leaderboard" | "settings") {
+    setTab(t);
+    if (t === "leaderboard" && !leaderboardLoaded) {
+      setLeaderboardLoaded(true);
+      fetch("/api/leaderboard")
+        .then((r) => r.json())
+        .then((d) => setEntries(d.entries ?? []))
+        .catch(() => {});
+    }
+  }
+
   const tabs = user
     ? (["account", "leaderboard", "settings"] as const)
     : (["account", "leaderboard"] as const);
@@ -109,7 +120,7 @@ export function ProfileClient({ entries, configured }: Props) {
     <div className="mx-auto max-w-xl px-4 pb-28 pt-4">
       <div className="mb-5 flex gap-1 rounded-2xl bg-border/30 p-1">
         {tabs.map((t) => (
-          <TabBtn key={t} active={tab === t} onClick={() => setTab(t)}>
+          <TabBtn key={t} active={tab === t} onClick={() => openTab(t)}>
             {t.charAt(0).toUpperCase() + t.slice(1)}
           </TabBtn>
         ))}
@@ -123,7 +134,7 @@ export function ProfileClient({ entries, configured }: Props) {
       )}
 
       {tab === "leaderboard" && (
-        <LeaderboardTab entries={entries} configured={configured} />
+        <LeaderboardTab entries={entries} loading={!leaderboardLoaded} />
       )}
 
       {tab === "settings" && user && (
@@ -240,9 +251,9 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
   );
 }
 
-function LeaderboardTab({ entries, configured }: { entries: LeaderboardEntry[]; configured: boolean }) {
-  if (!configured) {
-    return <div className="rounded-3xl border border-border bg-surface p-5 text-sm text-muted">Supabase not configured.</div>;
+function LeaderboardTab({ entries, loading }: { entries: LeaderboardEntry[]; loading: boolean }) {
+  if (loading) {
+    return <div className="rounded-3xl border border-border bg-surface p-5 text-sm text-muted">Loading…</div>;
   }
   if (entries.length === 0) {
     return <div className="rounded-3xl border border-border bg-surface p-5 text-sm text-muted">No entries yet — finish a session to appear here.</div>;

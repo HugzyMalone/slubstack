@@ -73,12 +73,7 @@ export function ReviewClient() {
             Practice
           </button>
         </div>
-      ) : (
-        <div className="mb-5 flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3.5 text-sm text-muted">
-          <Panda mood="happy" size={32} />
-          All caught up — check back tomorrow for new reviews.
-        </div>
-      )}
+      ) : null}
 
       {/* Vocabulary grid */}
       <div className="mb-3 flex items-baseline gap-2">
