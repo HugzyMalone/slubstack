@@ -75,10 +75,9 @@ export function ReviewClient() {
         </div>
       ) : null}
 
-      {/* Vocabulary grid */}
       <div className="mb-3 flex items-baseline gap-2">
-        <span className="text-sm font-semibold">Your vocabulary</span>
-        <span className="text-xs text-muted">{learnedCards.length} words</span>
+        <h1 className="text-lg font-bold tracking-tight">Flashcards</h1>
+        <span className="text-xs text-muted">{learnedCards.length} words learned</span>
       </div>
       <div className="grid grid-cols-2 gap-2.5">
         {learnedCards.map((card) => (
