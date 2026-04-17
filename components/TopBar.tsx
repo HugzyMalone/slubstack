@@ -55,7 +55,17 @@ export function TopBar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-surface/80 backdrop-blur-md">
+    <header
+      className="sticky top-0 z-30"
+      style={{
+        background: "color-mix(in srgb, var(--bg) 72%, transparent)",
+        backdropFilter: "blur(24px) saturate(180%)",
+        WebkitBackdropFilter: "blur(24px) saturate(180%)",
+        borderBottom: "1px solid color-mix(in srgb, var(--fg) 7%, transparent)",
+      }}
+    >
+      {/* Spacer that fills the Dynamic Island / status bar area — glass background extends behind it */}
+      <div style={{ height: "env(safe-area-inset-top)" }} />
       <div className="mx-auto flex h-13 max-w-xl lg:max-w-none items-center justify-between px-4 lg:px-6">
         <Link href="/" className="flex items-center gap-1.5 text-sm font-semibold tracking-tight lg:hidden">
           <PandaImage size={28} />
@@ -93,10 +103,14 @@ function Chip({ icon, label, title }: { icon: React.ReactNode; label: number; ti
   return (
     <span
       title={title}
-      className="inline-flex items-center gap-1 rounded-full bg-bg px-2 py-1 text-[11px] tabular-nums"
+      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] tabular-nums"
+      style={{
+        background: "color-mix(in srgb, var(--fg) 6%, transparent)",
+        border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)",
+      }}
     >
       {icon}
-      <span className="font-medium">{label}</span>
+      <span className="font-semibold">{label}</span>
     </span>
   );
 }

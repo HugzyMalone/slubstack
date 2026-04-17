@@ -2,13 +2,41 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Layers3, UserCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+function HomeIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 10L12 3l9 7v10a1 1 0 01-1 1H5a1 1 0 01-1-1V10z" />
+      <path d="M9 21V13h6v8" />
+    </svg>
+  );
+}
+
+function CardsIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="9" width="14" height="10" rx="2.5" />
+      <path d="M7 9V7a2 2 0 012-2h9a2 2 0 012 2v8a2 2 0 01-2 2h-2" />
+    </svg>
+  );
+}
+
+function PersonIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="7.5" r="3.5" />
+      <path d="M4 20.5c0-4.14 3.58-7.5 8-7.5s8 3.36 8 7.5" />
+    </svg>
+  );
+}
 
 export function BottomNav() {
   const pathname = usePathname();
 
-  // Hide during active lesson sessions
   if (
     pathname?.startsWith("/learn/") ||
     pathname?.startsWith("/mandarin/learn/") ||
@@ -19,7 +47,6 @@ export function BottomNav() {
     return null;
   }
 
-  // Flashcards link follows the current language section
   const flashcardsHref = pathname?.startsWith("/german")
     ? "/german/review"
     : pathname?.startsWith("/spanish")
@@ -30,14 +57,14 @@ export function BottomNav() {
     {
       href: "/",
       label: "Home",
-      Icon: Home,
+      Icon: HomeIcon,
       match: (p: string) =>
         p === "/" || p === "/mandarin" || p === "/german" || p === "/spanish" || p === "/trivia",
     },
     {
       href: flashcardsHref,
-      label: "Flashcards",
-      Icon: Layers3,
+      label: "Review",
+      Icon: CardsIcon,
       match: (p: string) =>
         p.startsWith("/mandarin/review") ||
         p.startsWith("/german/review") ||
@@ -47,41 +74,49 @@ export function BottomNav() {
     {
       href: "/stats",
       label: "Profile",
-      Icon: UserCircle2,
+      Icon: PersonIcon,
       match: (p: string) => p.startsWith("/stats") || p.startsWith("/leaderboard"),
     },
   ];
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/90 backdrop-blur-md lg:hidden">
-      <div className="mx-auto flex h-16 max-w-xl items-stretch px-3 pb-[env(safe-area-inset-bottom)]">
+    <nav
+      className="fixed inset-x-0 bottom-0 z-30 flex justify-center px-6 lg:hidden"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 10px)" }}
+    >
+      <div
+        className="flex items-stretch gap-0.5 rounded-[30px] p-1.5"
+        style={{
+          background: "linear-gradient(180deg, color-mix(in srgb, var(--surface) 80%, transparent) 0%, color-mix(in srgb, var(--surface) 72%, transparent) 100%)",
+          backdropFilter: "blur(28px) saturate(180%)",
+          WebkitBackdropFilter: "blur(28px) saturate(180%)",
+          border: "1px solid color-mix(in srgb, var(--fg) 9%, transparent)",
+          boxShadow: "0 10px 40px color-mix(in srgb, black 16%, transparent), 0 1px 0 color-mix(in srgb, white 28%, transparent) inset",
+        }}
+      >
         {tabs.map(({ href, label, Icon, match }) => {
           const active = match(pathname ?? "");
           return (
             <Link
               key={label}
               href={href}
-              className="relative flex flex-1 flex-col items-center justify-center gap-0.5"
-            >
-              {active && (
-                <span
-                  className="absolute inset-x-3 inset-y-2 rounded-2xl"
-                  style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)" }}
-                />
+              className={cn(
+                "flex flex-col items-center gap-0.5 rounded-[22px] px-7 py-2 transition-all duration-200 active:scale-[0.88]",
               )}
-              <Icon
-                size={19}
-                className={cn(
-                  "relative transition-colors duration-150",
-                  active ? "text-[var(--accent)]" : "text-muted",
-                )}
-              />
-              <span
-                className={cn(
-                  "relative text-[10px] font-medium transition-colors duration-150",
-                  active ? "text-[var(--accent)]" : "text-muted",
-                )}
-              >
+              style={active ? {
+                background: "color-mix(in srgb, var(--accent) 13%, transparent)",
+              } : undefined}
+            >
+              <span className={cn(
+                "transition-colors duration-150",
+                active ? "text-[var(--accent)]" : "text-muted",
+              )}>
+                <Icon />
+              </span>
+              <span className={cn(
+                "text-[10px] font-semibold tracking-wide transition-colors duration-150",
+                active ? "text-[var(--accent)]" : "text-muted",
+              )}>
                 {label}
               </span>
             </Link>

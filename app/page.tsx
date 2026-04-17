@@ -49,9 +49,17 @@ export default function HubPage() {
 
       <div className="mt-4 flex flex-col gap-3">
         {SECTIONS.map(({ href, flag, title, subtitle, accent, badge }) => (
-          <Link key={href} href={href} className="block active:scale-[0.99]">
-            <div className="flex items-center gap-4 rounded-2xl border border-border bg-surface px-5 py-4 transition-all duration-150">
-              <span className="text-4xl">{flag}</span>
+          <Link key={href} href={href} className="block active:scale-[0.985] transition-transform duration-150">
+            <div
+              className="flex items-center gap-4 rounded-2xl px-5 py-4"
+              style={{
+                background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 6%, var(--surface)) 0%, var(--surface) 60%)`,
+                border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)",
+                boxShadow: "0 2px 12px color-mix(in srgb, black 4%, transparent)",
+                borderLeft: `3px solid ${accent}`,
+              }}
+            >
+              <span className="text-[2.4rem] leading-none">{flag}</span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="text-base font-semibold">{title}</span>
@@ -64,13 +72,13 @@ export default function HubPage() {
                     </span>
                   )}
                 </div>
-                <div className="text-sm text-muted">{subtitle}</div>
+                <div className="mt-0.5 text-sm text-muted">{subtitle}</div>
               </div>
               <span
-                className="shrink-0 rounded-full px-3 py-1 text-xs font-semibold text-white"
-                style={{ background: accent }}
+                className="shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold text-white"
+                style={{ background: accent, boxShadow: `0 3px 10px color-mix(in srgb, ${accent} 40%, transparent)` }}
               >
-                Go
+                Go →
               </span>
             </div>
           </Link>
