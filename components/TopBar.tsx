@@ -7,6 +7,7 @@ import { useGameStore } from "@/lib/store";
 import { levelFromXp } from "@/lib/xp";
 import { useHydrated } from "@/lib/hooks";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { PandaImage } from "@/components/Panda";
 
 export function TopBar() {
   const hydrated = useHydrated();
@@ -56,13 +57,8 @@ export function TopBar() {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-surface/80 backdrop-blur-md">
       <div className="mx-auto flex h-13 max-w-xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-          <span
-            className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold"
-            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-          >
-            学
-          </span>
+        <Link href="/" className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+          <PandaImage size={28} />
           slubstack
         </Link>
 
