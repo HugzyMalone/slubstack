@@ -28,14 +28,10 @@ export function Panda({ size = 120, className }: Props) {
     setSrc(PANDAS[Math.floor(Math.random() * PANDAS.length)]);
   }, []);
 
-  const bounce = { y: [0, -6, 0] };
-
   return (
-    <motion.div
+    <div
       className={cn("inline-block select-none", className)}
       style={{ width: size, height: size }}
-      animate={bounce}
-      transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
     >
       <Image
         src={src}
@@ -45,7 +41,7 @@ export function Panda({ size = 120, className }: Props) {
         className="object-contain drop-shadow-md"
         priority
       />
-    </motion.div>
+    </div>
   );
 }
 

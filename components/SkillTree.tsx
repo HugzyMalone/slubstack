@@ -18,8 +18,8 @@ export function SkillTree() {
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-24 pt-2">
-      <header className="flex items-center gap-4 px-2 py-4">
-        <Panda mood="idle" size={120} />
+      <header className="flex items-end gap-4 px-2 py-4">
+        <Panda mood="idle" size={160} />
         <div>
           <h1 className="text-xl font-semibold tracking-tight">你好!</h1>
           <p className="text-sm text-muted">
