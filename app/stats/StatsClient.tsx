@@ -89,16 +89,6 @@ export function StatsClient() {
         </div>
       )}
 
-      <div className="mt-10 text-center">
-        <button
-          onClick={() => {
-            if (confirm("Reset all progress? This cannot be undone.")) reset();
-          }}
-          className="text-xs text-muted underline-offset-2 hover:text-danger hover:underline"
-        >
-          Reset progress
-        </button>
-      </div>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import type { User } from "@supabase/supabase-js";
 import { StatsClient } from "./StatsClient";
 import { AuthPanel } from "@/components/AuthPanel";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { useGameStore } from "@/lib/store";
 import type { LeaderboardEntry } from "@/lib/supabase/queries";
 
 const STAY_KEY = "slubstack_stay_signed_in";
@@ -30,6 +31,7 @@ export function ProfileClient({ entries, configured }: Props) {
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  const reset = useGameStore((s) => s.reset);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -207,6 +209,16 @@ export function ProfileClient({ entries, configured }: Props) {
               className="rounded-xl border border-border px-4 py-3.5 text-sm font-medium text-muted"
             >
               Sign out
+            </button>
+          </div>
+
+          <div className="border-t border-border pt-4">
+            <button
+              type="button"
+              onClick={() => { if (confirm("Reset all progress? This cannot be undone.")) reset(); }}
+              className="text-xs text-muted underline-offset-2 hover:text-[var(--danger)] hover:underline"
+            >
+              Reset progress
             </button>
           </div>
         </form>
