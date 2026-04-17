@@ -46,14 +46,14 @@ export function CardShell({
       </div>
 
       {/* Panda */}
-      <div className="shrink-0 flex items-center justify-center" style={{ height: "clamp(140px, 28vh, 240px)" }}>
+      <div className="shrink-0 flex items-center justify-center" style={{ height: "clamp(80px, 15vh, 140px)" }}>
         <div className="relative h-full w-full max-w-sm">
           <Panda mood={pandaMood} fill />
         </div>
       </div>
 
-      {/* Question — scrollable so content is never clipped behind the fixed footer */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Question — fixed height, no scroll */}
+      <div className="flex-1 overflow-hidden">
         <motion.div
           key={current}
           initial={{ opacity: 0, y: 20 }}
@@ -61,7 +61,7 @@ export function CardShell({
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
           className={cn(
-            "mx-auto w-full max-w-xl px-4 pb-28",
+            "mx-auto w-full max-w-xl px-4 pb-20",
             className,
           )}
         >
