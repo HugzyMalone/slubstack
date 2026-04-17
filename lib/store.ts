@@ -17,6 +17,15 @@ type State = {
   seenCardIds: string[];
 };
 
+type RemoteState = {
+  xp: number;
+  streak: number;
+  lastActiveDate: string | null;
+  completedUnits: string[];
+  seenCardIds: string[];
+  srs: Record<string, SrsState>;
+};
+
 type Actions = {
   rateCard: (cardId: string, quality: Quality) => void;
   addXp: (amount: number) => void;
@@ -24,7 +33,20 @@ type Actions = {
   completeUnit: (unitId: string) => void;
   getSrs: (cardId: string) => SrsState;
   reset: () => void;
+  mergeFromServer: (remote: RemoteState) => void;
 };
+
+function mergeSrs(
+  local: Record<string, SrsState>,
+  remote: Record<string, SrsState>,
+): Record<string, SrsState> {
+  const merged = { ...local };
+  for (const [id, r] of Object.entries(remote)) {
+    const l = local[id];
+    merged[id] = !l || r.reps > l.reps || (r.reps === l.reps && r.due > l.due) ? r : l;
+  }
+  return merged;
+}
 
 export const useGameStore = create<State & Actions>()(
   persist(
@@ -89,6 +111,19 @@ export const useGameStore = create<State & Actions>()(
           completedUnits: [],
           seenCardIds: [],
         }),
+
+      mergeFromServer: (remote) =>
+        set((local) => ({
+          xp: Math.max(local.xp, remote.xp),
+          streak: Math.max(local.streak, remote.streak),
+          lastActiveDate:
+            !local.lastActiveDate ? remote.lastActiveDate :
+            !remote.lastActiveDate ? local.lastActiveDate :
+            local.lastActiveDate > remote.lastActiveDate ? local.lastActiveDate : remote.lastActiveDate,
+          completedUnits: [...new Set([...local.completedUnits, ...remote.completedUnits])],
+          seenCardIds: [...new Set([...local.seenCardIds, ...remote.seenCardIds])],
+          srs: mergeSrs(local.srs, remote.srs),
+        })),
     }),
     {
       name: "slubstack-v1",
