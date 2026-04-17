@@ -31,7 +31,7 @@ export function FlipCard({ card, onResult, onFeedback }: Props) {
 
   return (
     <>
-      <div className="pt-4 text-center text-xs uppercase tracking-widest text-muted">
+      <div className="pt-2 text-center text-xs uppercase tracking-widest text-muted">
         Flashcard
       </div>
       <p className="mb-6 mt-1 text-center text-sm text-muted">
@@ -43,15 +43,15 @@ export function FlipCard({ card, onResult, onFeedback }: Props) {
         role="button"
         tabIndex={0}
         onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setFlipped((v) => !v)}
-        className="mx-auto block w-full max-w-sm cursor-pointer select-none rounded-3xl border border-border bg-surface px-6 py-10 text-center shadow-sm active:scale-[0.99]"
-        style={{ minHeight: 260, perspective: 1200 }}
+        className="mx-auto block w-full max-w-sm cursor-pointer select-none rounded-3xl border border-border bg-surface px-6 py-6 text-center shadow-sm active:scale-[0.99]"
+        style={{ perspective: 1200 }}
         aria-label="Tap to flip"
       >
         <motion.div
           initial={false}
           animate={{ rotateY: flipped ? 180 : 0 }}
           transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-          style={{ transformStyle: "preserve-3d", position: "relative", minHeight: 200 }}
+          style={{ transformStyle: "preserve-3d", position: "relative", minHeight: 140 }}
         >
           <div
             className="absolute inset-0 flex flex-col items-center justify-center px-2"

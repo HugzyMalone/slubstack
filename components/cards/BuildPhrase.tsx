@@ -80,7 +80,7 @@ export function BuildPhrase({ card, onResult, onFeedback }: Props) {
 
   return (
     <>
-      <div className="pt-4 text-center text-xs uppercase tracking-widest text-muted">
+      <div className="pt-2 text-center text-xs uppercase tracking-widest text-muted">
         Build the word
       </div>
 

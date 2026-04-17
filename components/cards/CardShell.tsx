@@ -26,10 +26,11 @@ export function CardShell({
   className,
 }: Props) {
   return (
-    <div className="flex min-h-[100dvh] flex-col">
+    // Fixed full-screen overlay — covers TopBar/BottomNav, no scrolling
+    <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-bg">
       {/* Progress bar */}
-      <div className="sticky top-0 z-20 bg-bg">
-        <div className="mx-auto flex max-w-xl items-center gap-3 px-4 pb-3 pt-3">
+      <div className="shrink-0 bg-bg">
+        <div className="mx-auto flex max-w-xl items-center gap-3 px-4 pb-2 pt-3">
           <Link
             href={exitHref}
             aria-label="Exit lesson"
@@ -44,21 +45,24 @@ export function CardShell({
         </div>
       </div>
 
-      {/* Panda character */}
-      <div className="flex justify-center" style={{ height: "28vh", minHeight: 120, maxHeight: 260 }}>
-        <div className="relative h-full w-full max-w-xs">
+      {/* Panda — top half */}
+      <div className="shrink-0 flex items-center justify-center" style={{ height: "45vh" }}>
+        <div className="relative h-full w-full max-w-sm">
           <Panda mood={pandaMood} fill />
         </div>
       </div>
 
-      {/* Card content */}
+      {/* Question — bottom half, no scroll */}
       <motion.div
         key={current}
-        initial={{ opacity: 0, x: 40 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -40 }}
-        transition={{ duration: 0.22, ease: "easeOut" }}
-        className={cn("mx-auto w-full max-w-xl flex-1 px-4 pb-36", className)}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className={cn(
+          "flex-1 overflow-hidden mx-auto w-full max-w-xl px-4",
+          className,
+        )}
       >
         {children}
       </motion.div>
@@ -97,7 +101,7 @@ export function CardFooter({ variant, primary, secondary, feedback }: FooterProp
   return (
     <div
       className={cn(
-        "fixed inset-x-0 bottom-0 z-20 border-t px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)]",
+        "fixed inset-x-0 bottom-0 z-50 border-t px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)]",
         bg,
       )}
     >

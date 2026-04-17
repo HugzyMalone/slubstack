@@ -49,7 +49,7 @@ export function MultipleChoice({ card, distractors, onResult, onFeedback }: Prop
 
   return (
     <>
-      <div className="pt-4 text-center text-xs uppercase tracking-widest text-muted">
+      <div className="pt-2 text-center text-xs uppercase tracking-widest text-muted">
         Choose the meaning
       </div>
 
