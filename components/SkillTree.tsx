@@ -30,7 +30,7 @@ export function SkillTree() {
         </div>
       </header>
 
-      <ol className="relative mt-2 space-y-4 pl-8">
+      <ol className="relative -mt-16 space-y-4 pl-8">
         <div
           className="absolute left-4 top-4 bottom-4 w-px rounded-full"
           style={{ background: "var(--border)" }}
