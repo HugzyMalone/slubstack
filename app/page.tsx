@@ -1,42 +1,75 @@
-import Link from "next/link";
-import { Panda } from "@/components/Panda";
+"use client";
 
-const SECTIONS = [
+import Link from "next/link";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown } from "lucide-react";
+import { Panda } from "@/components/Panda";
+import { cn } from "@/lib/utils";
+
+const LANGUAGES = [
   {
     href: "/spanish",
-    flag: "🇪🇸",
+    code: "ES",
     title: "Spanish",
-    subtitle: "Games only — match, quiz & type",
+    subtitle: "Match, quiz & type",
     accent: "#c2410c",
     badge: "New",
   },
   {
     href: "/mandarin",
-    flag: "🇨🇳",
+    code: "中",
     title: "Mandarin",
-    subtitle: "Chinese characters & phrases",
+    subtitle: "Characters & phrases",
     accent: "#e11d48",
     badge: null,
   },
   {
     href: "/german",
-    flag: "🇩🇪",
+    code: "DE",
     title: "German",
-    subtitle: "Everyday German, starting with Hallo",
+    subtitle: "Start with Hallo",
     accent: "#f97316",
-    badge: null,
-  },
-  {
-    href: "/trivia",
-    flag: "🎬",
-    title: "Trivia",
-    subtitle: "Guess the actor — race the clock",
-    accent: "#8b5cf6",
     badge: null,
   },
 ];
 
+function GlobeIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M2 12h20" />
+      <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+    </svg>
+  );
+}
+
+function FilmIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="2.5" />
+      <line x1="7" y1="2" x2="7" y2="22" />
+      <line x1="17" y1="2" x2="17" y2="22" />
+      <line x1="2" y1="12" x2="22" y2="12" />
+      <line x1="2" y1="7" x2="7" y2="7" />
+      <line x1="2" y1="17" x2="7" y2="17" />
+      <line x1="17" y1="17" x2="22" y2="17" />
+      <line x1="17" y1="7" x2="22" y2="7" />
+    </svg>
+  );
+}
+
+function ChevronRight() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 18l6-6-6-6" />
+    </svg>
+  );
+}
+
 export default function HubPage() {
+  const [langOpen, setLangOpen] = useState(true);
+
   return (
     <div className="mx-auto max-w-xl px-4 pb-24">
       <div className="flex flex-col items-center pt-0 pb-0">
@@ -47,42 +80,116 @@ export default function HubPage() {
         <p className="mt-0.5 text-sm text-muted">Pick a section to get started.</p>
       </div>
 
-      <div className="mt-3 flex flex-col gap-3">
-        {SECTIONS.map(({ href, flag, title, subtitle, accent, badge }) => (
-          <Link key={href} href={href} className="block active:scale-[0.985] transition-transform duration-150">
+      <div className="mt-3 flex flex-col gap-2">
+        {/* Languages accordion */}
+        <div
+          className="rounded-2xl overflow-hidden"
+          style={{
+            border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)",
+            background: "var(--surface)",
+          }}
+        >
+          <button
+            onClick={() => setLangOpen((o) => !o)}
+            className="flex w-full items-center gap-4 px-5 py-4 transition-colors duration-150 active:bg-[color-mix(in_srgb,var(--fg)_4%,transparent)]"
+          >
             <div
-              className="flex items-center gap-4 rounded-2xl px-5 py-4"
-              style={{
-                background: `linear-gradient(135deg, color-mix(in srgb, ${accent} 6%, var(--surface)) 0%, var(--surface) 60%)`,
-                border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)",
-                boxShadow: "0 2px 12px color-mix(in srgb, black 4%, transparent)",
-                borderLeft: `3px solid ${accent}`,
-              }}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white"
+              style={{ background: "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)" }}
             >
-              <span className="text-[2.4rem] leading-none">{flag}</span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-base font-semibold">{title}</span>
-                  {badge && (
-                    <span
-                      className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white"
-                      style={{ background: accent }}
-                    >
-                      {badge}
-                    </span>
-                  )}
-                </div>
-                <div className="mt-0.5 text-sm text-muted">{subtitle}</div>
-              </div>
-              <span
-                className="shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold text-white"
-                style={{ background: accent, boxShadow: `0 3px 10px color-mix(in srgb, ${accent} 40%, transparent)` }}
-              >
-                Go →
-              </span>
+              <GlobeIcon />
             </div>
-          </Link>
-        ))}
+            <div className="min-w-0 flex-1 text-left">
+              <div className="text-[15px] font-semibold">Languages</div>
+              <div className="mt-0.5 text-xs text-muted">Spanish · Mandarin · German</div>
+            </div>
+            <motion.div
+              animate={{ rotate: langOpen ? 180 : 0 }}
+              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+              className="shrink-0 text-muted"
+            >
+              <ChevronDown size={16} />
+            </motion.div>
+          </button>
+
+          <AnimatePresence initial={false}>
+            {langOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+                style={{ overflow: "hidden" }}
+              >
+                <div style={{ borderTop: "1px solid color-mix(in srgb, var(--fg) 6%, transparent)" }}>
+                  {LANGUAGES.map(({ href, code, title, subtitle, accent, badge }, i) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={cn(
+                        "flex items-center gap-4 px-5 py-3.5 active:bg-[color-mix(in_srgb,var(--fg)_4%,transparent)] transition-colors duration-100",
+                      )}
+                      style={
+                        i > 0
+                          ? { borderTop: "1px solid color-mix(in srgb, var(--fg) 6%, transparent)" }
+                          : undefined
+                      }
+                    >
+                      <div
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold text-white tracking-wide"
+                        style={{ background: accent }}
+                      >
+                        {code}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold">{title}</span>
+                          {badge && (
+                            <span
+                              className="rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white"
+                              style={{ background: accent }}
+                            >
+                              {badge}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted mt-0.5">{subtitle}</div>
+                      </div>
+                      <span className="text-muted shrink-0">
+                        <ChevronRight />
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Trivia */}
+        <Link href="/trivia" className="block active:scale-[0.985] transition-transform duration-150">
+          <div
+            className="flex items-center gap-4 rounded-2xl px-5 py-4"
+            style={{
+              background: "var(--surface)",
+              border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)",
+            }}
+          >
+            <div
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white"
+              style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)" }}
+            >
+              <FilmIcon />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[15px] font-semibold">Trivia</div>
+              <div className="mt-0.5 text-xs text-muted">Guess the actor — race the clock</div>
+            </div>
+            <span className="text-muted shrink-0">
+              <ChevronRight />
+            </span>
+          </div>
+        </Link>
       </div>
     </div>
   );

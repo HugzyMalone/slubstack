@@ -2,29 +2,24 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Flame, Sparkles, User } from "lucide-react";
+import { Flame, Zap, User } from "lucide-react";
 import { useGameStore } from "@/lib/store";
-import { levelFromXp } from "@/lib/xp";
 import { useHydrated } from "@/lib/hooks";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { PandaImage } from "@/components/Panda";
 
 export function TopBar() {
   const hydrated = useHydrated();
   const xp = useGameStore((s) => s.xp);
   const streak = useGameStore((s) => s.streak);
-  const level = hydrated ? levelFromXp(xp) : 0;
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [_avatar, setAvatar] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
 
-    // Read cached avatar instantly — no network call on every navigation
     const cached = localStorage.getItem("slubstack_avatar");
     if (cached) setAvatar(cached);
 
-    // getSession reads from localStorage — instant, no network
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) { setAvatar(null); localStorage.removeItem("slubstack_avatar"); return; }
       if (!cached) {
@@ -64,53 +59,52 @@ export function TopBar() {
         borderBottom: "1px solid color-mix(in srgb, var(--fg) 7%, transparent)",
       }}
     >
-      {/* Spacer that fills the Dynamic Island / status bar area — glass background extends behind it */}
       <div style={{ height: "env(safe-area-inset-top)" }} />
       <div className="mx-auto flex h-13 max-w-xl lg:max-w-none items-center justify-between px-4 lg:px-6">
-        <Link href="/" className="flex items-center gap-1.5 text-sm font-semibold tracking-tight lg:hidden">
-          <PandaImage size={28} />
+
+        {/* Wordmark — mobile only (sidebar shows it on desktop) */}
+        <Link
+          href="/"
+          className="lg:hidden text-[15px] font-semibold tracking-tight select-none"
+          style={{ letterSpacing: "-0.02em" }}
+        >
           slubstack
         </Link>
 
-        <div className="flex items-center gap-1.5">
-          <Chip icon={<Flame size={13} className="text-orange-500" />} label={hydrated ? streak : 0} title="Streak" />
-          <Chip icon={<Sparkles size={13} className="text-amber-500" />} label={hydrated ? xp : 0} title="XP" />
+        {/* Right: stats + profile */}
+        <div className="flex items-center gap-3 ml-auto">
+          {/* Streak */}
+          <div className="flex items-center gap-1" title="Streak">
+            <Flame size={12} strokeWidth={2} className="text-orange-400" />
+            <span className="text-[12px] font-semibold tabular-nums">{hydrated ? streak : 0}</span>
+          </div>
+
+          {/* Divider */}
+          <span
+            className="h-3 w-px shrink-0"
+            style={{ background: "color-mix(in srgb, var(--fg) 12%, transparent)" }}
+          />
+
+          {/* XP */}
+          <div className="flex items-center gap-1" title="XP">
+            <Zap size={12} strokeWidth={2} className="text-amber-400" />
+            <span className="text-[12px] font-semibold tabular-nums">{hydrated ? xp : 0}</span>
+          </div>
+
+          {/* Profile */}
           <Link
             href="/stats"
-            className="rounded-full border border-border px-2.5 py-1 text-[11px] font-semibold tabular-nums text-muted transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-            title="Level"
-          >
-            Lv {level}
-          </Link>
-          <Link
-            href="/stats"
-            className="ml-0.5 flex h-7 w-7 items-center justify-center rounded-full border border-border transition hover:border-[var(--accent)]"
+            className="ml-1 flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-150"
+            style={{
+              border: "1px solid color-mix(in srgb, var(--fg) 12%, transparent)",
+              background: "color-mix(in srgb, var(--fg) 5%, transparent)",
+            }}
             aria-label="Profile"
           >
-            {avatar ? (
-              <span className="text-base leading-none">{avatar}</span>
-            ) : (
-              <User size={13} className="text-muted" />
-            )}
+            <User size={13} strokeWidth={1.5} className="text-muted" />
           </Link>
         </div>
       </div>
     </header>
-  );
-}
-
-function Chip({ icon, label, title }: { icon: React.ReactNode; label: number; title: string }) {
-  return (
-    <span
-      title={title}
-      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] tabular-nums"
-      style={{
-        background: "color-mix(in srgb, var(--fg) 6%, transparent)",
-        border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)",
-      }}
-    >
-      {icon}
-      <span className="font-semibold">{label}</span>
-    </span>
   );
 }
