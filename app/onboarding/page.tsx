@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
+const STAY_KEY = "slubstack_stay_signed_in";
+function markStaySignedIn() {
+  localStorage.setItem(STAY_KEY, "1");
+  sessionStorage.removeItem(STAY_KEY);
+}
+
 const ANIMALS = [
   "🐼","🦊","🐨","🐯","🦁","🐸","🐧","🦆",
   "🐺","🦝","🐻","🦉","🦋","🐙","🦜","🐬",
@@ -64,6 +70,7 @@ export default function OnboardingPage() {
       }
     }
 
+    markStaySignedIn();
     router.replace("/");
   }
 
@@ -106,7 +113,7 @@ export default function OnboardingPage() {
           {/* Username */}
           <div>
             <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted" htmlFor="username">
-              Leaderboard name
+              Username
             </label>
             <input
               id="username"

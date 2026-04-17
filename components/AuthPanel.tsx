@@ -231,7 +231,7 @@ export function AuthPanel() {
           {/* Username */}
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wide text-muted" htmlFor="username">
-              Leaderboard name
+              Username
             </label>
             <input
               id="username"
