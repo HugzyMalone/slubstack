@@ -54,7 +54,8 @@ async function fetchActors(): Promise<ActorData[]> {
       if (!image) return null;
       // Use a larger size by replacing the width in the URL
       const bigImage = image.replace(/\/\d+px-/, "/400px-");
-      return { name, image: bigImage, decoys } satisfies ActorData;
+      const proxied = `/api/img?url=${encodeURIComponent(bigImage)}`;
+      return { name, image: proxied, decoys } satisfies ActorData;
     })
   );
 
