@@ -17,8 +17,8 @@ export function SkillTree() {
   const unlockedIndex = hydrated ? Math.min(ALL_UNITS.length - 1, completedUnits.length) : 0;
 
   return (
-    <div className="mx-auto max-w-xl px-4 pb-24 pt-2">
-      <header className="flex items-center gap-4 px-2 py-4">
+    <div className="mx-auto max-w-xl px-4 pb-24 pt-0">
+      <header className="flex items-center gap-4 px-2 py-1">
         <Panda mood="idle" size={200} />
         <div>
           <h1 className="text-xl font-semibold tracking-tight">你好!</h1>
