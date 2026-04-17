@@ -19,20 +19,33 @@ export function TopBar() {
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
 
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) return;
-      fetch("/api/profile", { cache: "no-store" })
-        .then((r) => r.ok ? r.json() : null)
-        .then((d) => { if (d?.profile?.avatar) setAvatar(d.profile.avatar); })
-        .catch(() => {});
+    // Read cached avatar instantly — no network call on every navigation
+    const cached = localStorage.getItem("slubstack_avatar");
+    if (cached) setAvatar(cached);
+
+    // getSession reads from localStorage — instant, no network
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) { setAvatar(null); localStorage.removeItem("slubstack_avatar"); return; }
+      if (!cached) {
+        fetch("/api/profile", { cache: "no-store" })
+          .then((r) => r.ok ? r.json() : null)
+          .then((d) => {
+            const a = d?.profile?.avatar;
+            if (a) { setAvatar(a); localStorage.setItem("slubstack_avatar", a); }
+          })
+          .catch(() => {});
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session?.user) { setAvatar(null); return; }
+      if (!session?.user) { setAvatar(null); localStorage.removeItem("slubstack_avatar"); return; }
       if (event === "SIGNED_IN") {
         fetch("/api/profile", { cache: "no-store" })
           .then((r) => r.ok ? r.json() : null)
-          .then((d) => { if (d?.profile?.avatar) setAvatar(d.profile.avatar); })
+          .then((d) => {
+            const a = d?.profile?.avatar;
+            if (a) { setAvatar(a); localStorage.setItem("slubstack_avatar", a); }
+          })
           .catch(() => {});
       }
     });

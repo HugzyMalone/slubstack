@@ -84,6 +84,7 @@ export function ProfileClient({ entries, configured }: Props) {
       }
     }
 
+    localStorage.setItem("slubstack_avatar", avatar);
     setSaving(false);
     setSaveMsg("Saved.");
     setNewPassword("");
