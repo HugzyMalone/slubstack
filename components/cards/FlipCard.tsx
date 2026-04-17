@@ -10,6 +10,15 @@ type Props = {
   onResult: (r: { quality: Quality; correct: boolean; firstTry: boolean }) => void;
 };
 
+function wordSize(text: string) {
+  const len = text.replace(/\s+/g, "").length;
+  if (len <= 3) return "text-6xl";
+  if (len <= 6) return "text-5xl";
+  if (len <= 10) return "text-4xl";
+  if (len <= 16) return "text-3xl";
+  return "text-2xl";
+}
+
 export function FlipCard({ card, onResult }: Props) {
   const [flipped, setFlipped] = useState(false);
 
@@ -42,15 +51,17 @@ export function FlipCard({ card, onResult }: Props) {
           style={{ transformStyle: "preserve-3d", position: "relative", minHeight: 200 }}
         >
           <div
-            className="absolute inset-0 flex flex-col items-center justify-center"
+            className="absolute inset-0 flex flex-col items-center justify-center px-2"
             style={{ backfaceVisibility: "hidden" }}
           >
-            <div className="hanzi text-6xl leading-none text-fg">{card.hanzi}</div>
-            <div className="mt-4 text-lg text-muted">{card.pinyin}</div>
+            <div className={`hanzi ${wordSize(card.hanzi)} w-full break-words leading-tight text-fg`}>
+              {card.hanzi}
+            </div>
+            <div className="mt-4 text-base text-muted">{card.pinyin}</div>
             <div className="mt-8 text-xs text-muted">Tap to reveal</div>
           </div>
           <div
-            className="absolute inset-0 flex flex-col items-center justify-center"
+            className="absolute inset-0 flex flex-col items-center justify-center px-2"
             style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
           >
             <div className="text-3xl font-semibold text-fg">{card.english}</div>

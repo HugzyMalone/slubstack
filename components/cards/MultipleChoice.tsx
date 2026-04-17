@@ -7,6 +7,15 @@ import type { Quality } from "@/lib/srs";
 import { shuffle, cn } from "@/lib/utils";
 import { CardFooter } from "./CardShell";
 
+function wordSize(text: string) {
+  const len = text.replace(/\s+/g, "").length;
+  if (len <= 3) return "text-6xl";
+  if (len <= 6) return "text-5xl";
+  if (len <= 10) return "text-4xl";
+  if (len <= 16) return "text-3xl";
+  return "text-2xl";
+}
+
 type Props = {
   card: Card;
   distractors: Card[];
@@ -43,7 +52,7 @@ export function MultipleChoice({ card, distractors, onResult }: Props) {
       </div>
 
       <div className="mx-auto mt-6 max-w-sm rounded-3xl border border-border bg-surface px-6 py-8 text-center">
-        <div className="hanzi text-6xl leading-none text-fg">{card.hanzi}</div>
+        <div className={`hanzi ${wordSize(card.hanzi)} w-full break-words leading-tight text-fg`}>{card.hanzi}</div>
         <div className="mt-3 text-base text-muted">{card.pinyin}</div>
       </div>
 

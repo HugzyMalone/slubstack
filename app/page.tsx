@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Panda } from "@/components/Panda";
 
 const SECTIONS = [
   {
@@ -27,20 +28,19 @@ const SECTIONS = [
 
 export default function HubPage() {
   return (
-    <div className="mx-auto max-w-xl px-4 pb-24 pt-8">
-      <h1 className="text-2xl font-bold tracking-tight">What are you learning?</h1>
-      <p className="mt-1 text-sm text-muted">Pick a section to get started.</p>
+    <div className="mx-auto max-w-xl px-4 pb-24">
+      <div className="flex flex-col items-center pt-6 pb-2">
+        <Panda mood="happy" size={240} />
+        <h1 className="mt-2 text-2xl font-bold tracking-tight">What are you learning?</h1>
+        <p className="mt-1 text-sm text-muted">Pick a section to get started.</p>
+      </div>
 
-      <div className="mt-6 flex flex-col gap-3">
+      <div className="mt-4 flex flex-col gap-3">
         {SECTIONS.map(({ href, flag, title, subtitle, accent, disabled }) => {
           const inner = (
             <div
               className="flex items-center gap-4 rounded-2xl border border-border bg-surface px-5 py-4 transition-all duration-150"
-              style={
-                disabled
-                  ? { opacity: 0.5 }
-                  : undefined
-              }
+              style={disabled ? { opacity: 0.5 } : undefined}
             >
               <span className="text-4xl">{flag}</span>
               <div className="min-w-0 flex-1">
