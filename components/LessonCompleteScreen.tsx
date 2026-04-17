@@ -10,9 +10,17 @@ type Props = {
   gained: number;
   firstTryCorrect: number;
   total: number;
+  exitHref?: string;
+  reviewHref?: string;
 };
 
-export function LessonCompleteScreen({ gained, firstTryCorrect, total }: Props) {
+export function LessonCompleteScreen({
+  gained,
+  firstTryCorrect,
+  total,
+  exitHref = "/",
+  reviewHref = "/review",
+}: Props) {
   const streak = useGameStore((s) => s.streak);
 
   return (
@@ -39,7 +47,7 @@ export function LessonCompleteScreen({ gained, firstTryCorrect, total }: Props) 
         transition={{ delay: 0.25 }}
         className="mt-2 text-muted"
       >
-        加油! Keep it going.
+        Keep it going!
       </motion.p>
 
       <motion.div
@@ -72,13 +80,13 @@ export function LessonCompleteScreen({ gained, firstTryCorrect, total }: Props) 
         className="mt-10 flex w-full flex-col gap-2"
       >
         <Link
-          href="/"
+          href={exitHref}
           className="w-full rounded-xl bg-[var(--accent)] px-4 py-3 text-center text-sm font-semibold text-[var(--accent-fg)] active:scale-[0.98]"
         >
           Done
         </Link>
         <Link
-          href="/review"
+          href={reviewHref}
           className="w-full rounded-xl border border-border px-4 py-3 text-center text-sm font-medium hover:bg-border/40"
         >
           Study flashcards

@@ -5,6 +5,7 @@ import "./globals.css";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
 import { CloudSync } from "@/components/CloudSync";
+import { GameStoreProvider, mandarinStore } from "@/lib/store";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,9 +20,9 @@ const notoSC = Noto_Sans_SC({
 });
 
 export const metadata: Metadata = {
-  title: "Slubstack — Mandarin flashcards",
+  title: "Slubstack — Learn languages",
   description:
-    "Learn beginner Mandarin with short, daily flashcard sessions. Authentic, native-sounding phrasing — not textbook stiffness.",
+    "Learn Mandarin and German with short, daily flashcard sessions.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
@@ -54,10 +55,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${notoSC.variable} h-full antialiased`}
     >
       <body className="flex min-h-dvh flex-col">
-        <TopBar />
-        <CloudSync />
-        <main className="flex-1">{children}</main>
-        <BottomNav />
+        <GameStoreProvider store={mandarinStore}>
+          <TopBar />
+          <CloudSync />
+          <main className="flex-1">{children}</main>
+          <BottomNav />
+        </GameStoreProvider>
       </body>
     </html>
   );

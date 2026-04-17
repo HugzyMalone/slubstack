@@ -16,9 +16,10 @@ type Props = {
   items: SessionItem[];
   unitId?: string;
   exitHref?: string;
+  reviewHref?: string;
 };
 
-export function SessionRunner({ items, unitId, exitHref = "/" }: Props) {
+export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/review" }: Props) {
   const rateCard = useGameStore((s) => s.rateCard);
   const completeSession = useGameStore((s) => s.completeSession);
   const completeUnit = useGameStore((s) => s.completeUnit);
@@ -76,6 +77,8 @@ export function SessionRunner({ items, unitId, exitHref = "/" }: Props) {
         gained={finished.gained}
         firstTryCorrect={firstTryCorrect}
         total={items.length}
+        exitHref={exitHref}
+        reviewHref={reviewHref}
       />
     );
   }

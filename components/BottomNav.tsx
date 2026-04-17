@@ -8,15 +8,34 @@ import { cn } from "@/lib/utils";
 export function BottomNav() {
   const pathname = usePathname();
 
-  if (pathname?.startsWith("/learn/") || pathname === "/review-run") return null;
+  // Hide during active lesson sessions
+  if (
+    pathname?.startsWith("/learn/") ||
+    pathname?.startsWith("/mandarin/learn/") ||
+    pathname?.startsWith("/german/learn/") ||
+    pathname === "/review-run"
+  ) {
+    return null;
+  }
+
+  // Flashcards link follows the current language section
+  const flashcardsHref = pathname?.startsWith("/german")
+    ? "/german/review"
+    : "/mandarin/review";
 
   const tabs = [
-    { href: "/", label: "Learn", Icon: Home, match: (p: string) => p === "/" },
     {
-      href: "/review",
+      href: "/",
+      label: "Home",
+      Icon: Home,
+      match: (p: string) =>
+        p === "/" || p === "/mandarin" || p === "/german" || p === "/trivia",
+    },
+    {
+      href: flashcardsHref,
       label: "Flashcards",
       Icon: Layers3,
-      match: (p: string) => p.startsWith("/review"),
+      match: (p: string) => p.startsWith("/mandarin/review") || p.startsWith("/german/review") || p.startsWith("/review"),
     },
     {
       href: "/stats",
@@ -33,7 +52,7 @@ export function BottomNav() {
           const active = match(pathname ?? "");
           return (
             <Link
-              key={href}
+              key={label}
               href={href}
               className="relative flex flex-1 flex-col items-center justify-center gap-0.5"
             >

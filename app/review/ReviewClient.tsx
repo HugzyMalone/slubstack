@@ -2,21 +2,25 @@
 
 import { useMemo, useState } from "react";
 import { buildReviewSession } from "@/lib/session";
+import { getLanguageContent, type Language } from "@/lib/content";
 import { useGameStore } from "@/lib/store";
 import { SessionRunner } from "@/components/SessionRunner";
 import { isDue } from "@/lib/srs";
-import { ALL_CARDS } from "@/lib/content";
 import type { Card } from "@/lib/content";
 import { Panda } from "@/components/Panda";
 import { useHydrated, useNow } from "@/lib/hooks";
 import Link from "next/link";
 
-export function ReviewClient() {
+export function ReviewClient({ lang = "mandarin" }: { lang?: Language }) {
   const srs = useGameStore((s) => s.srs);
   const seenCardIds = useGameStore((s) => s.seenCardIds);
   const hydrated = useHydrated();
   const now = useNow(hydrated);
   const [running, setRunning] = useState(false);
+
+  const content = getLanguageContent(lang);
+  const learnHref = lang === "mandarin" ? "/" : `/${lang}`;
+  const exitHref = lang === "mandarin" ? "/review" : `/${lang}/review`;
 
   const dueCount = useMemo(() => {
     if (!hydrated) return 0;
@@ -25,20 +29,20 @@ export function ReviewClient() {
 
   const items = useMemo(() => {
     if (!hydrated || !running) return [];
-    return buildReviewSession(srs, 10);
-  }, [srs, hydrated, running]);
+    return buildReviewSession(srs, content, 10);
+  }, [srs, hydrated, running, content]);
 
   const learnedCards = useMemo(() => {
     if (!hydrated) return [];
     return seenCardIds
-      .map((id) => ALL_CARDS.find((c) => c.id === id))
+      .map((id) => content.cards.find((c) => c.id === id))
       .filter((c): c is Card => !!c);
-  }, [hydrated, seenCardIds]);
+  }, [hydrated, seenCardIds, content]);
 
   if (!hydrated) return null;
 
   if (running) {
-    return <SessionRunner items={items} exitHref="/review" />;
+    return <SessionRunner items={items} exitHref={exitHref} reviewHref={exitHref} />;
   }
 
   if (learnedCards.length === 0) {
@@ -48,7 +52,7 @@ export function ReviewClient() {
         <h1 className="mt-4 text-2xl font-semibold tracking-tight">Flashcards</h1>
         <p className="mt-2 text-muted">No words learned yet. Complete a lesson to unlock flashcards.</p>
         <Link
-          href="/"
+          href={learnHref}
           className="mt-8 inline-block w-full rounded-xl border border-border px-4 py-3 text-sm font-medium hover:bg-border/40"
         >
           Start learning
@@ -59,7 +63,6 @@ export function ReviewClient() {
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-28 pt-4">
-      {/* Practice due banner */}
       {dueCount > 0 ? (
         <div className="mb-5 flex items-center justify-between rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent-soft)]/40 px-4 py-3.5">
           <div className="text-sm">
@@ -104,7 +107,6 @@ function FlipCard({ card }: { card: Card }) {
           transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
         }}
       >
-        {/* Front — Chinese */}
         <div
           className="absolute inset-0 flex flex-col items-center justify-center gap-1 p-3"
           style={{ backfaceVisibility: "hidden" }}
@@ -112,7 +114,6 @@ function FlipCard({ card }: { card: Card }) {
           <span className="hanzi text-2xl font-medium">{card.hanzi}</span>
           <span className="text-xs text-muted">{card.pinyin}</span>
         </div>
-        {/* Back — English */}
         <div
           className="absolute inset-0 flex flex-col items-center justify-center gap-1 p-3"
           style={{

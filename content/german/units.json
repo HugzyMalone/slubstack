@@ -1,0 +1,20 @@
+[
+  {
+    "id": "de-greetings",
+    "index": 0,
+    "title": "Greetings",
+    "subtitle": "Hello, thanks, goodbye",
+    "emoji": "👋",
+    "category": "de-greetings",
+    "cardIds": ["de-greet-01","de-greet-02","de-greet-03","de-greet-04","de-greet-05","de-greet-06","de-greet-07","de-greet-08","de-greet-09","de-greet-10","de-greet-11","de-greet-12","de-greet-13","de-greet-14","de-greet-15","de-greet-16","de-greet-17","de-greet-18","de-greet-19","de-greet-20"]
+  },
+  {
+    "id": "de-numbers",
+    "index": 1,
+    "title": "Numbers",
+    "subtitle": "0 to 1000",
+    "emoji": "🔢",
+    "category": "de-numbers",
+    "cardIds": ["de-num-01","de-num-02","de-num-03","de-num-04","de-num-05","de-num-06","de-num-07","de-num-08","de-num-09","de-num-10","de-num-11","de-num-12","de-num-13","de-num-14","de-num-15"]
+  }
+]

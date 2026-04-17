@@ -3,29 +3,36 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { CheckCircle2, Lock } from "lucide-react";
-import { ALL_UNITS } from "@/lib/content";
+import { type Unit } from "@/lib/content";
 import { useGameStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Panda } from "@/components/Panda";
 import { useHydrated } from "@/lib/hooks";
 
-export function SkillTree() {
+type Props = {
+  units: Unit[];
+  basePath: string;
+  greeting: string;
+  subGreeting?: string;
+};
+
+export function SkillTree({ units, basePath, greeting, subGreeting }: Props) {
   const hydrated = useHydrated();
   const completedUnits = useGameStore((s) => s.completedUnits);
   const seenCardIds = useGameStore((s) => s.seenCardIds);
 
-  const unlockedIndex = hydrated ? Math.min(ALL_UNITS.length - 1, completedUnits.length) : 0;
+  const unlockedIndex = hydrated ? Math.min(units.length - 1, completedUnits.length) : 0;
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-24 pt-0">
       <header className="flex items-center gap-4 px-2 py-1">
         <Panda mood="idle" size={200} />
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">你好!</h1>
+          <h1 className="text-xl font-semibold tracking-tight">{greeting}</h1>
           <p className="text-sm text-muted">
-            {hydrated && seenCardIds.length > 0
+            {subGreeting ?? (hydrated && seenCardIds.length > 0
               ? `${seenCardIds.length} words in your head — keep going.`
-              : "Learn Mandarin one word at a time."}
+              : "Learn one word at a time.")}
           </p>
         </div>
       </header>
@@ -35,7 +42,7 @@ export function SkillTree() {
           className="absolute left-4 top-4 bottom-4 w-px rounded-full"
           style={{ background: "var(--border)" }}
         />
-        {ALL_UNITS.map((unit, i) => {
+        {units.map((unit, i) => {
           const state: "locked" | "active" | "done" =
             !hydrated
               ? i === 0 ? "active" : "locked"
@@ -65,7 +72,7 @@ export function SkillTree() {
                 </div>
               ) : (
                 <Link
-                  href={`/learn/${unit.id}`}
+                  href={`${basePath}/learn/${unit.id}`}
                   className={cn(
                     "ml-4 flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all duration-150 active:scale-[0.98]",
                     state === "active"
