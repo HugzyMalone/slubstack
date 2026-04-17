@@ -1,16 +1,44 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Flame, Sparkles, User } from "lucide-react";
 import { useGameStore } from "@/lib/store";
 import { levelFromXp } from "@/lib/xp";
 import { useHydrated } from "@/lib/hooks";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export function TopBar() {
   const hydrated = useHydrated();
   const xp = useGameStore((s) => s.xp);
   const streak = useGameStore((s) => s.streak);
   const level = hydrated ? levelFromXp(xp) : 0;
+  const [avatar, setAvatar] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return;
+      fetch("/api/profile", { cache: "no-store" })
+        .then((r) => r.ok ? r.json() : null)
+        .then((d) => { if (d?.profile?.avatar) setAvatar(d.profile.avatar); })
+        .catch(() => {});
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session?.user) { setAvatar(null); return; }
+      if (event === "SIGNED_IN") {
+        fetch("/api/profile", { cache: "no-store" })
+          .then((r) => r.ok ? r.json() : null)
+          .then((d) => { if (d?.profile?.avatar) setAvatar(d.profile.avatar); })
+          .catch(() => {});
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-surface/80 backdrop-blur-md">
@@ -37,10 +65,14 @@ export function TopBar() {
           </Link>
           <Link
             href="/stats"
-            className="ml-0.5 flex h-7 w-7 items-center justify-center rounded-full border border-border text-muted transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-            aria-label="Account and stats"
+            className="ml-0.5 flex h-7 w-7 items-center justify-center rounded-full border border-border transition hover:border-[var(--accent)]"
+            aria-label="Profile"
           >
-            <User size={13} />
+            {avatar ? (
+              <span className="text-base leading-none">{avatar}</span>
+            ) : (
+              <User size={13} className="text-muted" />
+            )}
           </Link>
         </div>
       </div>
