@@ -39,15 +39,15 @@ const SECTIONS = [
 export default function HubPage() {
   return (
     <div className="mx-auto max-w-xl px-4 pb-24">
-      <div className="flex flex-col items-center pt-2 pb-2">
-        <div className="relative w-full" style={{ height: "45vh", maxHeight: 420 }}>
+      <div className="flex flex-col items-center pt-0 pb-0">
+        <div className="relative w-full" style={{ height: "32vh", maxHeight: 280 }}>
           <Panda mood="happy" fill />
         </div>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight">What are you learning?</h1>
-        <p className="mt-1 text-sm text-muted">Pick a section to get started.</p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight">What are you learning?</h1>
+        <p className="mt-0.5 text-sm text-muted">Pick a section to get started.</p>
       </div>
 
-      <div className="mt-4 flex flex-col gap-3">
+      <div className="mt-3 flex flex-col gap-3">
         {SECTIONS.map(({ href, flag, title, subtitle, accent, badge }) => (
           <Link key={href} href={href} className="block active:scale-[0.985] transition-transform duration-150">
             <div

@@ -33,8 +33,8 @@ function preload(src: string) {
 
 export function ActorBlitz({ actors }: Props) {
   const [gameState, setGameState] = useState<GameState>("lobby");
-  const [timeMode, setTimeMode] = useState<30 | 60>(60);
-  const [timeLeft, setTimeLeft] = useState(60);
+  const timeMode = 10;
+  const [timeLeft, setTimeLeft] = useState(10);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
@@ -69,7 +69,7 @@ export function ActorBlitz({ actors }: Props) {
     setStreak(0);
     setBestStreak(0);
     setTotal(0);
-    setTimeLeft(timeMode);
+    setTimeLeft(10);
     setSelected(null);
     setFeedback(null);
     setHistory([]);
@@ -141,12 +141,12 @@ export function ActorBlitz({ actors }: Props) {
   const shareResult = useCallback(() => {
     const accuracy = total > 0 ? Math.round((score / total) * 100) : 0;
     const streakEmoji = bestStreak >= 5 ? "🔥" : bestStreak >= 3 ? "⚡" : "✨";
-    const text = `🎬 Actor Blitz — ${score} correct in ${timeMode}s!\nAccuracy: ${accuracy}% | Best streak: ${bestStreak} ${streakEmoji}\nCan you beat me? slubstack.com/trivia/actors`;
+    const text = `🎬 Actor Blitz — ${score} correct in 10s!\nAccuracy: ${accuracy}% | Best streak: ${bestStreak} ${streakEmoji}\nCan you beat me? slubstack.com/trivia/actors`;
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
-  }, [score, total, timeMode, bestStreak]);
+  }, [score, total, bestStreak]);
 
   // ── LOBBY ──────────────────────────────────────────────────────────────────
   if (gameState === "lobby") {
@@ -159,24 +159,11 @@ export function ActorBlitz({ actors }: Props) {
         </p>
 
         <div className="mt-8 w-full rounded-2xl border border-border bg-surface p-5">
-          <div className="text-sm font-semibold mb-3 text-left">Time limit</div>
-          <div className="flex gap-3">
-            {([30, 60] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTimeMode(t)}
-                className="flex-1 rounded-xl border py-3 text-sm font-bold transition-colors duration-150"
-                style={
-                  timeMode === t
-                    ? { background: "var(--game)", borderColor: "var(--game)", color: "#fff" }
-                    : { borderColor: "var(--border)", color: "var(--muted)" }
-                }
-              >
-                {t}s
-              </button>
-            ))}
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span className="text-2xl font-black" style={{ color: "var(--game)" }}>10s</span>
+            <span className="text-sm text-muted font-medium">time limit</span>
           </div>
-          <div className="mt-4 space-y-2 text-left text-sm text-muted">
+          <div className="space-y-2 text-left text-sm text-muted">
             <div className="flex items-center gap-2"><span className="text-base">📸</span><span>Real photos — some might look a little different!</span></div>
             <div className="flex items-center gap-2"><span className="text-base">⚡</span><span>Pick fast — time keeps ticking</span></div>
             <div className="flex items-center gap-2"><span className="text-base">🏆</span><span>Share your score and challenge friends</span></div>
@@ -274,7 +261,7 @@ export function ActorBlitz({ actors }: Props) {
   if (!currentActor) return null;
 
   const timerPct = (timeLeft / timeMode) * 100;
-  const timerColor = timeLeft <= 5 ? "#e11d48" : timeLeft <= 15 ? "#f97316" : "var(--game)";
+  const timerColor = timeLeft <= 3 ? "#e11d48" : timeLeft <= 6 ? "#f97316" : "var(--game)";
 
   return (
     <div className="flex flex-col h-[calc(100dvh-56px-60px)] lg:h-[calc(100dvh-56px)] max-w-md mx-auto px-4 pt-3 pb-3 select-none">
@@ -315,6 +302,7 @@ export function ActorBlitz({ actors }: Props) {
           className="absolute inset-0 h-full w-full object-cover object-top"
           fetchPriority="high"
           decoding="async"
+          ref={(el) => { if (el?.complete && !el.naturalWidth) setImageError(true); else if (el?.complete) setImageLoaded(true); }}
           onLoad={() => setImageLoaded(true)}
           onError={() => setImageError(true)}
           style={{ opacity: imageLoaded ? 1 : 0, transition: "opacity 0.15s ease" }}
