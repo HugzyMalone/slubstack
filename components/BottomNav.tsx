@@ -85,7 +85,7 @@ export function BottomNav() {
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-30 flex justify-center px-6 lg:hidden"
-      style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 10px)" }}
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 4px)" }}
     >
       <div
         className="flex items-stretch gap-0.5 rounded-[30px] p-1.5"
