@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import type { ActorData } from "@/app/trivia/actors/page";
 
@@ -27,6 +26,12 @@ interface Props {
   actors: ActorData[];
 }
 
+// Preload an image URL into the browser cache
+function preload(src: string) {
+  const img = new window.Image();
+  img.src = src;
+}
+
 export function ActorBlitz({ actors }: Props) {
   const [gameState, setGameState] = useState<GameState>("lobby");
   const [timeMode, setTimeMode] = useState<30 | 60>(60);
@@ -45,15 +50,16 @@ export function ActorBlitz({ actors }: Props) {
   const [advancing, setAdvancing] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Preload all actor images as soon as they arrive
+  useEffect(() => {
+    actors.forEach((a) => preload(a.image));
+  }, [actors]);
+
   const currentActor = queue[currentIdx] ?? null;
 
-  const makeOptions = useCallback(
-    (actor: ActorData): string[] => {
-      const decoys = actor.decoys.slice(0, 3);
-      return shuffle([actor.name, ...decoys]);
-    },
-    []
-  );
+  const makeOptions = useCallback((actor: ActorData): string[] => {
+    return shuffle([actor.name, ...actor.decoys.slice(0, 3)]);
+  }, []);
 
   const startGame = useCallback(() => {
     const shuffled = shuffle(actors);
@@ -75,30 +81,29 @@ export function ActorBlitz({ actors }: Props) {
   // Countdown
   useEffect(() => {
     if (gameState !== "countdown") return;
-    if (countdown <= 0) {
-      setGameState("playing");
-      return;
-    }
+    if (countdown <= 0) { setGameState("playing"); return; }
     const t = setTimeout(() => setCountdown((c) => c - 1), 900);
     return () => clearTimeout(t);
   }, [gameState, countdown]);
 
-  // Setup options when actor changes
+  // Setup options + preload next 3 when actor changes
   useEffect(() => {
     if (gameState !== "playing" || !currentActor) return;
     setOptions(makeOptions(currentActor));
     setSelected(null);
     setFeedback(null);
     setAdvancing(false);
-  }, [gameState, currentIdx, currentActor, makeOptions]);
+    // Preload upcoming images
+    for (let i = 1; i <= 3; i++) {
+      const next = queue[(currentIdx + i) % queue.length];
+      if (next) preload(next.image);
+    }
+  }, [gameState, currentIdx, currentActor, makeOptions, queue]);
 
   // Timer
   useEffect(() => {
     if (gameState !== "playing") return;
-    if (timeLeft <= 0) {
-      setGameState("results");
-      return;
-    }
+    if (timeLeft <= 0) { setGameState("results"); return; }
     const t = setInterval(() => setTimeLeft((tl) => tl - 1), 1000);
     return () => clearInterval(t);
   }, [gameState, timeLeft]);
@@ -122,17 +127,10 @@ export function ActorBlitz({ actors }: Props) {
       setSelected(option);
       setFeedback(isCorrect ? "correct" : "wrong");
       setTotal((t) => t + 1);
-      setHistory((h) => [
-        ...h,
-        { name: currentActor.name, image: currentActor.image, correct: isCorrect },
-      ]);
+      setHistory((h) => [...h, { name: currentActor.name, image: currentActor.image, correct: isCorrect }]);
       if (isCorrect) {
         setScore((s) => s + 1);
-        setStreak((s) => {
-          const ns = s + 1;
-          setBestStreak((bs) => Math.max(bs, ns));
-          return ns;
-        });
+        setStreak((s) => { const ns = s + 1; setBestStreak((bs) => Math.max(bs, ns)); return ns; });
         setTimeout(advance, 450);
       } else {
         setStreak(0);
@@ -180,20 +178,10 @@ export function ActorBlitz({ actors }: Props) {
               </button>
             ))}
           </div>
-
           <div className="mt-4 space-y-2 text-left text-sm text-muted">
-            <div className="flex items-center gap-2">
-              <span className="text-base">📸</span>
-              <span>Real photos — some might look a little different!</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-base">⚡</span>
-              <span>Pick fast — time keeps ticking</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-base">🏆</span>
-              <span>Share your score and challenge friends</span>
-            </div>
+            <div className="flex items-center gap-2"><span className="text-base">📸</span><span>Real photos — some might look a little different!</span></div>
+            <div className="flex items-center gap-2"><span className="text-base">⚡</span><span>Pick fast — time keeps ticking</span></div>
+            <div className="flex items-center gap-2"><span className="text-base">🏆</span><span>Share your score and challenge friends</span></div>
           </div>
         </div>
 
@@ -205,10 +193,7 @@ export function ActorBlitz({ actors }: Props) {
         >
           {actors.length === 0 ? "Loading actors…" : "Let's Go! →"}
         </button>
-
-        <Link href="/trivia" className="mt-4 text-sm text-muted hover:text-fg">
-          ← Back to Trivia
-        </Link>
+        <Link href="/trivia" className="mt-4 text-sm text-muted hover:text-fg">← Back to Trivia</Link>
       </div>
     );
   }
@@ -218,10 +203,7 @@ export function ActorBlitz({ actors }: Props) {
     const label = countdown > 0 ? String(countdown) : "GO!";
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-bg">
-        <div
-          className="text-8xl font-black transition-all duration-300"
-          style={{ color: countdown > 0 ? "var(--fg)" : "#8b5cf6" }}
-        >
+        <div className="text-8xl font-black transition-all duration-300" style={{ color: countdown > 0 ? "var(--fg)" : "#8b5cf6" }}>
           {label}
         </div>
         <div className="mt-4 text-muted text-sm">Get ready…</div>
@@ -233,18 +215,14 @@ export function ActorBlitz({ actors }: Props) {
   if (gameState === "results") {
     const accuracy = total > 0 ? Math.round((score / total) * 100) : 0;
     const grade =
-      accuracy >= 90 ? "🏆 Incredible!"
-      : accuracy >= 75 ? "⭐ Great job!"
-      : accuracy >= 55 ? "💪 Not bad!"
-      : "🎬 Keep practising!";
+      accuracy >= 90 ? "🏆 Incredible!" : accuracy >= 75 ? "⭐ Great job!" : accuracy >= 55 ? "💪 Not bad!" : "🎬 Keep practising!";
 
     return (
       <div className="mx-auto max-w-md px-4 pb-24 pt-8">
         <div className="text-center mb-6">
           <div className="text-5xl mb-2">🎬</div>
           <div className="text-4xl font-black" style={{ color: "#8b5cf6" }}>
-            {score}
-            <span className="text-xl font-semibold text-muted"> / {total}</span>
+            {score}<span className="text-xl font-semibold text-muted"> / {total}</span>
           </div>
           <div className="text-lg font-semibold mt-1">{grade}</div>
         </div>
@@ -255,10 +233,7 @@ export function ActorBlitz({ actors }: Props) {
             { label: "Accuracy", value: `${accuracy}%` },
             { label: "Best streak", value: `🔥 ${bestStreak}` },
           ].map(({ label, value }) => (
-            <div
-              key={label}
-              className="rounded-2xl border border-border bg-surface p-3 text-center"
-            >
+            <div key={label} className="rounded-2xl border border-border bg-surface p-3 text-center">
               <div className="text-lg font-bold">{value}</div>
               <div className="text-xs text-muted mt-0.5">{label}</div>
             </div>
@@ -266,41 +241,22 @@ export function ActorBlitz({ actors }: Props) {
         </div>
 
         <div className="flex gap-3 mb-6">
-          <button
-            onClick={shareResult}
-            className="flex-1 rounded-2xl border border-border bg-surface py-3 text-sm font-semibold transition-all active:scale-[0.97]"
-          >
+          <button onClick={shareResult} className="flex-1 rounded-2xl border border-border bg-surface py-3 text-sm font-semibold transition-all active:scale-[0.97]">
             {copied ? "✅ Copied!" : "📋 Copy score"}
           </button>
-          <button
-            onClick={startGame}
-            className="flex-1 rounded-2xl py-3 text-sm font-bold text-white transition-all active:scale-[0.97]"
-            style={{ background: "#8b5cf6" }}
-          >
+          <button onClick={startGame} className="flex-1 rounded-2xl py-3 text-sm font-bold text-white transition-all active:scale-[0.97]" style={{ background: "#8b5cf6" }}>
             Play again
           </button>
         </div>
 
         {history.length > 0 && (
           <div>
-            <div className="text-xs font-semibold uppercase tracking-widest text-muted mb-3">
-              How you did
-            </div>
+            <div className="text-xs font-semibold uppercase tracking-widest text-muted mb-3">How you did</div>
             <div className="flex flex-col gap-2">
               {history.map((h, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-surface px-3 py-2"
-                >
-                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg">
-                    <Image
-                      src={h.image}
-                      alt={h.name}
-                      fill
-                      className="object-cover"
-                      sizes="40px"
-                    />
-                  </div>
+                <div key={i} className="flex items-center gap-3 rounded-xl border border-border bg-surface px-3 py-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={h.image} alt={h.name} className="h-10 w-10 shrink-0 rounded-lg object-cover object-top" />
                   <div className="min-w-0 flex-1 text-sm font-medium truncate">{h.name}</div>
                   <div className="text-base shrink-0">{h.correct ? "✅" : "❌"}</div>
                 </div>
@@ -310,9 +266,7 @@ export function ActorBlitz({ actors }: Props) {
         )}
 
         <div className="mt-6 text-center">
-          <Link href="/trivia" className="text-sm text-muted hover:text-fg">
-            ← Back to Trivia
-          </Link>
+          <Link href="/trivia" className="text-sm text-muted hover:text-fg">← Back to Trivia</Link>
         </div>
       </div>
     );
@@ -322,51 +276,37 @@ export function ActorBlitz({ actors }: Props) {
   if (!currentActor) return null;
 
   const timerPct = (timeLeft / timeMode) * 100;
-  const timerColor =
-    timeLeft <= 5 ? "#e11d48" : timeLeft <= 15 ? "#f97316" : "#8b5cf6";
+  const timerColor = timeLeft <= 5 ? "#e11d48" : timeLeft <= 15 ? "#f97316" : "#8b5cf6";
 
   return (
     <div className="flex flex-col h-[calc(100dvh-56px-60px)] max-w-md mx-auto px-4 pt-3 pb-3 select-none">
       {/* Timer bar + stats */}
       <div className="shrink-0 mb-3">
         <div className="flex items-center justify-between mb-1.5">
-          <div className="flex items-center gap-1.5">
-            <span className="text-sm font-black" style={{ color: timerColor }}>
-              {timeLeft}s
-            </span>
-          </div>
+          <span className="text-sm font-black" style={{ color: timerColor }}>{timeLeft}s</span>
           <div className="flex items-center gap-3">
-            {streak >= 2 && (
-              <span className="text-xs font-bold" style={{ color: "#f97316" }}>
-                🔥 {streak}
-              </span>
-            )}
+            {streak >= 2 && <span className="text-xs font-bold" style={{ color: "#f97316" }}>🔥 {streak}</span>}
             <span className="text-sm font-black">{score}</span>
           </div>
         </div>
         <div className="h-2 w-full rounded-full overflow-hidden bg-border">
-          <div
-            className="h-full rounded-full transition-all duration-1000"
-            style={{ width: `${timerPct}%`, background: timerColor }}
-          />
+          <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${timerPct}%`, background: timerColor }} />
         </div>
       </div>
 
-      {/* Actor image */}
-      <div className="shrink-0 relative w-full rounded-2xl overflow-hidden bg-surface border border-border"
-           style={{ height: "min(42vh, 300px)" }}>
-        <Image
+      {/* Actor image — plain <img> served directly from Wikimedia CDN, no proxy */}
+      <div className="shrink-0 relative w-full rounded-2xl overflow-hidden bg-surface border border-border" style={{ height: "min(42vh, 300px)" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          key={currentActor.image}
           src={currentActor.image}
           alt="Who is this?"
-          fill
-          className="object-cover object-top"
-          sizes="(max-width: 448px) 100vw, 448px"
-          priority
+          className="absolute inset-0 h-full w-full object-cover object-top"
+          fetchPriority="high"
+          decoding="async"
         />
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute bottom-2 left-3 text-white text-xs font-semibold opacity-70">
-          Who is this actor?
-        </div>
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+        <div className="absolute bottom-2 left-3 text-white text-xs font-semibold opacity-70">Who is this actor?</div>
       </div>
 
       {/* Options */}
@@ -374,26 +314,12 @@ export function ActorBlitz({ actors }: Props) {
         {options.map((option) => {
           const isSelected = selected === option;
           const isCorrect = option === currentActor.name;
-
-          let bg = "var(--surface)";
-          let borderColor = "var(--border)";
-          let textColor = "var(--fg)";
-
+          let bg = "var(--surface)", borderColor = "var(--border)", textColor = "var(--fg)";
           if (feedback !== null) {
-            if (isSelected && feedback === "correct") {
-              bg = "#059669";
-              borderColor = "#059669";
-              textColor = "#fff";
-            } else if (isSelected && feedback === "wrong") {
-              bg = "#e11d48";
-              borderColor = "#e11d48";
-              textColor = "#fff";
-            } else if (!isSelected && isCorrect && feedback === "wrong") {
-              borderColor = "#059669";
-              textColor = "#059669";
-            }
+            if (isSelected && feedback === "correct") { bg = "#059669"; borderColor = "#059669"; textColor = "#fff"; }
+            else if (isSelected && feedback === "wrong") { bg = "#e11d48"; borderColor = "#e11d48"; textColor = "#fff"; }
+            else if (!isSelected && isCorrect && feedback === "wrong") { borderColor = "#059669"; textColor = "#059669"; }
           }
-
           return (
             <button
               key={option}

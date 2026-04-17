@@ -4,11 +4,6 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
-  images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "upload.wikimedia.org" },
-    ],
-  },
 };
 
 export default nextConfig;
