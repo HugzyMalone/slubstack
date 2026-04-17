@@ -18,11 +18,10 @@ const SECTIONS = [
   },
   {
     href: "/trivia",
-    flag: "🎯",
+    flag: "🎬",
     title: "Trivia",
-    subtitle: "Challenge a friend — coming soon",
+    subtitle: "Guess the actor — race the clock",
     accent: "#8b5cf6",
-    disabled: true,
   },
 ];
 
@@ -38,41 +37,23 @@ export default function HubPage() {
       </div>
 
       <div className="mt-4 flex flex-col gap-3">
-        {SECTIONS.map(({ href, flag, title, subtitle, accent, disabled }) => {
-          const inner = (
-            <div
-              className="flex items-center gap-4 rounded-2xl border border-border bg-surface px-5 py-4 transition-all duration-150"
-              style={disabled ? { opacity: 0.5 } : undefined}
-            >
+        {SECTIONS.map(({ href, flag, title, subtitle, accent }) => (
+          <Link key={href} href={href} className="block active:scale-[0.99]">
+            <div className="flex items-center gap-4 rounded-2xl border border-border bg-surface px-5 py-4 transition-all duration-150">
               <span className="text-4xl">{flag}</span>
               <div className="min-w-0 flex-1">
                 <div className="text-base font-semibold">{title}</div>
                 <div className="text-sm text-muted">{subtitle}</div>
               </div>
-              {!disabled && (
-                <span
-                  className="shrink-0 rounded-full px-3 py-1 text-xs font-semibold text-white"
-                  style={{ background: accent }}
-                >
-                  Go
-                </span>
-              )}
-              {disabled && (
-                <span className="shrink-0 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted">
-                  Soon
-                </span>
-              )}
+              <span
+                className="shrink-0 rounded-full px-3 py-1 text-xs font-semibold text-white"
+                style={{ background: accent }}
+              >
+                Go
+              </span>
             </div>
-          );
-
-          return disabled ? (
-            <div key={href}>{inner}</div>
-          ) : (
-            <Link key={href} href={href} className="block active:scale-[0.99]">
-              {inner}
-            </Link>
-          );
-        })}
+          </Link>
+        ))}
       </div>
     </div>
   );
