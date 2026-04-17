@@ -45,27 +45,29 @@ export function CardShell({
         </div>
       </div>
 
-      {/* Panda — top half */}
-      <div className="shrink-0 flex items-center justify-center" style={{ height: "45vh" }}>
+      {/* Panda */}
+      <div className="shrink-0 flex items-center justify-center" style={{ height: "clamp(140px, 28vh, 240px)" }}>
         <div className="relative h-full w-full max-w-sm">
           <Panda mood={pandaMood} fill />
         </div>
       </div>
 
-      {/* Question — bottom half, no scroll */}
-      <motion.div
-        key={current}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        className={cn(
-          "flex-1 overflow-hidden mx-auto w-full max-w-xl px-4",
-          className,
-        )}
-      >
-        {children}
-      </motion.div>
+      {/* Question — scrollable so content is never clipped behind the fixed footer */}
+      <div className="flex-1 overflow-y-auto">
+        <motion.div
+          key={current}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className={cn(
+            "mx-auto w-full max-w-xl px-4 pb-28",
+            className,
+          )}
+        >
+          {children}
+        </motion.div>
+      </div>
     </div>
   );
 }

@@ -53,12 +53,12 @@ export function MultipleChoice({ card, distractors, onResult, onFeedback }: Prop
         Choose the meaning
       </div>
 
-      <div className="mx-auto mt-6 max-w-sm rounded-3xl border border-border bg-surface px-6 py-8 text-center">
+      <div className="mx-auto mt-4 max-w-sm rounded-3xl border border-border bg-surface px-5 py-5 text-center">
         <div className={`hanzi ${wordSize(card.hanzi)} w-full break-words leading-tight text-fg`}>{card.hanzi}</div>
-        <div className="mt-3 text-base text-muted">{card.pinyin}</div>
+        <div className="mt-2 text-base text-muted">{card.pinyin}</div>
       </div>
 
-      <div className="mx-auto mt-6 grid max-w-sm grid-cols-1 gap-2">
+      <div className="mx-auto mt-3 grid max-w-sm grid-cols-1 gap-2">
         {options.map((opt) => {
           const isSelected = opt.id === selected;
           const showCorrect = submitted && opt.id === card.id;

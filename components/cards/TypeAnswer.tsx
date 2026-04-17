@@ -75,12 +75,12 @@ export function TypeAnswer({ card, onResult, onFeedback }: Props) {
         Type the meaning
       </div>
 
-      <div className="mx-auto mt-6 max-w-sm rounded-3xl border border-border bg-surface px-6 py-8 text-center">
+      <div className="mx-auto mt-4 max-w-sm rounded-3xl border border-border bg-surface px-5 py-5 text-center">
         <div className={`hanzi ${wordSize(card.hanzi)} w-full break-words leading-tight text-fg`}>{card.hanzi}</div>
-        <div className="mt-3 text-base text-muted">{card.pinyin}</div>
+        <div className="mt-2 text-base text-muted">{card.pinyin}</div>
       </div>
 
-      <div className="mx-auto mt-6 max-w-sm">
+      <div className="mx-auto mt-4 max-w-sm">
         <input
           ref={ref}
           value={value}
