@@ -8,6 +8,7 @@ import type { Quality } from "@/lib/srs";
 type Props = {
   card: Card;
   onResult: (r: { quality: Quality; correct: boolean; firstTry: boolean }) => void;
+  onFeedback?: (correct: boolean) => void;
 };
 
 function wordSize(text: string) {
@@ -19,11 +20,13 @@ function wordSize(text: string) {
   return "text-2xl";
 }
 
-export function FlipCard({ card, onResult }: Props) {
+export function FlipCard({ card, onResult, onFeedback }: Props) {
   const [flipped, setFlipped] = useState(false);
 
   function submit(quality: Quality) {
-    onResult({ quality, correct: quality >= 3, firstTry: true });
+    const correct = quality >= 3;
+    onFeedback?.(correct);
+    onResult({ quality, correct, firstTry: true });
   }
 
   return (

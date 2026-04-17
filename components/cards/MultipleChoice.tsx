@@ -20,9 +20,10 @@ type Props = {
   card: Card;
   distractors: Card[];
   onResult: (r: { quality: Quality; correct: boolean; firstTry: boolean }) => void;
+  onFeedback?: (correct: boolean) => void;
 };
 
-export function MultipleChoice({ card, distractors, onResult }: Props) {
+export function MultipleChoice({ card, distractors, onResult, onFeedback }: Props) {
   const options = useMemo(
     () => shuffle([card, ...distractors].slice(0, 4)),
     [card, distractors],
@@ -43,6 +44,7 @@ export function MultipleChoice({ card, distractors, onResult }: Props) {
     }
     if (!selected) return;
     setSubmitted(true);
+    onFeedback?.(correct);
   }
 
   return (

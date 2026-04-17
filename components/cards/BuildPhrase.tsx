@@ -10,6 +10,7 @@ import { CardFooter } from "./CardShell";
 type Props = {
   card: Card;
   onResult: (r: { quality: Quality; correct: boolean; firstTry: boolean }) => void;
+  onFeedback?: (correct: boolean) => void;
 };
 
 type Tile = { id: string; text: string };
@@ -17,7 +18,7 @@ type Tile = { id: string; text: string };
 const DECOY_POOL = ["了", "吗", "的", "在", "和", "不", "很", "个", "也", "就"];
 
 /** Let the user tap character tiles to reconstruct the hanzi. */
-export function BuildPhrase({ card, onResult }: Props) {
+export function BuildPhrase({ card, onResult, onFeedback }: Props) {
   const tiles = useMemo<Tile[]>(() => {
     const chars = Array.from(card.hanzi);
     const realTiles: Tile[] = chars.map((ch, i) => ({ id: `r-${i}`, text: ch }));
@@ -59,13 +60,16 @@ export function BuildPhrase({ card, onResult }: Props) {
     }
     if (correct) {
       setSubmitted(true);
+      onFeedback?.(true);
       return;
     }
     // wrong: let them try again once, then mark as submitted
     if (firstTryFailed) {
       setSubmitted(true);
+      onFeedback?.(false);
     } else {
       setFirstTryFailed(true);
+      onFeedback?.(false);
       setPicked([]);
     }
   }

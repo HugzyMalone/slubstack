@@ -17,6 +17,7 @@ function wordSize(text: string) {
 type Props = {
   card: Card;
   onResult: (r: { quality: Quality; correct: boolean; firstTry: boolean }) => void;
+  onFeedback?: (correct: boolean) => void;
 };
 
 function norm(s: string) {
@@ -32,7 +33,7 @@ function acceptedAnswers(english: string): string[] {
     .filter(Boolean);
 }
 
-export function TypeAnswer({ card, onResult }: Props) {
+export function TypeAnswer({ card, onResult, onFeedback }: Props) {
   const [value, setValue] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [firstTryFailed, setFirstTryFailed] = useState(false);
@@ -56,12 +57,15 @@ export function TypeAnswer({ card, onResult }: Props) {
     }
     if (correct) {
       setSubmitted(true);
+      onFeedback?.(true);
       return;
     }
     if (firstTryFailed) {
       setSubmitted(true);
+      onFeedback?.(false);
     } else {
       setFirstTryFailed(true);
+      onFeedback?.(false);
     }
   }
 

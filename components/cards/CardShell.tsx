@@ -4,12 +4,14 @@ import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Panda, type PandaMood } from "@/components/Panda";
 
 type Props = {
-  progress: number; // 0..1
+  progress: number;
   total: number;
   current: number;
   exitHref?: string;
+  pandaMood?: PandaMood;
   children: React.ReactNode;
   className?: string;
 };
@@ -19,11 +21,13 @@ export function CardShell({
   total,
   current,
   exitHref = "/",
+  pandaMood = "idle",
   children,
   className,
 }: Props) {
   return (
     <div className="flex min-h-[100dvh] flex-col">
+      {/* Progress bar */}
       <div className="sticky top-0 z-20 bg-bg">
         <div className="mx-auto flex max-w-xl items-center gap-3 px-4 pb-3 pt-3">
           <Link
@@ -40,6 +44,14 @@ export function CardShell({
         </div>
       </div>
 
+      {/* Panda character */}
+      <div className="flex justify-center" style={{ height: "28vh", minHeight: 120, maxHeight: 260 }}>
+        <div className="relative h-full w-full max-w-xs">
+          <Panda mood={pandaMood} fill />
+        </div>
+      </div>
+
+      {/* Card content */}
       <motion.div
         key={current}
         initial={{ opacity: 0, x: 40 }}
@@ -74,7 +86,6 @@ type FooterProps = {
   feedback?: React.ReactNode;
 };
 
-/** Sticky bottom action bar that swaps colour on correct/wrong feedback. */
 export function CardFooter({ variant, primary, secondary, feedback }: FooterProps) {
   const bg =
     variant === "correct"

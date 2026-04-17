@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import type { SessionItem } from "@/lib/session";
 import type { Quality } from "@/lib/srs";
+import type { PandaMood } from "@/components/Panda";
 import { useGameStore } from "@/lib/store";
 import { CardShell } from "@/components/cards/CardShell";
 import { FlipCard } from "@/components/cards/FlipCard";
@@ -28,6 +29,11 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
   const [firstTryCorrect, setFirstTryCorrect] = useState(0);
   const [totalCorrect, setTotalCorrect] = useState(0);
   const [finished, setFinished] = useState<{ gained: number } | null>(null);
+  const [pandaMood, setPandaMood] = useState<PandaMood>("idle");
+
+  const handleFeedback = useCallback((correct: boolean) => {
+    setPandaMood(correct ? "happy" : "wrong");
+  }, []);
 
   const handleResult = useCallback(
     (r: { quality: Quality; correct: boolean; firstTry: boolean }) => {
@@ -46,27 +52,17 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
         setFinished({ gained });
       } else {
         setIndex((i) => i + 1);
+        setPandaMood("idle");
       }
     },
-    [
-      items,
-      index,
-      rateCard,
-      completeSession,
-      completeUnit,
-      unitId,
-      firstTryCorrect,
-      totalCorrect,
-    ],
+    [items, index, rateCard, completeSession, completeUnit, unitId, firstTryCorrect, totalCorrect],
   );
 
   if (items.length === 0) {
     return (
       <div className="mx-auto flex min-h-[60dvh] max-w-md flex-col items-center justify-center px-6 text-center">
         <p className="text-lg text-muted">Nothing due right now.</p>
-        <p className="mt-2 text-sm text-muted">
-          Come back tomorrow, or start a new unit.
-        </p>
+        <p className="mt-2 text-sm text-muted">Come back tomorrow, or start a new unit.</p>
       </div>
     );
   }
@@ -92,24 +88,26 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
       total={items.length}
       current={index + 1}
       exitHref={exitHref}
+      pandaMood={pandaMood}
     >
       <AnimatePresence mode="wait">
         <div key={`${index}-${current.kind}`}>
           {current.kind === "flip" && (
-            <FlipCard card={current.card} onResult={handleResult} />
+            <FlipCard card={current.card} onResult={handleResult} onFeedback={handleFeedback} />
           )}
           {current.kind === "multiple-choice" && (
             <MultipleChoice
               card={current.card}
               distractors={current.distractors ?? []}
               onResult={handleResult}
+              onFeedback={handleFeedback}
             />
           )}
           {current.kind === "build" && (
-            <BuildPhrase card={current.card} onResult={handleResult} />
+            <BuildPhrase card={current.card} onResult={handleResult} onFeedback={handleFeedback} />
           )}
           {current.kind === "type" && (
-            <TypeAnswer card={current.card} onResult={handleResult} />
+            <TypeAnswer card={current.card} onResult={handleResult} onFeedback={handleFeedback} />
           )}
         </div>
       </AnimatePresence>
