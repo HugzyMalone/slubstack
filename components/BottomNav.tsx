@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 function HomeIcon() {
@@ -33,6 +34,8 @@ function PersonIcon() {
     </svg>
   );
 }
+
+const SPRING = { type: "spring", stiffness: 420, damping: 36, mass: 0.9 } as const;
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -100,25 +103,41 @@ export function BottomNav() {
             <Link
               key={label}
               href={href}
-              className={cn(
-                "flex flex-col items-center gap-0.5 rounded-[22px] px-7 py-2 transition-all duration-200 active:scale-[0.88]",
-              )}
-              style={active ? {
-                background: "color-mix(in srgb, var(--accent) 13%, transparent)",
-              } : undefined}
+              className="relative flex flex-col items-center gap-0.5 rounded-[22px] px-7 py-2"
             >
-              <span className={cn(
-                "transition-colors duration-150",
-                active ? "text-[var(--accent)]" : "text-muted",
-              )}>
+              {/* Sliding pill — layoutId makes it animate between tabs */}
+              {active && (
+                <motion.div
+                  layoutId="nav-pill"
+                  className="absolute inset-0 rounded-[22px]"
+                  style={{ background: "color-mix(in srgb, var(--accent) 13%, transparent)" }}
+                  transition={SPRING}
+                />
+              )}
+
+              {/* Icon — bounces up slightly when becoming active */}
+              <motion.span
+                className={cn(
+                  "relative transition-colors duration-150",
+                  active ? "text-[var(--accent)]" : "text-muted",
+                )}
+                animate={{ y: active ? -1 : 0, scale: active ? 1.08 : 1 }}
+                transition={SPRING}
+              >
                 <Icon />
-              </span>
-              <span className={cn(
-                "text-[10px] font-semibold tracking-wide transition-colors duration-150",
-                active ? "text-[var(--accent)]" : "text-muted",
-              )}>
+              </motion.span>
+
+              {/* Label — fades + slides in when active */}
+              <motion.span
+                className={cn(
+                  "relative text-[10px] font-semibold tracking-wide",
+                  active ? "text-[var(--accent)]" : "text-muted",
+                )}
+                animate={{ opacity: active ? 1 : 0.55 }}
+                transition={{ duration: 0.18 }}
+              >
                 {label}
-              </span>
+              </motion.span>
             </Link>
           );
         })}
