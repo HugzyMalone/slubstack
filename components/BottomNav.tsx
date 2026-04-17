@@ -7,30 +7,33 @@ import { cn } from "@/lib/utils";
 
 function HomeIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 10L12 3l9 7v10a1 1 0 01-1 1H5a1 1 0 01-1-1V10z" />
-      <path d="M9 21V13h6v8" />
+    <svg width="23" height="23" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {/* Roof */}
+      <path d="M3 10.5L12 3l9 7.5" />
+      {/* Walls */}
+      <path d="M5 9V20a1 1 0 001 1h3.5v-5h5v5H18a1 1 0 001-1V9" />
     </svg>
   );
 }
 
 function CardsIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="9" width="14" height="10" rx="2.5" />
-      <path d="M7 9V7a2 2 0 012-2h9a2 2 0 012 2v8a2 2 0 01-2 2h-2" />
+    <svg width="23" height="23" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      {/* Open book */}
+      <path d="M2 4h6a4 4 0 014 4v13a3 3 0 00-3-3H2V4z" />
+      <path d="M22 4h-6a4 4 0 00-4 4v13a3 3 0 013-3h7V4z" />
     </svg>
   );
 }
 
 function PersonIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="7.5" r="3.5" />
-      <path d="M4 20.5c0-4.14 3.58-7.5 8-7.5s8 3.36 8 7.5" />
+    <svg width="23" height="23" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="7.5" r="4" />
+      <path d="M4 21c0-4.42 3.58-8 8-8s8 3.58 8 8" />
     </svg>
   );
 }
