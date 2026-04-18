@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import type { PandaMood } from "./Panda";
 
@@ -13,6 +14,18 @@ const MOOD_IMAGE: Record<PandaMood, string> = {
   wrong:       "/angrybear2.png",
 };
 
+const ALL_BEAR_IMAGES = Object.values(MOOD_IMAGE).filter((v, i, a) => a.indexOf(v) === i);
+
+let preloaded = false;
+function preloadBearImages() {
+  if (preloaded || typeof window === "undefined") return;
+  preloaded = true;
+  ALL_BEAR_IMAGES.forEach((src) => {
+    const img = new window.Image();
+    img.src = src;
+  });
+}
+
 type Props = {
   mood?: PandaMood;
   size?: number;
@@ -21,6 +34,7 @@ type Props = {
 };
 
 export function Bear({ mood = "idle", size = 120, fill = false, className }: Props) {
+  useEffect(() => { preloadBearImages(); }, []);
   const src = MOOD_IMAGE[mood];
 
   if (fill) {

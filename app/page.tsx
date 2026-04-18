@@ -123,15 +123,29 @@ function JoinCTA() {
   );
 }
 
+type HeroOption = { char: "panda" | "bear"; mood: "idle" | "happy" | "celebrating" | "sad" | "wrong" };
+const HERO_OPTIONS: HeroOption[] = [
+  { char: "panda", mood: "happy" },
+  { char: "panda", mood: "celebrating" },
+  { char: "panda", mood: "idle" },
+  { char: "bear",  mood: "happy" },
+  { char: "bear",  mood: "celebrating" },
+  { char: "bear",  mood: "wrong" },
+  { char: "bear",  mood: "sad" },
+  { char: "bear",  mood: "idle" },
+];
+
 export default function HubPage() {
-  const [useBear, setUseBear] = useState(false);
-  useEffect(() => { setUseBear(Math.random() < 0.5); }, []);
+  const [hero, setHero] = useState<HeroOption>(HERO_OPTIONS[0]);
+  useEffect(() => { setHero(HERO_OPTIONS[Math.floor(Math.random() * HERO_OPTIONS.length)]); }, []);
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-24">
       <div className="flex flex-col items-center pt-0 pb-0">
         <div className="relative w-full" style={{ height: "32vh", maxHeight: 280 }}>
-          {useBear ? <Bear mood="happy" fill /> : <Panda mood="happy" fill />}
+          {hero.char === "bear"
+            ? <Bear mood={hero.mood} fill />
+            : <Panda mood={hero.mood} fill />}
         </div>
         <h1 className="mt-1 text-2xl font-bold tracking-tight">What are you learning?</h1>
         <p className="mt-0.5 text-sm text-muted">Pick a section to get started.</p>

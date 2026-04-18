@@ -58,8 +58,10 @@ export function LessonCompleteScreen({
         initial={{ scale: 0.7, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 220, damping: 14 }}
+        className="relative w-full"
+        style={{ height: "32vh", maxHeight: 280 }}
       >
-        <CharComponent mood="celebrating" size={140} />
+        <CharComponent mood="celebrating" fill />
       </motion.div>
 
       <motion.h1
@@ -118,12 +120,6 @@ export function LessonCompleteScreen({
           className="w-full rounded-xl bg-[var(--accent)] px-4 py-3 text-center text-sm font-semibold text-[var(--accent-fg)] active:scale-[0.98]"
         >
           Done
-        </Link>
-        <Link
-          href={reviewHref}
-          className="w-full rounded-xl border border-border px-4 py-3 text-center text-sm font-medium hover:bg-border/40"
-        >
-          Study flashcards
         </Link>
       </motion.div>
     </div>
