@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Flame, Zap, User } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Flame, Zap, User, ChevronLeft } from "lucide-react";
 import { useGameStore } from "@/lib/store";
 import { useHydrated } from "@/lib/hooks";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -12,6 +13,9 @@ export function TopBar() {
   const xp = useGameStore((s) => s.xp);
   const streak = useGameStore((s) => s.streak);
   const [avatar, setAvatar] = useState<string | null>(null);
+  const pathname = usePathname();
+  const router = useRouter();
+  const isHome = pathname === "/";
 
   function isAvatarUrl(v: string | null): v is string {
     return !!v && (v.startsWith("http") || v.startsWith("data:") || v.startsWith("/"));
@@ -66,14 +70,24 @@ export function TopBar() {
       <div style={{ height: "env(safe-area-inset-top)" }} />
       <div className="mx-auto flex h-13 max-w-xl lg:max-w-none items-center justify-between px-4 lg:px-6">
 
-        {/* Wordmark — mobile only (sidebar shows it on desktop) */}
-        <Link
-          href="/"
-          className="lg:hidden text-[15px] font-semibold tracking-tight select-none"
-          style={{ letterSpacing: "-0.02em" }}
-        >
-          slubstack
-        </Link>
+        {/* Wordmark or back button — mobile only */}
+        {isHome ? (
+          <Link
+            href="/"
+            className="lg:hidden text-[15px] font-semibold tracking-tight select-none"
+            style={{ letterSpacing: "-0.02em" }}
+          >
+            slubstack
+          </Link>
+        ) : (
+          <button
+            onClick={() => router.back()}
+            className="lg:hidden flex items-center gap-0.5 text-xs text-muted/60 hover:text-muted transition-colors -ml-1 px-1 py-1"
+          >
+            <ChevronLeft size={15} />
+            Back
+          </button>
+        )}
 
         {/* Right: stats + profile */}
         <div className="flex items-center gap-3 ml-auto">

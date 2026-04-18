@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { CheckCircle2, Lock, ChevronLeft } from "lucide-react";
+import { CheckCircle2, Lock } from "lucide-react";
 import { type Unit } from "@/lib/content";
 import { useGameStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -21,19 +20,10 @@ export function SkillTree({ units, basePath, greeting, subGreeting }: Props) {
   const hydrated = useHydrated();
   const completedUnits = useGameStore((s) => s.completedUnits);
   const seenCardIds = useGameStore((s) => s.seenCardIds);
-  const router = useRouter();
-
   const unlockedIndex = hydrated ? Math.min(units.length - 1, completedUnits.length) : 0;
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-24 pt-0">
-      <button
-        onClick={() => router.back()}
-        className="mt-2 ml-1 flex items-center gap-0.5 text-xs text-muted/60 hover:text-muted transition-colors"
-      >
-        <ChevronLeft size={14} />
-        Back
-      </button>
       <header className="flex items-center gap-4 px-2 py-1">
         <Panda mood="idle" size={200} />
         <div>
