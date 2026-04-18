@@ -45,6 +45,15 @@ function GlobeIcon() {
   );
 }
 
+function BrainIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" />
+      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" />
+    </svg>
+  );
+}
+
 function FilmIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -114,7 +123,7 @@ function JoinCTA() {
 }
 
 export default function HubPage() {
-  const [langOpen, setLangOpen] = useState(true);
+  const [langOpen, setLangOpen] = useState(false);
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-24">
@@ -211,6 +220,31 @@ export default function HubPage() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Brain Training */}
+        <Link href="/brain-training" className="block active:scale-[0.985] transition-transform duration-150">
+          <div
+            className="flex items-center gap-4 rounded-2xl px-5 py-4"
+            style={{
+              background: "var(--surface)",
+              border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)",
+            }}
+          >
+            <div
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white"
+              style={{ background: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)" }}
+            >
+              <BrainIcon />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[15px] font-semibold">Brain Training</div>
+              <div className="mt-0.5 text-xs text-muted">Memory, logic &amp; focus games</div>
+            </div>
+            <span className="text-muted shrink-0">
+              <ChevronRight />
+            </span>
+          </div>
+        </Link>
 
         {/* Trivia */}
         <Link href="/trivia" className="block active:scale-[0.985] transition-transform duration-150">
