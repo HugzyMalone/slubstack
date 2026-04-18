@@ -98,7 +98,7 @@ export function TopBar() {
           {/* Profile */}
           <Link
             href="/stats"
-            className="ml-1 flex h-7 w-7 items-center justify-center rounded-full overflow-hidden transition-colors duration-150"
+            className="ml-1 flex h-8 w-8 items-center justify-center rounded-full overflow-hidden transition-opacity duration-150 hover:opacity-80"
             style={{
               border: "1px solid color-mix(in srgb, var(--fg) 12%, transparent)",
               background: avatar && !isAvatarUrl(avatar)

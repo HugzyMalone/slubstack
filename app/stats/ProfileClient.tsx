@@ -302,7 +302,9 @@ function AuthPage() {
 
 // ── ProfileTab ─────────────────────────────────────────────────────────────
 
-function ProfileTab({ user, avatar, username }: { user: SupaUser; avatar: string | null; username: string }) {
+function ProfileTab({ user, avatar, username, status }: {
+  user: SupaUser; avatar: string | null; username: string; status: string | null;
+}) {
   const hydrated = useHydrated();
   const xp = useGameStore((s) => s.xp);
   const streak = useGameStore((s) => s.streak);
@@ -318,45 +320,70 @@ function ProfileTab({ user, avatar, username }: { user: SupaUser; avatar: string
   const due = Object.values(srs).filter((s) => isDue(s, now)).length;
   const totalCards = ALL_CARDS.length;
 
+  const stats = [
+    { icon: <Flame size={15} className="text-orange-400" />, value: `${streak}d`, label: "streak" },
+    { icon: <Zap size={15} className="text-amber-400" />, value: String(xp), label: "xp" },
+    { icon: <BookOpen size={15} className="text-sky-400" />, value: String(seen.length), label: `of ${totalCards}` },
+    { icon: <Target size={15} className="text-emerald-400" />, value: String(completed.length), label: "units" },
+  ];
+
   return (
     <div className="space-y-3">
       {/* Profile card */}
-      <div className="rounded-3xl border border-border bg-surface p-6 text-center shadow-sm">
-        <div className="flex justify-center mb-3">
-          <AvatarDisplay avatar={avatar} size="xl" />
-        </div>
-        <div className="text-xl font-bold">{username || "Learner"}</div>
-        <div className="text-sm text-muted mt-0.5">{user.email}</div>
-
-        <div className="mt-5">
-          <div className="text-[10px] font-semibold uppercase tracking-widest text-muted">Level</div>
-          <div className="count-up mt-0.5 text-5xl font-bold tabular-nums">{level}</div>
-          <div className="mx-auto mt-3 h-1.5 max-w-48 overflow-hidden rounded-full bg-border">
-            <div
-              className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${Math.max(0, Math.min(1, progress)) * 100}%`, background: "var(--accent)" }}
-            />
+      <div className="rounded-3xl border border-border bg-surface shadow-sm overflow-hidden">
+        {/* Header section */}
+        <div className="px-6 pt-6 pb-5 text-center">
+          <div className="flex justify-center mb-4">
+            <AvatarDisplay avatar={avatar} size="xl" />
           </div>
-          <div className="mt-1.5 text-xs tabular-nums text-muted">
-            {xp - current} / {next - current} XP to level {level + 1}
+
+          {/* Name + level badge */}
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-lg font-bold leading-none">{username || "Learner"}</span>
+            <span
+              className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white leading-none"
+              style={{ background: "var(--accent)" }}
+            >
+              Lv. {level}
+            </span>
+          </div>
+
+          {/* Status */}
+          {status ? (
+            <p className="mt-1.5 text-sm text-muted italic">&ldquo;{status}&rdquo;</p>
+          ) : (
+            <p className="mt-1.5 text-xs text-muted/50">No status set</p>
+          )}
+
+          {/* XP bar */}
+          <div className="mt-4">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{ width: `${Math.max(0, Math.min(1, progress)) * 100}%`, background: "var(--accent)" }}
+              />
+            </div>
+            <div className="mt-1.5 text-xs text-muted tabular-nums">
+              {xp - current} <span className="opacity-50">/</span> {next - current} XP to level {level + 1}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Stat tiles */}
-      <div className="grid grid-cols-2 gap-2.5">
-        <StatTile icon={<Flame size={16} />} iconBg="bg-orange-100 text-orange-500 dark:bg-orange-950/60 dark:text-orange-400"
-          label="Day streak" value={String(streak)} />
-        <StatTile icon={<Sparkles size={16} />} iconBg="bg-amber-100 text-amber-500 dark:bg-amber-950/60 dark:text-amber-400"
-          label="Total XP" value={String(xp)} />
-        <StatTile icon={<BookOpen size={16} />} iconBg="bg-sky-100 text-sky-500 dark:bg-sky-950/60 dark:text-sky-400"
-          label="Words learned" value={String(seen.length)} sub={`of ${totalCards}`} />
-        <StatTile icon={<Target size={16} />} iconBg="bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400"
-          label="Units done" value={String(completed.length)} />
+        {/* Stats strip */}
+        <div className="grid grid-cols-4 border-t border-border divide-x divide-border">
+          {stats.map(({ icon, value, label }) => (
+            <div key={label} className="flex flex-col items-center gap-1 py-3.5 px-1">
+              {icon}
+              <span className="text-sm font-bold tabular-nums leading-none">{value}</span>
+              <span className="text-[10px] text-muted leading-none">{label}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {due > 0 && (
-        <Link href="/review" className="flex items-center justify-between rounded-2xl border px-4 py-3.5 transition-colors duration-150"
+        <Link href="/review"
+          className="flex items-center justify-between rounded-2xl border px-4 py-3.5 transition-colors duration-150"
           style={{ borderColor: "color-mix(in srgb, var(--accent) 30%, var(--border))", background: "color-mix(in srgb, var(--accent) 4%, var(--surface))" }}>
           <div className="text-sm">
             <span className="font-semibold">{due}</span> flashcard{due === 1 ? "" : "s"} ready to review
@@ -369,39 +396,29 @@ function ProfileTab({ user, avatar, username }: { user: SupaUser; avatar: string
   );
 }
 
-function StatTile({ icon, iconBg, label, value, sub }: {
-  icon: React.ReactNode; iconBg: string; label: string; value: string; sub?: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-      <div className={`inline-flex rounded-xl p-2 ${iconBg}`}>{icon}</div>
-      <div className="count-up mt-2.5 text-2xl font-bold tabular-nums leading-none">
-        {value}
-        {sub && <span className="ml-1 text-sm font-normal text-muted">{sub}</span>}
-      </div>
-      <div className="mt-1 text-xs text-muted">{label}</div>
-    </div>
-  );
-}
-
 // ── SettingsTab ────────────────────────────────────────────────────────────
 
 function SettingsTab({
   user,
   avatar,
   username,
+  status,
   onAvatarChange,
   onUsernameChange,
+  onStatusChange,
   onSignOut,
 }: {
   user: SupaUser;
   avatar: string | null;
   username: string;
+  status: string | null;
   onAvatarChange: (a: string) => void;
   onUsernameChange: (u: string) => void;
+  onStatusChange: (s: string | null) => void;
   onSignOut: () => void;
 }) {
   const [localUsername, setLocalUsername] = useState(username);
+  const [localStatus, setLocalStatus] = useState(status ?? "");
   const [newPassword, setNewPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -411,8 +428,8 @@ function SettingsTab({
   const fileRef = useRef<HTMLInputElement>(null);
   const reset = useGameStore((s) => s.reset);
 
-  // Sync if parent changes username
   useEffect(() => { setLocalUsername(username); }, [username]);
+  useEffect(() => { setLocalStatus(status ?? ""); }, [status]);
 
   async function uploadPhoto(file: File) {
     const supabase = getSupabaseBrowserClient();
@@ -460,7 +477,7 @@ function SettingsTab({
     const res = await fetch("/api/profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: localUsername, avatar }),
+      body: JSON.stringify({ username: localUsername, avatar, status: localStatus }),
     });
     const payload = (await res.json()) as { error?: string; ok?: boolean };
 
@@ -475,6 +492,7 @@ function SettingsTab({
     }
 
     onUsernameChange(localUsername);
+    onStatusChange(localStatus.trim() || null);
     localStorage.setItem("slubstack_avatar", avatar ?? "");
     setSaving(false);
     setSaveMsg("Saved!");
@@ -574,6 +592,24 @@ function SettingsTab({
                 placeholder="your-name" maxLength={20}
                 className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-sm outline-none placeholder:text-muted focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 transition-colors"
               />
+            </div>
+
+            {/* Status */}
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted" htmlFor="s-status">
+                Status <span className="normal-case font-normal text-muted/60">— shown on your profile</span>
+              </label>
+              <div className="relative">
+                <textarea id="s-status" value={localStatus}
+                  onChange={(e) => setLocalStatus(e.target.value.slice(0, 100))}
+                  placeholder="What are you learning today?"
+                  rows={2}
+                  className="w-full resize-none rounded-xl border border-border bg-bg px-4 py-3 text-sm outline-none placeholder:text-muted focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 transition-colors"
+                />
+                <span className="absolute bottom-2 right-3 text-[10px] text-muted/50 tabular-nums pointer-events-none">
+                  {localStatus.length}/100
+                </span>
+              </div>
             </div>
 
             {/* Password */}
@@ -816,6 +852,7 @@ export function ProfileClient() {
   const [user, setUser] = useState<SupaUser | null>(null);
   const [username, setUsername] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
   const [lbFilter, setLbFilter] = useState<LBFilter>("overall");
@@ -846,6 +883,7 @@ export function ProfileClient() {
         if (cancelled || !data?.profile) return;
         setUsername(data.profile.username ?? "");
         setAvatar(data.profile.avatar ?? null);
+        setStatus(data.profile.status ?? null);
       })
       .catch(() => {});
     return () => { cancelled = true; };
@@ -890,14 +928,15 @@ export function ProfileClient() {
         </TabBtn>
       </div>
 
-      {tab === "profile" && <ProfileTab user={user} avatar={avatar} username={username} />}
+      {tab === "profile" && <ProfileTab user={user} avatar={avatar} username={username} status={status} />}
       {tab === "leaderboard" && (
         <LeaderboardTab entries={entries} loading={!leaderboardLoaded} filter={lbFilter}
           onFilter={setLbFilter} actorBest={actorBest} />
       )}
       {tab === "settings" && (
-        <SettingsTab user={user} avatar={avatar} username={username}
-          onAvatarChange={setAvatar} onUsernameChange={setUsername} onSignOut={handleSignOut} />
+        <SettingsTab user={user} avatar={avatar} username={username} status={status}
+          onAvatarChange={setAvatar} onUsernameChange={setUsername}
+          onStatusChange={setStatus} onSignOut={handleSignOut} />
       )}
     </div>
   );

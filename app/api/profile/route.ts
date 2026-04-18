@@ -18,7 +18,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("username, email, avatar_url")
+    .select("username, email, avatar_url, status")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -26,8 +26,8 @@ export async function GET() {
 
   return NextResponse.json({
     profile: data
-      ? { username: data.username, email: data.email, avatar: data.avatar_url }
-      : { username: fallbackUsername(user.id), email: user.email ?? null, avatar: null },
+      ? { username: data.username, email: data.email, avatar: data.avatar_url, status: data.status ?? null }
+      : { username: fallbackUsername(user.id), email: user.email ?? null, avatar: null, status: null },
   });
 }
 
@@ -40,9 +40,10 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = (await request.json()) as { username?: string; avatar?: string };
+  const body = (await request.json()) as { username?: string; avatar?: string; status?: string };
   const username = body.username?.trim();
   const avatar = body.avatar?.trim() ?? null;
+  const status = (body.status ?? "").trim().slice(0, 100) || null;
 
   if (!username || !USERNAME_RE.test(username)) {
     return NextResponse.json(
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
   }
 
   const { error } = await supabase.from("profiles").upsert(
-    { id: user.id, username, email: user.email ?? null, avatar_url: avatar },
+    { id: user.id, username, email: user.email ?? null, avatar_url: avatar, status },
     { onConflict: "id" },
   );
 
