@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Panda } from "@/components/Panda";
+import { Bear } from "@/components/Bear";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 function GlobeIcon() {
@@ -123,11 +124,14 @@ function JoinCTA() {
 }
 
 export default function HubPage() {
+  const [useBear, setUseBear] = useState(false);
+  useEffect(() => { setUseBear(Math.random() < 0.5); }, []);
+
   return (
     <div className="mx-auto max-w-xl px-4 pb-24">
       <div className="flex flex-col items-center pt-0 pb-0">
         <div className="relative w-full" style={{ height: "32vh", maxHeight: 280 }}>
-          <Panda mood="happy" fill />
+          {useBear ? <Bear mood="happy" fill /> : <Panda mood="happy" fill />}
         </div>
         <h1 className="mt-1 text-2xl font-bold tracking-tight">What are you learning?</h1>
         <p className="mt-0.5 text-sm text-muted">Pick a section to get started.</p>

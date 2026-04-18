@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Trophy, RotateCcw } from "lucide-react";
+import { globalStore } from "@/lib/globalStore";
 
 type Difficulty = "easy" | "medium" | "hard";
 type Phase = "select" | "countdown" | "playing" | "result";
@@ -161,6 +162,10 @@ export default function MathBlitzPage() {
     setBests(loadBests());
     setResult({ score, correct, wrong, bestStreak, isNewBest, reason, difficulty: diffRef.current });
     setPhase("result");
+    globalStore.getState().touchStreak();
+    const thresholds: Record<string, [number, number]> = { easy: [80, 40], medium: [150, 80], hard: [200, 100] };
+    const [goldT, silverT] = thresholds[diffRef.current];
+    globalStore.getState().awardMedal(score >= goldT ? "gold" : score >= silverT ? "silver" : "bronze");
   }
 
   // Countdown

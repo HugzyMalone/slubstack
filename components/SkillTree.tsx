@@ -7,6 +7,7 @@ import { type Unit } from "@/lib/content";
 import { useGameStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Panda } from "@/components/Panda";
+import { Bear } from "@/components/Bear";
 import { useHydrated } from "@/lib/hooks";
 
 type Props = {
@@ -14,9 +15,10 @@ type Props = {
   basePath: string;
   greeting: string;
   subGreeting?: string;
+  character?: "panda" | "bear";
 };
 
-export function SkillTree({ units, basePath, greeting, subGreeting }: Props) {
+export function SkillTree({ units, basePath, greeting, subGreeting, character = "panda" }: Props) {
   const hydrated = useHydrated();
   const completedUnits = useGameStore((s) => s.completedUnits);
   const seenCardIds = useGameStore((s) => s.seenCardIds);
@@ -25,7 +27,7 @@ export function SkillTree({ units, basePath, greeting, subGreeting }: Props) {
   return (
     <div className="mx-auto max-w-xl px-4 pb-24 pt-0">
       <header className="flex items-center gap-4 px-2 py-1">
-        <Panda mood="idle" size={200} />
+        {character === "bear" ? <Bear mood="idle" size={200} /> : <Panda mood="idle" size={200} />}
         <div>
           <h1 className="text-xl font-semibold tracking-tight">{greeting}</h1>
           <p className="text-sm text-muted">

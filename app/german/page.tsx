@@ -9,6 +9,7 @@ export default function GermanPage() {
       basePath="/german"
       greeting="Guten Tag!"
       subGreeting="Learn German one word at a time."
+      character="bear"
     />
   );
 }

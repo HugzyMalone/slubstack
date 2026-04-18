@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Panda, type PandaMood } from "@/components/Panda";
+import { Bear } from "@/components/Bear";
 
 type Props = {
   progress: number;
@@ -12,6 +13,7 @@ type Props = {
   current: number;
   exitHref?: string;
   pandaMood?: PandaMood;
+  character?: "panda" | "bear";
   children: React.ReactNode;
   className?: string;
 };
@@ -22,6 +24,7 @@ export function CardShell({
   current,
   exitHref = "/",
   pandaMood = "idle",
+  character = "panda",
   children,
   className,
 }: Props) {
@@ -45,10 +48,10 @@ export function CardShell({
         </div>
       </div>
 
-      {/* Panda */}
+      {/* Character */}
       <div className="shrink-0 flex items-center justify-center" style={{ height: "clamp(80px, 15vh, 140px)" }}>
         <div className="relative h-full w-full max-w-sm">
-          <Panda mood={pandaMood} fill />
+          {character === "bear" ? <Bear mood={pandaMood} fill /> : <Panda mood={pandaMood} fill />}
         </div>
       </div>
 

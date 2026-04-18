@@ -6,6 +6,8 @@ import type { SessionItem } from "@/lib/session";
 import type { Quality } from "@/lib/srs";
 import type { PandaMood } from "@/components/Panda";
 import { useGameStore } from "@/lib/store";
+import { globalStore } from "@/lib/globalStore";
+import type { Language } from "@/lib/content";
 import { CardShell } from "@/components/cards/CardShell";
 import { FlipCard } from "@/components/cards/FlipCard";
 import { MultipleChoice } from "@/components/cards/MultipleChoice";
@@ -19,9 +21,11 @@ type Props = {
   unitId?: string;
   exitHref?: string;
   reviewHref?: string;
+  character?: "panda" | "bear";
+  lang?: Language;
 };
 
-export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/review" }: Props) {
+export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/review", character = "panda", lang = "mandarin" }: Props) {
   const rateCard = useGameStore((s) => s.rateCard);
   const completeSession = useGameStore((s) => s.completeSession);
   const completeUnit = useGameStore((s) => s.completeUnit);
@@ -29,7 +33,7 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
   const [index, setIndex] = useState(0);
   const [firstTryCorrect, setFirstTryCorrect] = useState(0);
   const [totalCorrect, setTotalCorrect] = useState(0);
-  const [finished, setFinished] = useState<{ gained: number } | null>(null);
+  const [finished, setFinished] = useState<{ gained: number; streakIncremented: boolean } | null>(null);
   const [pandaMood, setPandaMood] = useState<PandaMood>("idle");
 
   const handleFeedback = useCallback((correct: boolean) => {
@@ -48,9 +52,12 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
       if (index + 1 >= items.length) {
         const firstTry = firstTryCorrect + (r.correct && r.firstTry ? 1 : 0);
         const total = totalCorrect + (r.correct ? 1 : 0);
-        const gained = completeSession(firstTry, total);
+        const { gained, streakIncremented } = completeSession(firstTry, total);
         if (unitId) completeUnit(unitId);
-        setFinished({ gained });
+        const medalRatio = items.length > 0 ? firstTry / items.length : 0;
+        const medalType = medalRatio === 1 ? "gold" : medalRatio >= 0.7 ? "silver" : "bronze";
+        globalStore.getState().awardMedal(medalType);
+        setFinished({ gained, streakIncremented });
       } else {
         setIndex((i) => i + 1);
         setPandaMood("idle");
@@ -76,6 +83,9 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
         total={items.length}
         exitHref={exitHref}
         reviewHref={reviewHref}
+        language={lang}
+        streakIncremented={finished.streakIncremented}
+        character={character}
       />
     );
   }
@@ -90,6 +100,7 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
       current={index + 1}
       exitHref={exitHref}
       pandaMood={pandaMood}
+      character={character}
     >
       <AnimatePresence mode="wait">
         <div key={`${index}-${current.kind}`}>

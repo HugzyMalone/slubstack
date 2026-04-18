@@ -8,6 +8,7 @@ import { SessionRunner } from "@/components/SessionRunner";
 import { INITIAL_SRS, isDue } from "@/lib/srs";
 import type { Card } from "@/lib/content";
 import { Panda } from "@/components/Panda";
+import { Bear } from "@/components/Bear";
 import { useHydrated, useNow } from "@/lib/hooks";
 import Link from "next/link";
 
@@ -67,15 +68,17 @@ export function ReviewClient({ lang = "mandarin" }: { lang?: Language }) {
 
   if (!hydrated) return null;
 
+  const character = lang === "german" ? "bear" : "panda";
+
   if (running) {
-    return <SessionRunner items={items} exitHref={exitHref} reviewHref={exitHref} />;
+    return <SessionRunner items={items} exitHref={exitHref} reviewHref={exitHref} character={character} lang={lang} />;
   }
 
   if (learnedCards.length === 0) {
     return (
       <div className="mx-auto max-w-md px-6 pb-24 pt-4 text-center">
         <div className="relative mx-auto h-[45vh] w-full">
-          <Panda mood="sleeping" fill />
+          {character === "bear" ? <Bear mood="sleeping" fill /> : <Panda mood="sleeping" fill />}
         </div>
         <h1 className="mt-4 text-2xl font-semibold tracking-tight">Flashcards</h1>
         <p className="mt-2 text-muted">No words learned yet. Complete a lesson to unlock flashcards.</p>

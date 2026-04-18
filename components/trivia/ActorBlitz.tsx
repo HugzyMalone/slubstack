@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { CheckCircle, XCircle, Clipboard, ClipboardCheck, ChevronDown } from "lucide-react";
 import type { ActorData } from "@/app/trivia/actors/page";
+import { globalStore } from "@/lib/globalStore";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -75,6 +76,7 @@ interface HistoryEntry {
 
 export interface ActorBest {
   score: number;
+  correct?: number;
   total: number;
   bestStreak: number;
   accuracy: number;
@@ -107,6 +109,7 @@ export function ActorBlitz({ actors }: Props) {
   const [gameState, setGameState] = useState<GameState>("lobby");
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
   const [score, setScore] = useState(0);
+  const [correct, setCorrect] = useState(0);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [total, setTotal] = useState(0);
@@ -126,9 +129,11 @@ export function ActorBlitz({ actors }: Props) {
 
   // Refs for stable values when saving PB on game end
   const scoreRef = useRef(score);
+  const correctRef = useRef(correct);
   const totalRef = useRef(total);
   const bestStreakRef = useRef(bestStreak);
   useEffect(() => { scoreRef.current = score; }, [score]);
+  useEffect(() => { correctRef.current = correct; }, [correct]);
   useEffect(() => { totalRef.current = total; }, [total]);
   useEffect(() => { bestStreakRef.current = bestStreak; }, [bestStreak]);
 
@@ -151,6 +156,7 @@ export function ActorBlitz({ actors }: Props) {
     setQueue(shuffled);
     setCurrentIdx(0);
     setScore(0);
+    setCorrect(0);
     setStreak(0);
     setBestStreak(0);
     setTotal(0);
@@ -191,10 +197,11 @@ export function ActorBlitz({ actors }: Props) {
       setGameState("results");
       // Save personal best on game end
       const s = scoreRef.current;
+      const c = correctRef.current;
       const t = totalRef.current;
       const bs = bestStreakRef.current;
-      const accuracy = t > 0 ? Math.round((s / t) * 100) : 0;
-      const pb: ActorBest = { score: s, total: t, bestStreak: bs, accuracy };
+      const accuracy = t > 0 ? Math.round((c / t) * 100) : 0;
+      const pb: ActorBest = { score: s, correct: c, total: t, bestStreak: bs, accuracy };
       try {
         const saved = localStorage.getItem(PB_KEY);
         const prev: ActorBest | null = saved ? JSON.parse(saved) : null;
@@ -203,6 +210,10 @@ export function ActorBlitz({ actors }: Props) {
           setPersonalBest(pb);
         }
       } catch {}
+      // Update global streak and award medal
+      globalStore.getState().touchStreak();
+      const acc = t > 0 ? c / t : 0;
+      globalStore.getState().awardMedal(acc >= 0.9 ? "gold" : acc >= 0.7 ? "silver" : "bronze");
       return;
     }
     const t = setInterval(() => setTimeLeft((tl) => tl - 1), 1000);
@@ -241,6 +252,7 @@ export function ActorBlitz({ actors }: Props) {
         saveActorStats(stats);
       } catch {}
       if (isCorrect) {
+        setCorrect((c) => c + 1);
         setScore((s) => s + currentMultiplier);
         setStreak((s) => { const ns = s + 1; setBestStreak((bs) => Math.max(bs, ns)); return ns; });
         setTimeout(advance, 300);
@@ -253,11 +265,11 @@ export function ActorBlitz({ actors }: Props) {
   );
 
   const shareResult = useCallback(() => {
-    const s = scoreRef.current;
+    const c = correctRef.current;
     const t = totalRef.current;
     const bs = bestStreakRef.current;
-    const accuracy = t > 0 ? Math.round((s / t) * 100) : 0;
-    const text = `Actor Blitz — ${s} correct in ${TIME_LIMIT}s!\nAccuracy: ${accuracy}% | Best streak: ${bs}\nCan you beat me? slubstack.com/trivia/actors`;
+    const accuracy = t > 0 ? Math.round((c / t) * 100) : 0;
+    const text = `Actor Blitz — ${c}/${t} correct in ${TIME_LIMIT}s!\nAccuracy: ${accuracy}% | Best streak: ${bs}\nCan you beat me? slubstack.com/trivia/actors`;
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -289,7 +301,10 @@ export function ActorBlitz({ actors }: Props) {
               <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">Personal best</span>
             </div>
             <div className="flex gap-4 text-sm">
-              <span className="font-bold" style={{ color: "var(--game)" }}>{personalBest.score}<span className="text-xs font-normal text-muted">/{personalBest.total}</span></span>
+              <span className="font-bold" style={{ color: "var(--game)" }}>
+                {personalBest.correct ?? personalBest.score}
+                <span className="text-xs font-normal text-muted">/{personalBest.total}</span>
+              </span>
               <span className="text-muted">{personalBest.accuracy}% acc</span>
               <span className="text-muted">{personalBest.bestStreak} streak</span>
             </div>
@@ -345,10 +360,10 @@ export function ActorBlitz({ actors }: Props) {
 
   // ── RESULTS ────────────────────────────────────────────────────────────────
   if (gameState === "results") {
-    const s = scoreRef.current;
+    const c = correctRef.current;
     const t = totalRef.current;
     const bs = bestStreakRef.current;
-    const accuracy = t > 0 ? Math.round((s / t) * 100) : 0;
+    const accuracy = t > 0 ? Math.round((c / t) * 100) : 0;
     const grade =
       accuracy >= 90 ? "Incredible!" : accuracy >= 75 ? "Great job!" : accuracy >= 55 ? "Not bad!" : "Keep practising!";
 
@@ -362,14 +377,14 @@ export function ActorBlitz({ actors }: Props) {
             <FilmIcon size={24} />
           </div>
           <div className="text-4xl font-black" style={{ color: "var(--game)" }}>
-            {s}<span className="text-xl font-semibold text-muted"> / {t}</span>
+            {c}<span className="text-xl font-semibold text-muted"> / {t}</span>
           </div>
           <div className="text-base font-semibold mt-1 text-muted">{grade}</div>
         </div>
 
         <div className="grid grid-cols-3 gap-3 mb-5">
           {[
-            { label: "Correct", value: String(s) },
+            { label: "Correct", value: `${c}/${t}` },
             { label: "Accuracy", value: `${accuracy}%` },
             { label: "Best streak", value: String(bs) },
           ].map(({ label, value }) => (

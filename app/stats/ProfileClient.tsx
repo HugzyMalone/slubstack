@@ -1,21 +1,18 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Flame, Zap, Trophy, Lock, Mail, Eye, EyeOff, Camera,
-  BookOpen, Target, Sparkles, ChevronDown, CheckCircle,
-  User, Settings, BarChart3, Clipboard, ClipboardCheck,
+  CheckCircle, User, Settings, BarChart3,
 } from "lucide-react";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { useGameStore } from "@/lib/store";
+import { useGlobalStore } from "@/lib/globalStore";
 import { levelFromXp, xpToNextLevel } from "@/lib/xp";
-import { ALL_CARDS } from "@/lib/content";
-import { isDue } from "@/lib/srs";
-import { useHydrated, useNow } from "@/lib/hooks";
+import { useHydrated } from "@/lib/hooks";
 import type { LeaderboardEntry } from "@/lib/supabase/queries";
-import type { ActorBest } from "@/components/trivia/ActorBlitz";
 import Link from "next/link";
 
 // ── helpers ────────────────────────────────────────────────────────────────
@@ -301,25 +298,13 @@ function ProfileTab({ user, avatar, username, status }: {
 }) {
   const hydrated = useHydrated();
   const xp = useGameStore((s) => s.xp);
-  const streak = useGameStore((s) => s.streak);
-  const seen = useGameStore((s) => s.seenCardIds);
-  const completed = useGameStore((s) => s.completedUnits);
-  const srs = useGameStore((s) => s.srs);
-  const now = useNow(hydrated);
+  const streak = useGlobalStore((s) => s.streak);
+  const medals = useGlobalStore((s) => s.medals);
 
   if (!hydrated) return null;
 
   const level = levelFromXp(xp);
   const { current, next, progress } = xpToNextLevel(xp);
-  const due = Object.values(srs).filter((s) => isDue(s, now)).length;
-  const totalCards = ALL_CARDS.length;
-
-  const stats = [
-    { icon: <Flame size={15} className="text-orange-400" />, value: `${streak}d`, label: "streak" },
-    { icon: <Zap size={15} className="text-amber-400" />, value: String(xp), label: "xp" },
-    { icon: <BookOpen size={15} className="text-sky-400" />, value: String(seen.length), label: `of ${totalCards}` },
-    { icon: <Target size={15} className="text-emerald-400" />, value: String(completed.length), label: "units" },
-  ];
 
   return (
     <div className="space-y-3">
@@ -364,28 +349,30 @@ function ProfileTab({ user, avatar, username, status }: {
         </div>
 
         {/* Stats strip */}
-        <div className="grid grid-cols-4 border-t border-border divide-x divide-border">
-          {stats.map(({ icon, value, label }) => (
-            <div key={label} className="flex flex-col items-center gap-1 py-3.5 px-1">
-              {icon}
+        <div className="grid grid-cols-5 border-t border-border divide-x divide-border">
+          <div className="flex flex-col items-center gap-1 py-3 px-1">
+            <Flame size={14} className="text-orange-400" />
+            <span className="text-sm font-bold tabular-nums leading-none">{streak}d</span>
+            <span className="text-[9px] text-muted leading-none">streak</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 py-3 px-1">
+            <Zap size={14} className="text-amber-400" />
+            <span className="text-sm font-bold tabular-nums leading-none">{xp}</span>
+            <span className="text-[9px] text-muted leading-none">xp</span>
+          </div>
+          {[
+            { emoji: "🥇", value: medals.gold, label: "gold" },
+            { emoji: "🥈", value: medals.silver, label: "silver" },
+            { emoji: "🥉", value: medals.bronze, label: "bronze" },
+          ].map(({ emoji, value, label }) => (
+            <div key={label} className="flex flex-col items-center gap-1 py-3 px-1">
+              <span className="text-sm leading-none">{emoji}</span>
               <span className="text-sm font-bold tabular-nums leading-none">{value}</span>
-              <span className="text-[10px] text-muted leading-none">{label}</span>
+              <span className="text-[9px] text-muted leading-none">{label}</span>
             </div>
           ))}
         </div>
       </div>
-
-      {due > 0 && (
-        <Link href="/review"
-          className="flex items-center justify-between rounded-2xl border px-4 py-3.5 transition-colors duration-150"
-          style={{ borderColor: "color-mix(in srgb, var(--accent) 30%, var(--border))", background: "color-mix(in srgb, var(--accent) 4%, var(--surface))" }}>
-          <div className="text-sm">
-            <span className="font-semibold">{due}</span> flashcard{due === 1 ? "" : "s"} ready to review
-          </div>
-          <span className="rounded-full px-3 py-1 text-xs font-semibold"
-            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}>Review</span>
-        </Link>
-      )}
     </div>
   );
 }
@@ -834,11 +821,10 @@ const LB_FILTERS: { id: LBFilter; label: string }[] = [
 ];
 
 function LeaderboardTab({
-  entries, loading, filter, onFilter, actorBest, mathBlitzBest,
+  entries, loading, filter, onFilter,
 }: {
   entries: LeaderboardEntry[]; loading: boolean; filter: LBFilter;
-  onFilter: (f: LBFilter) => void; actorBest: ActorBest | null;
-  mathBlitzBest: Record<string, number> | null;
+  onFilter: (f: LBFilter) => void;
 }) {
   return (
     <div className="space-y-4">
@@ -864,8 +850,24 @@ function LeaderboardTab({
       {(filter === "mandarin" || filter === "german" || filter === "spanish") && (
         <LanguagePlaceholder language={filter} />
       )}
-      {filter === "actor-blitz" && <ActorBlitzSection best={actorBest} />}
-      {filter === "math-blitz" && <MathBlitzSection best={mathBlitzBest} />}
+      {filter === "actor-blitz" && (
+        <Link href="/stats/actor-blitz" className="flex items-center justify-between rounded-2xl border border-border bg-surface px-5 py-5 transition-colors active:scale-[0.99]">
+          <div>
+            <div className="text-sm font-semibold">Actor Blitz Stats</div>
+            <div className="mt-0.5 text-xs text-muted">View your personal bests and rankings</div>
+          </div>
+          <span className="text-muted">→</span>
+        </Link>
+      )}
+      {filter === "math-blitz" && (
+        <Link href="/stats/math-blitz" className="flex items-center justify-between rounded-2xl border border-border bg-surface px-5 py-5 transition-colors active:scale-[0.99]">
+          <div>
+            <div className="text-sm font-semibold">Math Blitz Stats</div>
+            <div className="mt-0.5 text-xs text-muted">View your personal bests and rankings</div>
+          </div>
+          <span className="text-muted">→</span>
+        </Link>
+      )}
     </div>
   );
 }
@@ -942,97 +944,6 @@ function LanguagePlaceholder({ language }: { language: "mandarin" | "german" | "
   );
 }
 
-function ActorBlitzSection({ best }: { best: ActorBest | null }) {
-  if (!best) {
-    return (
-      <div className="rounded-2xl border border-border bg-surface p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-white"
-          style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)" }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2" y="2" width="20" height="20" rx="2.5" /><line x1="7" y1="2" x2="7" y2="22" />
-            <line x1="17" y1="2" x2="17" y2="22" /><line x1="2" y1="12" x2="22" y2="12" />
-            <line x1="2" y1="7" x2="7" y2="7" /><line x1="2" y1="17" x2="7" y2="17" />
-            <line x1="17" y1="17" x2="22" y2="17" /><line x1="17" y1="7" x2="22" y2="7" />
-          </svg>
-        </div>
-        <div className="text-sm font-semibold">No score yet</div>
-        <div className="mt-1 text-xs text-muted">Play Actor Blitz to set a personal best</div>
-        <Link href="/trivia/actors"
-          className="mt-4 inline-block rounded-xl px-5 py-2.5 text-sm font-semibold text-white"
-          style={{ background: "var(--game)" }}>Play now</Link>
-      </div>
-    );
-  }
-  return (
-    <div className="space-y-3">
-      <div className="text-xs font-semibold uppercase tracking-widest text-muted">Your personal best</div>
-      <div className="grid grid-cols-3 gap-2.5">
-        {[
-          { label: "Score", value: `${best.score}/${best.total}` },
-          { label: "Accuracy", value: `${best.accuracy}%` },
-          { label: "Best streak", value: String(best.bestStreak) },
-        ].map(({ label, value }) => (
-          <div key={label} className="rounded-2xl border border-border bg-surface p-3 text-center">
-            <div className="text-lg font-bold" style={{ color: "var(--game)" }}>{value}</div>
-            <div className="text-xs text-muted mt-0.5">{label}</div>
-          </div>
-        ))}
-      </div>
-      <Link href="/trivia/actors"
-        className="flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-white transition-colors active:scale-[0.98]"
-        style={{ background: "var(--game)" }}>Beat your score →</Link>
-      <p className="text-center text-xs text-muted">Global Actor Blitz rankings — coming soon</p>
-    </div>
-  );
-}
-
-function MathBlitzSection({ best }: { best: Record<string, number> | null }) {
-  const DIFF_COLORS: Record<string, string> = { easy: "#10b981", medium: "#f59e0b", hard: "#e11d48" };
-  const hasAny = best && (best.easy > 0 || best.medium > 0 || best.hard > 0);
-
-  if (!hasAny) {
-    return (
-      <div className="rounded-2xl border border-border bg-surface p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-white"
-          style={{ background: "linear-gradient(135deg, #10b981 0%, #0ea5e9 100%)" }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12" /><line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="6" x2="9" y2="6" /><line x1="15" y1="18" x2="19" y2="18" />
-          </svg>
-        </div>
-        <div className="text-sm font-semibold">No score yet</div>
-        <div className="mt-1 text-xs text-muted">Play Math Blitz to set a personal best</div>
-        <Link href="/brain-training/math-blitz"
-          className="mt-4 inline-block rounded-xl px-5 py-2.5 text-sm font-semibold text-white"
-          style={{ background: "linear-gradient(135deg, #10b981 0%, #0ea5e9 100%)" }}>Play now</Link>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      <div className="text-xs font-semibold uppercase tracking-widest text-muted">Your personal bests</div>
-      <div className="grid grid-cols-3 gap-2.5">
-        {(["easy", "medium", "hard"] as const).map((diff) => {
-          const score = best?.[diff] ?? 0;
-          return (
-            <div key={diff} className="rounded-2xl border border-border bg-surface p-3 text-center">
-              <div className="text-lg font-bold tabular-nums" style={{ color: score > 0 ? DIFF_COLORS[diff] : "var(--muted)" }}>
-                {score > 0 ? score : "—"}
-              </div>
-              <div className="text-xs text-muted mt-0.5 capitalize">{diff}</div>
-            </div>
-          );
-        })}
-      </div>
-      <Link href="/brain-training/math-blitz"
-        className="flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-white transition-colors active:scale-[0.98]"
-        style={{ background: "linear-gradient(135deg, #10b981 0%, #0ea5e9 100%)" }}>Beat your score →</Link>
-      <p className="text-center text-xs text-muted">Global Math Blitz rankings — coming soon</p>
-    </div>
-  );
-}
-
 // ── TabBtn ─────────────────────────────────────────────────────────────────
 
 function TabBtn({ active, onClick, icon, children }: {
@@ -1062,8 +973,6 @@ export function ProfileClient() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
   const [lbFilter, setLbFilter] = useState<LBFilter>("overall");
-  const [actorBest, setActorBest] = useState<ActorBest | null>(null);
-  const [mathBlitzBest, setMathBlitzBest] = useState<Record<string, number> | null>(null);
   const lbFetchedRef = useRef(false);
 
   // Eagerly load avatar from cache so it appears instantly
@@ -1115,27 +1024,10 @@ export function ProfileClient() {
       .then((r) => r.json())
       .then((d) => { setEntries(d.entries ?? []); setLeaderboardLoaded(true); })
       .catch(() => {});
-    try {
-      const s = localStorage.getItem("slubstack_actorblitz_best");
-      if (s) setActorBest(JSON.parse(s));
-    } catch {}
-    try {
-      const s = localStorage.getItem("slubstack_mathblitz_best");
-      if (s) setMathBlitzBest(JSON.parse(s));
-    } catch {}
   }, [user]);
 
   function openLeaderboard() {
     setTab("leaderboard");
-    // Refresh bests from localStorage in case user played since page load
-    try {
-      const s = localStorage.getItem("slubstack_actorblitz_best");
-      if (s) setActorBest(JSON.parse(s));
-    } catch {}
-    try {
-      const s = localStorage.getItem("slubstack_mathblitz_best");
-      if (s) setMathBlitzBest(JSON.parse(s));
-    } catch {}
     // Fallback fetch if prefetch didn't succeed
     if (!leaderboardLoaded) {
       setLeaderboardLoaded(true);
@@ -1174,7 +1066,7 @@ export function ProfileClient() {
       {tab === "profile" && <ProfileTab user={user} avatar={avatar} username={username} status={status} />}
       {tab === "leaderboard" && (
         <LeaderboardTab entries={entries} loading={!leaderboardLoaded} filter={lbFilter}
-          onFilter={setLbFilter} actorBest={actorBest} mathBlitzBest={mathBlitzBest} />
+          onFilter={setLbFilter} />
       )}
       {tab === "settings" && (
         <SettingsTab user={user} avatar={avatar} username={username} status={status}

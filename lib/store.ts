@@ -6,6 +6,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { INITIAL_SRS, type SrsState, rate, type Quality } from "@/lib/srs";
 import { levelFromXp, XP_SESSION_COMPLETE } from "@/lib/xp";
 import { daysBetween, todayKey } from "@/lib/utils";
+import { globalStore } from "@/lib/globalStore";
 
 type State = {
   srs: Record<string, SrsState>;
@@ -28,7 +29,7 @@ export type RemoteState = {
 type Actions = {
   rateCard: (cardId: string, quality: Quality) => void;
   addXp: (amount: number) => void;
-  completeSession: (firstTryCorrect: number, totalCorrect: number) => number;
+  completeSession: (firstTryCorrect: number, totalCorrect: number) => { gained: number; streakIncremented: boolean };
   completeUnit: (unitId: string) => void;
   getSrs: (cardId: string) => SrsState;
   reset: () => void;
@@ -85,14 +86,10 @@ function createGameStore(name: string) {
               newStreak = gap === 1 ? streak + 1 : gap === 0 ? streak : 1;
             }
           }
-          const gained =
-            bonus + firstTryCorrect * 10 + (totalCorrect - firstTryCorrect) * 5;
-          set((s) => ({
-            xp: s.xp + gained,
-            streak: newStreak,
-            lastActiveDate: today,
-          }));
-          return gained;
+          const gained = bonus + firstTryCorrect * 10 + (totalCorrect - firstTryCorrect) * 5;
+          set((s) => ({ xp: s.xp + gained, streak: newStreak, lastActiveDate: today }));
+          const { streakIncremented } = globalStore.getState().touchStreak();
+          return { gained, streakIncremented };
         },
 
         completeUnit: (unitId) =>

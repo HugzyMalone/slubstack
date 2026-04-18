@@ -37,6 +37,8 @@ export function LessonClient({
       unitId={unitId}
       exitHref={exitHref ?? (lang === "mandarin" ? "/" : `/${lang}`)}
       reviewHref={reviewHref ?? (lang === "mandarin" ? "/review" : `/${lang}/review`)}
+      character={lang === "german" ? "bear" : "panda"}
+      lang={lang}
     />
   );
 }
