@@ -42,7 +42,8 @@ Three-accent system defined in `app/globals.css`:
 - `/german/review` — German flashcard review
 - `/trivia` — Trivia hub
 - `/trivia/actors` — Actor Blitz game
-- `/brain-training` — Brain Training hub (placeholder — games coming soon)
+- `/brain-training` — Brain Training hub (Math Blitz live; Memory Match, Word Puzzles, Speed Recall coming soon)
+- `/brain-training/math-blitz` — Math Blitz game (fully built)
 - `/stats` — Profile / leaderboard / settings
 - `/onboarding` — First-time setup (avatar, username, password)
 - Legacy `/learn/[unitId]` and `/review` still work (mandarin defaults)
@@ -50,7 +51,8 @@ Three-accent system defined in `app/globals.css`:
 ### Key files
 - `app/layout.tsx` — root layout; has AppSidebar + content wrapper with `lg:ml-60`
 - `app/page.tsx` — hub with panda hero + 3 accordion sections (Languages, Brain Training, Trivia). All use shared `AccordionSection` component. All collapsed by default.
-- `app/brain-training/page.tsx` — Brain Training hub, coming-soon placeholder games
+- `app/brain-training/page.tsx` — Brain Training hub; Math Blitz live, others coming soon
+- `app/brain-training/math-blitz/page.tsx` — Math Blitz game (self-contained client component)
 - `app/mandarin/layout.tsx` — provides `mandarinStore` via context
 - `app/german/layout.tsx` — provides `germanStore` via context (separate isolated progress)
 - `app/trivia/actors/page.tsx` — **synchronous** (no async fetch). Builds actor list from `ACTOR_CONFIGS` using local `/public/actors/*.jpg` images. No Wikipedia API calls at runtime.
@@ -72,16 +74,25 @@ Three-accent system defined in `app/globals.css`:
 - `lib/supabase/admin.ts` — Supabase admin client using `SUPABASE_SERVICE_ROLE_KEY` (server-only, bypasses RLS)
 - `lib/xp.ts`, `lib/srs.ts`, `lib/utils.ts` — utilities
 
+## Math Blitz (`app/brain-training/math-blitz/page.tsx`)
+- 30 second countdown timer, 3 lives (3 wrong = game over)
+- Difficulty select upfront: Easy (+/−, to 10), Medium (all ops, to 20), Hard (all ops, to 50)
+- Scoring: 10pts base + speed bonus (+5 if <3s, +3 if <5s) × streak multiplier (×1.5 at 3, ×2 at 5, ×3 at 10)
+- Personal best per difficulty stored in localStorage (`slubstack_mathblitz_best`)
+- All game state in `liveRef` to avoid stale closures in timer callbacks; React state only for display
+- Full roadmap (leaderboard DB schema, head-to-head rooms, multi-game lobby) in `MATH_BLITZ_PLAN.md`
+
 ## Avatar upload
 - Upload goes through `/api/avatar` (POST, multipart) using the service role key — never direct from browser client (RLS blocks it)
+- **`SUPABASE_SERVICE_ROLE_KEY` must be set for Production in Vercel** — adding it to Preview/Development only won't work
 - Profile photo upload opens a circular crop modal first: drag to reposition, pinch to zoom, then "Use photo" crops to circle via Canvas API and sends the blob to `/api/avatar`
-- Emoji avatars still set directly via `/api/profile`
+- No emoji avatar picker — photo upload only. Existing emoji avatars still display correctly (AvatarDisplay handles both URL and emoji string)
 
 ## Profile / Settings (`app/stats/ProfileClient.tsx`)
 - Three tabs: Profile, Leaderboard, Settings
-- Settings tab: avatar picker (photo upload with crop modal OR emoji), username, status, save button
+- Settings tab: photo upload (with crop modal), username, status (emoji allowed in status text), save button
 - Account section: signed-in email display, Forgot password button (sends Supabase reset email), Sign out
-- No "reset all progress" or danger zone — removed
+- No emoji avatar picker, no danger zone / reset progress
 - `CropModal` component: uses pointer events + refs for live gesture state (no stale closure issues). Pinch-to-zoom via two-pointer distance tracking. CSS `transform: scale()` on image — no explicit width/height (prevents distortion).
 
 ## Actor Blitz trivia game
@@ -166,9 +177,12 @@ useGameStore(s => s.xp)  // reads from nearest provider
 - Domain: slubstack.com
 - Supabase project: `pbzpgyjyiprepxbzgkmf.supabase.co`
 - Email via Resend SMTP (`noreply@slubstack.com`)
+- Vercel env vars needed: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (all must be set for **Production**)
 
 ## Planned / not yet built
-- Brain Training games (Memory Match, Word Puzzles, Speed Recall)
+- Brain Training games (Memory Match, Word Puzzles, Speed Recall) — see `MATH_BLITZ_PLAN.md` for full roadmap incl. leaderboard + head-to-head
+- Math Blitz global leaderboard (needs `math_blitz_scores` Supabase table — schema in `MATH_BLITZ_PLAN.md`)
+- Head-to-head multiplayer lobby (`/play/[roomCode]`) — see `MATH_BLITZ_PLAN.md`
 - More trivia game modes (Sports Stars, Music Icons)
 - German + Spanish progress sync to Supabase (currently only mandarin syncs)
 - More German content units (food, pronouns, family, etc.)
