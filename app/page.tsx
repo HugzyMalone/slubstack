@@ -135,9 +135,19 @@ const HERO_OPTIONS: HeroOption[] = [
   { char: "bear",  mood: "idle" },
 ];
 
+const HERO_SESSION_KEY = "slubstack_home_hero";
+
 export default function HubPage() {
   const [hero, setHero] = useState<HeroOption>(HERO_OPTIONS[0]);
-  useEffect(() => { setHero(HERO_OPTIONS[Math.floor(Math.random() * HERO_OPTIONS.length)]); }, []);
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(HERO_SESSION_KEY);
+      if (saved) { setHero(JSON.parse(saved)); return; }
+    } catch {}
+    const picked = HERO_OPTIONS[Math.floor(Math.random() * HERO_OPTIONS.length)];
+    try { sessionStorage.setItem(HERO_SESSION_KEY, JSON.stringify(picked)); } catch {}
+    setHero(picked);
+  }, []);
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-24">
