@@ -123,7 +123,6 @@ export default function MathBlitzPage() {
   // Display state derived from live ref
   const [disp, setDisp] = useState({ score: 0, lives: MAX_LIVES, streak: 0 });
 
-  const inputRef      = useRef<HTMLInputElement>(null);
   const qStartRef     = useRef(0);
   const inFeedbackRef = useRef(false);
   const diffRef       = useRef<Difficulty>("medium");
@@ -142,7 +141,6 @@ export default function MathBlitzPage() {
     setAnswer("");
     inFeedbackRef.current = false;
     qStartRef.current = Date.now();
-    requestAnimationFrame(() => inputRef.current?.focus());
   }
 
   function endGame(reason: "time" | "lives") {
@@ -429,8 +427,27 @@ export default function MathBlitzPage() {
       ? "color-mix(in srgb, #e11d48 12%, var(--surface))"
       : "var(--surface)";
 
+  function padPress(key: string) {
+    if (inFeedbackRef.current || phase !== "playing") return;
+    if (key === "⌫") {
+      setAnswer((a) => a.slice(0, -1));
+    } else if (key === "−" ) {
+      // toggle negative (allow negative answers for hard subtraction edge cases)
+      setAnswer((a) => a.startsWith("-") ? a.slice(1) : a.length ? "-" + a : "-");
+    } else {
+      setAnswer((a) => (a.length < 4 ? a + key : a));
+    }
+  }
+
+  const PAD_ROWS = [
+    ["7", "8", "9"],
+    ["4", "5", "6"],
+    ["1", "2", "3"],
+    ["−", "0", "⌫"],
+  ];
+
   return (
-    <div className="fixed inset-0 z-20 flex flex-col bg-bg overflow-hidden">
+    <div className="fixed inset-0 z-40 flex flex-col bg-bg overflow-hidden">
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 pt-4 pb-2 shrink-0">
         {/* Lives */}
@@ -469,7 +486,7 @@ export default function MathBlitzPage() {
       </div>
 
       {/* Timer */}
-      <div className="flex justify-center py-2 shrink-0">
+      <div className="flex justify-center py-1 shrink-0">
         <TimerRing secs={secsLeft} total={GAME_SECS} />
       </div>
 
@@ -486,36 +503,44 @@ export default function MathBlitzPage() {
           <div className="text-4xl font-black tracking-tight select-none">
             {question?.display} =
           </div>
+          {/* Answer display */}
+          <div className="mt-4 text-3xl font-black tabular-nums min-h-[2.5rem]" style={{ color: "var(--accent)" }}>
+            {answer || <span className="text-muted/30">?</span>}
+          </div>
         </motion.div>
       </div>
 
-      {/* Answer input */}
-      <div className="shrink-0 px-5 pb-8 pt-4 space-y-3">
-        <form onSubmit={(e) => { e.preventDefault(); submitAnswer(); }}>
-          <div className="flex gap-2">
-            <input
-              ref={inputRef}
-              type="text"
-              inputMode="decimal"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder="?"
-              className="flex-1 rounded-2xl border border-border bg-surface px-5 py-4 text-center text-2xl font-bold outline-none placeholder:text-muted/30 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-colors"
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck={false}
-            />
-            <button
-              type="submit"
-              disabled={!answer.trim() || inFeedbackRef.current}
-              className="rounded-2xl px-6 py-4 text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-40"
-              style={{ background: "var(--accent)" }}
-            >
-              OK
-            </button>
+      {/* Numpad */}
+      <div className="shrink-0 px-4 pb-6 pt-2 space-y-2" style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}>
+        {PAD_ROWS.map((row, ri) => (
+          <div key={ri} className="grid grid-cols-3 gap-2">
+            {row.map((key) => (
+              <button
+                key={key}
+                onPointerDown={(e) => { e.preventDefault(); padPress(key); }}
+                className="rounded-2xl py-4 text-xl font-bold select-none transition-all active:scale-95"
+                style={{
+                  background: key === "⌫" || key === "−"
+                    ? "color-mix(in srgb, var(--fg) 8%, var(--surface))"
+                    : "var(--surface)",
+                  border: "1px solid color-mix(in srgb, var(--fg) 10%, transparent)",
+                  color: key === "⌫" ? "var(--muted)" : "var(--fg)",
+                }}
+              >
+                {key}
+              </button>
+            ))}
           </div>
-        </form>
+        ))}
+        {/* Submit */}
+        <button
+          onPointerDown={(e) => { e.preventDefault(); submitAnswer(); }}
+          disabled={!answer.trim() || inFeedbackRef.current}
+          className="w-full rounded-2xl py-4 text-base font-bold text-white transition-all active:scale-[0.98] disabled:opacity-40"
+          style={{ background: "var(--accent)" }}
+        >
+          Check ✓
+        </button>
       </div>
     </div>
   );

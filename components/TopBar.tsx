@@ -16,6 +16,7 @@ export function TopBar() {
   const pathname = usePathname();
   const router = useRouter();
   const isHome = pathname === "/";
+  const hideBack = isHome || pathname === "/stats" || pathname.endsWith("/review");
 
   function isAvatarUrl(v: string | null): v is string {
     return !!v && (v.startsWith("http") || v.startsWith("data:") || v.startsWith("/"));
@@ -54,7 +55,10 @@ export function TopBar() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    const onAvatarChanged = (e: Event) => setAvatar((e as CustomEvent<string>).detail);
+    window.addEventListener("slubstack_avatar_changed", onAvatarChanged);
+
+    return () => { subscription.unsubscribe(); window.removeEventListener("slubstack_avatar_changed", onAvatarChanged); };
   }, []);
 
   return (
@@ -79,7 +83,7 @@ export function TopBar() {
           >
             slubstack
           </Link>
-        ) : (
+        ) : !hideBack ? (
           <button
             onClick={() => router.back()}
             className="lg:hidden flex items-center gap-0.5 text-xs text-muted/60 hover:text-muted transition-colors -ml-1 px-1 py-1"
@@ -87,7 +91,7 @@ export function TopBar() {
             <ChevronLeft size={15} />
             Back
           </button>
-        )}
+        ) : <div />}
 
         {/* Right: stats + profile */}
         <div className="flex items-center gap-3 ml-auto">

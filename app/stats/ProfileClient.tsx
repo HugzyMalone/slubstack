@@ -620,6 +620,7 @@ function SettingsTab({
 
     onAvatarChange(data.url!);
     localStorage.setItem("slubstack_avatar", data.url!);
+    window.dispatchEvent(new CustomEvent("slubstack_avatar_changed", { detail: data.url }));
     setSaveMsg("Photo updated!");
     setUploading(false);
   }
@@ -988,6 +989,7 @@ function TabBtn({ active, onClick, icon, children }: {
 export function ProfileClient() {
   const [tab, setTab] = useState<Tab>("profile");
   const [user, setUser] = useState<SupaUser | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [username, setUsername] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -998,16 +1000,18 @@ export function ProfileClient() {
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
-    if (!supabase) return;
+    if (!supabase) { setAuthChecked(true); return; }
 
     supabase.auth.getUser().then(({ data }) => {
       const u = data.user ?? null;
-      if (u && shouldSignOut()) { supabase.auth.signOut(); setUser(null); return; }
+      if (u && shouldSignOut()) { supabase.auth.signOut(); setUser(null); setAuthChecked(true); return; }
       setUser(u);
+      setAuthChecked(true);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setAuthChecked(true);
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -1049,6 +1053,7 @@ export function ProfileClient() {
     setTab("profile");
   }
 
+  if (!authChecked) return null;
   if (!user) return <AuthPage />;
 
   return (
