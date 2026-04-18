@@ -18,6 +18,17 @@ interface GameResult {
 const GAME_SECS = 30;
 const MAX_LIVES = 3;
 const BEST_KEY = "slubstack_mathblitz_best";
+const STATS_KEY = "slubstack_mathblitz_stats";
+
+export type MathOpStats = Record<string, { c: number; w: number }>;
+
+export function loadMathOpStats(): MathOpStats {
+  try { return JSON.parse(localStorage.getItem(STATS_KEY) ?? "{}").ops ?? {}; }
+  catch { return {}; }
+}
+function saveMathOpStats(ops: MathOpStats) {
+  localStorage.setItem(STATS_KEY, JSON.stringify({ ops }));
+}
 
 const DIFF_CONFIG = {
   easy:   { label: "Easy",   color: "#10b981", ops: ["+", "−"],           maxA: 10, maxB: 10, desc: "Add & subtract · numbers to 10" },
@@ -204,8 +215,16 @@ export default function MathBlitzPage() {
     inFeedbackRef.current = true;
     const elapsed = Date.now() - qStartRef.current;
     const g = liveRef.current;
+    const isCorrect = parsed === question.answer;
 
-    if (parsed === question.answer) {
+    // Track per-operation stats
+    const op = question.display.split(" ")[1];
+    const opStats = loadMathOpStats();
+    const prev = opStats[op] ?? { c: 0, w: 0 };
+    opStats[op] = { c: prev.c + (isCorrect ? 1 : 0), w: prev.w + (isCorrect ? 0 : 1) };
+    saveMathOpStats(opStats);
+
+    if (isCorrect) {
       // Correct
       const pts = calcPoints(elapsed, g.streak);
       g.score += pts;

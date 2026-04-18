@@ -82,6 +82,17 @@ export interface ActorBest {
 
 const TIME_LIMIT = 15;
 const PB_KEY = "slubstack_actorblitz_best";
+const ACTOR_STATS_KEY = "slubstack_actorblitz_stats";
+
+export type ActorStatMap = Record<string, { c: number; w: number; img: string }>;
+
+export function loadActorStats(): ActorStatMap {
+  try { return JSON.parse(localStorage.getItem(ACTOR_STATS_KEY) ?? "{}").actors ?? {}; }
+  catch { return {}; }
+}
+function saveActorStats(actors: ActorStatMap) {
+  localStorage.setItem(ACTOR_STATS_KEY, JSON.stringify({ actors }));
+}
 
 interface Props {
   actors: ActorData[];
@@ -221,6 +232,14 @@ export function ActorBlitz({ actors }: Props) {
       setFeedback(isCorrect ? "correct" : "wrong");
       setTotal((t) => t + 1);
       setHistory((h) => [...h, { name: currentActor.name, image: currentActor.image, correct: isCorrect }]);
+
+      // Track per-actor stats
+      try {
+        const stats = loadActorStats();
+        const curr = stats[currentActor.name] ?? { c: 0, w: 0, img: currentActor.image };
+        stats[currentActor.name] = { c: curr.c + (isCorrect ? 1 : 0), w: curr.w + (isCorrect ? 0 : 1), img: currentActor.image };
+        saveActorStats(stats);
+      } catch {}
       if (isCorrect) {
         setScore((s) => s + currentMultiplier);
         setStreak((s) => { const ns = s + 1; setBestStreak((bs) => Math.max(bs, ns)); return ns; });

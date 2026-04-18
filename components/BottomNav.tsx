@@ -53,12 +53,6 @@ export function BottomNav() {
     return null;
   }
 
-  const flashcardsHref = pathname?.startsWith("/german")
-    ? "/german/review"
-    : pathname?.startsWith("/spanish")
-      ? "/spanish/review"
-      : "/mandarin/review";
-
   const tabs = [
     {
       href: "/",
@@ -68,7 +62,7 @@ export function BottomNav() {
         p === "/" || p === "/mandarin" || p === "/german" || p === "/spanish" || p === "/trivia",
     },
     {
-      href: flashcardsHref,
+      href: "/review",
       label: "Review",
       Icon: CardsIcon,
       match: (p: string) =>

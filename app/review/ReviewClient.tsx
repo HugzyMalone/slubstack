@@ -5,11 +5,20 @@ import { buildReviewSession } from "@/lib/session";
 import { getLanguageContent, type Language } from "@/lib/content";
 import { useGameStore } from "@/lib/store";
 import { SessionRunner } from "@/components/SessionRunner";
-import { isDue } from "@/lib/srs";
+import { INITIAL_SRS, isDue } from "@/lib/srs";
 import type { Card } from "@/lib/content";
 import { Panda } from "@/components/Panda";
 import { useHydrated, useNow } from "@/lib/hooks";
 import Link from "next/link";
+
+type SortBy = "newest" | "oldest" | "best" | "worst";
+
+const SORT_OPTIONS: { id: SortBy; label: string }[] = [
+  { id: "worst",   label: "Worst first" },
+  { id: "best",    label: "Best first" },
+  { id: "newest",  label: "Newest" },
+  { id: "oldest",  label: "Oldest" },
+];
 
 export function ReviewClient({ lang = "mandarin" }: { lang?: Language }) {
   const srs = useGameStore((s) => s.srs);
@@ -17,6 +26,7 @@ export function ReviewClient({ lang = "mandarin" }: { lang?: Language }) {
   const hydrated = useHydrated();
   const now = useNow(hydrated);
   const [running, setRunning] = useState(false);
+  const [sortBy, setSortBy] = useState<SortBy>("worst");
 
   const content = getLanguageContent(lang);
   const learnHref = lang === "mandarin" ? "/" : `/${lang}`;
@@ -34,10 +44,26 @@ export function ReviewClient({ lang = "mandarin" }: { lang?: Language }) {
 
   const learnedCards = useMemo(() => {
     if (!hydrated) return [];
-    return seenCardIds
+    const cards = seenCardIds
       .map((id) => content.cards.find((c) => c.id === id))
       .filter((c): c is Card => !!c);
-  }, [hydrated, seenCardIds, content]);
+
+    if (sortBy === "oldest") return cards;
+    if (sortBy === "newest") return [...cards].reverse();
+    if (sortBy === "best") {
+      return [...cards].sort((a, b) => {
+        const ea = srs[a.id]?.ease ?? INITIAL_SRS.ease;
+        const eb = srs[b.id]?.ease ?? INITIAL_SRS.ease;
+        return eb - ea;
+      });
+    }
+    // worst: lowest ease first
+    return [...cards].sort((a, b) => {
+      const ea = srs[a.id]?.ease ?? INITIAL_SRS.ease;
+      const eb = srs[b.id]?.ease ?? INITIAL_SRS.ease;
+      return ea - eb;
+    });
+  }, [hydrated, seenCardIds, content, sortBy, srs]);
 
   if (!hydrated) return null;
 
@@ -65,7 +91,7 @@ export function ReviewClient({ lang = "mandarin" }: { lang?: Language }) {
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-28 pt-4">
-      {dueCount > 0 ? (
+      {dueCount > 0 && (
         <div className="mb-5 flex items-center justify-between rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent-soft)]/40 px-4 py-3.5">
           <div className="text-sm">
             <span className="font-semibold">{dueCount}</span> card{dueCount === 1 ? "" : "s"} due for review
@@ -78,23 +104,47 @@ export function ReviewClient({ lang = "mandarin" }: { lang?: Language }) {
             Practice
           </button>
         </div>
-      ) : null}
+      )}
 
-      <div className="mb-3 flex items-baseline gap-2">
-        <h1 className="text-lg font-bold tracking-tight">Flashcards</h1>
-        <span className="text-xs text-muted">{learnedCards.length} words learned</span>
+      {/* Sort controls */}
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <span className="text-sm font-bold tracking-tight">Flashcards</span>
+          <span className="ml-2 text-xs text-muted">{learnedCards.length} words</span>
+        </div>
+        <div className="flex gap-1">
+          {SORT_OPTIONS.map(({ id, label }) => (
+            <button
+              key={id}
+              onClick={() => setSortBy(id)}
+              className="rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors duration-150"
+              style={sortBy === id
+                ? { background: "var(--accent)", color: "var(--accent-fg)" }
+                : { background: "color-mix(in srgb, var(--fg) 8%, transparent)", color: "var(--muted)" }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
+
       <div className="grid grid-cols-2 gap-2.5">
         {learnedCards.map((card) => (
-          <FlipCard key={card.id} card={card} />
+          <FlipCard key={card.id} card={card} ease={srs[card.id]?.ease} />
         ))}
       </div>
     </div>
   );
 }
 
-function FlipCard({ card }: { card: Card }) {
+function FlipCard({ card, ease }: { card: Card; ease?: number }) {
   const [flipped, setFlipped] = useState(false);
+
+  // colour-code the dot: green (ease>2.2), amber (1.6–2.2), red (<1.6)
+  const dotColor = !ease ? "#94a3b8"
+    : ease > 2.2 ? "#10b981"
+    : ease > 1.6 ? "#f59e0b"
+    : "#e11d48";
 
   return (
     <button
@@ -102,6 +152,11 @@ function FlipCard({ card }: { card: Card }) {
       className="relative h-28 w-full overflow-hidden rounded-2xl border border-border bg-surface text-left transition-all active:scale-[0.97]"
       style={{ perspective: "600px" }}
     >
+      {/* ease indicator dot */}
+      <span
+        className="absolute top-2 right-2 h-2 w-2 rounded-full z-10"
+        style={{ background: dotColor }}
+      />
       <div
         className="absolute inset-0 transition-transform duration-300"
         style={{
