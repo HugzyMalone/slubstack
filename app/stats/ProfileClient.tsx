@@ -405,47 +405,92 @@ function CropModal({ src, onConfirm, onCancel }: {
 }) {
   const SIZE = 280;
   const imgRef = useRef<HTMLImageElement>(null);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [scale, setScale] = useState(1);
-  const [minScale, setMinScale] = useState(1);
-  const [imgNatural, setImgNatural] = useState({ w: 1, h: 1 });
-  const dragStart = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  // Render state — drives the img transform
+  const [renderState, setRenderState] = useState({ ox: 0, oy: 0, scale: 1 });
 
-  function clampOffset(ox: number, oy: number, s: number, nat: { w: number; h: number }) {
-    const maxX = Math.max(0, nat.w * s / 2 - SIZE / 2);
-    const maxY = Math.max(0, nat.h * s / 2 - SIZE / 2);
-    return { x: Math.max(-maxX, Math.min(maxX, ox)), y: Math.max(-maxY, Math.min(maxY, oy)) };
+  // Live refs — always current even inside pointer event handlers
+  const liveRef = useRef({ ox: 0, oy: 0, scale: 1, minScale: 1, natW: 1, natH: 1 });
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const dragStart = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
+  const lastPinchDist = useRef<number | null>(null);
+
+  function clamp(ox: number, oy: number, s: number) {
+    const { natW, natH } = liveRef.current;
+    const maxX = Math.max(0, natW * s / 2 - SIZE / 2);
+    const maxY = Math.max(0, natH * s / 2 - SIZE / 2);
+    return {
+      ox: Math.max(-maxX, Math.min(maxX, ox)),
+      oy: Math.max(-maxY, Math.min(maxY, oy)),
+    };
+  }
+
+  function commit(ox: number, oy: number, scale: number) {
+    const clamped = clamp(ox, oy, scale);
+    liveRef.current.ox = clamped.ox;
+    liveRef.current.oy = clamped.oy;
+    liveRef.current.scale = scale;
+    setRenderState({ ox: clamped.ox, oy: clamped.oy, scale });
   }
 
   function onImgLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     const img = e.currentTarget;
-    const nat = { w: img.naturalWidth, h: img.naturalHeight };
-    const min = Math.max(SIZE / nat.w, SIZE / nat.h);
-    setImgNatural(nat);
-    setMinScale(min);
-    setScale(min);
-    setOffset({ x: 0, y: 0 });
+    const natW = img.naturalWidth;
+    const natH = img.naturalHeight;
+    const minScale = Math.max(SIZE / natW, SIZE / natH);
+    liveRef.current = { ox: 0, oy: 0, scale: minScale, minScale, natW, natH };
+    setRenderState({ ox: 0, oy: 0, scale: minScale });
+    setLoaded(true);
   }
 
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
-    dragStart.current = { px: e.clientX, py: e.clientY, ox: offset.x, oy: offset.y };
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointers.current.size === 1) {
+      dragStart.current = { px: e.clientX, py: e.clientY, ox: liveRef.current.ox, oy: liveRef.current.oy };
+      lastPinchDist.current = null;
+    } else {
+      dragStart.current = null;
+      const pts = [...pointers.current.values()];
+      lastPinchDist.current = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+    }
   }
 
   function onPointerMove(e: React.PointerEvent) {
-    if (!dragStart.current) return;
-    const raw = {
-      x: dragStart.current.ox + e.clientX - dragStart.current.px,
-      y: dragStart.current.oy + e.clientY - dragStart.current.py,
-    };
-    setOffset(clampOffset(raw.x, raw.y, scale, imgNatural));
+    e.preventDefault();
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    const pts = [...pointers.current.values()];
+
+    if (pts.length >= 2) {
+      // Pinch zoom
+      const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+      if (lastPinchDist.current !== null && lastPinchDist.current > 0) {
+        const ratio = dist / lastPinchDist.current;
+        const newScale = Math.max(liveRef.current.minScale, liveRef.current.scale * ratio);
+        commit(liveRef.current.ox, liveRef.current.oy, newScale);
+      }
+      lastPinchDist.current = dist;
+    } else if (dragStart.current) {
+      // Single-finger drag
+      const rawOx = dragStart.current.ox + e.clientX - dragStart.current.px;
+      const rawOy = dragStart.current.oy + e.clientY - dragStart.current.py;
+      commit(rawOx, rawOy, liveRef.current.scale);
+    }
   }
 
-  function onPointerUp() { dragStart.current = null; }
-
-  function handleScale(v: number) {
-    setScale(v);
-    setOffset((prev) => clampOffset(prev.x, prev.y, v, imgNatural));
+  function onPointerUp(e: React.PointerEvent) {
+    pointers.current.delete(e.pointerId);
+    lastPinchDist.current = null;
+    if (pointers.current.size === 0) {
+      dragStart.current = null;
+    } else if (pointers.current.size === 1) {
+      // Lift one finger during pinch → resume drag from current position
+      const [ptr] = [...pointers.current.values()];
+      dragStart.current = { px: ptr.x, py: ptr.y, ox: liveRef.current.ox, oy: liveRef.current.oy };
+    }
   }
 
   function confirm() {
@@ -457,9 +502,8 @@ function CropModal({ src, onConfirm, onCancel }: {
     ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2, 0, Math.PI * 2);
     ctx.clip();
     const img = imgRef.current!;
-    const dw = imgNatural.w * scale;
-    const dh = imgNatural.h * scale;
-    ctx.drawImage(img, SIZE / 2 - dw / 2 + offset.x, SIZE / 2 - dh / 2 + offset.y, dw, dh);
+    const { natW, natH, ox, oy, scale } = liveRef.current;
+    ctx.drawImage(img, SIZE / 2 + ox - natW * scale / 2, SIZE / 2 + oy - natH * scale / 2, natW * scale, natH * scale);
     canvas.toBlob((blob) => { if (blob) onConfirm(blob); }, "image/jpeg", 0.92);
   }
 
@@ -469,14 +513,17 @@ function CropModal({ src, onConfirm, onCancel }: {
       <div className="w-full max-w-sm rounded-3xl bg-surface p-6 space-y-5 shadow-2xl">
         <div>
           <h3 className="text-base font-semibold">Crop photo</h3>
-          <p className="text-xs text-muted mt-0.5">Drag to reposition · slide to zoom</p>
+          <p className="text-xs text-muted mt-0.5">Drag to reposition · pinch to zoom</p>
         </div>
 
         <div className="flex justify-center">
           <div
             className="relative overflow-hidden cursor-grab active:cursor-grabbing select-none"
-            style={{ width: SIZE, height: SIZE, borderRadius: "50%", touchAction: "none",
-              boxShadow: "0 0 0 4px color-mix(in srgb, var(--accent) 40%, transparent)" }}
+            style={{
+              width: SIZE, height: SIZE, borderRadius: "50%", touchAction: "none",
+              background: "var(--border)",
+              boxShadow: "0 0 0 4px color-mix(in srgb, var(--accent) 40%, transparent)",
+            }}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
@@ -491,22 +538,18 @@ function CropModal({ src, onConfirm, onCancel }: {
               draggable={false}
               style={{
                 position: "absolute",
-                width: imgNatural.w * scale,
-                height: imgNatural.h * scale,
-                left: SIZE / 2 - imgNatural.w * scale / 2 + offset.x,
-                top: SIZE / 2 - imgNatural.h * scale / 2 + offset.y,
+                top: "50%",
+                left: "50%",
+                // translate centres the image, then we apply offset + scale
+                transform: `translate(calc(-50% + ${renderState.ox}px), calc(-50% + ${renderState.oy}px)) scale(${renderState.scale})`,
+                transformOrigin: "center",
+                maxWidth: "none",
                 pointerEvents: "none",
                 userSelect: "none",
+                opacity: loaded ? 1 : 0,
               }}
             />
           </div>
-        </div>
-
-        <div className="space-y-1">
-          <p className="text-xs text-muted">Zoom</p>
-          <input type="range" min={minScale} max={minScale * 3} step={0.001}
-            value={scale} onChange={(e) => handleScale(Number(e.target.value))}
-            className="w-full accent-[var(--accent)]" />
         </div>
 
         <div className="flex gap-3">
