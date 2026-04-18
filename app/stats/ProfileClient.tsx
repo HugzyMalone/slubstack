@@ -419,12 +419,12 @@ function SettingsTab({
 }) {
   const [localUsername, setLocalUsername] = useState(username);
   const [localStatus, setLocalStatus] = useState(status ?? "");
-  const [newPassword, setNewPassword] = useState("");
-  const [showPw, setShowPw] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [pwResetSending, setPwResetSending] = useState(false);
+  const [pwResetMsg, setPwResetMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const reset = useGameStore((s) => s.reset);
 
@@ -483,20 +483,27 @@ function SettingsTab({
 
     if (payload.error) { setSaving(false); setSaveMsg(payload.error); return; }
 
-    if (newPassword) {
-      const supabase = getSupabaseBrowserClient();
-      if (supabase) {
-        const { error } = await supabase.auth.updateUser({ password: newPassword });
-        if (error) { setSaving(false); setSaveMsg(error.message); return; }
-      }
-    }
-
     onUsernameChange(localUsername);
     onStatusChange(localStatus.trim() || null);
     localStorage.setItem("slubstack_avatar", avatar ?? "");
     setSaving(false);
     setSaveMsg("Saved!");
-    setNewPassword("");
+  }
+
+  async function sendPasswordReset() {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase || !user.email) return;
+    setPwResetSending(true);
+    setPwResetMsg(null);
+    const redirectTo = typeof window !== "undefined"
+      ? `${window.location.origin}/auth/callback?next=/stats`
+      : undefined;
+    const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo });
+    setPwResetSending(false);
+    setPwResetMsg(error
+      ? { text: error.message, ok: false }
+      : { text: `Password reset link sent to ${user.email}`, ok: true }
+    );
   }
 
   async function setEmojiAvatar(emoji: string) {
@@ -612,23 +619,6 @@ function SettingsTab({
               </div>
             </div>
 
-            {/* Password */}
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted" htmlFor="s-password">
-                New password
-              </label>
-              <div className="relative">
-                <input id="s-password" type={showPw ? "text" : "password"}
-                  value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Leave blank to keep current" minLength={6}
-                  className="w-full rounded-xl border border-border bg-bg px-4 py-3 pr-10 text-sm outline-none placeholder:text-muted focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 transition-colors"
-                />
-                <button type="button" onClick={() => setShowPw((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-fg">
-                  {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
-                </button>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -657,12 +647,49 @@ function SettingsTab({
         <div className="px-4 py-3 border-b border-border">
           <h3 className="text-sm font-semibold">Account</h3>
         </div>
-        <div className="px-4 py-3 space-y-2">
-          <button onClick={onSignOut}
-            className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-sm font-medium transition-colors hover:bg-border/30">
-            <span>Sign out</span>
-            <span className="text-xs text-muted">{user.email}</span>
-          </button>
+        <div className="divide-y divide-border">
+          {/* Signed in as */}
+          <div className="px-4 py-3.5 flex items-center gap-3">
+            <Mail size={14} className="text-muted shrink-0" />
+            <div className="min-w-0">
+              <p className="text-xs text-muted">Signed in as</p>
+              <p className="text-sm font-medium truncate">{user.email}</p>
+            </div>
+          </div>
+
+          {/* Forgot password */}
+          <div className="px-4 py-3.5">
+            <button
+              type="button"
+              onClick={sendPasswordReset}
+              disabled={pwResetSending}
+              className="flex w-full items-center justify-between text-sm font-medium transition-colors hover:text-[var(--accent)] disabled:opacity-50"
+            >
+              <span>Forgot password</span>
+              <span className="text-xs text-muted">{pwResetSending ? "Sending…" : "Send reset link"}</span>
+            </button>
+            {pwResetMsg && (
+              <p className="mt-2 text-xs rounded-lg px-3 py-2"
+                style={{
+                  background: pwResetMsg.ok
+                    ? "color-mix(in srgb, #10b981 10%, transparent)"
+                    : "color-mix(in srgb, #e11d48 10%, transparent)",
+                  color: pwResetMsg.ok ? "#059669" : "#e11d48",
+                }}>
+                {pwResetMsg.text}
+              </p>
+            )}
+          </div>
+
+          {/* Sign out */}
+          <div className="px-4 py-3.5">
+            <button
+              onClick={onSignOut}
+              className="text-sm font-medium text-[var(--danger)] transition-colors hover:opacity-80"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </section>
 
