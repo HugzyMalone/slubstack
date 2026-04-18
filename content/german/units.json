@@ -16,5 +16,50 @@
     "emoji": "🔢",
     "category": "de-numbers",
     "cardIds": ["de-num-01","de-num-02","de-num-03","de-num-04","de-num-05","de-num-06","de-num-07","de-num-08","de-num-09","de-num-10","de-num-11","de-num-12","de-num-13","de-num-14","de-num-15"]
+  },
+  {
+    "id": "de-colors",
+    "index": 2,
+    "title": "Colors",
+    "subtitle": "Red, blue, green & more",
+    "emoji": "🎨",
+    "category": "de-colors",
+    "cardIds": ["de-col-01","de-col-02","de-col-03","de-col-04","de-col-05","de-col-06","de-col-07","de-col-08","de-col-09","de-col-10","de-col-11","de-col-12","de-col-13","de-col-14","de-col-15"]
+  },
+  {
+    "id": "de-food",
+    "index": 3,
+    "title": "Food & Drink",
+    "subtitle": "Water, bread, coffee & more",
+    "emoji": "🍞",
+    "category": "de-food",
+    "cardIds": ["de-food-01","de-food-02","de-food-03","de-food-04","de-food-05","de-food-06","de-food-07","de-food-08","de-food-09","de-food-10","de-food-11","de-food-12","de-food-13","de-food-14","de-food-15","de-food-16"]
+  },
+  {
+    "id": "de-family",
+    "index": 4,
+    "title": "Family",
+    "subtitle": "Mother, father, siblings",
+    "emoji": "👨‍👩‍👧",
+    "category": "de-family",
+    "cardIds": ["de-fam-01","de-fam-02","de-fam-03","de-fam-04","de-fam-05","de-fam-06","de-fam-07","de-fam-08","de-fam-09","de-fam-10","de-fam-11","de-fam-12","de-fam-13","de-fam-14"]
+  },
+  {
+    "id": "de-verbs",
+    "index": 5,
+    "title": "Verbs",
+    "subtitle": "Be, have, go, speak & more",
+    "emoji": "⚡",
+    "category": "de-verbs",
+    "cardIds": ["de-verb-01","de-verb-02","de-verb-03","de-verb-04","de-verb-05","de-verb-06","de-verb-07","de-verb-08","de-verb-09","de-verb-10","de-verb-11","de-verb-12","de-verb-13","de-verb-14","de-verb-15","de-verb-16"]
+  },
+  {
+    "id": "de-time",
+    "index": 6,
+    "title": "Days & Time",
+    "subtitle": "Days of the week, today, now",
+    "emoji": "📅",
+    "category": "de-time",
+    "cardIds": ["de-time-01","de-time-02","de-time-03","de-time-04","de-time-05","de-time-06","de-time-07","de-time-08","de-time-09","de-time-10","de-time-11","de-time-12","de-time-13","de-time-14","de-time-15"]
   }
 ]
