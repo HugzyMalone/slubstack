@@ -47,8 +47,10 @@ export function ReviewClient({ lang = "mandarin" }: { lang?: Language }) {
 
   if (learnedCards.length === 0) {
     return (
-      <div className="mx-auto max-w-md px-6 pb-24 pt-12 text-center">
-        <Panda mood="sleeping" size={120} />
+      <div className="mx-auto max-w-md px-6 pb-24 pt-4 text-center">
+        <div className="relative mx-auto h-[45vh] w-full">
+          <Panda mood="sleeping" fill />
+        </div>
         <h1 className="mt-4 text-2xl font-semibold tracking-tight">Flashcards</h1>
         <p className="mt-2 text-muted">No words learned yet. Complete a lesson to unlock flashcards.</p>
         <Link
