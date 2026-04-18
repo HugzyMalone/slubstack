@@ -233,6 +233,15 @@ function AccordionSection({
   );
 }
 
+function MathIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12" /><line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="6" x2="9" y2="6" /><line x1="15" y1="18" x2="19" y2="18" />
+    </svg>
+  );
+}
+
 function MemoryIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -293,6 +302,14 @@ const TRIVIA_ITEMS: AccordionItem[] = [
 ];
 
 const BRAIN_ITEMS: AccordionItem[] = [
+  {
+    href: "/brain-training/math-blitz",
+    icon: <MathIcon />,
+    iconBg: "linear-gradient(135deg, #10b981 0%, #0ea5e9 100%)",
+    title: "Math Blitz",
+    subtitle: "30 seconds · how many can you get?",
+    badge: "New",
+  },
   {
     icon: <MemoryIcon />,
     iconBg: "linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)",

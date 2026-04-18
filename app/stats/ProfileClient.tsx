@@ -40,12 +40,6 @@ function isAvatarUrl(v: string | null | undefined): v is string {
   return !!v && (v.startsWith("http") || v.startsWith("data:") || v.startsWith("/"));
 }
 
-const ANIMALS = [
-  "🐼","🦊","🐨","🐯","🦁","🐸","🐧","🦆",
-  "🐺","🦝","🐻","🦉","🦋","🐙","🦜","🐬",
-  "🦒","🦓","🐘","🐲",
-];
-
 type LBFilter = "overall" | "mandarin" | "german" | "spanish" | "actor-blitz";
 type Tab = "profile" | "leaderboard" | "settings";
 
@@ -594,7 +588,6 @@ function SettingsTab({
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [pwResetSending, setPwResetSending] = useState(false);
   const [pwResetMsg, setPwResetMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -667,20 +660,6 @@ function SettingsTab({
     );
   }
 
-  async function setEmojiAvatar(emoji: string) {
-    const res = await fetch("/api/profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: localUsername || username, avatar: emoji }),
-    });
-    if (res.ok) {
-      onAvatarChange(emoji);
-      localStorage.setItem("slubstack_avatar", emoji);
-      setShowEmojiPicker(false);
-      setSaveMsg("Avatar updated!");
-    }
-  }
-
   return (
     <div className="space-y-5">
       {cropSrc && (
@@ -694,7 +673,7 @@ function SettingsTab({
       <section className="rounded-2xl border border-border bg-surface overflow-hidden">
         <div className="px-4 py-3 border-b border-border">
           <h3 className="text-sm font-semibold">Profile photo</h3>
-          <p className="text-xs text-muted mt-0.5">Upload a photo or choose an avatar</p>
+          <p className="text-xs text-muted mt-0.5">Upload a photo to personalise your profile</p>
         </div>
         <div className="px-4 py-4 flex items-center gap-4">
           <div className="relative group">
@@ -716,30 +695,8 @@ function SettingsTab({
               className="rounded-xl border border-border bg-bg px-4 py-2 text-sm font-medium transition-colors hover:bg-border/50 disabled:opacity-50">
               {uploading ? "Uploading…" : "Upload photo"}
             </button>
-            <button onClick={() => setShowEmojiPicker((v) => !v)}
-              className="rounded-xl border border-border bg-bg px-4 py-2 text-sm font-medium transition-colors hover:bg-border/50">
-              Choose emoji
-            </button>
           </div>
         </div>
-
-        {showEmojiPicker && (
-          <div className="px-4 pb-4 border-t border-border pt-3">
-            <div className="grid grid-cols-10 gap-1.5">
-              {ANIMALS.map((animal) => (
-                <button key={animal} type="button" onClick={() => setEmojiAvatar(animal)}
-                  className={`flex h-9 w-full items-center justify-center rounded-xl text-xl transition-all ${
-                    avatar === animal
-                      ? "ring-2 ring-[var(--accent)]"
-                      : "bg-border/40 hover:bg-border/70"
-                  }`}
-                  style={avatar === animal ? { background: "color-mix(in srgb, var(--accent) 12%, transparent)" } : {}}>
-                  {animal}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </section>
 
       {/* Profile form */}
@@ -793,10 +750,10 @@ function SettingsTab({
         {saveMsg && (
           <p className="text-sm rounded-xl px-3 py-2"
             style={{
-              background: saveMsg === "Saved!" || saveMsg === "Photo updated!" || saveMsg === "Avatar updated!"
+              background: saveMsg === "Saved!" || saveMsg === "Photo updated!"
                 ? "color-mix(in srgb, #10b981 10%, transparent)"
                 : "color-mix(in srgb, #e11d48 10%, transparent)",
-              color: saveMsg === "Saved!" || saveMsg === "Photo updated!" || saveMsg === "Avatar updated!"
+              color: saveMsg === "Saved!" || saveMsg === "Photo updated!"
                 ? "#059669" : "#e11d48",
             }}>
             {saveMsg}

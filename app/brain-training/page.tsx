@@ -1,3 +1,16 @@
+import Link from "next/link";
+
+function MathIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="6" x2="9" y2="6" />
+      <line x1="15" y1="18" x2="19" y2="18" />
+    </svg>
+  );
+}
+
 function PuzzleIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -25,6 +38,17 @@ function SpeedIcon() {
     </svg>
   );
 }
+
+const LIVE = [
+  {
+    href: "/brain-training/math-blitz",
+    Icon: MathIcon,
+    iconBg: "linear-gradient(135deg, #10b981 0%, #0ea5e9 100%)",
+    title: "Math Blitz",
+    description: "30 seconds · how many can you get?",
+    badge: "New",
+  },
+];
 
 const COMING_SOON = [
   {
@@ -56,7 +80,42 @@ export default function BrainTrainingPage() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-muted">Coming soon</div>
+        {LIVE.map(({ href, Icon, iconBg, title, description, badge }) => (
+          <Link
+            key={title}
+            href={href}
+            className="flex items-center gap-4 rounded-2xl px-5 py-4 transition-all active:scale-[0.98]"
+            style={{
+              background: "var(--surface)",
+              border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)",
+              boxShadow: "0 2px 8px color-mix(in srgb, var(--fg) 4%, transparent)",
+            }}
+          >
+            <div
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
+              style={{ background: iconBg }}
+            >
+              <Icon />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[15px] font-semibold">{title}</span>
+                {badge && (
+                  <span className="rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white"
+                    style={{ background: iconBg }}>
+                    {badge}
+                  </span>
+                )}
+              </div>
+              <div className="text-sm text-muted">{description}</div>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-muted">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </Link>
+        ))}
+
+        <div className="mb-1 mt-2 text-xs font-semibold uppercase tracking-widest text-muted">Coming soon</div>
 
         {COMING_SOON.map(({ Icon, iconBg, title, description }) => (
           <div
