@@ -396,6 +396,135 @@ function ProfileTab({ user, avatar, username, status }: {
   );
 }
 
+// ── CropModal ──────────────────────────────────────────────────────────────
+
+function CropModal({ src, onConfirm, onCancel }: {
+  src: string;
+  onConfirm: (blob: Blob) => void;
+  onCancel: () => void;
+}) {
+  const SIZE = 280;
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [scale, setScale] = useState(1);
+  const [minScale, setMinScale] = useState(1);
+  const [imgNatural, setImgNatural] = useState({ w: 1, h: 1 });
+  const dragStart = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
+
+  function clampOffset(ox: number, oy: number, s: number, nat: { w: number; h: number }) {
+    const maxX = Math.max(0, nat.w * s / 2 - SIZE / 2);
+    const maxY = Math.max(0, nat.h * s / 2 - SIZE / 2);
+    return { x: Math.max(-maxX, Math.min(maxX, ox)), y: Math.max(-maxY, Math.min(maxY, oy)) };
+  }
+
+  function onImgLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+    const img = e.currentTarget;
+    const nat = { w: img.naturalWidth, h: img.naturalHeight };
+    const min = Math.max(SIZE / nat.w, SIZE / nat.h);
+    setImgNatural(nat);
+    setMinScale(min);
+    setScale(min);
+    setOffset({ x: 0, y: 0 });
+  }
+
+  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragStart.current = { px: e.clientX, py: e.clientY, ox: offset.x, oy: offset.y };
+  }
+
+  function onPointerMove(e: React.PointerEvent) {
+    if (!dragStart.current) return;
+    const raw = {
+      x: dragStart.current.ox + e.clientX - dragStart.current.px,
+      y: dragStart.current.oy + e.clientY - dragStart.current.py,
+    };
+    setOffset(clampOffset(raw.x, raw.y, scale, imgNatural));
+  }
+
+  function onPointerUp() { dragStart.current = null; }
+
+  function handleScale(v: number) {
+    setScale(v);
+    setOffset((prev) => clampOffset(prev.x, prev.y, v, imgNatural));
+  }
+
+  function confirm() {
+    const canvas = document.createElement("canvas");
+    canvas.width = SIZE;
+    canvas.height = SIZE;
+    const ctx = canvas.getContext("2d")!;
+    ctx.beginPath();
+    ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2, 0, Math.PI * 2);
+    ctx.clip();
+    const img = imgRef.current!;
+    const dw = imgNatural.w * scale;
+    const dh = imgNatural.h * scale;
+    ctx.drawImage(img, SIZE / 2 - dw / 2 + offset.x, SIZE / 2 - dh / 2 + offset.y, dw, dh);
+    canvas.toBlob((blob) => { if (blob) onConfirm(blob); }, "image/jpeg", 0.92);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/60 p-4"
+      style={{ backdropFilter: "blur(6px)" }}>
+      <div className="w-full max-w-sm rounded-3xl bg-surface p-6 space-y-5 shadow-2xl">
+        <div>
+          <h3 className="text-base font-semibold">Crop photo</h3>
+          <p className="text-xs text-muted mt-0.5">Drag to reposition · slide to zoom</p>
+        </div>
+
+        <div className="flex justify-center">
+          <div
+            className="relative overflow-hidden cursor-grab active:cursor-grabbing select-none"
+            style={{ width: SIZE, height: SIZE, borderRadius: "50%", touchAction: "none",
+              boxShadow: "0 0 0 4px color-mix(in srgb, var(--accent) 40%, transparent)" }}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              ref={imgRef}
+              src={src}
+              alt=""
+              onLoad={onImgLoad}
+              draggable={false}
+              style={{
+                position: "absolute",
+                width: imgNatural.w * scale,
+                height: imgNatural.h * scale,
+                left: SIZE / 2 - imgNatural.w * scale / 2 + offset.x,
+                top: SIZE / 2 - imgNatural.h * scale / 2 + offset.y,
+                pointerEvents: "none",
+                userSelect: "none",
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <p className="text-xs text-muted">Zoom</p>
+          <input type="range" min={minScale} max={minScale * 3} step={0.001}
+            value={scale} onChange={(e) => handleScale(Number(e.target.value))}
+            className="w-full accent-[var(--accent)]" />
+        </div>
+
+        <div className="flex gap-3">
+          <button type="button" onClick={onCancel}
+            className="flex-1 rounded-xl border border-border py-3 text-sm font-medium transition-colors hover:bg-border/40">
+            Cancel
+          </button>
+          <button type="button" onClick={confirm}
+            className="flex-1 rounded-xl py-3 text-sm font-bold text-white"
+            style={{ background: "var(--accent)" }}>
+            Use photo
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── SettingsTab ────────────────────────────────────────────────────────────
 
 function SettingsTab({
@@ -425,48 +554,37 @@ function SettingsTab({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [pwResetSending, setPwResetSending] = useState(false);
   const [pwResetMsg, setPwResetMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const reset = useGameStore((s) => s.reset);
 
   useEffect(() => { setLocalUsername(username); }, [username]);
   useEffect(() => { setLocalStatus(status ?? ""); }, [status]);
 
-  async function uploadPhoto(file: File) {
-    const supabase = getSupabaseBrowserClient();
-    if (!supabase || !user) return;
+  function onFileSelected(file: File) {
+    const url = URL.createObjectURL(file);
+    setCropSrc(url);
+  }
+
+  async function uploadCroppedBlob(blob: Blob) {
+    setCropSrc(null);
     setUploading(true);
     setSaveMsg(null);
 
-    const ext = file.type.includes("png") ? "png" : "jpg";
-    const path = `${user.id}/avatar.${ext}`;
+    const form = new FormData();
+    form.append("file", blob, "avatar.jpg");
 
-    const { data, error } = await supabase.storage
-      .from("avatars")
-      .upload(path, file, { upsert: true, contentType: file.type });
+    const res = await fetch("/api/avatar", { method: "POST", body: form });
+    const data = (await res.json()) as { url?: string; error?: string };
 
-    if (error) {
+    if (!res.ok || data.error) {
       setUploading(false);
-      setSaveMsg(error.message.includes("Bucket") || error.message.includes("bucket")
-        ? "Photo upload is not configured. Ask the admin to create an 'avatars' storage bucket in Supabase."
-        : error.message);
+      setSaveMsg(data.error ?? "Upload failed");
       return;
     }
 
-    const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(data.path);
-
-    const res = await fetch("/api/profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: localUsername || username, avatar: publicUrl }),
-    });
-
-    if (res.ok) {
-      onAvatarChange(publicUrl);
-      localStorage.setItem("slubstack_avatar", publicUrl);
-      setSaveMsg("Photo updated!");
-    } else {
-      setSaveMsg("Failed to save photo.");
-    }
+    onAvatarChange(data.url!);
+    localStorage.setItem("slubstack_avatar", data.url!);
+    setSaveMsg("Photo updated!");
     setUploading(false);
   }
 
@@ -522,6 +640,13 @@ function SettingsTab({
 
   return (
     <div className="space-y-5">
+      {cropSrc && (
+        <CropModal
+          src={cropSrc}
+          onConfirm={(blob) => { URL.revokeObjectURL(cropSrc); uploadCroppedBlob(blob); }}
+          onCancel={() => { URL.revokeObjectURL(cropSrc); setCropSrc(null); }}
+        />
+      )}
       {/* Avatar section */}
       <section className="rounded-2xl border border-border bg-surface overflow-hidden">
         <div className="px-4 py-3 border-b border-border">
@@ -541,7 +666,7 @@ function SettingsTab({
               }
             </div>
             <input ref={fileRef} type="file" accept="image/*" className="sr-only"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadPhoto(f); e.target.value = ""; }} />
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) onFileSelected(f); e.target.value = ""; }} />
           </div>
           <div className="flex flex-col gap-2">
             <button onClick={() => fileRef.current?.click()} disabled={uploading}
@@ -663,10 +788,9 @@ function SettingsTab({
               type="button"
               onClick={sendPasswordReset}
               disabled={pwResetSending}
-              className="flex w-full items-center justify-between text-sm font-medium transition-colors hover:text-[var(--accent)] disabled:opacity-50"
+              className="text-sm font-medium transition-colors hover:text-[var(--accent)] disabled:opacity-50"
             >
-              <span>Forgot password</span>
-              <span className="text-xs text-muted">{pwResetSending ? "Sending…" : "Send reset link"}</span>
+              {pwResetSending ? "Sending reset link…" : "Forgot password"}
             </button>
             {pwResetMsg && (
               <p className="mt-2 text-xs rounded-lg px-3 py-2"
@@ -693,19 +817,6 @@ function SettingsTab({
         </div>
       </section>
 
-      {/* Danger zone */}
-      <section className="rounded-2xl border overflow-hidden" style={{ borderColor: "color-mix(in srgb, var(--danger) 25%, var(--border))" }}>
-        <div className="px-4 py-3 border-b" style={{ borderColor: "color-mix(in srgb, var(--danger) 25%, var(--border))" }}>
-          <h3 className="text-sm font-semibold" style={{ color: "var(--danger)" }}>Danger zone</h3>
-        </div>
-        <div className="px-4 py-3">
-          <button type="button"
-            onClick={() => { if (confirm("Reset all progress? This cannot be undone.")) reset(); }}
-            className="text-sm text-muted hover:text-[var(--danger)] transition-colors">
-            Reset all progress
-          </button>
-        </div>
-      </section>
     </div>
   );
 }
