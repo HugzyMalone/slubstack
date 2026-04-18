@@ -11,7 +11,11 @@ export function TopBar() {
   const hydrated = useHydrated();
   const xp = useGameStore((s) => s.xp);
   const streak = useGameStore((s) => s.streak);
-  const [_avatar, setAvatar] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(null);
+
+  function isAvatarUrl(v: string | null): v is string {
+    return !!v && (v.startsWith("http") || v.startsWith("data:") || v.startsWith("/"));
+  }
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -94,14 +98,23 @@ export function TopBar() {
           {/* Profile */}
           <Link
             href="/stats"
-            className="ml-1 flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-150"
+            className="ml-1 flex h-7 w-7 items-center justify-center rounded-full overflow-hidden transition-colors duration-150"
             style={{
               border: "1px solid color-mix(in srgb, var(--fg) 12%, transparent)",
-              background: "color-mix(in srgb, var(--fg) 5%, transparent)",
+              background: avatar && !isAvatarUrl(avatar)
+                ? "color-mix(in srgb, var(--accent) 15%, var(--surface))"
+                : "color-mix(in srgb, var(--fg) 5%, transparent)",
             }}
             aria-label="Profile"
           >
-            <User size={13} strokeWidth={1.5} className="text-muted" />
+            {isAvatarUrl(avatar) ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatar} alt="avatar" className="h-full w-full object-cover object-center" />
+            ) : avatar ? (
+              <span className="text-sm leading-none">{avatar}</span>
+            ) : (
+              <User size={13} strokeWidth={1.5} className="text-muted" />
+            )}
           </Link>
         </div>
       </div>

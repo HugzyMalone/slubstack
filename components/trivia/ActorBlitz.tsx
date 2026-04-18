@@ -210,16 +210,19 @@ export function ActorBlitz({ actors }: Props) {
     });
   }, [queue.length]);
 
+  const multiplier = streak >= 5 ? 3 : streak >= 3 ? 2 : 1;
+
   const handleAnswer = useCallback(
     (option: string) => {
       if (selected !== null || !currentActor || advancing) return;
       const isCorrect = option === currentActor.name;
+      const currentMultiplier = streak >= 5 ? 3 : streak >= 3 ? 2 : 1;
       setSelected(option);
       setFeedback(isCorrect ? "correct" : "wrong");
       setTotal((t) => t + 1);
       setHistory((h) => [...h, { name: currentActor.name, image: currentActor.image, correct: isCorrect }]);
       if (isCorrect) {
-        setScore((s) => s + 1);
+        setScore((s) => s + currentMultiplier);
         setStreak((s) => { const ns = s + 1; setBestStreak((bs) => Math.max(bs, ns)); return ns; });
         setTimeout(advance, 300);
       } else {
@@ -227,7 +230,7 @@ export function ActorBlitz({ actors }: Props) {
         setTimeout(advance, 700);
       }
     },
-    [selected, currentActor, advancing, advance]
+    [selected, currentActor, advancing, advance, streak]
   );
 
   const shareResult = useCallback(() => {
@@ -389,7 +392,7 @@ export function ActorBlitz({ actors }: Props) {
                 {history.map((h, i) => (
                   <div key={i} className="flex items-center gap-3 rounded-xl border border-border bg-surface px-3 py-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={h.image} alt={h.name} className="h-10 w-10 shrink-0 rounded-lg object-cover object-top" />
+                    <img src={h.image} alt={h.name} className="h-10 w-10 shrink-0 rounded-lg object-cover object-center" />
                     <div className="min-w-0 flex-1 text-sm font-medium truncate">{h.name}</div>
                     {h.correct
                       ? <CheckCircle size={16} className="text-emerald-500 shrink-0" />
@@ -427,6 +430,14 @@ export function ActorBlitz({ actors }: Props) {
                 <FlameIcon size={12} />{streak}
               </span>
             )}
+            {multiplier > 1 && (
+              <span
+                className="rounded-md px-1.5 py-0.5 text-xs font-black tabular-nums text-white"
+                style={{ background: multiplier >= 3 ? "#dc2626" : "#f97316" }}
+              >
+                {multiplier}×
+              </span>
+            )}
             <span className="text-sm font-black">{score}</span>
           </div>
         </div>
@@ -453,13 +464,13 @@ export function ActorBlitz({ actors }: Props) {
         <img
           src={currentActor.image}
           alt="Who is this?"
-          className="absolute inset-0 h-full w-full object-cover object-top"
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: "50% 15%", opacity: imageLoaded ? 1 : 0, transition: "opacity 0.15s ease" }}
           fetchPriority="high"
           decoding="async"
           ref={(el) => { if (el?.complete && !el.naturalWidth) setImageError(true); else if (el?.complete) setImageLoaded(true); }}
           onLoad={() => setImageLoaded(true)}
           onError={() => { setImageError(true); if (!advancing) advance(); }}
-          style={{ opacity: imageLoaded ? 1 : 0, transition: "opacity 0.15s ease" }}
         />
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
         <div className="absolute bottom-2 left-3 text-white text-xs font-semibold opacity-70">Who is this actor?</div>

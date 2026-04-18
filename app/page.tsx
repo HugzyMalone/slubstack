@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Panda } from "@/components/Panda";
 import { cn } from "@/lib/utils";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 const LANGUAGES = [
   {
@@ -64,6 +65,51 @@ function ChevronRight() {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M9 18l6-6-6-6" />
     </svg>
+  );
+}
+
+function JoinCTA() {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data }) => { setShow(!data.session); });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setShow(!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <Link href="/stats" className="block mt-2 active:scale-[0.985] transition-transform duration-150">
+      <div
+        className="flex items-center gap-4 rounded-2xl px-5 py-4"
+        style={{
+          background: "linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, var(--surface)), color-mix(in srgb, var(--accent) 4%, var(--surface)))",
+          border: "1px solid color-mix(in srgb, var(--accent) 25%, var(--border))",
+        }}
+      >
+        <div
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-base font-black text-white"
+          style={{ background: "linear-gradient(135deg, var(--accent) 0%, #ea580c 100%)" }}
+        >
+          S
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-[15px] font-semibold">Track your progress</div>
+          <div className="mt-0.5 text-xs text-muted">Save XP, streak &amp; compete on the leaderboard — free</div>
+        </div>
+        <span
+          className="shrink-0 rounded-full px-3 py-1.5 text-xs font-bold text-white"
+          style={{ background: "var(--accent)" }}
+        >
+          Join free
+        </span>
+      </div>
+    </Link>
   );
 }
 
@@ -190,6 +236,8 @@ export default function HubPage() {
             </span>
           </div>
         </Link>
+
+        <JoinCTA />
       </div>
     </div>
   );
