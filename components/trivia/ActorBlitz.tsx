@@ -484,7 +484,7 @@ export function ActorBlitz({ actors }: Props) {
           src={currentActor.image}
           alt="Who is this?"
           className="absolute inset-0 h-full w-full object-cover"
-          style={{ objectPosition: "50% 15%", opacity: imageLoaded ? 1 : 0, transition: "opacity 0.15s ease" }}
+          style={{ objectPosition: "50% 25%", opacity: imageLoaded ? 1 : 0, transition: "opacity 0.15s ease" }}
           fetchPriority="high"
           decoding="async"
           ref={(el) => { if (el?.complete && !el.naturalWidth) setImageError(true); else if (el?.complete) setImageLoaded(true); }}

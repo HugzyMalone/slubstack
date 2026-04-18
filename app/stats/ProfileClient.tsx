@@ -40,7 +40,7 @@ function isAvatarUrl(v: string | null | undefined): v is string {
   return !!v && (v.startsWith("http") || v.startsWith("data:") || v.startsWith("/"));
 }
 
-type LBFilter = "overall" | "mandarin" | "german" | "spanish" | "actor-blitz";
+type LBFilter = "overall" | "mandarin" | "german" | "spanish" | "actor-blitz" | "math-blitz";
 type Tab = "profile" | "leaderboard" | "settings";
 
 // ── AvatarDisplay ──────────────────────────────────────────────────────────
@@ -830,13 +830,15 @@ const LB_FILTERS: { id: LBFilter; label: string }[] = [
   { id: "german", label: "German" },
   { id: "spanish", label: "Spanish" },
   { id: "actor-blitz", label: "Actor Blitz" },
+  { id: "math-blitz", label: "Math Blitz" },
 ];
 
 function LeaderboardTab({
-  entries, loading, filter, onFilter, actorBest,
+  entries, loading, filter, onFilter, actorBest, mathBlitzBest,
 }: {
   entries: LeaderboardEntry[]; loading: boolean; filter: LBFilter;
   onFilter: (f: LBFilter) => void; actorBest: ActorBest | null;
+  mathBlitzBest: Record<string, number> | null;
 }) {
   return (
     <div className="space-y-4">
@@ -854,7 +856,7 @@ function LeaderboardTab({
 
       {filter === "overall" && (
         loading
-          ? <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-muted">Loading…</div>
+          ? <LeaderboardSkeleton />
           : entries.length === 0
             ? <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-muted">No entries yet — finish a session to appear here.</div>
             : <XPLeaderboard entries={entries} />
@@ -863,6 +865,26 @@ function LeaderboardTab({
         <LanguagePlaceholder language={filter} />
       )}
       {filter === "actor-blitz" && <ActorBlitzSection best={actorBest} />}
+      {filter === "math-blitz" && <MathBlitzSection best={mathBlitzBest} />}
+    </div>
+  );
+}
+
+function LeaderboardSkeleton() {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3.5 animate-pulse">
+          <div className="w-7 shrink-0 flex justify-center">
+            <div className="h-6 w-6 rounded-full bg-border" />
+          </div>
+          <div className="h-8 w-8 shrink-0 rounded-full bg-border" />
+          <div className="flex-1 space-y-1.5">
+            <div className="h-3 w-24 rounded bg-border" />
+            <div className="h-2.5 w-36 rounded bg-border" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -890,10 +912,7 @@ function XPLeaderboard({ entries }: { entries: LeaderboardEntry[] }) {
               <span className="text-xs font-semibold text-muted tabular-nums">#{index + 1}</span>
             )}
           </div>
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold uppercase"
-            style={{ background: "color-mix(in srgb, var(--fg) 10%, transparent)", color: "var(--fg)" }}>
-            {entry.username.slice(0, 2)}
-          </div>
+          <AvatarDisplay avatar={entry.avatar} size="sm" />
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-semibold">{entry.username}</div>
             <div className="mt-0.5 flex gap-3 text-xs text-muted">
@@ -967,6 +986,53 @@ function ActorBlitzSection({ best }: { best: ActorBest | null }) {
   );
 }
 
+function MathBlitzSection({ best }: { best: Record<string, number> | null }) {
+  const DIFF_COLORS: Record<string, string> = { easy: "#10b981", medium: "#f59e0b", hard: "#e11d48" };
+  const hasAny = best && (best.easy > 0 || best.medium > 0 || best.hard > 0);
+
+  if (!hasAny) {
+    return (
+      <div className="rounded-2xl border border-border bg-surface p-8 text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-white"
+          style={{ background: "linear-gradient(135deg, #10b981 0%, #0ea5e9 100%)" }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12" /><line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="6" x2="9" y2="6" /><line x1="15" y1="18" x2="19" y2="18" />
+          </svg>
+        </div>
+        <div className="text-sm font-semibold">No score yet</div>
+        <div className="mt-1 text-xs text-muted">Play Math Blitz to set a personal best</div>
+        <Link href="/brain-training/math-blitz"
+          className="mt-4 inline-block rounded-xl px-5 py-2.5 text-sm font-semibold text-white"
+          style={{ background: "linear-gradient(135deg, #10b981 0%, #0ea5e9 100%)" }}>Play now</Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="text-xs font-semibold uppercase tracking-widest text-muted">Your personal bests</div>
+      <div className="grid grid-cols-3 gap-2.5">
+        {(["easy", "medium", "hard"] as const).map((diff) => {
+          const score = best?.[diff] ?? 0;
+          return (
+            <div key={diff} className="rounded-2xl border border-border bg-surface p-3 text-center">
+              <div className="text-lg font-bold tabular-nums" style={{ color: score > 0 ? DIFF_COLORS[diff] : "var(--muted)" }}>
+                {score > 0 ? score : "—"}
+              </div>
+              <div className="text-xs text-muted mt-0.5 capitalize">{diff}</div>
+            </div>
+          );
+        })}
+      </div>
+      <Link href="/brain-training/math-blitz"
+        className="flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-white transition-colors active:scale-[0.98]"
+        style={{ background: "linear-gradient(135deg, #10b981 0%, #0ea5e9 100%)" }}>Beat your score →</Link>
+      <p className="text-center text-xs text-muted">Global Math Blitz rankings — coming soon</p>
+    </div>
+  );
+}
+
 // ── TabBtn ─────────────────────────────────────────────────────────────────
 
 function TabBtn({ active, onClick, icon, children }: {
@@ -997,6 +1063,14 @@ export function ProfileClient() {
   const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
   const [lbFilter, setLbFilter] = useState<LBFilter>("overall");
   const [actorBest, setActorBest] = useState<ActorBest | null>(null);
+  const [mathBlitzBest, setMathBlitzBest] = useState<Record<string, number> | null>(null);
+  const lbFetchedRef = useRef(false);
+
+  // Eagerly load avatar from cache so it appears instantly
+  useEffect(() => {
+    const cached = localStorage.getItem("slubstack_avatar");
+    if (cached) setAvatar(cached);
+  }, []);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -1024,22 +1098,48 @@ export function ProfileClient() {
       .then((data) => {
         if (cancelled || !data?.profile) return;
         setUsername(data.profile.username ?? "");
-        setAvatar(data.profile.avatar ?? null);
+        const av = data.profile.avatar ?? null;
+        setAvatar(av);
         setStatus(data.profile.status ?? null);
+        if (av) localStorage.setItem("slubstack_avatar", av);
       })
       .catch(() => {});
     return () => { cancelled = true; };
   }, [user]);
 
+  // Prefetch leaderboard in background once user is authenticated
+  useEffect(() => {
+    if (!user || lbFetchedRef.current) return;
+    lbFetchedRef.current = true;
+    fetch("/api/leaderboard")
+      .then((r) => r.json())
+      .then((d) => { setEntries(d.entries ?? []); setLeaderboardLoaded(true); })
+      .catch(() => {});
+    try {
+      const s = localStorage.getItem("slubstack_actorblitz_best");
+      if (s) setActorBest(JSON.parse(s));
+    } catch {}
+    try {
+      const s = localStorage.getItem("slubstack_mathblitz_best");
+      if (s) setMathBlitzBest(JSON.parse(s));
+    } catch {}
+  }, [user]);
+
   function openLeaderboard() {
     setTab("leaderboard");
+    // Refresh bests from localStorage in case user played since page load
+    try {
+      const s = localStorage.getItem("slubstack_actorblitz_best");
+      if (s) setActorBest(JSON.parse(s));
+    } catch {}
+    try {
+      const s = localStorage.getItem("slubstack_mathblitz_best");
+      if (s) setMathBlitzBest(JSON.parse(s));
+    } catch {}
+    // Fallback fetch if prefetch didn't succeed
     if (!leaderboardLoaded) {
       setLeaderboardLoaded(true);
       fetch("/api/leaderboard").then((r) => r.json()).then((d) => setEntries(d.entries ?? [])).catch(() => {});
-      try {
-        const s = localStorage.getItem("slubstack_actorblitz_best");
-        if (s) setActorBest(JSON.parse(s));
-      } catch {}
     }
   }
 
@@ -1074,7 +1174,7 @@ export function ProfileClient() {
       {tab === "profile" && <ProfileTab user={user} avatar={avatar} username={username} status={status} />}
       {tab === "leaderboard" && (
         <LeaderboardTab entries={entries} loading={!leaderboardLoaded} filter={lbFilter}
-          onFilter={setLbFilter} actorBest={actorBest} />
+          onFilter={setLbFilter} actorBest={actorBest} mathBlitzBest={mathBlitzBest} />
       )}
       {tab === "settings" && (
         <SettingsTab user={user} avatar={avatar} username={username} status={status}

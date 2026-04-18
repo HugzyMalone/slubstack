@@ -426,13 +426,14 @@ export default function MathBlitzPage() {
           </button>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-border bg-surface p-5 text-center">
-          <div className="text-sm font-semibold">Leaderboard</div>
-          <div className="mt-1 text-xs text-muted">Global rankings coming soon — create an account to be first on the board.</div>
-          <Link href="/stats" className="mt-3 inline-block text-xs font-semibold" style={{ color: "var(--accent)" }}>
-            Go to profile →
-          </Link>
-        </div>
+        <Link href="/stats"
+          className="mt-6 flex items-center justify-between rounded-2xl border border-border bg-surface px-5 py-4 transition-colors active:scale-[0.99]">
+          <div>
+            <div className="text-sm font-semibold">Math Blitz Leaderboard</div>
+            <div className="mt-0.5 text-xs text-muted">See your best scores &amp; compare</div>
+          </div>
+          <Trophy size={16} className="text-muted shrink-0" />
+        </Link>
       </div>
     );
   }
@@ -533,33 +534,66 @@ export default function MathBlitzPage() {
       <div className="shrink-0 px-4 pb-6 pt-2 space-y-2" style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}>
         {PAD_ROWS.map((row, ri) => (
           <div key={ri} className="grid grid-cols-3 gap-2">
-            {row.map((key) => (
-              <button
-                key={key}
-                onPointerDown={(e) => { e.preventDefault(); padPress(key); }}
-                className="rounded-2xl py-4 text-xl font-bold select-none transition-all active:scale-95"
-                style={{
-                  background: key === "⌫" || key === "−"
-                    ? "color-mix(in srgb, var(--fg) 8%, var(--surface))"
-                    : "var(--surface)",
-                  border: "1px solid color-mix(in srgb, var(--fg) 10%, transparent)",
-                  color: key === "⌫" ? "var(--muted)" : "var(--fg)",
-                }}
-              >
-                {key}
-              </button>
-            ))}
+            {row.map((key) => {
+              const isSpecial = key === "⌫" || key === "−";
+              return (
+                <motion.button
+                  key={key}
+                  onPointerDown={(e) => { e.preventDefault(); padPress(key); }}
+                  variants={{
+                    rest: {
+                      y: 0,
+                      scale: 1,
+                      boxShadow: "0 4px 0 color-mix(in srgb, var(--fg) 14%, transparent)",
+                    },
+                    pressed: {
+                      y: 4,
+                      scale: 0.97,
+                      boxShadow: "0 0px 0 color-mix(in srgb, var(--fg) 14%, transparent)",
+                    },
+                  }}
+                  initial="rest"
+                  whileTap="pressed"
+                  transition={{ type: "spring", stiffness: 700, damping: 30, mass: 0.5 }}
+                  className="rounded-2xl py-4 text-xl font-bold select-none"
+                  style={{
+                    background: isSpecial
+                      ? "color-mix(in srgb, var(--fg) 9%, var(--surface))"
+                      : "color-mix(in srgb, var(--fg) 4%, var(--surface))",
+                    border: "1px solid color-mix(in srgb, var(--fg) 12%, transparent)",
+                    color: key === "⌫" ? "var(--muted)" : "var(--fg)",
+                  }}
+                >
+                  {key}
+                </motion.button>
+              );
+            })}
           </div>
         ))}
         {/* Submit */}
-        <button
+        <motion.button
           onPointerDown={(e) => { e.preventDefault(); submitAnswer(); }}
           disabled={!answer.trim() || inFeedbackRef.current}
-          className="w-full rounded-2xl py-4 text-base font-bold text-white transition-all active:scale-[0.98] disabled:opacity-40"
+          variants={{
+            rest: {
+              y: 0,
+              scale: 1,
+              boxShadow: "0 4px 0 color-mix(in srgb, var(--accent) 45%, #0006)",
+            },
+            pressed: {
+              y: 4,
+              scale: 0.98,
+              boxShadow: "0 0px 0 color-mix(in srgb, var(--accent) 45%, #0006)",
+            },
+          }}
+          initial="rest"
+          whileTap="pressed"
+          transition={{ type: "spring", stiffness: 700, damping: 30, mass: 0.5 }}
+          className="w-full rounded-2xl py-4 text-base font-bold text-white disabled:opacity-40"
           style={{ background: "var(--accent)" }}
         >
           Check ✓
-        </button>
+        </motion.button>
       </div>
     </div>
   );
