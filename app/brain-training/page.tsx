@@ -67,7 +67,7 @@ const LIVE = [
     iconBg: "linear-gradient(135deg, #6aaa64 0%, #c9b458 100%)",
     title: "Wordle",
     description: "Daily word puzzle · 6 tries to guess",
-    badge: "New",
+    badge: null,
   },
 ];
 

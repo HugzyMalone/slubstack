@@ -30,7 +30,7 @@ Three-accent system defined in `app/globals.css`:
 ## App structure
 
 ### Routes
-- `/` — Hub page: three accordions (Languages, Brain Training, Trivia) — all collapsed by default
+- `/` — Hub page: **static, no-scroll**. Animal hero (28vh) + hourly rotating fact + 3 section cards. Body scroll locked via `useEffect`. No dynamic data (no due-cards banner, no continue card). Fact rotates once per hour based on `Math.floor(Date.now() / 3600000) % FACTS.length` — 105 facts across languages, brain science, history, tech, etc.
 - `/spanish` — Spanish skill tree
 - `/spanish/learn/[unitId]` — Spanish lesson (games only: MC, Type, Match)
 - `/spanish/review` — Spanish flashcard review
@@ -52,7 +52,7 @@ Three-accent system defined in `app/globals.css`:
 
 ### Key files
 - `app/layout.tsx` — root layout; has AppSidebar + content wrapper with `lg:ml-60`
-- `app/page.tsx` — hub with panda hero + 3 accordion sections (Languages, Brain Training, Trivia). All use shared `AccordionSection` component. All collapsed by default.
+- `app/page.tsx` — static no-scroll hub. Animal hero + hourly rotating fact (105 facts) + 3 section cards. No banners, no continue card, no badges. Body scroll locked on mount.
 - `app/brain-training/page.tsx` — Brain Training hub; Math Blitz + Wordle live, others coming soon
 - `app/brain-training/math-blitz/page.tsx` — Math Blitz game (self-contained client component)
 - `app/brain-training/wordle/page.tsx` — Daily Wordle game (self-contained client component)
@@ -66,7 +66,7 @@ Three-accent system defined in `app/globals.css`:
 - `components/cards/CardShell.tsx` — **fixed full-screen** lesson layout (z-40), top 45vh = panda, bottom = question, no scrolling
 - `components/cards/CardFooter` — fixed z-50, always above CardShell
 - `components/Panda.tsx` — mood-mapped images (idle/happy/wrong/sad/celebrating/sleeping), supports `fill` prop for CSS-sized containers
-- `components/TopBar.tsx` — shows `← Back` (router.back()) on all non-home pages on mobile; wordmark on home only
+- `components/TopBar.tsx` — shows `← Back` (router.back()) on all non-home pages on mobile; wordmark on home only. Right side shows streak (from `useGlobalStore`) + level chip (from `useGameStore` XP via root mandarinStore). On mount, syncs `globalStore.streak` to the max of all three language store streaks (fixes historical divergence). Level chip colour is tier-based (see Level & Tier system).
 - `components/BottomNav.tsx` — `lg:hidden`; hidden during lessons (`/*/learn/*`) **and on all game pages** (`/brain-training/wordle`, `/brain-training/math-blitz`, `/trivia/actors`) so the nav never overlaps game UI. Uses per-tab opacity/scale transitions (not `layoutId` FLIP — avoids layout measurement jank).
 - `components/CloudSync.tsx` — syncs language store to Supabase; mounted in all three language layouts (mandarin/german/spanish). Accepts `lang` prop.
 - `components/trivia/ActorBlitz.tsx` — Actor Blitz game component. Images from local `/public/actors/`. Uses `var(--game)` (pastel mauve) for all game UI. Answer correct delay 300ms, wrong delay 700ms.
@@ -108,6 +108,22 @@ Three-accent system defined in `app/globals.css`:
 - Profile photo upload opens a circular crop modal first: drag to reposition, pinch to zoom, then "Use photo" crops to circle via Canvas API and sends the blob to `/api/avatar`
 - No emoji avatar picker — photo upload only. Existing emoji avatars still display correctly (AvatarDisplay handles both URL and emoji string)
 
+## Level & Tier system
+`lib/xp.ts`: `levelFromXp(xp) = Math.floor(Math.sqrt(xp / 50))`. Tiers defined in both `TopBar.tsx` and `ProfileClient.tsx` (keep in sync):
+| Tier | Min level | Colour |
+|---|---|---|
+| Bronze | 0 | `#cd7c54` |
+| Silver | 5 | `#94a3b8` |
+| Gold | 10 | `#f59e0b` |
+| Platinum | 20 | `#b0bec5` |
+| Diamond | 30 | `#60d5fa` |
+| Emerald | 40 | `#10b981` |
+| Obsidian | 50 | `#8b5cf6` |
+
+- TopBar shows `Lv. X` in the tier colour (replaces XP counter).
+- Profile card badge shows `{TierName} · Lv. X` with tier colour background/border; XP bar also uses tier colour.
+- `LessonCompleteScreen` shows an animated per-language level bar: fills from pre-lesson progress → post-lesson progress. On level-up: bar fills to 100%, resets, then fills to new level's progress with a "Level Up!" badge.
+
 ## Profile / Settings (`app/stats/ProfileClient.tsx`)
 - Three tabs: Profile, Leaderboard, Settings
 - Settings tab: photo upload (with crop modal), username, status (emoji allowed in status text), save button
@@ -147,8 +163,13 @@ Per-language `allowedInteractions`:
 - German: `["multiple-choice", "type", "match"]`
 - Spanish: `["multiple-choice", "type", "match"]`
 
+## Lesson complete screen (`components/LessonCompleteScreen.tsx`)
+- **No-scroll**: body scroll locked on mount; fixed height `calc(100dvh - 52px - env(safe-area-inset-top, 0px))`.
+- Layout: character (22vh/180px max) → title → XP counter → flex-1 spacer → level bar → stats row → Done button.
+- Level bar animates on a delay: if no level-up, fills from old progress → new progress (700ms ease-out). If level-up: fills to 100% → resets → "Level Up!" badge pops in → fills to new level's progress.
+
 ## Panda character
-- **Hub page**: fills 32vh (max 280px), `mood="happy"` — hero
+- **Hub page**: fills 28vh (max 240px), random mood — hero
 - **Review empty state**: fills 45vh, `mood="sleeping"`
 - **Skill tree pages**: 200px, `mood="idle"`
 - **Lesson pages**: fills 45vh zone in CardShell, reacts to answers:

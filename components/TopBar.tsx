@@ -3,20 +3,57 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Flame, Zap, User, ChevronLeft } from "lucide-react";
-import { useGameStore } from "@/lib/store";
+import { Flame, User, ChevronLeft } from "lucide-react";
+import { useGameStore, mandarinStore, germanStore, spanishStore } from "@/lib/store";
 import { useHydrated } from "@/lib/hooks";
+import { useGlobalStore, globalStore } from "@/lib/globalStore";
+import { levelFromXp } from "@/lib/xp";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+
+// Tier thresholds (level required to reach that tier)
+const TIERS = [
+  { min: 50, name: "Obsidian",  color: "#8b5cf6" },
+  { min: 40, name: "Emerald",   color: "#10b981" },
+  { min: 30, name: "Diamond",   color: "#60d5fa" },
+  { min: 20, name: "Platinum",  color: "#b0bec5" },
+  { min: 10, name: "Gold",      color: "#f59e0b" },
+  { min: 5,  name: "Silver",    color: "#94a3b8" },
+  { min: 0,  name: "Bronze",    color: "#cd7c54" },
+];
+
+function getTier(level: number) {
+  return TIERS.find((t) => level >= t.min) ?? TIERS[TIERS.length - 1];
+}
 
 export function TopBar() {
   const hydrated = useHydrated();
   const xp = useGameStore((s) => s.xp);
-  const streak = useGameStore((s) => s.streak);
+  const streak = useGlobalStore((s) => s.streak);
   const [avatar, setAvatar] = useState<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
   const isHome = pathname === "/";
   const hideBack = isHome || pathname === "/stats" || pathname.endsWith("/review");
+
+  // One-time sync: push the max streak from any language store into globalStore
+  // This fixes any historical divergence between per-language and global streaks
+  useEffect(() => {
+    const manState = mandarinStore.getState();
+    const deState = germanStore.getState();
+    const esState = spanishStore.getState();
+    const globalState = globalStore.getState();
+
+    const candidates = [
+      { streak: manState.streak, date: manState.lastActiveDate },
+      { streak: deState.streak, date: deState.lastActiveDate },
+      { streak: esState.streak, date: esState.lastActiveDate },
+    ];
+    const best = candidates.reduce((a, b) => a.streak >= b.streak ? a : b);
+
+    if (best.streak > globalState.streak) {
+      globalStore.setState({ streak: best.streak, lastActiveDate: best.date });
+    }
+  }, []);
 
   function isAvatarUrl(v: string | null): v is string {
     return !!v && (v.startsWith("http") || v.startsWith("data:") || v.startsWith("/"));
@@ -60,6 +97,9 @@ export function TopBar() {
 
     return () => { subscription.unsubscribe(); window.removeEventListener("slubstack_avatar_changed", onAvatarChanged); };
   }, []);
+
+  const level = hydrated ? levelFromXp(xp) : 0;
+  const tier = getTier(level);
 
   return (
     <header
@@ -107,10 +147,17 @@ export function TopBar() {
             style={{ background: "color-mix(in srgb, var(--fg) 12%, transparent)" }}
           />
 
-          {/* XP */}
-          <div className="flex items-center gap-1" title="XP">
-            <Zap size={12} strokeWidth={2} className="text-amber-400" />
-            <span className="text-[12px] font-semibold tabular-nums">{hydrated ? xp : 0}</span>
+          {/* Level (tier-coloured) */}
+          <div
+            className="flex items-center gap-0.5"
+            title={`${tier.name} · Level ${level}`}
+          >
+            <span className="text-[10px] font-bold tabular-nums" style={{ color: tier.color }}>
+              Lv.
+            </span>
+            <span className="text-[12px] font-semibold tabular-nums" style={{ color: tier.color }}>
+              {level}
+            </span>
           </div>
 
           {/* Profile */}

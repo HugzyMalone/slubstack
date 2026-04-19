@@ -15,7 +15,7 @@ const LANGUAGES = [
     title: "Spanish",
     description: "Match, quiz & type",
     iconBg: "linear-gradient(135deg, #c2410c 0%, #ea580c 100%)",
-    badge: "New",
+    badge: null,
     accentColor: "#c2410c",
     units: "5 units · 75 words",
   },

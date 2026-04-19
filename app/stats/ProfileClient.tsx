@@ -11,6 +11,19 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { useGameStore } from "@/lib/store";
 import { useGlobalStore } from "@/lib/globalStore";
 import { levelFromXp, xpToNextLevel } from "@/lib/xp";
+
+const TIERS = [
+  { min: 50, name: "Obsidian",  color: "#8b5cf6" },
+  { min: 40, name: "Emerald",   color: "#10b981" },
+  { min: 30, name: "Diamond",   color: "#60d5fa" },
+  { min: 20, name: "Platinum",  color: "#b0bec5" },
+  { min: 10, name: "Gold",      color: "#f59e0b" },
+  { min: 5,  name: "Silver",    color: "#94a3b8" },
+  { min: 0,  name: "Bronze",    color: "#cd7c54" },
+];
+function getTier(level: number) {
+  return TIERS.find((t) => level >= t.min) ?? TIERS[TIERS.length - 1];
+}
 import { useHydrated } from "@/lib/hooks";
 import type { LeaderboardEntry } from "@/lib/supabase/queries";
 import Link from "next/link";
@@ -317,6 +330,7 @@ function ProfileTab({ user, avatar, username, status }: {
 
   const level = levelFromXp(xp);
   const { current, next, progress } = xpToNextLevel(xp);
+  const tier = getTier(level);
 
   return (
     <div className="space-y-3">
@@ -332,10 +346,14 @@ function ProfileTab({ user, avatar, username, status }: {
           <div className="flex items-center justify-center gap-2">
             <span className="text-lg font-bold leading-none">{username || "Learner"}</span>
             <span
-              className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white leading-none"
-              style={{ background: "var(--accent)" }}
+              className="rounded-full px-2 py-0.5 text-[11px] font-bold leading-none"
+              style={{
+                background: `color-mix(in srgb, ${tier.color} 15%, var(--surface))`,
+                color: tier.color,
+                border: `1px solid color-mix(in srgb, ${tier.color} 35%, transparent)`,
+              }}
             >
-              Lv. {level}
+              {tier.name} · Lv. {level}
             </span>
           </div>
 
@@ -351,7 +369,7 @@ function ProfileTab({ user, avatar, username, status }: {
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
               <div
                 className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${Math.max(0, Math.min(1, progress)) * 100}%`, background: "var(--accent)" }}
+                style={{ width: `${Math.max(0, Math.min(1, progress)) * 100}%`, background: tier.color }}
               />
             </div>
             <div className="mt-1.5 text-xs text-muted tabular-nums">
