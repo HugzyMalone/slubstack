@@ -11,6 +11,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ userId:
     supabase.from("user_stats").select("xp, streak, words_learned, units_done").eq("user_id", userId).maybeSingle(),
   ]);
 
+  if (profileRes.error || statsRes.error)
+    return NextResponse.json({ error: "Database error" }, { status: 500 });
   if (!profileRes.data) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   return NextResponse.json({
