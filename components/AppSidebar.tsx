@@ -133,8 +133,10 @@ export function AppSidebar() {
       {/* Brand */}
       <Link
         href="/"
-        className="flex items-center px-5 py-4 border-b border-border"
+        className="flex items-center gap-2 px-5 py-4 border-b border-border"
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/slubstack-logo.png" alt="" className="h-6 w-6 rounded object-contain" />
         <span
           className="text-[15px] font-semibold"
           style={{ letterSpacing: "-0.02em" }}

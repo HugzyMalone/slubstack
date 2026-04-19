@@ -32,8 +32,8 @@ export const metadata: Metadata = {
     title: "Slubstack",
   },
   icons: {
-    icon: "/3dpanda.png",
-    apple: "/3dpanda.png",
+    icon: "/slubstack-logo.png",
+    apple: "/slubstack-logo.png",
   },
 };
 

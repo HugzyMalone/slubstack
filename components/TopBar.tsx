@@ -121,10 +121,11 @@ export function TopBar() {
         {isHome ? (
           <Link
             href="/"
-            className="lg:hidden text-[15px] font-semibold tracking-tight select-none"
-            style={{ letterSpacing: "-0.02em" }}
+            className="lg:hidden flex items-center gap-2 select-none"
           >
-            slubstack
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/slubstack-logo.png" alt="" className="h-6 w-6 rounded object-contain" />
+            <span className="text-[15px] font-semibold" style={{ letterSpacing: "-0.02em" }}>slubstack</span>
           </Link>
         ) : !hideBack ? (
           <button
