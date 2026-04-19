@@ -108,3 +108,28 @@ on public.wordle_scores
 for insert
 to authenticated
 with check (auth.uid() = user_id);
+
+create table if not exists public.actor_blitz_scores (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles (id) on delete cascade not null,
+  score integer not null check (score >= 0),
+  correct integer not null default 0 check (correct >= 0),
+  total integer not null default 0 check (total >= 0),
+  best_streak integer not null default 0 check (best_streak >= 0),
+  accuracy integer not null default 0 check (accuracy >= 0 and accuracy <= 100),
+  created_at timestamptz not null default timezone('utc', now())
+);
+create index if not exists actor_blitz_scores_score_idx on public.actor_blitz_scores (score desc);
+
+alter table public.actor_blitz_scores enable row level security;
+
+create policy "actor blitz scores readable by everyone"
+on public.actor_blitz_scores
+for select
+using (true);
+
+create policy "users can insert their own actor blitz score"
+on public.actor_blitz_scores
+for insert
+to authenticated
+with check (auth.uid() = user_id);

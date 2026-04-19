@@ -99,6 +99,25 @@ export function buildUnitSession(
   });
 }
 
+export function buildPracticeSession(
+  seenCardIds: string[],
+  content: Pick<LanguageContent, "cards" | "allowedInteractions">,
+  size = 10,
+): SessionItem[] {
+  const allowed: InteractionKind[] = content.allowedInteractions;
+  const order = REVIEW_ORDER.filter((k) => allowed.includes(k));
+  const seenCards = seenCardIds
+    .map((id) => content.cards.find((c) => c.id === id))
+    .filter((c): c is Card => !!c);
+  const pool = shuffle(seenCards).slice(0, size);
+  return pool.map((card, i) => {
+    const kind = order[i % order.length];
+    return kind === "multiple-choice" || kind === "match"
+      ? { card, kind, distractors: pickDistractors(card, content.cards) }
+      : { card, kind };
+  });
+}
+
 export function buildReviewSession(
   srs: Record<string, SrsState>,
   content?: Pick<LanguageContent, "cards" | "allowedInteractions">,

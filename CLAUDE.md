@@ -49,6 +49,7 @@ Three-accent system defined in `app/globals.css`:
 - `/stats/user/[userId]` — Public read-only profile page for any leaderboard user
 - `/onboarding` — First-time setup (avatar, username, password)
 - `/review` — Review hub: three accordion sections (Languages, Brain Training, Trivia). Tap to expand, reveals sub-items with live localStorage stats, each navigates to that game/review page.
+- `/spanish/review`, `/mandarin/review`, `/german/review` — Flashcard review pages. **Practice button always shows** when user has learned cards (not just when SRS cards are due). When cards are due: shows due count + Practice. When nothing is due: shows "Practice to earn XP". Practice session runs via `SessionRunner` → awards XP via `completeSession` on completion. If no SRS-due cards, falls back to `buildPracticeSession` (all seen cards).
 - Legacy `/learn/[unitId]` and `/review` still work (mandarin defaults)
 
 ### Key files
@@ -71,11 +72,11 @@ Three-accent system defined in `app/globals.css`:
 - `components/Panda.tsx` — mood-mapped images (idle/happy/wrong/sad/celebrating/sleeping), supports `fill` prop for CSS-sized containers
 - `components/TopBar.tsx` — shows `← Back` (router.back()) on all non-home pages on mobile; wordmark on home only. Right side shows streak (from `useGlobalStore`) + level chip (from `useGameStore` XP via root mandarinStore) + profile avatar — all hidden when user is not logged in (gated on `loggedIn` state derived from `supabase.auth.getSession`). On mount, syncs `globalStore.streak` to the max of all three language store streaks (fixes historical divergence). Level chip colour is tier-based (see Level & Tier system).
 - `components/BottomNav.tsx` — `lg:hidden`; hidden during lessons (`/*/learn/*`) **and on all game pages** (`/brain-training/wordle`, `/brain-training/math-blitz`, `/trivia/actors`) so the nav never overlaps game UI. Uses per-tab opacity/scale transitions (not `layoutId` FLIP — avoids layout measurement jank).
-- `components/CloudSync.tsx` — syncs language store to Supabase; mounted in all three language layouts (mandarin/german/spanish). Accepts `lang` prop.
-- `components/trivia/ActorBlitz.tsx` — Actor Blitz game component. Images from local `/public/actors/`. Uses `var(--game)` (pastel mauve) for all game UI. Answer correct delay 300ms, wrong delay 700ms.
+- `components/CloudSync.tsx` — syncs language store to Supabase; mounted in all three language layouts (mandarin/german/spanish). Accepts `lang` prop. On every push it reads XP from all three raw stores and sends `totalXp` (sum) so `user_stats.xp` always reflects the cross-language total.
+- `components/trivia/ActorBlitz.tsx` — Actor Blitz game component. Images from local `/public/actors/`. Uses `var(--game)` (pastel mauve) for all game UI. Answer correct delay 300ms, wrong delay 700ms. Submits score to `/api/scores/actor-blitz` on game end (fire-and-forget, fails silently if unauthenticated).
 - `lib/store.ts` — Zustand context pattern: `createGameStore(key)` factory, `GameStoreProvider`, `useGameStore` reads from nearest provider. `mandarinStore` = key `slubstack-v1`, `germanStore` = `slubstack-german-v1`, `spanishStore` = `slubstack-spanish-v1`
 - `lib/content.ts` — `getLanguageContent(lang)` returns `{ cards, units, getCard, getCardsForUnit, getUnit, allowedInteractions }`. Spanish/German exclude "build"; Spanish/German/Mandarin all have "match".
-- `lib/session.ts` — `buildUnitSession` uses `LESSON_ORDER` (no flip — games only). `buildReviewSession` uses `REVIEW_ORDER` (includes flip for flashcard tool). Both take content as param.
+- `lib/session.ts` — `buildUnitSession` uses `LESSON_ORDER` (no flip — games only). `buildReviewSession` uses `REVIEW_ORDER` (games only — MC, type, match — no flip). `buildPracticeSession` builds a session from all seen cards ignoring SRS due dates (used when no cards are due but user wants to practice). All take content as param.
 - `lib/hooks.ts` — `useHydrated` (useSyncExternalStore), `useNow` (useState/useEffect — NOT useSyncExternalStore, which caused infinite loop with Date.now())
 - `lib/supabase/admin.ts` — Supabase admin client using `SUPABASE_SERVICE_ROLE_KEY` (server-only, bypasses RLS)
 - `lib/wordle-words.ts` — ~700-word answer pool, `getDailyWord()`, `getDayIndex()`, `getTodayStr()`, `isValidGuess()`
@@ -88,7 +89,7 @@ Three-accent system defined in `app/globals.css`:
 - Personal best per difficulty stored in localStorage (`slubstack_mathblitz_best`)
 - All game state in `liveRef` to avoid stale closures in timer callbacks; React state only for display
 - Result screen shows inline top-5 leaderboard for the played difficulty (fetched 800ms after game ends)
-- Full leaderboard at `/stats/math-blitz`; scores stored in `math_blitz_scores` table
+- Leaderboard shown inline in the Profile leaderboard tab (Math Blitz filter); `/stats/math-blitz` page still exists as standalone. Scores stored in `math_blitz_scores` table.
 - Full roadmap (head-to-head rooms, multi-game lobby) in `MATH_BLITZ_PLAN.md`
 - BottomNav hidden on `/brain-training/math-blitz`. No in-game back link — TopBar provides the back button. Do not add back links to select or result screen.
 
@@ -129,8 +130,8 @@ Three-accent system defined in `app/globals.css`:
 
 ## Profile / Settings (`app/stats/ProfileClient.tsx`)
 - Three tabs: Profile, Leaderboard, Settings
-- Profile tab: avatar, tier badge, XP bar, streak + XP strip, **Language Levels** card (per-language XP bar + tier for Spanish/Mandarin/German). No medals, no streak shield.
-- Leaderboard tab: each row is a `<Link>` to `/stats/user/[userId]` — tap any user to view their public profile.
+- Profile tab: avatar, tier badge, XP bar (based on **total XP** = mandarin + german + spanish combined), streak + XP strip, **Language Levels** card (per-language XP bar + tier for Spanish/Mandarin/German). No medals, no streak shield.
+- Leaderboard tab: filter pills — Overall, Mandarin, German, Spanish, Actor Blitz, Math Blitz. All filters show inline lists (no link-out buttons). Language leaderboards fetch from `/api/leaderboard?lang=X`. Math Blitz has Easy/Medium/Hard sub-filter. Actor Blitz fetches from `/api/scores/actor-blitz`.
 - Settings tab: photo upload (with crop modal), username, status (emoji allowed in status text), save button
 - Account section: signed-in email display, Forgot password button (sends Supabase reset email), Sign out
 - No emoji avatar picker, no danger zone / reset progress, no streak shield, no medals
@@ -144,6 +145,7 @@ Three-accent system defined in `app/globals.css`:
 - `app/api/img/route.ts` exists but is no longer used for actor images. Can be repurposed or deleted.
 - ActorBlitz has image loading skeleton + `onError` fallback (🎬 emoji) + `fade-in` CSS animation on actor change.
 - BottomNav hidden on `/trivia/actors`. No in-game back link — TopBar provides the back button. Do not add back links to lobby or results screen.
+- Scores submitted to `actor_blitz_scores` table via `/api/scores/actor-blitz` on game end. Leaderboard shown inline in the Profile leaderboard tab.
 
 ## Content
 - `content/mandarin/vocab.json` + `units.json` — 8 units, ~160 cards
@@ -163,7 +165,7 @@ Lessons use `LESSON_ORDER` (no flip cards — interactive games only):
 - `"build"` — arrange character tiles (Mandarin only)
 - `"match"` — tap to match 4 word-pairs across two columns (all languages)
 
-Flashcard review uses `REVIEW_ORDER` (includes `"flip"` for self-rated SRS review).
+Flashcard review uses `REVIEW_ORDER` (games only — MC, type, match). No flip cards in review.
 
 Per-language `allowedInteractions`:
 - Mandarin: `["multiple-choice", "build", "type", "match"]`
@@ -211,9 +213,10 @@ useGameStore(s => s.xp)  // reads from nearest provider
 
 ## Supabase schema
 - `profiles` — id, username, email, avatar_url, status
-- `user_stats` — user_id, xp, streak, words_learned, units_done, updated_at, state_json, german_state_json, spanish_state_json (all jsonb)
+- `user_stats` — user_id, xp (**total across all 3 languages**), streak, words_learned, units_done, updated_at, state_json, german_state_json, spanish_state_json (all jsonb). `xp` is kept up-to-date by CloudSync which sends `totalXp = mandarinXp + germanXp + spanishXp` on every push.
 - `math_blitz_scores` — id, user_id, difficulty (easy/medium/hard), score, correct, created_at. RLS: public read, auth insert. Index on (difficulty, score DESC).
 - `wordle_scores` — id, user_id, date, attempts (1–6), solved, created_at. Unique(user_id, date). RLS: public read, auth insert. Index on (date, solved, attempts).
+- `actor_blitz_scores` — id, user_id, score, correct, total, best_streak, accuracy, created_at. RLS: public read, auth insert. Index on (score DESC). See `supabase/schema.sql` — must be created manually in Supabase dashboard if not already present.
 - `avatars` — Supabase Storage bucket for profile photos
 
 ## Auth flow

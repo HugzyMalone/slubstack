@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useStore } from "zustand";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { useGameStore } from "@/lib/store";
+import { useGameStore, mandarinStore, germanStore, spanishStore } from "@/lib/store";
 
 type Props = { lang?: "mandarin" | "german" | "spanish" };
 
 export function CloudSync({ lang = "mandarin" }: Props) {
   const store = useGameStore();
   const mergeFromServer = useGameStore((s) => s.mergeFromServer);
+  const mandarinXp = useStore(mandarinStore, (s) => s.xp);
+  const germanXp = useStore(germanStore, (s) => s.xp);
+  const spanishXp = useStore(spanishStore, (s) => s.xp);
   const hasPulled = useRef(false);
   const langParam = lang !== "mandarin" ? `?lang=${lang}` : "";
 
@@ -51,6 +55,7 @@ export function CloudSync({ lang = "mandarin" }: Props) {
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
 
+    const totalXp = mandarinXp + germanXp + spanishXp;
     const timeout = window.setTimeout(async () => {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return;
@@ -67,12 +72,13 @@ export function CloudSync({ lang = "mandarin" }: Props) {
           completedUnits: store.completedUnits,
           seenCardIds: store.seenCardIds,
           srs: store.srs,
+          totalXp,
         }),
       }).catch((err) => console.error("[CloudSync] push failed:", err));
     }, 700);
 
     return () => window.clearTimeout(timeout);
-  }, [store.xp, store.streak, store.seenCardIds, store.completedUnits, store.srs, store.lastActiveDate, langParam]);
+  }, [store.xp, store.streak, store.seenCardIds, store.completedUnits, store.srs, store.lastActiveDate, langParam, mandarinXp, germanXp, spanishXp]);
 
   return null;
 }

@@ -213,6 +213,12 @@ export function ActorBlitz({ actors }: Props) {
       globalStore.getState().touchStreak();
       const acc = t > 0 ? c / t : 0;
       globalStore.getState().awardMedal(acc >= 0.9 ? "gold" : acc >= 0.7 ? "silver" : "bronze");
+      // Submit score to leaderboard
+      fetch("/api/scores/actor-blitz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ score: s, correct: c, total: t, bestStreak: bs, accuracy }),
+      }).catch(() => {});
       return;
     }
     const t = setInterval(() => setTimeLeft((tl) => tl - 1), 1000);

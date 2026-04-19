@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { buildReviewSession } from "@/lib/session";
+import { buildReviewSession, buildPracticeSession } from "@/lib/session";
 import { getLanguageContent, type Language } from "@/lib/content";
 import { useGameStore } from "@/lib/store";
 import { SessionRunner } from "@/components/SessionRunner";
@@ -40,8 +40,10 @@ export function ReviewClient({ lang = "mandarin" }: { lang?: Language }) {
 
   const items = useMemo(() => {
     if (!hydrated || !running) return [];
-    return buildReviewSession(srs, { cards: content.cards, allowedInteractions: content.allowedInteractions }, 10);
-  }, [srs, hydrated, running, content]);
+    const due = buildReviewSession(srs, { cards: content.cards, allowedInteractions: content.allowedInteractions }, 10);
+    if (due.length > 0) return due;
+    return buildPracticeSession(seenCardIds, { cards: content.cards, allowedInteractions: content.allowedInteractions }, 10);
+  }, [srs, hydrated, running, content, seenCardIds]);
 
   const learnedCards = useMemo(() => {
     if (!hydrated) return [];
@@ -94,20 +96,25 @@ export function ReviewClient({ lang = "mandarin" }: { lang?: Language }) {
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-28 pt-4">
-      {dueCount > 0 && (
-        <div className="mb-5 flex items-center justify-between rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent-soft)]/40 px-4 py-3.5">
-          <div className="text-sm">
-            <span className="font-semibold">{dueCount}</span> card{dueCount === 1 ? "" : "s"} due for review
-          </div>
-          <button
-            onClick={() => setRunning(true)}
-            className="rounded-full px-3.5 py-1.5 text-xs font-semibold"
-            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-          >
-            Practice
-          </button>
+      <div className="mb-5 flex items-center justify-between rounded-2xl border px-4 py-3.5"
+        style={dueCount > 0
+          ? { borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)", background: "color-mix(in srgb, var(--accent) 8%, transparent)" }
+          : { borderColor: "var(--border)", background: "var(--surface)" }}>
+        <div className="text-sm">
+          {dueCount > 0 ? (
+            <><span className="font-semibold">{dueCount}</span> card{dueCount === 1 ? "" : "s"} due for review</>
+          ) : (
+            <span className="text-muted">Practice to earn XP</span>
+          )}
         </div>
-      )}
+        <button
+          onClick={() => setRunning(true)}
+          className="rounded-full px-3.5 py-1.5 text-xs font-semibold"
+          style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+        >
+          Practice
+        </button>
+      </div>
 
       {/* Sort controls */}
       <div className="mb-4 flex items-center justify-between">

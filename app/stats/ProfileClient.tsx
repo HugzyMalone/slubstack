@@ -10,7 +10,6 @@ import { mandarinStore, germanStore, spanishStore } from "@/lib/store";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { useGameStore } from "@/lib/store";
 import { useGlobalStore } from "@/lib/globalStore";
 import { levelFromXp, xpToNextLevel } from "@/lib/xp";
 
@@ -312,7 +311,6 @@ function ProfileTab({ user, avatar, username, status }: {
   user: SupaUser; avatar: string | null; username: string; status: string | null;
 }) {
   const hydrated = useHydrated();
-  const xp = useGameStore((s) => s.xp);
   const streak = useGlobalStore((s) => s.streak);
   const mandarinXp = useStore(mandarinStore, (s) => s.xp);
   const germanXp = useStore(germanStore, (s) => s.xp);
@@ -320,6 +318,7 @@ function ProfileTab({ user, avatar, username, status }: {
 
   if (!hydrated) return null;
 
+  const xp = mandarinXp + germanXp + spanishXp;
   const level = levelFromXp(xp);
   const { current, next, progress } = xpToNextLevel(xp);
   const tier = getTier(level);
@@ -874,6 +873,208 @@ const LB_FILTERS: { id: LBFilter; label: string }[] = [
   { id: "math-blitz", label: "Math Blitz" },
 ];
 
+const RANK_COLORS = ["#f59e0b", "#94a3b8", "#cd7c54"];
+
+type GameLBEntry = { username: string; avatar: string | null; score: number; correct: number; total?: number };
+
+function LanguageLeaderboard({ language }: { language: "mandarin" | "german" | "spanish" }) {
+  const [entries, setEntries] = useState<LeaderboardEntry[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const labels = {
+    mandarin: { code: "中", name: "Mandarin", accent: "#e11d48" },
+    german: { code: "DE", name: "German", accent: "#f97316" },
+    spanish: { code: "ES", name: "Spanish", accent: "#c2410c" },
+  };
+  const { name, accent } = labels[language];
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/leaderboard?lang=${language}`)
+      .then((r) => r.json())
+      .then((d) => setEntries(d.entries ?? []))
+      .catch(() => setEntries([]))
+      .finally(() => setLoading(false));
+  }, [language]);
+
+  if (loading) return <LeaderboardSkeleton />;
+  if (!entries || entries.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-muted text-center">
+        No {name} scores yet — complete a lesson to appear here.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 mb-3">
+        <Trophy size={14} className="text-muted" />
+        <span className="text-xs font-semibold uppercase tracking-widest text-muted">{name} — Ranked by XP</span>
+      </div>
+      {entries.map((entry, index) => (
+        <Link key={entry.userId} href={`/stats/user/${entry.userId}`}
+          className="flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-colors active:scale-[0.99]"
+          style={{
+            borderColor: index === 0 ? `color-mix(in srgb, ${accent} 30%, var(--border))` : "color-mix(in srgb, var(--fg) 8%, transparent)",
+            background: index === 0 ? `color-mix(in srgb, ${accent} 4%, var(--surface))` : "var(--surface)",
+          }}>
+          <div className="w-7 shrink-0 flex justify-center">
+            {index < 3 ? (
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold text-white"
+                style={{ background: RANK_COLORS[index] }}>{index + 1}</span>
+            ) : (
+              <span className="text-xs font-semibold text-muted tabular-nums">#{index + 1}</span>
+            )}
+          </div>
+          <AvatarDisplay avatar={entry.avatar} size="sm" />
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-semibold">{entry.username}</div>
+            <div className="mt-0.5 flex gap-3 text-xs text-muted">
+              <span className="inline-flex items-center gap-1"><Zap size={10} className="text-amber-400" />{entry.xp} XP</span>
+              <span className="inline-flex items-center gap-1"><Flame size={10} className="text-orange-400" />{entry.streak}d streak</span>
+            </div>
+          </div>
+          <span className="text-muted text-xs shrink-0">→</span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+function MathBlitzLeaderboard() {
+  const [diff, setDiff] = useState<"easy" | "medium" | "hard">("medium");
+  const [entries, setEntries] = useState<GameLBEntry[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const fetchedRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (fetchedRef.current === diff) return;
+    fetchedRef.current = diff;
+    setLoading(true);
+    fetch(`/api/scores/math-blitz?difficulty=${diff}`)
+      .then((r) => r.json())
+      .then(({ leaderboard }) => setEntries(leaderboard ?? []))
+      .catch(() => setEntries([]))
+      .finally(() => setLoading(false));
+  }, [diff]);
+
+  const DIFF_COLORS: Record<string, string> = { easy: "#10b981", medium: "#f59e0b", hard: "#e11d48" };
+  const DIFF_LABEL: Record<string, string> = { easy: "Easy", medium: "Medium", hard: "Hard" };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Trophy size={14} className="text-muted" />
+          <span className="text-xs font-semibold uppercase tracking-widest text-muted">Math Blitz Rankings</span>
+        </div>
+        <div className="flex gap-1">
+          {(["easy", "medium", "hard"] as const).map((d) => (
+            <button key={d} onClick={() => { setEntries(null); setDiff(d); }}
+              className="rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors"
+              style={{
+                background: diff === d ? DIFF_COLORS[d] : "var(--border)",
+                color: diff === d ? "#fff" : "var(--muted)",
+              }}>
+              {DIFF_LABEL[d]}
+            </button>
+          ))}
+        </div>
+      </div>
+      {loading || entries === null ? (
+        <LeaderboardSkeleton />
+      ) : entries.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-muted text-center">
+          No scores yet for {DIFF_LABEL[diff]} — be the first!
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {entries.map((entry, i) => (
+            <div key={i} className="flex items-center gap-3 rounded-2xl border px-4 py-3.5"
+              style={{
+                borderColor: i === 0 ? "color-mix(in srgb, #f59e0b 30%, var(--border))" : "color-mix(in srgb, var(--fg) 8%, transparent)",
+                background: i === 0 ? "color-mix(in srgb, #f59e0b 4%, var(--surface))" : "var(--surface)",
+              }}>
+              <div className="w-7 shrink-0 flex justify-center">
+                {i < 3 ? (
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold text-white"
+                    style={{ background: RANK_COLORS[i] }}>{i + 1}</span>
+                ) : (
+                  <span className="text-xs font-semibold text-muted tabular-nums">#{i + 1}</span>
+                )}
+              </div>
+              <AvatarDisplay avatar={entry.avatar} size="sm" />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-semibold">{entry.username}</div>
+                <div className="mt-0.5 text-xs text-muted">{entry.correct} correct</div>
+              </div>
+              <div className="text-lg font-black tabular-nums" style={{ color: DIFF_COLORS[diff] }}>
+                {entry.score}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ActorBlitzLeaderboard() {
+  const [entries, setEntries] = useState<GameLBEntry[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/scores/actor-blitz")
+      .then((r) => r.json())
+      .then(({ leaderboard }) => setEntries(leaderboard ?? []))
+      .catch(() => setEntries([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading || entries === null) return <LeaderboardSkeleton />;
+
+  if (entries.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-muted text-center">
+        No scores yet — play Actor Blitz to appear here!
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 mb-3">
+        <Trophy size={14} className="text-muted" />
+        <span className="text-xs font-semibold uppercase tracking-widest text-muted">Actor Blitz Rankings</span>
+      </div>
+      {entries.map((entry, i) => (
+        <div key={i} className="flex items-center gap-3 rounded-2xl border px-4 py-3.5"
+          style={{
+            borderColor: i === 0 ? "color-mix(in srgb, #a21caf 30%, var(--border))" : "color-mix(in srgb, var(--fg) 8%, transparent)",
+            background: i === 0 ? "color-mix(in srgb, #a21caf 4%, var(--surface))" : "var(--surface)",
+          }}>
+          <div className="w-7 shrink-0 flex justify-center">
+            {i < 3 ? (
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold text-white"
+                style={{ background: RANK_COLORS[i] }}>{i + 1}</span>
+            ) : (
+              <span className="text-xs font-semibold text-muted tabular-nums">#{i + 1}</span>
+            )}
+          </div>
+          <AvatarDisplay avatar={entry.avatar} size="sm" />
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-semibold">{entry.username}</div>
+            <div className="mt-0.5 text-xs text-muted">{entry.correct}/{entry.total ?? "?"} correct</div>
+          </div>
+          <div className="text-lg font-black tabular-nums" style={{ color: "var(--game)" }}>
+            {entry.score}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function LeaderboardTab({
   entries, loading, filter, onFilter,
 }: {
@@ -902,26 +1103,10 @@ function LeaderboardTab({
             : <XPLeaderboard entries={entries} />
       )}
       {(filter === "mandarin" || filter === "german" || filter === "spanish") && (
-        <LanguagePlaceholder language={filter} />
+        <LanguageLeaderboard key={filter} language={filter} />
       )}
-      {filter === "actor-blitz" && (
-        <Link href="/stats/actor-blitz" className="flex items-center justify-between rounded-2xl border border-border bg-surface px-5 py-5 transition-colors active:scale-[0.99]">
-          <div>
-            <div className="text-sm font-semibold">Actor Blitz Stats</div>
-            <div className="mt-0.5 text-xs text-muted">View your personal bests and rankings</div>
-          </div>
-          <span className="text-muted">→</span>
-        </Link>
-      )}
-      {filter === "math-blitz" && (
-        <Link href="/stats/math-blitz" className="flex items-center justify-between rounded-2xl border border-border bg-surface px-5 py-5 transition-colors active:scale-[0.99]">
-          <div>
-            <div className="text-sm font-semibold">Math Blitz Stats</div>
-            <div className="mt-0.5 text-xs text-muted">View your personal bests and rankings</div>
-          </div>
-          <span className="text-muted">→</span>
-        </Link>
-      )}
+      {filter === "actor-blitz" && <ActorBlitzLeaderboard />}
+      {filter === "math-blitz" && <MathBlitzLeaderboard />}
     </div>
   );
 }
@@ -983,21 +1168,6 @@ function XPLeaderboard({ entries }: { entries: LeaderboardEntry[] }) {
   );
 }
 
-function LanguagePlaceholder({ language }: { language: "mandarin" | "german" | "spanish" }) {
-  const labels = {
-    mandarin: { code: "中", name: "Mandarin", accent: "#e11d48" },
-    german: { code: "DE", name: "German", accent: "#f97316" },
-    spanish: { code: "ES", name: "Spanish", accent: "#c2410c" },
-  };
-  const { code, name, accent } = labels[language];
-  return (
-    <div className="rounded-2xl border border-border bg-surface p-8 text-center">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-sm font-bold text-white" style={{ background: accent }}>{code}</div>
-      <div className="text-sm font-semibold">{name} leaderboard</div>
-      <div className="mt-1 text-xs text-muted leading-relaxed">Per-language rankings are coming soon.<br />Keep learning to build your score!</div>
-    </div>
-  );
-}
 
 // ── TabBtn ─────────────────────────────────────────────────────────────────
 

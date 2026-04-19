@@ -11,6 +11,7 @@ type SyncPayload = {
   completedUnits?: string[];
   seenCardIds?: string[];
   srs?: Record<string, SrsState>;
+  totalXp?: number;
 };
 
 function fallbackUsername(userId: string) {
@@ -74,22 +75,26 @@ export async function POST(request: NextRequest) {
 
   let upsertData: Record<string, unknown>;
 
+  const totalXp = body.totalXp !== undefined ? Math.max(0, Math.floor(body.totalXp)) : undefined;
+
   if (lang === "german") {
     upsertData = {
       user_id: user.id,
       updated_at: new Date().toISOString(),
       german_state_json: stateJson(body),
+      ...(totalXp !== undefined && { xp: totalXp }),
     };
   } else if (lang === "spanish") {
     upsertData = {
       user_id: user.id,
       updated_at: new Date().toISOString(),
       spanish_state_json: stateJson(body),
+      ...(totalXp !== undefined && { xp: totalXp }),
     };
   } else {
     upsertData = {
       user_id: user.id,
-      xp: Math.max(0, Math.floor(body.xp ?? 0)),
+      xp: totalXp ?? Math.max(0, Math.floor(body.xp ?? 0)),
       streak: Math.max(0, Math.floor(body.streak ?? 0)),
       words_learned: Math.max(0, Math.floor(body.wordsLearned ?? 0)),
       units_done: Math.max(0, Math.floor(body.unitsDone ?? 0)),
