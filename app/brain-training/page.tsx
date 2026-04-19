@@ -39,6 +39,19 @@ function SpeedIcon() {
   );
 }
 
+function WordleIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="5" height="5" rx="1" />
+      <rect x="9.5" y="3" width="5" height="5" rx="1" />
+      <rect x="16" y="3" width="5" height="5" rx="1" />
+      <rect x="3" y="9.5" width="5" height="5" rx="1" />
+      <rect x="9.5" y="9.5" width="5" height="5" rx="1" />
+      <rect x="16" y="9.5" width="5" height="5" rx="1" />
+    </svg>
+  );
+}
+
 const LIVE = [
   {
     href: "/brain-training/math-blitz",
@@ -46,6 +59,14 @@ const LIVE = [
     iconBg: "linear-gradient(135deg, #10b981 0%, #0ea5e9 100%)",
     title: "Math Blitz",
     description: "30 seconds · how many can you get?",
+    badge: null,
+  },
+  {
+    href: "/brain-training/wordle",
+    Icon: WordleIcon,
+    iconBg: "linear-gradient(135deg, #6aaa64 0%, #c9b458 100%)",
+    title: "Wordle",
+    description: "Daily word puzzle · 6 tries to guess",
     badge: "New",
   },
 ];

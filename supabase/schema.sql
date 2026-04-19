@@ -83,3 +83,28 @@ on public.math_blitz_scores
 for insert
 to authenticated
 with check (auth.uid() = user_id);
+
+create table if not exists public.wordle_scores (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles (id) on delete cascade not null,
+  date date not null,
+  attempts integer not null check (attempts between 1 and 6),
+  solved boolean not null default false,
+  created_at timestamptz not null default timezone('utc', now()),
+  unique(user_id, date)
+);
+create index if not exists wordle_scores_date_idx on public.wordle_scores (date, solved, attempts);
+
+alter table public.wordle_scores enable row level security;
+
+create policy "wordle scores readable by everyone"
+on public.wordle_scores
+for select
+to anon, authenticated
+using (true);
+
+create policy "users can upsert their own wordle score"
+on public.wordle_scores
+for insert
+to authenticated
+with check (auth.uid() = user_id);
