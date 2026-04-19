@@ -46,6 +46,7 @@ Three-accent system defined in `app/globals.css`:
 - `/brain-training/math-blitz` — Math Blitz game (fully built)
 - `/brain-training/wordle` — Daily Wordle game (fully built)
 - `/stats` — Profile / leaderboard / settings
+- `/stats/user/[userId]` — Public read-only profile page for any leaderboard user
 - `/onboarding` — First-time setup (avatar, username, password)
 - `/review` — Review hub: three accordion sections (Languages, Brain Training, Trivia). Tap to expand, reveals sub-items with live localStorage stats, each navigates to that game/review page.
 - Legacy `/learn/[unitId]` and `/review` still work (mandarin defaults)
@@ -56,10 +57,12 @@ Three-accent system defined in `app/globals.css`:
 - `app/brain-training/page.tsx` — Brain Training hub; Math Blitz + Wordle live, others coming soon
 - `app/brain-training/math-blitz/page.tsx` — Math Blitz game (self-contained client component)
 - `app/brain-training/wordle/page.tsx` — Daily Wordle game (self-contained client component)
+- `app/languages/page.tsx` — **client component** (reads Zustand stores directly via `useStore`). Shows `Lv. X` badge per language using live XP.
 - `app/mandarin/layout.tsx` — provides `mandarinStore` via context
 - `app/german/layout.tsx` — provides `germanStore` via context (separate isolated progress)
 - `app/trivia/actors/page.tsx` — **synchronous** (no async fetch). Builds actor list from `ACTOR_CONFIGS` using local `/public/actors/*.jpg` images. No Wikipedia API calls at runtime.
 - `app/api/avatar/route.ts` — server-side avatar upload using service role key (bypasses RLS). Accepts multipart form data, uploads to `avatars/{userId}/avatar.jpg` in Supabase storage.
+- `app/api/user/[userId]/route.ts` — public profile API: returns username, avatar, status, xp, streak for any user (no auth required).
 - `components/AppSidebar.tsx` — desktop sidebar (lg+ only)
 - `components/SkillTree.tsx` — shared skill tree, takes `units`, `basePath`, `greeting` props
 - `components/SessionRunner.tsx` — runs a lesson session, tracks `pandaMood`, resets on each card
@@ -126,10 +129,14 @@ Three-accent system defined in `app/globals.css`:
 
 ## Profile / Settings (`app/stats/ProfileClient.tsx`)
 - Three tabs: Profile, Leaderboard, Settings
+- Profile tab: avatar, tier badge, XP bar, streak + XP strip, **Language Levels** card (per-language XP bar + tier for Spanish/Mandarin/German). No medals, no streak shield.
+- Leaderboard tab: each row is a `<Link>` to `/stats/user/[userId]` — tap any user to view their public profile.
 - Settings tab: photo upload (with crop modal), username, status (emoji allowed in status text), save button
 - Account section: signed-in email display, Forgot password button (sends Supabase reset email), Sign out
-- No emoji avatar picker, no danger zone / reset progress
+- No emoji avatar picker, no danger zone / reset progress, no streak shield, no medals
 - `CropModal` component: uses pointer events + refs for live gesture state (no stale closure issues). Pinch-to-zoom via two-pointer distance tracking. CSS `transform: scale()` on image — no explicit width/height (prevents distortion).
+- Username cached in `localStorage` as `slubstack_username` (alongside `slubstack_avatar`) for instant load before API response.
+- Shows a skeleton while auth is being verified (instead of blank screen).
 
 ## Actor Blitz trivia game
 - **Images**: 32 actor JPGs stored in `public/actors/` (e.g. `tom_hanks.jpg`, `samuel_l._jackson.jpg`). Filename = `name.replace(/ /g, "_").toLowerCase() + ".jpg"`. **Do not use Wikipedia API or proxy** — Wikimedia rate-limits server IPs (429). Local files serve instantly from Vercel CDN.
@@ -152,7 +159,7 @@ Card shape (all languages):
 ## Interaction system
 Lessons use `LESSON_ORDER` (no flip cards — interactive games only):
 - `"multiple-choice"` — pick the meaning from 4 options
-- `"type"` — type the English meaning
+- `"type"` — type the English meaning. Accepts digit input for number words (e.g. "2" accepted when answer is "two") and vice versa. `norm()` preserves digits; `acceptedAnswers()` expands with digit↔word alternatives via `NUMBER_WORDS` map (0–20, 100, 1000, 10000).
 - `"build"` — arrange character tiles (Mandarin only)
 - `"match"` — tap to match 4 word-pairs across two columns (all languages)
 

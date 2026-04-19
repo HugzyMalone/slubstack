@@ -5,6 +5,8 @@ import {
   Flame, Zap, Trophy, Lock, Mail, Eye, EyeOff, Camera,
   CheckCircle, User, Settings, BarChart3,
 } from "lucide-react";
+import { useStore } from "zustand";
+import { mandarinStore, germanStore, spanishStore } from "@/lib/store";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -311,20 +313,10 @@ function ProfileTab({ user, avatar, username, status }: {
 }) {
   const hydrated = useHydrated();
   const xp = useGameStore((s) => s.xp);
-  const addXp = useGameStore((s) => s.addXp);
   const streak = useGlobalStore((s) => s.streak);
-  const medals = useGlobalStore((s) => s.medals);
-  const streakFreezes = useGlobalStore((s) => s.streakFreezes);
-  const addStreakFreeze = useGlobalStore((s) => s.addStreakFreeze);
-  const [freezeMsg, setFreezeMsg] = useState<string | null>(null);
-
-  function buyFreeze() {
-    if (xp < 200) return;
-    addXp(-200);
-    addStreakFreeze();
-    setFreezeMsg("Shield purchased!");
-    setTimeout(() => setFreezeMsg(null), 2500);
-  }
+  const mandarinXp = useStore(mandarinStore, (s) => s.xp);
+  const germanXp = useStore(germanStore, (s) => s.xp);
+  const spanishXp = useStore(spanishStore, (s) => s.xp);
 
   if (!hydrated) return null;
 
@@ -379,7 +371,7 @@ function ProfileTab({ user, avatar, username, status }: {
         </div>
 
         {/* Stats strip */}
-        <div className="grid grid-cols-5 border-t border-border divide-x divide-border">
+        <div className="grid grid-cols-2 border-t border-border divide-x divide-border">
           <div className="flex flex-col items-center gap-1 py-3 px-1">
             <Flame size={14} className="text-orange-400" />
             <span className="text-sm font-bold tabular-nums leading-none">{streak}d</span>
@@ -390,42 +382,49 @@ function ProfileTab({ user, avatar, username, status }: {
             <span className="text-sm font-bold tabular-nums leading-none">{xp}</span>
             <span className="text-[9px] text-muted leading-none">xp</span>
           </div>
-          {[
-            { emoji: "🥇", value: medals.gold, label: "gold" },
-            { emoji: "🥈", value: medals.silver, label: "silver" },
-            { emoji: "🥉", value: medals.bronze, label: "bronze" },
-          ].map(({ emoji, value, label }) => (
-            <div key={label} className="flex flex-col items-center gap-1 py-3 px-1">
-              <span className="text-sm leading-none">{emoji}</span>
-              <span className="text-sm font-bold tabular-nums leading-none">{value}</span>
-              <span className="text-[9px] text-muted leading-none">{label}</span>
-            </div>
-          ))}
         </div>
       </div>
 
-      {/* Streak Shield */}
-      <div
-        className="rounded-2xl border border-border bg-surface p-4 flex items-center gap-3"
-      >
-        <div className="text-2xl">🛡️</div>
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold">Streak Shield</div>
-          <div className="text-xs text-muted mt-0.5">
-            {streakFreezes > 0
-              ? `${streakFreezes} shield${streakFreezes !== 1 ? "s" : ""} — auto-protect if you miss a day`
-              : "Protects your streak if you miss a day"}
-          </div>
-          {freezeMsg && <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">{freezeMsg}</div>}
+      {/* Language levels */}
+      <div className="rounded-2xl border border-border bg-surface overflow-hidden">
+        <div className="px-4 py-3 border-b border-border">
+          <h3 className="text-sm font-semibold">Language Levels</h3>
         </div>
-        <button
-          onClick={buyFreeze}
-          disabled={xp < 200 || streakFreezes >= 5}
-          className="shrink-0 rounded-xl px-3 py-2 text-xs font-semibold text-white transition-opacity disabled:opacity-40"
-          style={{ background: "var(--accent)" }}
-        >
-          {streakFreezes >= 5 ? "Full" : "Buy · 200 XP"}
-        </button>
+        <div className="divide-y divide-border">
+          {[
+            { label: "Spanish", xp: spanishXp, code: "ES", iconBg: "linear-gradient(135deg, #c2410c 0%, #ea580c 100%)" },
+            { label: "Mandarin", xp: mandarinXp, code: "中", iconBg: "linear-gradient(135deg, #be123c 0%, #e11d48 100%)" },
+            { label: "German", xp: germanXp, code: "DE", iconBg: "linear-gradient(135deg, #c2410c 0%, #f97316 100%)" },
+          ].map(({ label, xp: langXp, code, iconBg }) => {
+            const langLevel = levelFromXp(langXp);
+            const langTier = getTier(langLevel);
+            const { current: lc, next: ln, progress: lp } = xpToNextLevel(langXp);
+            return (
+              <div key={label} className="flex items-center gap-3 px-4 py-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white text-[11px] font-bold" style={{ background: iconBg }}>
+                  {code}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium">{label}</span>
+                    <span className="text-xs font-bold tabular-nums" style={{ color: langTier.color }}>
+                      {langTier.name} · Lv. {langLevel}
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: `${Math.max(0, Math.min(1, lp)) * 100}%`, background: langTier.color }}
+                    />
+                  </div>
+                  <div className="mt-0.5 text-[10px] text-muted tabular-nums">
+                    {langXp - lc} / {ln - lc} XP
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -681,6 +680,7 @@ function SettingsTab({
 
     onUsernameChange(localUsername);
     onStatusChange(localStatus.trim() || null);
+    localStorage.setItem("slubstack_username", localUsername);
     localStorage.setItem("slubstack_avatar", avatar ?? "");
     setSaving(false);
     setSaveMsg("Saved!");
@@ -954,8 +954,8 @@ function XPLeaderboard({ entries }: { entries: LeaderboardEntry[] }) {
         <span className="text-xs font-semibold uppercase tracking-widest text-muted">Ranked by XP</span>
       </div>
       {entries.map((entry, index) => (
-        <div key={entry.userId}
-          className="flex items-center gap-3 rounded-2xl border px-4 py-3.5"
+        <Link key={entry.userId} href={`/stats/user/${entry.userId}`}
+          className="flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-colors active:scale-[0.99]"
           style={{
             borderColor: index === 0 ? "color-mix(in srgb, #f59e0b 30%, var(--border))" : "color-mix(in srgb, var(--fg) 8%, transparent)",
             background: index === 0 ? "color-mix(in srgb, #f59e0b 4%, var(--surface))" : "var(--surface)",
@@ -976,7 +976,8 @@ function XPLeaderboard({ entries }: { entries: LeaderboardEntry[] }) {
               <span className="inline-flex items-center gap-1"><Flame size={10} className="text-orange-400" />{entry.streak}d streak</span>
             </div>
           </div>
-        </div>
+          <span className="text-muted text-xs shrink-0">→</span>
+        </Link>
       ))}
     </div>
   );
@@ -1029,10 +1030,12 @@ export function ProfileClient() {
   const [lbFilter, setLbFilter] = useState<LBFilter>("overall");
   const lbFetchedRef = useRef(false);
 
-  // Eagerly load avatar from cache so it appears instantly
+  // Eagerly load avatar + username from cache so they appear instantly
   useEffect(() => {
-    const cached = localStorage.getItem("slubstack_avatar");
-    if (cached) setAvatar(cached);
+    const cachedAvatar = localStorage.getItem("slubstack_avatar");
+    if (cachedAvatar) setAvatar(cachedAvatar);
+    const cachedUsername = localStorage.getItem("slubstack_username");
+    if (cachedUsername) setUsername(cachedUsername);
   }, []);
 
   useEffect(() => {
@@ -1060,10 +1063,12 @@ export function ProfileClient() {
       .then((r) => r.ok ? r.json() : null)
       .then((data) => {
         if (cancelled || !data?.profile) return;
-        setUsername(data.profile.username ?? "");
+        const uname = data.profile.username ?? "";
+        setUsername(uname);
         const av = data.profile.avatar ?? null;
         setAvatar(av);
         setStatus(data.profile.status ?? null);
+        if (uname) localStorage.setItem("slubstack_username", uname);
         if (av) localStorage.setItem("slubstack_avatar", av);
       })
       .catch(() => {});
@@ -1099,7 +1104,17 @@ export function ProfileClient() {
     setTab("profile");
   }
 
-  if (!authChecked) return null;
+  if (!authChecked) return (
+    <div className="mx-auto max-w-xl px-4 pb-28 pt-4 animate-pulse space-y-3">
+      <div className="h-10 rounded-2xl bg-border/30" />
+      <div className="rounded-3xl border border-border bg-surface p-6 space-y-4">
+        <div className="flex justify-center"><div className="h-24 w-24 rounded-full bg-border" /></div>
+        <div className="mx-auto h-5 w-32 rounded bg-border" />
+        <div className="mx-auto h-3 w-24 rounded bg-border" />
+        <div className="h-1.5 w-full rounded-full bg-border" />
+      </div>
+    </div>
+  );
   if (!user) return <AuthPage />;
 
   return (

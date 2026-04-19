@@ -22,16 +22,34 @@ type Props = {
   onFeedback?: (correct: boolean) => void;
 };
 
+const NUMBER_WORDS: Record<string, string> = {
+  zero: "0", one: "1", two: "2", three: "3", four: "4",
+  five: "5", six: "6", seven: "7", eight: "8", nine: "9",
+  ten: "10", eleven: "11", twelve: "12", thirteen: "13",
+  fourteen: "14", fifteen: "15", sixteen: "16", seventeen: "17",
+  eighteen: "18", nineteen: "19", twenty: "20",
+  "one hundred": "100", "one thousand": "1000", "ten thousand": "10000",
+};
+const DIGIT_WORDS: Record<string, string> = Object.fromEntries(
+  Object.entries(NUMBER_WORDS).map(([w, d]) => [d, w])
+);
+
 function norm(s: string) {
-  return s.trim().toLowerCase().replace(/[^\p{L}\s]/gu, "").replace(/\s+/g, " ");
+  return s.trim().toLowerCase().replace(/[^\p{L}\d\s]/gu, "").replace(/\s+/g, " ");
 }
 
 function acceptedAnswers(english: string): string[] {
-  return english
+  const base = english
     .split(/\/|,/)
     .map((s) => s.replace(/\([^)]*\)/g, "").trim())
     .map(norm)
     .filter(Boolean);
+  const extras: string[] = [];
+  for (const a of base) {
+    if (NUMBER_WORDS[a]) extras.push(NUMBER_WORDS[a]);
+    else if (DIGIT_WORDS[a]) extras.push(norm(DIGIT_WORDS[a]));
+  }
+  return [...new Set([...base, ...extras])];
 }
 
 export function TypeAnswer({ card, onResult, onFeedback }: Props) {

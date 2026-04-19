@@ -1,4 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useStore } from "zustand";
+import { mandarinStore, germanStore, spanishStore } from "@/lib/store";
+import { levelFromXp } from "@/lib/xp";
+import { useHydrated } from "@/lib/hooks";
 
 function ChevronRight() {
   return (
@@ -8,40 +14,42 @@ function ChevronRight() {
   );
 }
 
-const LANGUAGES = [
-  {
-    href: "/spanish",
-    code: "ES",
-    title: "Spanish",
-    description: "Match, quiz & type",
-    iconBg: "linear-gradient(135deg, #c2410c 0%, #ea580c 100%)",
-    badge: null,
-    accentColor: "#c2410c",
-    units: "5 units · 75 words",
-  },
-  {
-    href: "/mandarin",
-    code: "中",
-    title: "Mandarin",
-    description: "Characters, pinyin & phrases",
-    iconBg: "linear-gradient(135deg, #be123c 0%, #e11d48 100%)",
-    badge: null,
-    accentColor: "#e11d48",
-    units: "8 units · 160 cards",
-  },
-  {
-    href: "/german",
-    code: "DE",
-    title: "German",
-    description: "Start with Hallo",
-    iconBg: "linear-gradient(135deg, #c2410c 0%, #f97316 100%)",
-    badge: null,
-    accentColor: "#f97316",
-    units: "2 units · 35 words",
-  },
-];
-
 export default function LanguagesPage() {
+  const hydrated = useHydrated();
+  const spanishXp = useStore(spanishStore, (s) => s.xp);
+  const mandarinXp = useStore(mandarinStore, (s) => s.xp);
+  const germanXp = useStore(germanStore, (s) => s.xp);
+
+  const LANGUAGES = [
+    {
+      href: "/spanish",
+      code: "ES",
+      title: "Spanish",
+      description: "Match, quiz & type",
+      iconBg: "linear-gradient(135deg, #c2410c 0%, #ea580c 100%)",
+      units: "5 units · 75 words",
+      xp: spanishXp,
+    },
+    {
+      href: "/mandarin",
+      code: "中",
+      title: "Mandarin",
+      description: "Characters, pinyin & phrases",
+      iconBg: "linear-gradient(135deg, #be123c 0%, #e11d48 100%)",
+      units: "8 units · 160 cards",
+      xp: mandarinXp,
+    },
+    {
+      href: "/german",
+      code: "DE",
+      title: "German",
+      description: "Start with Hallo",
+      iconBg: "linear-gradient(135deg, #c2410c 0%, #f97316 100%)",
+      units: "2 units · 35 words",
+      xp: germanXp,
+    },
+  ];
+
   return (
     <div className="mx-auto max-w-md px-4 pb-24 pt-8">
       <div className="mb-6">
@@ -50,41 +58,41 @@ export default function LanguagesPage() {
       </div>
 
       <div className="flex flex-col gap-3">
-        {LANGUAGES.map(({ href, code, title, description, iconBg, badge, units }) => (
-          <Link
-            key={href}
-            href={href}
-            className="flex items-center gap-4 rounded-2xl px-5 py-4 transition-all duration-150 active:scale-[0.98]"
-            style={{
-              background: "var(--surface)",
-              border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)",
-              boxShadow: "0 2px 8px color-mix(in srgb, var(--fg) 4%, transparent)",
-            }}
-          >
-            <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white text-sm font-bold"
-              style={{ background: iconBg }}
+        {LANGUAGES.map(({ href, code, title, description, iconBg, units, xp }) => {
+          const level = hydrated ? levelFromXp(xp) : 0;
+          return (
+            <Link
+              key={href}
+              href={href}
+              className="flex items-center gap-4 rounded-2xl px-5 py-4 transition-all duration-150 active:scale-[0.98]"
+              style={{
+                background: "var(--surface)",
+                border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)",
+                boxShadow: "0 2px 8px color-mix(in srgb, var(--fg) 4%, transparent)",
+              }}
             >
-              {code}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[15px] font-semibold">{title}</span>
-                {badge && (
-                  <span
-                    className="rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white"
-                    style={{ background: iconBg }}
-                  >
-                    {badge}
-                  </span>
-                )}
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white text-sm font-bold"
+                style={{ background: iconBg }}
+              >
+                {code}
               </div>
-              <div className="text-sm text-muted">{description}</div>
-              <div className="mt-0.5 text-xs text-muted/60">{units}</div>
-            </div>
-            <span className="shrink-0 text-muted"><ChevronRight /></span>
-          </Link>
-        ))}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[15px] font-semibold">{title}</span>
+                  {hydrated && (
+                    <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-muted/70 bg-border/60">
+                      Lv. {level}
+                    </span>
+                  )}
+                </div>
+                <div className="text-sm text-muted">{description}</div>
+                <div className="mt-0.5 text-xs text-muted/60">{units}</div>
+              </div>
+              <span className="shrink-0 text-muted"><ChevronRight /></span>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
