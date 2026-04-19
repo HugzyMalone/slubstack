@@ -16,6 +16,24 @@ interface GameResult {
   bestStreak: number; isNewBest: boolean; reason: "time" | "lives";
   difficulty: Difficulty;
 }
+interface LBEntry { username: string; avatar: string | null; score: number; correct: number; }
+
+function MiniAvatar({ avatar, username }: { avatar: string | null; username: string }) {
+  if (avatar && (avatar.startsWith("http") || avatar.startsWith("/"))) {
+    return (
+      <div className="h-7 w-7 shrink-0 rounded-full overflow-hidden bg-border">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={avatar} alt={username} className="h-full w-full object-cover" />
+      </div>
+    );
+  }
+  return (
+    <div className="h-7 w-7 shrink-0 rounded-full flex items-center justify-center text-xs"
+      style={{ background: "color-mix(in srgb, var(--game) 20%, var(--surface))" }}>
+      {avatar || username[0]?.toUpperCase() || "?"}
+    </div>
+  );
+}
 
 const GAME_SECS = 30;
 const MAX_LIVES = 3;
@@ -130,6 +148,8 @@ export default function MathBlitzPage() {
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [result, setResult]     = useState<GameResult | null>(null);
   const [bests, setBests]       = useState<Record<Difficulty, number>>({ easy: 0, medium: 0, hard: 0 });
+  const [leaderboard, setLeaderboard] = useState<LBEntry[] | null>(null);
+  const [lbLoading, setLbLoading]     = useState(false);
 
   // Live game state in refs to avoid stale closures in intervals
   const liveRef = useRef({ score: 0, lives: MAX_LIVES, streak: 0, bestStreak: 0, correct: 0, wrong: 0 });
@@ -279,6 +299,21 @@ export default function MathBlitzPage() {
     setPhase("countdown");
   }
 
+  // Fetch leaderboard after game ends (delayed so DB write completes first)
+  useEffect(() => {
+    if (phase !== "result" || !result) return;
+    setLeaderboard(null);
+    setLbLoading(true);
+    const t = setTimeout(() => {
+      fetch(`/api/scores/math-blitz?difficulty=${result.difficulty}`)
+        .then((r) => r.json())
+        .then(({ leaderboard }) => setLeaderboard(leaderboard ?? []))
+        .catch(() => setLeaderboard([]))
+        .finally(() => setLbLoading(false));
+    }, 800);
+    return () => clearTimeout(t);
+  }, [phase, result]);
+
   function resetToSelect() {
     gameActiveRef.current = false;
     setPhase("select");
@@ -286,6 +321,7 @@ export default function MathBlitzPage() {
     setQuestion(null);
     setAnswer("");
     setFeedback(null);
+    setLeaderboard(null);
   }
 
   // ── Select screen ───────────────────────────────────────────────────────────
@@ -444,14 +480,50 @@ export default function MathBlitzPage() {
           </button>
         </div>
 
-        <Link href="/stats"
-          className="mt-6 flex items-center justify-between rounded-2xl border border-border bg-surface px-5 py-4 transition-colors active:scale-[0.99]">
-          <div>
-            <div className="text-sm font-semibold">Math Blitz Leaderboard</div>
-            <div className="mt-0.5 text-xs text-muted">See your best scores &amp; compare</div>
+        {/* Inline leaderboard */}
+        <div className="mt-6">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="text-xs font-semibold uppercase tracking-widest text-muted">
+              {cfg.label} leaderboard
+            </div>
+            <Link href="/stats/math-blitz" className="text-xs text-muted hover:text-fg transition-colors">
+              Full rankings →
+            </Link>
           </div>
-          <Trophy size={16} className="text-muted shrink-0" />
-        </Link>
+
+          {lbLoading ? (
+            <div className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted">
+              Loading…
+            </div>
+          ) : !leaderboard || leaderboard.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-surface p-6 text-center">
+              <div className="text-sm text-muted">No scores yet — you could be first!</div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {leaderboard.slice(0, 5).map((entry, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-2xl border bg-surface px-4 py-3 transition-colors"
+                  style={{ borderColor: entry.score === result.score && entry.username ? "var(--game)" : "var(--border)" }}
+                >
+                  <span className="w-5 text-center text-xs font-bold tabular-nums"
+                    style={{ color: i === 0 ? "#f59e0b" : i === 1 ? "#94a3b8" : i === 2 ? "#b45309" : "var(--muted)" }}>
+                    {i + 1}
+                  </span>
+                  <MiniAvatar avatar={entry.avatar} username={entry.username} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold truncate">{entry.username}</div>
+                    <div className="text-xs text-muted">{entry.correct} correct</div>
+                  </div>
+                  <div className="text-base font-black tabular-nums" style={{ color: cfg.color }}>
+                    {entry.score}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
