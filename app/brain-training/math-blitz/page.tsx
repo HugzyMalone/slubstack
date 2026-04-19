@@ -176,7 +176,7 @@ export default function MathBlitzPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ difficulty: diffRef.current, score, correct }),
-        }).catch(() => {});
+        }).catch((err) => console.error("[MathBlitz] score submit failed:", err));
       });
     }
   }

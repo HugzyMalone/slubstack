@@ -26,7 +26,9 @@ export function CloudSync({ lang = "mandarin" }: Props) {
         if (state && typeof state === "object") {
           mergeFromServer(state as Parameters<typeof mergeFromServer>[0]);
         }
-      } catch {}
+      } catch (err) {
+        console.error("[CloudSync] pull failed:", err);
+      }
     }
 
     supabase.auth.getSession().then(({ data }) => {
@@ -66,7 +68,7 @@ export function CloudSync({ lang = "mandarin" }: Props) {
           seenCardIds: store.seenCardIds,
           srs: store.srs,
         }),
-      }).catch(() => {});
+      }).catch((err) => console.error("[CloudSync] push failed:", err));
     }, 700);
 
     return () => window.clearTimeout(timeout);

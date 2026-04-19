@@ -64,8 +64,15 @@ export async function POST(request: NextRequest) {
     difficulty: string; score: number; correct: number;
   };
 
-  if (!difficulty || typeof score !== "number" || score < 0) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  const VALID_DIFFICULTIES = ["easy", "medium", "hard"] as const;
+  if (!VALID_DIFFICULTIES.includes(difficulty as typeof VALID_DIFFICULTIES[number])) {
+    return NextResponse.json({ error: "Invalid difficulty" }, { status: 400 });
+  }
+  if (typeof score !== "number" || score < 0 || !Number.isInteger(score)) {
+    return NextResponse.json({ error: "Invalid score" }, { status: 400 });
+  }
+  if (typeof correct !== "number" || correct < 0 || !Number.isInteger(correct)) {
+    return NextResponse.json({ error: "Invalid correct count" }, { status: 400 });
   }
 
   const { error } = await supabase.from("math_blitz_scores").insert({
