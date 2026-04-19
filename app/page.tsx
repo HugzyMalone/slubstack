@@ -73,11 +73,11 @@ const SECTIONS = [
     subtitle: "Spanish · Mandarin · German",
   },
   {
-    href: "/vibe-coding",
+    href: "/skills",
     icon: <WandIcon />,
     iconBg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-    title: "Vibe Coding",
-    subtitle: "Claude · Prompting · Web Apps",
+    title: "Skills",
+    subtitle: "Vibe Coding & more",
   },
   {
     href: "/brain-training",

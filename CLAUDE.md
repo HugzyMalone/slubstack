@@ -30,7 +30,7 @@ Three-accent system defined in `app/globals.css`:
 ## App structure
 
 ### Routes
-- `/` — Hub page: **static, no-scroll**. Animal hero (28vh) + hourly rotating fact + 4 section cards (Languages, Vibe Coding, Brain Training, Trivia). Body scroll locked via `useEffect`. No dynamic data. Fact rotates once per hour based on `Math.floor(Date.now() / 3600000) % FACTS.length` — 105 facts across languages, brain science, history, tech, etc.
+- `/` — Hub page: **static, no-scroll**. Animal hero (28vh) + hourly rotating fact + 4 section cards (Languages, Skills, Brain Training, Trivia). Body scroll locked via `useEffect`. No dynamic data. Fact rotates once per hour based on `Math.floor(Date.now() / 3600000) % FACTS.length` — 105 facts across languages, brain science, history, tech, etc.
 - `/spanish` — Spanish skill tree
 - `/spanish/learn/[unitId]` — Spanish lesson (games only: MC, Type, Match)
 - `/spanish/review` — Spanish flashcard review
@@ -40,6 +40,7 @@ Three-accent system defined in `app/globals.css`:
 - `/german` — German skill tree
 - `/german/learn/[unitId]` — German lesson
 - `/german/review` — German flashcard review
+- `/skills` — Skills hub: lists all skill curricula (currently just Vibe Coding), shows level badge per skill
 - `/vibe-coding` — Vibe Coding skill tree (Claude/prompting curriculum)
 - `/vibe-coding/learn/[unitId]` — Vibe Coding lesson (MC, Type, Match)
 - `/vibe-coding/review` — Vibe Coding flashcard review

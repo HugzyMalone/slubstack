@@ -117,7 +117,7 @@ export function AppSidebar() {
       label: "Vibe Coding",
       type: "icon" as const,
       Icon: WandIcon,
-      match: (p: string) => p.startsWith("/vibe-coding"),
+      match: (p: string) => p.startsWith("/vibe-coding") || p.startsWith("/skills"),
     },
     {
       href: "/trivia",
