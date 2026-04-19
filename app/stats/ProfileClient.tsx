@@ -298,8 +298,20 @@ function ProfileTab({ user, avatar, username, status }: {
 }) {
   const hydrated = useHydrated();
   const xp = useGameStore((s) => s.xp);
+  const addXp = useGameStore((s) => s.addXp);
   const streak = useGlobalStore((s) => s.streak);
   const medals = useGlobalStore((s) => s.medals);
+  const streakFreezes = useGlobalStore((s) => s.streakFreezes);
+  const addStreakFreeze = useGlobalStore((s) => s.addStreakFreeze);
+  const [freezeMsg, setFreezeMsg] = useState<string | null>(null);
+
+  function buyFreeze() {
+    if (xp < 200) return;
+    addXp(-200);
+    addStreakFreeze();
+    setFreezeMsg("Shield purchased!");
+    setTimeout(() => setFreezeMsg(null), 2500);
+  }
 
   if (!hydrated) return null;
 
@@ -372,6 +384,30 @@ function ProfileTab({ user, avatar, username, status }: {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Streak Shield */}
+      <div
+        className="rounded-2xl border border-border bg-surface p-4 flex items-center gap-3"
+      >
+        <div className="text-2xl">🛡️</div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-semibold">Streak Shield</div>
+          <div className="text-xs text-muted mt-0.5">
+            {streakFreezes > 0
+              ? `${streakFreezes} shield${streakFreezes !== 1 ? "s" : ""} — auto-protect if you miss a day`
+              : "Protects your streak if you miss a day"}
+          </div>
+          {freezeMsg && <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">{freezeMsg}</div>}
+        </div>
+        <button
+          onClick={buyFreeze}
+          disabled={xp < 200 || streakFreezes >= 5}
+          className="shrink-0 rounded-xl px-3 py-2 text-xs font-semibold text-white transition-opacity disabled:opacity-40"
+          style={{ background: "var(--accent)" }}
+        >
+          {streakFreezes >= 5 ? "Full" : "Buy · 200 XP"}
+        </button>
       </div>
     </div>
   );

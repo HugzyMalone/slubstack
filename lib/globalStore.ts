@@ -6,15 +6,27 @@ import { daysBetween, todayKey } from "@/lib/utils";
 
 export type MedalCounts = { gold: number; silver: number; bronze: number };
 
+export type LastUnit = {
+  lang: string;
+  unitId: string;
+  title: string;
+  emoji: string;
+  href: string;
+};
+
 type GlobalState = {
   streak: number;
   lastActiveDate: string | null;
   medals: MedalCounts;
+  streakFreezes: number;
+  lastUnit: LastUnit | null;
 };
 
 type GlobalActions = {
   touchStreak: () => { streakIncremented: boolean; newStreak: number };
   awardMedal: (type: keyof MedalCounts) => void;
+  addStreakFreeze: () => void;
+  setLastUnit: (unit: LastUnit) => void;
 };
 
 export const globalStore = createStore<GlobalState & GlobalActions>()(
@@ -23,12 +35,18 @@ export const globalStore = createStore<GlobalState & GlobalActions>()(
       streak: 0,
       lastActiveDate: null,
       medals: { gold: 0, silver: 0, bronze: 0 },
+      streakFreezes: 0,
+      lastUnit: null,
 
       touchStreak() {
         const today = todayKey();
-        const { lastActiveDate, streak } = get();
+        const { lastActiveDate, streak, streakFreezes } = get();
         if (lastActiveDate === today) return { streakIncremented: false, newStreak: streak };
         const gap = lastActiveDate ? daysBetween(lastActiveDate, today) : null;
+        if (gap !== null && gap > 1 && streakFreezes > 0) {
+          set((s) => ({ streakFreezes: s.streakFreezes - 1, lastActiveDate: today }));
+          return { streakIncremented: false, newStreak: streak };
+        }
         const newStreak = gap === null ? 1 : gap === 1 ? streak + 1 : 1;
         set({ streak: newStreak, lastActiveDate: today });
         return { streakIncremented: newStreak > streak, newStreak };
@@ -37,8 +55,16 @@ export const globalStore = createStore<GlobalState & GlobalActions>()(
       awardMedal(type) {
         set((s) => ({ medals: { ...s.medals, [type]: s.medals[type] + 1 } }));
       },
+
+      addStreakFreeze() {
+        set((s) => ({ streakFreezes: Math.min(5, s.streakFreezes + 1) }));
+      },
+
+      setLastUnit(unit) {
+        set({ lastUnit: unit });
+      },
     }),
-    { name: "slubstack-global-v1", storage: createJSONStorage(() => localStorage), version: 1 }
+    { name: "slubstack-global-v1", storage: createJSONStorage(() => localStorage), version: 2 }
   )
 );
 

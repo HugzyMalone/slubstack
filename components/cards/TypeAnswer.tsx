@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { Volume2 } from "lucide-react";
 import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
+import { speak, cardLang } from "@/lib/speech";
 import { CardFooter } from "./CardShell";
 
 function wordSize(text: string) {
@@ -65,9 +67,16 @@ export function TypeAnswer({ card, onResult, onFeedback }: Props) {
         Type the meaning
       </div>
 
-      <div className="mx-auto mt-4 max-w-sm rounded-3xl border border-border bg-surface px-5 py-5 text-center">
+      <div className="mx-auto mt-4 max-w-sm rounded-3xl border border-border bg-surface px-5 py-5 text-center relative">
         <div className={`hanzi ${wordSize(card.hanzi)} w-full break-words leading-tight text-fg`}>{card.hanzi}</div>
         <div className="mt-2 text-base text-muted">{card.pinyin}</div>
+        <button
+          onClick={() => speak(card.hanzi, cardLang(card.id))}
+          className="absolute right-3 top-3 rounded-full p-1.5 text-muted hover:text-fg hover:bg-border/50 transition-colors"
+          aria-label="Listen"
+        >
+          <Volume2 size={15} />
+        </button>
       </div>
 
       {/* Input + inline Check — stays visible above keyboard, no fixed footer before submit */}

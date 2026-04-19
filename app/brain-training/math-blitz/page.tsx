@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Trophy, RotateCcw } from "lucide-react";
 import { globalStore } from "@/lib/globalStore";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 type Difficulty = "easy" | "medium" | "hard";
 type Phase = "select" | "countdown" | "playing" | "result";
@@ -166,6 +167,18 @@ export default function MathBlitzPage() {
     const thresholds: Record<string, [number, number]> = { easy: [80, 40], medium: [150, 80], hard: [200, 100] };
     const [goldT, silverT] = thresholds[diffRef.current];
     globalStore.getState().awardMedal(score >= goldT ? "gold" : score >= silverT ? "silver" : "bronze");
+    // Submit score to leaderboard if signed in
+    const supabase = getSupabaseBrowserClient();
+    if (supabase && score > 0) {
+      supabase.auth.getSession().then(({ data }) => {
+        if (!data.session) return;
+        fetch("/api/scores/math-blitz", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ difficulty: diffRef.current, score, correct }),
+        }).catch(() => {});
+      });
+    }
   }
 
   // Countdown

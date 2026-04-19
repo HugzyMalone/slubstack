@@ -43,5 +43,32 @@
     "emoji": "⚡",
     "category": "es-verbs",
     "cardIds": ["es-verb-01","es-verb-02","es-verb-03","es-verb-04","es-verb-05","es-verb-06","es-verb-07","es-verb-08","es-verb-09","es-verb-10","es-verb-11","es-verb-12","es-verb-13","es-verb-14","es-verb-15","es-verb-16"]
+  },
+  {
+    "id": "es-family",
+    "index": 5,
+    "title": "Family",
+    "subtitle": "Madre, padre, hermanos",
+    "emoji": "👨‍👩‍👧",
+    "category": "es-family",
+    "cardIds": ["es-fam-01","es-fam-02","es-fam-03","es-fam-04","es-fam-05","es-fam-06","es-fam-07","es-fam-08","es-fam-09","es-fam-10","es-fam-11","es-fam-12","es-fam-13","es-fam-14"]
+  },
+  {
+    "id": "es-time",
+    "index": 6,
+    "title": "Days & Time",
+    "subtitle": "Days of the week, today, now",
+    "emoji": "📅",
+    "category": "es-time",
+    "cardIds": ["es-time-01","es-time-02","es-time-03","es-time-04","es-time-05","es-time-06","es-time-07","es-time-08","es-time-09","es-time-10","es-time-11","es-time-12","es-time-13","es-time-14","es-time-15"]
+  },
+  {
+    "id": "es-places",
+    "index": 7,
+    "title": "Places",
+    "subtitle": "Casa, escuela, playa y más",
+    "emoji": "🏙️",
+    "category": "es-places",
+    "cardIds": ["es-place-01","es-place-02","es-place-03","es-place-04","es-place-05","es-place-06","es-place-07","es-place-08","es-place-09","es-place-10","es-place-11","es-place-12"]
   }
 ]

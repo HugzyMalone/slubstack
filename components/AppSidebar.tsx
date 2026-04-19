@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, UserCircle2 } from "lucide-react";
+import { useStore } from "zustand";
 import { cn } from "@/lib/utils";
+import { mandarinStore, germanStore, spanishStore } from "@/lib/store";
 
 function GlobeIcon() {
   return (
@@ -39,58 +41,67 @@ function HomeIcon() {
   );
 }
 
-type NavItem = {
-  href: string;
-  label: string;
-  match: (p: string) => boolean;
-} & (
-  | { type: "icon"; Icon: () => React.ReactElement }
-  | { type: "code"; code: string; accent: string }
-);
-
-const navItems: NavItem[] = [
-  {
-    href: "/",
-    label: "Home",
-    type: "icon",
-    Icon: HomeIcon,
-    match: (p) => p === "/" || p === "/mandarin" || p === "/german" || p === "/spanish" || p === "/trivia",
-  },
-  {
-    href: "/spanish",
-    label: "Spanish",
-    type: "code",
-    code: "ES",
-    accent: "#c2410c",
-    match: (p) => p.startsWith("/spanish"),
-  },
-  {
-    href: "/mandarin",
-    label: "Mandarin",
-    type: "code",
-    code: "中",
-    accent: "#e11d48",
-    match: (p) => p.startsWith("/mandarin"),
-  },
-  {
-    href: "/german",
-    label: "German",
-    type: "code",
-    code: "DE",
-    accent: "#f97316",
-    match: (p) => p.startsWith("/german"),
-  },
-  {
-    href: "/trivia",
-    label: "Trivia",
-    type: "icon",
-    Icon: FilmIcon,
-    match: (p) => p.startsWith("/trivia"),
-  },
-];
+function ProgressPip({ done, total }: { done: number; total: number }) {
+  if (done === 0) return null;
+  return (
+    <span className="ml-auto text-[10px] tabular-nums text-muted/70">
+      {done}/{total}
+    </span>
+  );
+}
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const mandarinDone = useStore(mandarinStore, (s) => s.completedUnits.length);
+  const germanDone = useStore(germanStore, (s) => s.completedUnits.length);
+  const spanishDone = useStore(spanishStore, (s) => s.completedUnits.length);
+
+  const langProgress: Record<string, { done: number; total: number }> = {
+    "/spanish":  { done: spanishDone,  total: 8 },
+    "/mandarin": { done: mandarinDone, total: 8 },
+    "/german":   { done: germanDone,   total: 7 },
+  };
+
+  const navItems = [
+    {
+      href: "/",
+      label: "Home",
+      type: "icon" as const,
+      Icon: HomeIcon,
+      match: (p: string) => p === "/" || p === "/mandarin" || p === "/german" || p === "/spanish" || p === "/trivia",
+    },
+    {
+      href: "/spanish",
+      label: "Spanish",
+      type: "code" as const,
+      code: "ES",
+      accent: "#c2410c",
+      match: (p: string) => p.startsWith("/spanish"),
+    },
+    {
+      href: "/mandarin",
+      label: "Mandarin",
+      type: "code" as const,
+      code: "中",
+      accent: "#e11d48",
+      match: (p: string) => p.startsWith("/mandarin"),
+    },
+    {
+      href: "/german",
+      label: "German",
+      type: "code" as const,
+      code: "DE",
+      accent: "#f97316",
+      match: (p: string) => p.startsWith("/german"),
+    },
+    {
+      href: "/trivia",
+      label: "Trivia",
+      type: "icon" as const,
+      Icon: FilmIcon,
+      match: (p: string) => p.startsWith("/trivia"),
+    },
+  ];
 
   return (
     <aside className="hidden lg:flex fixed inset-y-0 left-0 z-40 w-60 flex-col border-r border-border bg-surface">
@@ -111,6 +122,7 @@ export function AppSidebar() {
       <nav className="flex flex-1 flex-col gap-0.5 px-3 py-4">
         {navItems.map((item) => {
           const active = item.match(pathname ?? "");
+          const progress = item.href in langProgress ? langProgress[item.href] : null;
           return (
             <Link
               key={item.label}
@@ -153,6 +165,8 @@ export function AppSidebar() {
               )}
 
               {item.label}
+
+              {progress && <ProgressPip done={progress.done} total={progress.total} />}
             </Link>
           );
         })}

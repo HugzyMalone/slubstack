@@ -5,12 +5,14 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { useGameStore } from "@/lib/store";
 
-export function CloudSync() {
+type Props = { lang?: "mandarin" | "german" | "spanish" };
+
+export function CloudSync({ lang = "mandarin" }: Props) {
   const store = useGameStore();
   const mergeFromServer = useGameStore((s) => s.mergeFromServer);
   const hasPulled = useRef(false);
+  const langParam = lang !== "mandarin" ? `?lang=${lang}` : "";
 
-  // Pull state from server on sign-in (once per session)
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
     if (!supabase || !isSupabaseConfigured()) return;
@@ -19,7 +21,7 @@ export function CloudSync() {
       if (hasPulled.current) return;
       hasPulled.current = true;
       try {
-        const res = await fetch("/api/stats/sync");
+        const res = await fetch(`/api/stats/sync${langParam}`);
         const { state } = (await res.json()) as { state: Record<string, unknown> | null };
         if (state && typeof state === "object") {
           mergeFromServer(state as Parameters<typeof mergeFromServer>[0]);
@@ -39,9 +41,8 @@ export function CloudSync() {
     });
 
     return () => subscription.unsubscribe();
-  }, [mergeFromServer]);
+  }, [mergeFromServer, langParam]);
 
-  // Push full state to server whenever it changes
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
 
@@ -52,7 +53,7 @@ export function CloudSync() {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return;
 
-      fetch("/api/stats/sync", {
+      fetch(`/api/stats/sync${langParam}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -69,7 +70,7 @@ export function CloudSync() {
     }, 700);
 
     return () => window.clearTimeout(timeout);
-  }, [store.xp, store.streak, store.seenCardIds, store.completedUnits, store.srs, store.lastActiveDate]);
+  }, [store.xp, store.streak, store.seenCardIds, store.completedUnits, store.srs, store.lastActiveDate, langParam]);
 
   return null;
 }

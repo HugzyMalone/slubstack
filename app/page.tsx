@@ -2,9 +2,15 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useStore } from "zustand";
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { useGlobalStore } from "@/lib/globalStore";
+import { mandarinStore, germanStore, spanishStore } from "@/lib/store";
+import { isDue } from "@/lib/srs";
+import { todayKey } from "@/lib/utils";
+import { useHydrated } from "@/lib/hooks";
 
 function GlobeIcon() {
   return (
@@ -55,7 +61,6 @@ const SECTIONS = [
     iconBg: "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)",
     title: "Languages",
     subtitle: "Spanish · Mandarin · German",
-    detail: "3 languages",
     badge: null as string | null,
   },
   {
@@ -64,7 +69,6 @@ const SECTIONS = [
     iconBg: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)",
     title: "Brain Training",
     subtitle: "Math Blitz & memory games",
-    detail: "Math · Memory · Speed",
     badge: "New" as string | null,
   },
   {
@@ -73,10 +77,129 @@ const SECTIONS = [
     iconBg: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)",
     title: "Trivia",
     subtitle: "Actor Blitz & more",
-    detail: "Race the clock",
     badge: null as string | null,
   },
 ];
+
+// ── Streak warning ─────────────────────────────────────────────────────────────
+
+function StreakWarning() {
+  const hydrated = useHydrated();
+  const streak = useGlobalStore((s) => s.streak);
+  const lastActiveDate = useGlobalStore((s) => s.lastActiveDate);
+  const streakFreezes = useGlobalStore((s) => s.streakFreezes);
+
+  if (!hydrated || streak === 0) return null;
+  if (lastActiveDate === todayKey()) return null;
+
+  return (
+    <div
+      className="flex items-center gap-3 rounded-2xl px-4 py-3"
+      style={{
+        background: "color-mix(in srgb, #f97316 8%, var(--surface))",
+        border: "1px solid color-mix(in srgb, #f97316 30%, var(--border))",
+      }}
+    >
+      <span className="text-xl">🔥</span>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-semibold">Your {streak}-day streak is at risk!</div>
+        <div className="text-xs text-muted mt-0.5">
+          {streakFreezes > 0
+            ? `Play today or a Shield will auto-protect it (${streakFreezes} left)`
+            : "Play any lesson or game today to keep it alive"}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Due cards banner ───────────────────────────────────────────────────────────
+
+function DueCardsBanner() {
+  const hydrated = useHydrated();
+  const mandarinSrs = useStore(mandarinStore, (s) => s.srs);
+  const germanSrs = useStore(germanStore, (s) => s.srs);
+  const spanishSrs = useStore(spanishStore, (s) => s.srs);
+
+  if (!hydrated) return null;
+
+  const now = Date.now();
+  const counts = {
+    mandarin: Object.values(mandarinSrs).filter((s) => isDue(s, now)).length,
+    german: Object.values(germanSrs).filter((s) => isDue(s, now)).length,
+    spanish: Object.values(spanishSrs).filter((s) => isDue(s, now)).length,
+  };
+  const total = counts.mandarin + counts.german + counts.spanish;
+  if (total === 0) return null;
+
+  const langs = [
+    { key: "mandarin" as const, label: "Mandarin", href: "/mandarin/review" },
+    { key: "german" as const,   label: "German",   href: "/german/review" },
+    { key: "spanish" as const,  label: "Spanish",  href: "/spanish/review" },
+  ].filter((l) => counts[l.key] > 0);
+
+  return (
+    <div
+      className="rounded-2xl px-4 py-3"
+      style={{
+        background: "color-mix(in srgb, var(--learn) 10%, var(--surface))",
+        border: "1px solid color-mix(in srgb, var(--learn) 30%, var(--border))",
+      }}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-base">📚</span>
+        <span className="text-sm font-semibold">{total} card{total !== 1 ? "s" : ""} ready for review</span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {langs.map((l) => (
+          <Link
+            key={l.key}
+            href={l.href}
+            className="rounded-full px-3 py-1 text-xs font-semibold transition-colors"
+            style={{ background: "var(--learn)", color: "#0e7490" }}
+          >
+            {l.label} · {counts[l.key]}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Continue card ──────────────────────────────────────────────────────────────
+
+function ContinueCard() {
+  const hydrated = useHydrated();
+  const lastUnit = useGlobalStore((s) => s.lastUnit);
+  if (!hydrated || !lastUnit) return null;
+
+  return (
+    <Link
+      href={lastUnit.href}
+      className="flex items-center gap-4 rounded-2xl px-5 py-4 transition-all duration-150 active:scale-[0.98]"
+      style={{
+        background: "var(--surface)",
+        border: "1px solid color-mix(in srgb, var(--accent) 25%, var(--border))",
+        boxShadow: "0 2px 8px color-mix(in srgb, var(--accent) 8%, transparent)",
+      }}
+    >
+      <div
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-2xl"
+        style={{ background: "color-mix(in srgb, var(--accent) 12%, var(--surface))" }}
+      >
+        {lastUnit.emoji}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-xs text-muted uppercase tracking-wider">Continue</div>
+        <div className="text-[15px] font-semibold mt-0.5">{lastUnit.title}</div>
+        <div className="text-xs text-muted capitalize">{lastUnit.lang}</div>
+      </div>
+      <span className="shrink-0 text-muted"><ChevronRight /></span>
+    </Link>
+  );
+}
+
+// ── Join CTA ───────────────────────────────────────────────────────────────────
 
 function JoinCTA() {
   const [show, setShow] = useState(false);
@@ -123,6 +246,8 @@ function JoinCTA() {
   );
 }
 
+// ── Hero ───────────────────────────────────────────────────────────────────────
+
 type HeroOption = { char: "panda" | "bear"; mood: "idle" | "happy" | "celebrating" | "sad" | "wrong" };
 const HERO_OPTIONS: HeroOption[] = [
   { char: "panda", mood: "happy" },
@@ -162,6 +287,9 @@ export default function HubPage() {
       </div>
 
       <div className="mt-4 flex flex-col gap-3">
+        <StreakWarning />
+        <ContinueCard />
+
         {SECTIONS.map(({ href, icon, iconBg, title, subtitle, badge }) => (
           <Link
             key={href}
@@ -197,6 +325,7 @@ export default function HubPage() {
           </Link>
         ))}
 
+        <DueCardsBanner />
         <JoinCTA />
       </div>
     </div>

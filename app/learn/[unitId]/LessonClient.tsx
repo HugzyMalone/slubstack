@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { buildUnitSession } from "@/lib/session";
 import { getLanguageContent, type Language } from "@/lib/content";
 import { useGameStore } from "@/lib/store";
+import { globalStore } from "@/lib/globalStore";
 import { SessionRunner } from "@/components/SessionRunner";
 
 export function LessonClient({
@@ -22,6 +23,16 @@ export function LessonClient({
   useEffect(() => setHydrated(true), []);
 
   const content = getLanguageContent(lang);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const unit = content.getUnit(unitId);
+    if (unit) {
+      const href = lang === "mandarin" ? `/learn/${unitId}` : `/${lang}/learn/${unitId}`;
+      globalStore.getState().setLastUnit({ lang, unitId, title: unit.title, emoji: unit.emoji, href });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, unitId, lang]);
 
   const items = useMemo(() => {
     if (!hydrated) return [];
