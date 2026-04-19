@@ -229,6 +229,15 @@ useGameStore(s => s.xp)  // reads from nearest provider
 - Full verification suite: `tests/e2e/full-verification.spec.ts` — covers all routes, nav, API, 404
 - Run with: `pnpm exec playwright test`
 
+### Playwright selector gotchas
+- **BottomNav** has Home (`/`), Review (`/review`), Profile (`/stats`) tabs only — language links (`/spanish` etc.) are desktop sidebar only. Use `a[href="/stats"]` to target BottomNav.
+- **Sidebar nav** is always in the DOM (even on mobile) — `nav` locators that don't scope to viewport-visible elements will find the hidden sidebar. Prefer `aside` or scope to `main`.
+- **Section cards on home page**: the sidebar also has a `/trivia` link — scope card selectors to `main` to avoid double-counting.
+- **Wordle tiles** use only inline styles (no class names) — use `div[style*="perspective"]` to find tile wrappers.
+- **Math Blitz phases**: clicking a difficulty goes to `countdown` (3→2→1→Go!, ~3.5s) before `playing`. Don't assert on math question text immediately; assert the select screen disappears instead.
+- **Actor Blitz lobby**: initial state shows "Let's Go →" / "Loading actors…" button — no actor images until the game starts. Match `/let.s go|loading actors/i`.
+- **Hourly fact regex**: home page facts contain apostrophes (`Alzheimer's`) which break `\w` sequences — use `/.{40,}/` not `/\w{10,}/` to match any fact.
+
 ## Deployment
 - `proxy.ts` (root) — Next.js 16 proxy (formerly `middleware.ts`); refreshes Supabase session cookies on every request. Export must be named `proxy` (not `middleware`).
 - GitHub: `HugzyMalone/slubstack` — Vercel auto-deploys on push to `main`
