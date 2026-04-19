@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { CheckCircle, XCircle, Clipboard, ClipboardCheck, ChevronDown } from "lucide-react";
 import type { ActorData } from "@/app/trivia/actors/page";
 import { globalStore } from "@/lib/globalStore";
+import { triviaStore } from "@/lib/store";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -213,6 +214,7 @@ export function ActorBlitz({ actors }: Props) {
       globalStore.getState().touchStreak();
       const acc = t > 0 ? c / t : 0;
       globalStore.getState().awardMedal(acc >= 0.9 ? "gold" : acc >= 0.7 ? "silver" : "bronze");
+      if (c > 0) triviaStore.getState().addXp(c * 8);
       // Submit score to leaderboard
       fetch("/api/scores/actor-blitz", {
         method: "POST",

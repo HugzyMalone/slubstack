@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getDailyWord, getTodayStr, getDayIndex, isValidGuess } from "@/lib/wordle-words";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { brainTrainingStore } from "@/lib/store";
 
 type TileState = "correct" | "present" | "absent" | "empty" | "active";
 type GamePhase = "playing" | "won" | "lost";
@@ -428,6 +429,7 @@ export default function WordlePage() {
         if (won) showToast(WIN_MSGS[Math.min(rowIdx, WIN_MSGS.length - 1)], 2500);
         else showToast(`The word was ${solution}`, 3000);
         submitScore(newGuesses.length, won);
+        brainTrainingStore.getState().addXp(won ? 75 : 15);
       } else {
         saveGame({ date: todayStr, guesses: newGuesses, phase: "playing" });
       }

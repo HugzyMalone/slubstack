@@ -2,9 +2,27 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useStore } from "zustand";
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
+import { mandarinStore, germanStore, spanishStore, vibeCodingStore, brainTrainingStore, triviaStore } from "@/lib/store";
+import { levelFromXp } from "@/lib/xp";
+
+function SparkleIcon() {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className="mt-0.5 shrink-0"
+      style={{ color: "var(--accent)" }}
+    >
+      <path d="M12 1 L14.3 9.7 L23 12 L14.3 14.3 L12 23 L9.7 14.3 L1 12 L9.7 9.7 Z" />
+    </svg>
+  );
+}
 
 function GlobeIcon() {
   return (
@@ -56,19 +74,12 @@ function WandIcon() {
   );
 }
 
-function ChevronRight() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 18l6-6-6-6" />
-    </svg>
-  );
-}
-
 const SECTIONS = [
   {
     href: "/languages",
     icon: <GlobeIcon />,
     iconBg: "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)",
+    cardTint: "#6366f1",
     title: "Languages",
     subtitle: "Spanish · Mandarin · German",
   },
@@ -76,6 +87,7 @@ const SECTIONS = [
     href: "/skills",
     icon: <WandIcon />,
     iconBg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+    cardTint: "#f59e0b",
     title: "Skills",
     subtitle: "Vibe Coding & more",
   },
@@ -83,6 +95,7 @@ const SECTIONS = [
     href: "/brain-training",
     icon: <BrainIcon />,
     iconBg: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)",
+    cardTint: "#0ea5e9",
     title: "Brain Training",
     subtitle: "Math Blitz & memory games",
   },
@@ -90,6 +103,7 @@ const SECTIONS = [
     href: "/trivia",
     icon: <FilmIcon />,
     iconBg: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)",
+    cardTint: "#a855f7",
     title: "Trivia",
     subtitle: "Actor Blitz & more",
   },
@@ -252,9 +266,33 @@ const HERO_OPTIONS: HeroOption[] = [
 
 const HERO_SESSION_KEY = "slubstack_home_hero";
 
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return "Good morning";
+  if (h >= 12 && h < 18) return "Good afternoon";
+  if (h >= 18 && h < 22) return "Good evening";
+  return "Welcome back";
+}
+
 export default function HubPage() {
   const [hero, setHero] = useState<HeroOption>(HERO_OPTIONS[0]);
   const [factIdx, setFactIdx] = useState(0);
+  const [greeting, setGreeting] = useState("");
+  const prefersReducedMotion = useReducedMotion();
+
+  // Live levels from stores
+  const mandarinXp = useStore(mandarinStore, s => s.xp);
+  const germanXp = useStore(germanStore, s => s.xp);
+  const spanishXp = useStore(spanishStore, s => s.xp);
+  const vibeXp = useStore(vibeCodingStore, s => s.xp);
+  const brainXp = useStore(brainTrainingStore, s => s.xp);
+  const triviaXp = useStore(triviaStore, s => s.xp);
+  const sectionLevels = [
+    levelFromXp(mandarinXp + germanXp + spanishXp),
+    levelFromXp(vibeXp),
+    levelFromXp(brainXp),
+    levelFromXp(triviaXp),
+  ];
 
   useEffect(() => {
     try {
@@ -267,67 +305,144 @@ export default function HubPage() {
   }, []);
 
   useEffect(() => {
-    // Pick fact based on current hour — changes once per hour
     setFactIdx(Math.floor(Date.now() / (1000 * 60 * 60)) % FACTS.length);
+    setGreeting(getGreeting());
   }, []);
 
-  // Lock scroll on home page
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, []);
 
+  const cycleFact = () => setFactIdx(prev => (prev + 1) % FACTS.length);
+
   return (
     <div
-      className="flex flex-col px-4 lg:px-6"
+      className="relative flex flex-col overflow-hidden px-4 lg:px-6"
       style={{ height: "calc(100dvh - 52px - env(safe-area-inset-top, 0px))" }}
     >
-      {/* Hero animal */}
-      <div className="relative flex-shrink-0" style={{ height: "28vh", maxHeight: 240 }}>
+      {/* Subtle accent glow behind hero */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          zIndex: -1,
+          background:
+            "radial-gradient(ellipse 100% 50% at 50% -5%, color-mix(in srgb, var(--accent) 14%, transparent), transparent)",
+        }}
+      />
+
+      {/* Greeting */}
+      <motion.p
+        className="flex-shrink-0 pt-2.5 pb-0.5 text-center text-[11px] font-semibold tracking-widest text-muted uppercase"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: greeting ? 1 : 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        {greeting || "\u00A0"}
+      </motion.p>
+
+      {/* Hero animal — floating animation */}
+      <motion.div
+        className="relative flex-shrink-0"
+        style={{ height: "26vh", maxHeight: 210 }}
+        animate={prefersReducedMotion ? {} : { y: [0, -7, 0] }}
+        transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
+      >
         {hero.char === "bear"
           ? <Bear mood={hero.mood} fill />
           : <Panda mood={hero.mood} fill />}
-      </div>
+      </motion.div>
 
-      {/* Fact of the hour */}
-      <div className="flex-shrink-0 px-1 py-3 text-center" style={{ minHeight: 56 }}>
-        <motion.p
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-xs text-muted leading-relaxed mx-auto"
-          style={{ maxWidth: 320 }}
+      {/* Fact of the hour — tappable callout */}
+      <motion.div
+        className="flex-shrink-0 mb-2.5"
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <button
+          onClick={cycleFact}
+          className="w-full text-left"
+          aria-label="Show another fact"
         >
-          {FACTS[factIdx]}
-        </motion.p>
-      </div>
-
-      {/* Section cards */}
-      <div className="flex flex-col gap-2.5 pb-[max(calc(env(safe-area-inset-bottom,0px)+72px),88px)] lg:pb-4">
-        {SECTIONS.map(({ href, icon, iconBg, title, subtitle }) => (
-          <Link
-            key={href}
-            href={href}
-            className="flex items-center gap-4 rounded-2xl px-5 py-3.5 transition-all duration-150 active:scale-[0.98]"
+          <div
+            className="flex items-start gap-2.5 rounded-2xl px-4 py-2.5 transition-opacity duration-150 active:opacity-70"
             style={{
-              background: "var(--surface)",
-              border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)",
-              boxShadow: "0 2px 8px color-mix(in srgb, var(--fg) 4%, transparent)",
+              background: "color-mix(in srgb, var(--accent) 8%, var(--surface))",
+              border: "1px solid color-mix(in srgb, var(--accent) 18%, transparent)",
             }}
           >
-            <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
-              style={{ background: iconBg }}
+            <SparkleIcon />
+            <div className="flex-1 overflow-hidden">
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={factIdx}
+                  initial={{ opacity: 0, x: 14 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -14 }}
+                  transition={{ duration: 0.22, ease: "easeOut" }}
+                  className="text-[12px] leading-relaxed text-muted"
+                >
+                  {FACTS[factIdx]}
+                </motion.p>
+              </AnimatePresence>
+            </div>
+          </div>
+        </button>
+      </motion.div>
+
+      {/* Section cards — 2×2 on mobile, 4-col row on desktop */}
+      <div className="flex-1 min-h-0 grid grid-cols-2 gap-2.5 pb-[max(calc(env(safe-area-inset-bottom,0px)+72px),88px)] lg:grid-cols-4 lg:flex-none lg:max-h-[280px] lg:pb-4">
+        {SECTIONS.map(({ href, icon, iconBg, cardTint, title, subtitle }, i) => {
+          const level = sectionLevels[i];
+          return (
+            <motion.div
+              key={href}
+              className="h-full"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: 0.15 + i * 0.07,
+                duration: 0.4,
+                ease: [0.25, 0.46, 0.45, 0.94],
+              }}
             >
-              {icon}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-[15px] font-semibold">{title}</div>
-              <div className="mt-0.5 text-sm text-muted">{subtitle}</div>
-            </div>
-            <span className="shrink-0 text-muted"><ChevronRight /></span>
-          </Link>
-        ))}
+              <Link
+                href={href}
+                className="relative flex h-full flex-col items-center justify-center gap-2.5 rounded-2xl p-3 transition-transform duration-150 active:scale-[0.97]"
+                style={{
+                  background: `color-mix(in srgb, ${cardTint} 10%, var(--surface))`,
+                  border: `1px solid color-mix(in srgb, ${cardTint} 22%, transparent)`,
+                  boxShadow: `0 4px 20px color-mix(in srgb, ${cardTint} 10%, transparent)`,
+                }}
+              >
+                {/* Live level badge */}
+                {level > 0 && (
+                  <span
+                    className="absolute top-2 right-2 rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none"
+                    style={{
+                      background: `color-mix(in srgb, ${cardTint} 20%, var(--surface))`,
+                      color: cardTint,
+                      border: `1px solid color-mix(in srgb, ${cardTint} 30%, transparent)`,
+                    }}
+                  >
+                    Lv.{level}
+                  </span>
+                )}
+                <div
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white"
+                  style={{ background: iconBg }}
+                >
+                  {icon}
+                </div>
+                <div className="text-center">
+                  <div className="text-[14px] font-bold leading-tight">{title}</div>
+                  <div className="mt-0.5 text-[11px] leading-tight text-muted">{subtitle}</div>
+                </div>
+              </Link>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

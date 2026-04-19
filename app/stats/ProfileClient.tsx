@@ -3,10 +3,10 @@
 import { useEffect, useState, useRef } from "react";
 import {
   Flame, Zap, Trophy, Lock, Mail, Eye, EyeOff, Camera,
-  CheckCircle, User, Settings, BarChart3,
+  User, Settings, BarChart3,
 } from "lucide-react";
 import { useStore } from "zustand";
-import { mandarinStore, germanStore, spanishStore, vibeCodingStore } from "@/lib/store";
+import { mandarinStore, germanStore, spanishStore, vibeCodingStore, brainTrainingStore, triviaStore } from "@/lib/store";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -93,12 +93,6 @@ function AvatarDisplay({
 
 // ── Auth page (unauthenticated) ────────────────────────────────────────────
 
-const FEATURES = [
-  "Free forever — no credit card needed",
-  "Progress saved and synced to the cloud",
-  "Compete on the global leaderboard",
-  "Daily streak & XP tracking across all games",
-];
 
 function AuthPage() {
   const [mode, setMode] = useState<"signin" | "create">("signin");
@@ -115,6 +109,25 @@ function AuthPage() {
         Configure Supabase environment variables to enable sign-in.
       </div>
     );
+  }
+
+  async function handleGoogle() {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+    markStaySignedIn(stay);
+    setLoading(true); setMsg(null);
+    const redirectTo =
+      typeof window === "undefined"
+        ? undefined
+        : `${window.location.origin}/auth/callback?next=/onboarding`;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo },
+    });
+    if (error) {
+      setLoading(false);
+      setMsg({ text: error.message, ok: false });
+    }
   }
 
   async function handleSignIn(e: React.FormEvent) {
@@ -150,128 +163,104 @@ function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100dvh-56px-60px)] lg:min-h-[calc(100dvh-56px)] flex-col items-center justify-center px-4 py-8">
-      {/* Brand */}
-      <div className="mb-8 text-center select-none">
-        <div
-          className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl text-white text-2xl font-black shadow-lg"
-          style={{ background: "linear-gradient(135deg, var(--accent) 0%, #ea580c 100%)" }}
-        >
-          S
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight">slubstack</h1>
-        <p className="mt-1 text-sm text-muted">Learn languages. Track progress. Compete.</p>
+    <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden px-4 lg:static lg:min-h-dvh lg:overflow-visible lg:px-6 lg:py-10">
+      <div className="mb-5 text-center select-none lg:mb-8">
+        <img src="/slubstack-logo.png" alt="Slubstack" className="mx-auto h-12 w-auto lg:h-20" />
+        <h1 className="hidden lg:mt-4 lg:block lg:text-3xl lg:font-bold lg:tracking-tight">slubstack</h1>
+        <p className="hidden lg:mt-1.5 lg:block lg:text-sm lg:text-muted">Learn languages. Track progress. Compete.</p>
       </div>
 
-      {/* Card */}
       <div
-        className="w-full max-w-sm rounded-3xl border border-border bg-surface shadow-xl shadow-black/5"
+        className="w-full max-w-sm rounded-3xl border border-border bg-surface lg:max-w-md"
         style={{ boxShadow: "0 8px 40px color-mix(in srgb, var(--fg) 8%, transparent)" }}
       >
-        {/* Mode toggle */}
-        <div className="flex rounded-3xl rounded-b-none p-1.5 gap-1" style={{ borderBottom: "1px solid var(--border)" }}>
+        <div className="flex gap-1 border-b border-border p-1.5 lg:p-2">
           {(["signin", "create"] as const).map((m) => (
             <button
               key={m}
               onClick={() => { setMode(m); setMsg(null); }}
-              className={`flex-1 rounded-2xl py-2.5 text-sm font-semibold transition-all duration-150 ${
-                mode === m
-                  ? "bg-bg text-fg shadow-sm"
-                  : "text-muted hover:text-fg"
+              className={`flex-1 rounded-2xl py-2 text-sm font-semibold transition-colors lg:py-3 lg:text-[15px] ${
+                mode === m ? "bg-bg text-fg shadow-sm" : "text-muted hover:text-fg"
               }`}
             >
-              {m === "signin" ? "Sign in" : "Create account"}
+              {m === "signin" ? "Log in" : "Create account"}
             </button>
           ))}
         </div>
 
-        <div className="px-6 pb-6 pt-5">
+        <div className="px-5 pb-5 pt-4 lg:px-8 lg:pb-8 lg:pt-6">
+          <button
+            type="button"
+            onClick={handleGoogle}
+            disabled={loading}
+            className="mb-3 flex w-full items-center justify-center gap-2.5 rounded-xl border border-border bg-bg py-2.5 text-sm font-semibold transition-colors hover:bg-surface disabled:opacity-50 lg:mb-4 lg:py-3.5 lg:text-[15px]"
+          >
+            <svg className="lg:h-5 lg:w-5" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.2s2.7-6.2 6-6.2c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.7 3.3 14.6 2.3 12 2.3 6.9 2.3 2.8 6.4 2.8 11.5S6.9 20.7 12 20.7c6.9 0 9.5-4.8 9.5-7.3 0-.5-.05-.9-.12-1.3H12z"/>
+            </svg>
+            Continue with Google
+          </button>
+
+          <div className="mb-3 flex items-center gap-3 lg:mb-4">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-muted">or</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
           {mode === "signin" ? (
-            <form onSubmit={handleSignIn} className="space-y-4">
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted">Email address</label>
-                <div className="relative">
-                  <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
-                  <input
-                    type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com" autoComplete="email" required
-                    className="w-full rounded-xl border border-border bg-bg py-3 pl-9 pr-4 text-sm outline-none placeholder:text-muted focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 transition-colors"
-                  />
-                </div>
+            <form onSubmit={handleSignIn} className="space-y-3 lg:space-y-4">
+              <div className="relative">
+                <Mail size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+                <input
+                  type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email" autoComplete="email" required
+                  className="w-full rounded-xl border border-border bg-bg py-2.5 pl-9 pr-4 text-sm outline-none placeholder:text-muted focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 lg:py-3.5 lg:text-[15px]"
+                />
               </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted">Password</label>
-                <div className="relative">
-                  <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
-                  <input
-                    type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Your password" autoComplete="current-password" required
-                    className="w-full rounded-xl border border-border bg-bg py-3 pl-9 pr-10 text-sm outline-none placeholder:text-muted focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 transition-colors"
-                  />
-                  <button type="button" onClick={() => setShowPw((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-fg"
-                    aria-label={showPw ? "Hide password" : "Show password"}>
-                    {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
-                  </button>
-                </div>
+              <div className="relative">
+                <Lock size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+                <input
+                  type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password" autoComplete="current-password" required
+                  className="w-full rounded-xl border border-border bg-bg py-2.5 pl-9 pr-10 text-sm outline-none placeholder:text-muted focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 lg:py-3.5 lg:text-[15px]"
+                />
+                <button type="button" onClick={() => setShowPw((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-fg"
+                  aria-label={showPw ? "Hide password" : "Show password"}>
+                  {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
               </div>
-
-              <label className="flex cursor-pointer items-center gap-2.5">
-                <input type="checkbox" checked={stay} onChange={(e) => setStay(e.target.checked)}
-                  className="h-4 w-4 rounded accent-[var(--accent)]" />
-                <span className="text-sm text-muted">Stay signed in on this device</span>
-              </label>
-
               <button
                 type="submit" disabled={loading || !email || !password}
-                className="w-full rounded-xl py-3.5 text-sm font-bold text-white shadow-md transition-all duration-150 active:scale-[0.98] disabled:opacity-50"
+                className="w-full rounded-xl py-3 text-sm font-bold text-white shadow-md transition-all active:scale-[0.98] disabled:opacity-50 lg:py-4 lg:text-[15px]"
                 style={{ background: "var(--accent)", boxShadow: "0 4px 14px color-mix(in srgb, var(--accent) 30%, transparent)" }}
               >
-                {loading ? "Signing in…" : "Sign in →"}
-              </button>
-
-              <button type="button" onClick={() => { setMode("create"); setMsg(null); }}
-                className="w-full pt-0.5 text-center text-sm text-muted hover:text-fg transition-colors">
-                New to Slubstack? Create a free account
+                {loading ? "Signing in…" : "Log in"}
               </button>
             </form>
           ) : (
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div className="rounded-xl border border-border bg-bg/50 px-4 py-3 text-xs text-muted leading-relaxed">
-                We&apos;ll email you a magic link. No password needed to get started — you can set one later.
+            <form onSubmit={handleCreate} className="space-y-3 lg:space-y-4">
+              <div className="relative">
+                <Mail size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+                <input
+                  type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email" autoComplete="email" required
+                  className="w-full rounded-xl border border-border bg-bg py-2.5 pl-9 pr-4 text-sm outline-none placeholder:text-muted focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 lg:py-3.5 lg:text-[15px]"
+                />
               </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted">Your email address</label>
-                <div className="relative">
-                  <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
-                  <input
-                    type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com" autoComplete="email" required
-                    className="w-full rounded-xl border border-border bg-bg py-3 pl-9 pr-4 text-sm outline-none placeholder:text-muted focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/30 transition-colors"
-                  />
-                </div>
-              </div>
-
               <button
                 type="submit" disabled={loading || !email}
-                className="w-full rounded-xl py-3.5 text-sm font-bold text-white shadow-md transition-all duration-150 active:scale-[0.98] disabled:opacity-50"
+                className="w-full rounded-xl py-3 text-sm font-bold text-white shadow-md transition-all active:scale-[0.98] disabled:opacity-50 lg:py-4 lg:text-[15px]"
                 style={{ background: "var(--accent)", boxShadow: "0 4px 14px color-mix(in srgb, var(--accent) 30%, transparent)" }}
               >
-                {loading ? "Sending…" : "Send magic link →"}
-              </button>
-
-              <button type="button" onClick={() => { setMode("signin"); setMsg(null); }}
-                className="w-full pt-0.5 text-center text-sm text-muted hover:text-fg transition-colors">
-                Already have an account? Sign in
+                {loading ? "Sending…" : "Send magic link"}
               </button>
             </form>
           )}
 
           {msg && (
             <div
-              className="mt-4 rounded-xl px-4 py-3 text-sm"
+              className="mt-3 rounded-xl px-3 py-2 text-xs lg:mt-4 lg:text-sm"
               style={{
                 background: msg.ok
                   ? "color-mix(in srgb, #10b981 10%, transparent)"
@@ -283,24 +272,11 @@ function AuthPage() {
             </div>
           )}
         </div>
-
-        {/* Trust footer */}
-        <div className="rounded-b-3xl border-t border-border px-6 py-3">
-          <p className="flex items-center gap-1.5 text-xs text-muted">
-            <Lock size={11} /> Your data is encrypted and never shared.
-          </p>
-        </div>
       </div>
 
-      {/* Feature list */}
-      <ul className="mt-8 w-full max-w-xs space-y-2.5">
-        {FEATURES.map((f) => (
-          <li key={f} className="flex items-start gap-2.5 text-sm text-muted">
-            <CheckCircle size={15} className="mt-0.5 shrink-0 text-emerald-500" />
-            {f}
-          </li>
-        ))}
-      </ul>
+      <p className="mt-6 hidden text-xs text-muted lg:block">
+        Your data is encrypted and never shared.
+      </p>
     </div>
   );
 }
@@ -322,6 +298,8 @@ function ProfileTab({ user, avatar, username, status }: {
   const germanXp = useStore(germanStore, (s) => s.xp);
   const spanishXp = useStore(spanishStore, (s) => s.xp);
   const vibeXp = useStore(vibeCodingStore, (s) => s.xp);
+  const brainXp = useStore(brainTrainingStore, (s) => s.xp);
+  const triviaXp = useStore(triviaStore, (s) => s.xp);
 
   const [levelTab, setLevelTab] = useState<LevelCategory>("languages");
   const [mathBests, setMathBests] = useState<MathBests>({ easy: 0, medium: 0, hard: 0 });
@@ -487,58 +465,98 @@ function ProfileTab({ user, avatar, username, status }: {
         )}
 
         {/* Brain Training */}
-        {levelTab === "brain" && (
-          <div className="divide-y divide-border">
-            {[
-              { label: "Math Blitz · Easy",   score: mathBests.easy,   color: "#10b981" },
-              { label: "Math Blitz · Medium", score: mathBests.medium, color: "#f59e0b" },
-              { label: "Math Blitz · Hard",   score: mathBests.hard,   color: "#ef4444" },
-            ].map(({ label, score, color }) => (
-              <div key={label} className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm">{label}</span>
-                <span className="text-sm font-bold tabular-nums" style={{ color: score > 0 ? color : undefined }}>
-                  {score > 0 ? score : <span className="text-muted">—</span>}
+        {levelTab === "brain" && (() => {
+          const bLevel = levelFromXp(brainXp);
+          const bTier = getTier(bLevel);
+          const { current: bc, next: bn, progress: bp } = xpToNextLevel(brainXp);
+          return (
+            <div className="divide-y divide-border">
+              {/* Level bar */}
+              <div className="flex items-center gap-3 px-4 py-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white text-[13px] font-bold" style={{ background: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)" }}>🧠</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium">Brain Training</span>
+                    <span className="text-xs font-bold tabular-nums" style={{ color: bTier.color }}>{bTier.name} · Lv. {bLevel}</span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
+                    <div className="h-full rounded-full" style={{ width: `${Math.max(0, Math.min(1, bp)) * 100}%`, background: bTier.color }} />
+                  </div>
+                  <div className="mt-0.5 text-[10px] text-muted tabular-nums">{brainXp - bc} / {bn - bc} XP</div>
+                </div>
+              </div>
+              {/* Per-game stats */}
+              {[
+                { label: "Math Blitz · Easy",   score: mathBests.easy,   color: "#10b981" },
+                { label: "Math Blitz · Medium", score: mathBests.medium, color: "#f59e0b" },
+                { label: "Math Blitz · Hard",   score: mathBests.hard,   color: "#ef4444" },
+              ].map(({ label, score, color }) => (
+                <div key={label} className="flex items-center justify-between px-4 py-3">
+                  <span className="text-sm">{label}</span>
+                  <span className="text-sm font-bold tabular-nums" style={{ color: score > 0 ? color : undefined }}>
+                    {score > 0 ? score : <span className="text-muted">—</span>}
+                  </span>
+                </div>
+              ))}
+              <div className="flex items-center justify-between px-4 py-3">
+                <span className="text-sm">Wordle · Today</span>
+                <span className="text-sm font-bold tabular-nums" style={{ color: wordleToday?.phase === "won" ? "#10b981" : wordleToday?.phase === "lost" ? "#ef4444" : undefined }}>
+                  {wordleToday?.phase === "won"
+                    ? `${wordleToday.attempts}/6 ✓`
+                    : wordleToday?.phase === "lost"
+                    ? "X/6"
+                    : wordleToday?.phase === "playing"
+                    ? `${wordleToday.attempts}/6…`
+                    : <span className="text-muted">—</span>}
                 </span>
               </div>
-            ))}
-            <div className="flex items-center justify-between px-4 py-3">
-              <span className="text-sm">Wordle · Today</span>
-              <span className="text-sm font-bold tabular-nums" style={{ color: wordleToday?.phase === "won" ? "#10b981" : wordleToday?.phase === "lost" ? "#ef4444" : undefined }}>
-                {wordleToday?.phase === "won"
-                  ? `${wordleToday.attempts}/6 ✓`
-                  : wordleToday?.phase === "lost"
-                  ? "X/6"
-                  : wordleToday?.phase === "playing"
-                  ? `${wordleToday.attempts}/6…`
-                  : <span className="text-muted">—</span>}
-              </span>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Trivia */}
-        {levelTab === "trivia" && (
-          <div className="divide-y divide-border">
-            {actorBest ? (
-              <>
-                <div className="flex items-center justify-between px-4 py-3">
-                  <span className="text-sm">Actor Blitz · Best Score</span>
-                  <span className="text-sm font-bold tabular-nums" style={{ color: "var(--game)" }}>{actorBest.score}</span>
+        {levelTab === "trivia" && (() => {
+          const tLevel = levelFromXp(triviaXp);
+          const tTier = getTier(tLevel);
+          const { current: tc, next: tn, progress: tp } = xpToNextLevel(triviaXp);
+          return (
+            <div className="divide-y divide-border">
+              {/* Level bar */}
+              <div className="flex items-center gap-3 px-4 py-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white text-[13px] font-bold" style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)" }}>🎬</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium">Trivia</span>
+                    <span className="text-xs font-bold tabular-nums" style={{ color: tTier.color }}>{tTier.name} · Lv. {tLevel}</span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
+                    <div className="h-full rounded-full" style={{ width: `${Math.max(0, Math.min(1, tp)) * 100}%`, background: tTier.color }} />
+                  </div>
+                  <div className="mt-0.5 text-[10px] text-muted tabular-nums">{triviaXp - tc} / {tn - tc} XP</div>
                 </div>
-                <div className="flex items-center justify-between px-4 py-3">
-                  <span className="text-sm">Best Accuracy</span>
-                  <span className="text-sm font-bold tabular-nums">{actorBest.accuracy}%</span>
-                </div>
-                <div className="flex items-center justify-between px-4 py-3">
-                  <span className="text-sm">Best Streak</span>
-                  <span className="text-sm font-bold tabular-nums">{actorBest.bestStreak}</span>
-                </div>
-              </>
-            ) : (
-              <div className="px-4 py-6 text-center text-sm text-muted">No games played yet</div>
-            )}
-          </div>
-        )}
+              </div>
+              {/* Per-game stats */}
+              {actorBest ? (
+                <>
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <span className="text-sm">Actor Blitz · Best Score</span>
+                    <span className="text-sm font-bold tabular-nums" style={{ color: "var(--game)" }}>{actorBest.score}</span>
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <span className="text-sm">Best Accuracy</span>
+                    <span className="text-sm font-bold tabular-nums">{actorBest.accuracy}%</span>
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <span className="text-sm">Best Streak</span>
+                    <span className="text-sm font-bold tabular-nums">{actorBest.bestStreak}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="px-4 py-6 text-center text-sm text-muted">No games played yet</div>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

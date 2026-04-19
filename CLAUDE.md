@@ -6,7 +6,7 @@ Mandarin, German & Spanish language PWA with a hub home screen. Next.js App Rout
 
 ## Stack
 - **Next.js 16** (App Router, Turbopack) — see AGENTS.md for version caveats
-- **Supabase** — auth (magic link + email/password), profiles, user_stats, leaderboard
+- **Supabase** — auth (Google OAuth + magic link + email/password), profiles, user_stats, leaderboard
 - **Zustand** (persisted to localStorage) — per-language game state
 - **Framer Motion** — card animations
 - **Tailwind CSS v4** with CSS custom properties (`--accent`, `--bg`, `--surface`, etc.)
@@ -30,7 +30,7 @@ Three-accent system defined in `app/globals.css`:
 ## App structure
 
 ### Routes
-- `/` — Hub page: **static, no-scroll**. Animal hero (28vh) + hourly rotating fact + 4 section cards (Languages, Skills, Brain Training, Trivia). Body scroll locked via `useEffect`. No dynamic data. Fact rotates once per hour based on `Math.floor(Date.now() / 3600000) % FACTS.length` — 105 facts across languages, brain science, history, tech, etc.
+- `/` — Hub page: **static, no-scroll**. Time-aware greeting + floating animal hero (26vh, max 210px) + tappable fact callout (cycles through facts on tap, AnimatePresence slide) + 2×2 section card grid (lg: 4-col row). Body scroll locked via `useEffect`. Live `Lv.X` badge on each card from their respective stores. Background radial accent glow. 105 facts across languages, brain science, history, tech, etc.
 - `/spanish` — Spanish skill tree
 - `/spanish/learn/[unitId]` — Spanish lesson (games only: MC, Type, Match)
 - `/spanish/review` — Spanish flashcard review
@@ -58,7 +58,7 @@ Three-accent system defined in `app/globals.css`:
 
 ### Key files
 - `app/layout.tsx` — root layout; has AppSidebar + content wrapper with `lg:ml-60`
-- `app/page.tsx` — static no-scroll hub. Animal hero + hourly rotating fact (105 facts) + 3 section cards. No banners, no continue card, no badges. Body scroll locked on mount.
+- `app/page.tsx` — static no-scroll hub. Greeting + floating hero + tappable fact callout + 2×2 card grid (lg: 4-col). Live `Lv.X` badges from all four stores. Staggered Framer Motion entrance. Body scroll locked on mount.
 - `app/brain-training/page.tsx` — Brain Training hub; Math Blitz + Wordle live, others coming soon
 - `app/brain-training/math-blitz/page.tsx` — Math Blitz game (self-contained client component)
 - `app/brain-training/wordle/page.tsx` — Daily Wordle game (self-contained client component)
@@ -79,7 +79,7 @@ Three-accent system defined in `app/globals.css`:
 - `components/BottomNav.tsx` — `lg:hidden`; hidden during lessons (`/*/learn/*`) **and on all game pages** (`/brain-training/wordle`, `/brain-training/math-blitz`, `/trivia/actors`) so the nav never overlaps game UI. Uses per-tab opacity/scale transitions (not `layoutId` FLIP — avoids layout measurement jank).
 - `components/CloudSync.tsx` — syncs language store to Supabase; mounted in all four language/skill layouts (mandarin/german/spanish/vibe-coding). Accepts `lang` prop. On every push it reads XP from all four raw stores and sends `totalXp` (sum) so `user_stats.xp` always reflects the cross-language total.
 - `components/trivia/ActorBlitz.tsx` — Actor Blitz game component. Images from local `/public/actors/`. Uses `var(--game)` (pastel mauve) for all game UI. Answer correct delay 300ms, wrong delay 700ms. Submits score to `/api/scores/actor-blitz` on game end (fire-and-forget, fails silently if unauthenticated).
-- `lib/store.ts` — Zustand context pattern: `createGameStore(key)` factory, `GameStoreProvider`, `useGameStore` reads from nearest provider. `mandarinStore` = key `slubstack-v1`, `germanStore` = `slubstack-german-v1`, `spanishStore` = `slubstack-spanish-v1`, `vibeCodingStore` = `slubstack-vibe-v1`
+- `lib/store.ts` — Zustand context pattern: `createGameStore(key)` factory, `GameStoreProvider`, `useGameStore` reads from nearest provider. `mandarinStore` = `slubstack-v1`, `germanStore` = `slubstack-german-v1`, `spanishStore` = `slubstack-spanish-v1`, `vibeCodingStore` = `slubstack-vibe-v1`, `brainTrainingStore` = `slubstack-brain-v1`, `triviaStore` = `slubstack-trivia-v1`
 - `lib/content.ts` — `getLanguageContent(lang)` returns `{ cards, units, getCard, getCardsForUnit, getUnit, allowedInteractions }`. Spanish/German/Vibe Coding exclude "build"; Vibe Coding also excludes "type".
 - `lib/session.ts` — `buildUnitSession` uses `LESSON_ORDER` (no flip — games only). `buildReviewSession` uses `REVIEW_ORDER` (games only — MC, type, match — no flip). `buildPracticeSession` builds a session from all seen cards ignoring SRS due dates (used when no cards are due but user wants to practice). All take content as param.
 - `lib/hooks.ts` — `useHydrated` (useSyncExternalStore), `useNow` (useState/useEffect — NOT useSyncExternalStore, which caused infinite loop with Date.now())
@@ -95,6 +95,7 @@ Three-accent system defined in `app/globals.css`:
 - All game state in `liveRef` to avoid stale closures in timer callbacks; React state only for display
 - Result screen shows inline top-5 leaderboard for the played difficulty (fetched 800ms after game ends)
 - Leaderboard shown inline in the Profile leaderboard tab (Math Blitz filter); `/stats/math-blitz` page still exists as standalone. Scores stored in `math_blitz_scores` table.
+- **XP**: awards `correct * 5` XP to `brainTrainingStore` on game end (only if correct > 0)
 - Full roadmap (head-to-head rooms, multi-game lobby) in `MATH_BLITZ_PLAN.md`
 - BottomNav hidden on `/brain-training/math-blitz`. No in-game back link — TopBar provides the back button. Do not add back links to select or result screen.
 
@@ -108,6 +109,7 @@ Three-accent system defined in `app/globals.css`:
 - Share button copies emoji grid to clipboard (`Slubstack Wordle #N · X/6`)
 - Daily leaderboard via `/api/scores/wordle` — shows all users' scores for today, signed-in only
 - Scores stored in `wordle_scores` table (unique per user per date — can't resubmit)
+- **XP**: awards 75 XP (won) or 15 XP (lost) to `brainTrainingStore` when the game transitions to `won`/`lost` in `submitGuess` — fires exactly once per completion, never on page reload
 - **Two-phase layout**: playing phase uses `height: calc(100dvh - 52px - env(safe-area-inset-top, 0px))` flex-col (header shrink-0 → toast shrink-0 → grid flex-1 min-h-0 → keyboard shrink-0) — fits on screen with no scroll. Result/won/lost phase switches to normal scrollable layout. BottomNav is hidden on this route.
 - Tile: 52px, gap 4px. Keyboard key: 48px tall, 32px wide (ENTER/⌫ 52px wide), 4px gap. Sized to fit iPhone SE and up without scroll.
 
@@ -139,12 +141,13 @@ Three-accent system defined in `app/globals.css`:
 - **Activity Levels card** has 4 sub-tabs you can flick between:
   - **Languages** — Spanish, Mandarin, German XP bars with tier + level
   - **Skills** — Vibe Coding XP bar with tier + level
-  - **Brain** — Math Blitz personal bests (Easy/Medium/Hard from `slubstack_mathblitz_best`) + today's Wordle result (from `slubstack_wordle`)
-  - **Trivia** — Actor Blitz best score, accuracy, best streak (from `slubstack_actorblitz_best`); shows "No games played yet" if empty
+  - **Brain** — Brain Training XP/level bar (from `brainTrainingStore`) + Math Blitz personal bests (Easy/Medium/Hard) + today's Wordle result
+  - **Trivia** — Trivia XP/level bar (from `triviaStore`) + Actor Blitz best score, accuracy, best streak; shows "No games played yet" if no scores
 - Leaderboard tab: filter pills — Overall, Mandarin, German, Spanish, Actor Blitz, Math Blitz. All filters show inline lists (no link-out buttons). Language leaderboards fetch from `/api/leaderboard?lang=X`. Math Blitz has Easy/Medium/Hard sub-filter. Actor Blitz fetches from `/api/scores/actor-blitz`.
 - Settings tab: photo upload (with crop modal), username, status (emoji allowed in status text), save button
 - Account section: signed-in email display, Forgot password button (sends Supabase reset email), Sign out
 - No emoji avatar picker, no danger zone / reset progress, no streak shield, no medals
+- Logged-out auth page (`app/stats/ProfileClient.tsx` sign-in block): compact two-tab card — **Log in** (email + password) / **Create account** (email magic link). Top of each form has a **Continue with Google** button + "or" divider. Mobile is scroll-locked (`fixed inset-0 overflow-hidden`) and fits on iPhone SE without scrolling. Desktop (`lg:`) switches to `lg:static lg:min-h-dvh lg:overflow-visible lg:py-10` with a larger logo (`h-20`), restored "slubstack" wordmark + tagline, wider card (`max-w-md`), larger inputs/buttons, and a small "Your data is encrypted and never shared." footer below the card. `handleGoogle` calls `supabase.auth.signInWithOAuth({ provider: "google" })` with `redirectTo: /auth/callback?next=/onboarding`. `components/AuthPanel.tsx` is orphaned — not imported anywhere.
 - `CropModal` component: uses pointer events + refs for live gesture state (no stale closure issues). Pinch-to-zoom via two-pointer distance tracking. CSS `transform: scale()` on image — no explicit width/height (prevents distortion).
 - Username cached in `localStorage` as `slubstack_username` (alongside `slubstack_avatar`) for instant load before API response.
 - Shows a skeleton while auth is being verified (instead of blank screen).
@@ -156,6 +159,7 @@ Three-accent system defined in `app/globals.css`:
 - ActorBlitz has image loading skeleton + `onError` fallback (🎬 emoji) + `fade-in` CSS animation on actor change.
 - BottomNav hidden on `/trivia/actors`. No in-game back link — TopBar provides the back button. Do not add back links to lobby or results screen.
 - Scores submitted to `actor_blitz_scores` table via `/api/scores/actor-blitz` on game end. Leaderboard shown inline in the Profile leaderboard tab.
+- **XP**: awards `correct * 8` XP to `triviaStore` on game end (only if correct > 0)
 
 ## Content
 - `content/mandarin/vocab.json` + `units.json` — 8 units, ~160 cards
@@ -201,7 +205,7 @@ Per-language `allowedInteractions`:
 - Level bar animates on a delay: if no level-up, fills from old progress → new progress (700ms ease-out). If level-up: fills to 100% → resets → "Level Up!" badge pops in → fills to new level's progress.
 
 ## Panda character
-- **Hub page**: fills 28vh (max 240px), random mood — hero
+- **Hub page**: fills 26vh (max 210px), random mood — hero, floating animation (3s ease-in-out loop, disabled with prefers-reduced-motion)
 - **Review empty state**: fills 45vh, `mood="sleeping"`
 - **Skill tree pages**: 200px, `mood="idle"`
 - **Lesson pages**: fills 45vh zone in CardShell, reacts to answers:
@@ -236,18 +240,23 @@ useGameStore(s => s.xp)  // reads from nearest provider
 
 ## Supabase schema
 - `profiles` — id, username, email, avatar_url, status
-- `user_stats` — user_id, xp (**total across all 3 languages**), streak, words_learned, units_done, updated_at, state_json, german_state_json, spanish_state_json (all jsonb). `xp` is kept up-to-date by CloudSync which sends `totalXp = mandarinXp + germanXp + spanishXp` on every push.
+- `user_stats` — user_id, xp (**total across all 4 language/skill stores**), streak, words_learned, units_done, updated_at, state_json, german_state_json, spanish_state_json (all jsonb). `xp` is kept up-to-date by CloudSync which sends `totalXp = mandarinXp + germanXp + spanishXp + vibeXp` on every push. Note: `brainTrainingStore` and `triviaStore` XP are localStorage-only and not synced to Supabase.
 - `math_blitz_scores` — id, user_id, difficulty (easy/medium/hard), score, correct, created_at. RLS: public read, auth insert. Index on (difficulty, score DESC).
 - `wordle_scores` — id, user_id, date, attempts (1–6), solved, created_at. Unique(user_id, date). RLS: public read, auth insert. Index on (date, solved, attempts).
 - `actor_blitz_scores` — id, user_id, score, correct, total, best_streak, accuracy, created_at. RLS: public read, auth insert. Index on (score DESC). See `supabase/schema.sql` — must be created manually in Supabase dashboard if not already present.
 - `avatars` — Supabase Storage bucket for profile photos
 
 ## Auth flow
-1. New user: magic link → `/auth/callback` → `/onboarding` (pick avatar, set username + password)
-2. Returning user: email + password on Profile page
-3. Stay-signed-in uses `localStorage`/`sessionStorage` flag (`slubstack_stay_signed_in`)
-4. Avatar cached in `localStorage` as `slubstack_avatar`
-5. Password reset: Supabase `resetPasswordForEmail` triggered from Settings tab
+1. New user (Google): OAuth → `/auth/callback` (exchanges code for session) → `/onboarding`
+2. New user (email): magic link → `/auth/callback` → `/onboarding` (pick avatar, set username + password)
+3. Returning user: email + password on Profile page, or Continue with Google
+4. Stay-signed-in flag is always on in the new compact form (`markStaySignedIn(true)` fires on every sign-in); the visible checkbox was removed. Still backed by `localStorage`/`sessionStorage` under `slubstack_stay_signed_in`.
+5. Avatar cached in `localStorage` as `slubstack_avatar`
+6. Password reset: Supabase `resetPasswordForEmail` triggered from Settings tab
+
+### OAuth providers
+- **Google** — enabled. Requires `Authentication → Providers → Google` toggled on in Supabase with a Google Cloud OAuth Client ID/Secret whose Authorized redirect URI is `https://pbzpgyjyiprepxbzgkmf.supabase.co/auth/v1/callback`. Supabase **Redirect URLs** allowlist must include `https://slubstack.com/auth/callback` and `http://localhost:3000/auth/callback`.
+- Apple and LinkedIn are not wired up (buttons exist only inside the orphaned `components/AuthPanel.tsx`).
 
 ## Testing
 - Playwright (`@playwright/test`) installed, config at `playwright.config.ts` — targets Chromium only, auto-starts dev server

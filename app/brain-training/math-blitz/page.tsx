@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Trophy, RotateCcw } from "lucide-react";
 import { globalStore } from "@/lib/globalStore";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { brainTrainingStore } from "@/lib/store";
 
 type Difficulty = "easy" | "medium" | "hard";
 type Phase = "select" | "countdown" | "playing" | "result";
@@ -187,6 +188,7 @@ export default function MathBlitzPage() {
     const thresholds: Record<string, [number, number]> = { easy: [80, 40], medium: [150, 80], hard: [200, 100] };
     const [goldT, silverT] = thresholds[diffRef.current];
     globalStore.getState().awardMedal(score >= goldT ? "gold" : score >= silverT ? "silver" : "bronze");
+    if (correct > 0) brainTrainingStore.getState().addXp(correct * 5);
     // Submit score to leaderboard if signed in
     const supabase = getSupabaseBrowserClient();
     if (supabase && score > 0) {
