@@ -47,6 +47,7 @@ Three-accent system defined in `app/globals.css`:
 - `/brain-training/wordle` — Daily Wordle game (fully built)
 - `/stats` — Profile / leaderboard / settings
 - `/onboarding` — First-time setup (avatar, username, password)
+- `/review` — Review hub: three accordion sections (Languages, Brain Training, Trivia). Tap to expand, reveals sub-items with live localStorage stats, each navigates to that game/review page.
 - Legacy `/learn/[unitId]` and `/review` still work (mandarin defaults)
 
 ### Key files
@@ -66,7 +67,7 @@ Three-accent system defined in `app/globals.css`:
 - `components/cards/CardFooter` — fixed z-50, always above CardShell
 - `components/Panda.tsx` — mood-mapped images (idle/happy/wrong/sad/celebrating/sleeping), supports `fill` prop for CSS-sized containers
 - `components/TopBar.tsx` — shows `← Back` (router.back()) on all non-home pages on mobile; wordmark on home only
-- `components/BottomNav.tsx` — `lg:hidden`; hidden during lessons (`/*/learn/*`); Flashcards tab follows current language section
+- `components/BottomNav.tsx` — `lg:hidden`; hidden during lessons (`/*/learn/*`) **and on all game pages** (`/brain-training/wordle`, `/brain-training/math-blitz`, `/trivia/actors`) so the nav never overlaps game UI. Uses per-tab opacity/scale transitions (not `layoutId` FLIP — avoids layout measurement jank).
 - `components/CloudSync.tsx` — syncs language store to Supabase; mounted in all three language layouts (mandarin/german/spanish). Accepts `lang` prop.
 - `components/trivia/ActorBlitz.tsx` — Actor Blitz game component. Images from local `/public/actors/`. Uses `var(--game)` (pastel mauve) for all game UI. Answer correct delay 300ms, wrong delay 700ms.
 - `lib/store.ts` — Zustand context pattern: `createGameStore(key)` factory, `GameStoreProvider`, `useGameStore` reads from nearest provider. `mandarinStore` = key `slubstack-v1`, `germanStore` = `slubstack-german-v1`, `spanishStore` = `slubstack-spanish-v1`
@@ -86,6 +87,7 @@ Three-accent system defined in `app/globals.css`:
 - Result screen shows inline top-5 leaderboard for the played difficulty (fetched 800ms after game ends)
 - Full leaderboard at `/stats/math-blitz`; scores stored in `math_blitz_scores` table
 - Full roadmap (head-to-head rooms, multi-game lobby) in `MATH_BLITZ_PLAN.md`
+- BottomNav hidden on `/brain-training/math-blitz`. No in-game back link — TopBar provides the back button. Do not add back links to select or result screen.
 
 ## Wordle (`app/brain-training/wordle/page.tsx`)
 - NYT-style daily word puzzle: 6 tries to guess a 5-letter word
@@ -97,6 +99,8 @@ Three-accent system defined in `app/globals.css`:
 - Share button copies emoji grid to clipboard (`Slubstack Wordle #N · X/6`)
 - Daily leaderboard via `/api/scores/wordle` — shows all users' scores for today, signed-in only
 - Scores stored in `wordle_scores` table (unique per user per date — can't resubmit)
+- **Two-phase layout**: playing phase uses `height: calc(100dvh - 52px - env(safe-area-inset-top, 0px))` flex-col (header shrink-0 → toast shrink-0 → grid flex-1 min-h-0 → keyboard shrink-0) — fits on screen with no scroll. Result/won/lost phase switches to normal scrollable layout. BottomNav is hidden on this route.
+- Tile: 52px, gap 4px. Keyboard key: 48px tall, 32px wide (ENTER/⌫ 52px wide), 4px gap. Sized to fit iPhone SE and up without scroll.
 
 ## Avatar upload
 - Upload goes through `/api/avatar` (POST, multipart) using the service role key — never direct from browser client (RLS blocks it)
@@ -116,6 +120,7 @@ Three-accent system defined in `app/globals.css`:
 - **Game UI uses `var(--game)` (pastel mauve)** — not `var(--accent)` (purple). Keep these separate.
 - `app/api/img/route.ts` exists but is no longer used for actor images. Can be repurposed or deleted.
 - ActorBlitz has image loading skeleton + `onError` fallback (🎬 emoji) + `fade-in` CSS animation on actor change.
+- BottomNav hidden on `/trivia/actors`. No in-game back link — TopBar provides the back button. Do not add back links to lobby or results screen.
 
 ## Content
 - `content/mandarin/vocab.json` + `units.json` — 8 units, ~160 cards
