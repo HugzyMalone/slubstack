@@ -42,8 +42,9 @@ Three-accent system defined in `app/globals.css`:
 - `/german/review` — German flashcard review
 - `/trivia` — Trivia hub
 - `/trivia/actors` — Actor Blitz game
-- `/brain-training` — Brain Training hub (Math Blitz live; Memory Match, Word Puzzles, Speed Recall coming soon)
+- `/brain-training` — Brain Training hub (Math Blitz + Wordle live; Memory Match, Word Puzzles, Speed Recall coming soon)
 - `/brain-training/math-blitz` — Math Blitz game (fully built)
+- `/brain-training/wordle` — Daily Wordle game (fully built)
 - `/stats` — Profile / leaderboard / settings
 - `/onboarding` — First-time setup (avatar, username, password)
 - Legacy `/learn/[unitId]` and `/review` still work (mandarin defaults)
@@ -51,8 +52,9 @@ Three-accent system defined in `app/globals.css`:
 ### Key files
 - `app/layout.tsx` — root layout; has AppSidebar + content wrapper with `lg:ml-60`
 - `app/page.tsx` — hub with panda hero + 3 accordion sections (Languages, Brain Training, Trivia). All use shared `AccordionSection` component. All collapsed by default.
-- `app/brain-training/page.tsx` — Brain Training hub; Math Blitz live, others coming soon
+- `app/brain-training/page.tsx` — Brain Training hub; Math Blitz + Wordle live, others coming soon
 - `app/brain-training/math-blitz/page.tsx` — Math Blitz game (self-contained client component)
+- `app/brain-training/wordle/page.tsx` — Daily Wordle game (self-contained client component)
 - `app/mandarin/layout.tsx` — provides `mandarinStore` via context
 - `app/german/layout.tsx` — provides `germanStore` via context (separate isolated progress)
 - `app/trivia/actors/page.tsx` — **synchronous** (no async fetch). Builds actor list from `ACTOR_CONFIGS` using local `/public/actors/*.jpg` images. No Wikipedia API calls at runtime.
@@ -65,13 +67,14 @@ Three-accent system defined in `app/globals.css`:
 - `components/Panda.tsx` — mood-mapped images (idle/happy/wrong/sad/celebrating/sleeping), supports `fill` prop for CSS-sized containers
 - `components/TopBar.tsx` — shows `← Back` (router.back()) on all non-home pages on mobile; wordmark on home only
 - `components/BottomNav.tsx` — `lg:hidden`; hidden during lessons (`/*/learn/*`); Flashcards tab follows current language section
-- `components/CloudSync.tsx` — syncs mandarin store to Supabase (german not yet synced)
+- `components/CloudSync.tsx` — syncs language store to Supabase; mounted in all three language layouts (mandarin/german/spanish). Accepts `lang` prop.
 - `components/trivia/ActorBlitz.tsx` — Actor Blitz game component. Images from local `/public/actors/`. Uses `var(--game)` (pastel mauve) for all game UI. Answer correct delay 300ms, wrong delay 700ms.
 - `lib/store.ts` — Zustand context pattern: `createGameStore(key)` factory, `GameStoreProvider`, `useGameStore` reads from nearest provider. `mandarinStore` = key `slubstack-v1`, `germanStore` = `slubstack-german-v1`, `spanishStore` = `slubstack-spanish-v1`
 - `lib/content.ts` — `getLanguageContent(lang)` returns `{ cards, units, getCard, getCardsForUnit, getUnit, allowedInteractions }`. Spanish/German exclude "build"; Spanish/German/Mandarin all have "match".
 - `lib/session.ts` — `buildUnitSession` uses `LESSON_ORDER` (no flip — games only). `buildReviewSession` uses `REVIEW_ORDER` (includes flip for flashcard tool). Both take content as param.
 - `lib/hooks.ts` — `useHydrated` (useSyncExternalStore), `useNow` (useState/useEffect — NOT useSyncExternalStore, which caused infinite loop with Date.now())
 - `lib/supabase/admin.ts` — Supabase admin client using `SUPABASE_SERVICE_ROLE_KEY` (server-only, bypasses RLS)
+- `lib/wordle-words.ts` — ~700-word answer pool, `getDailyWord()`, `getDayIndex()`, `getTodayStr()`, `isValidGuess()`
 - `lib/xp.ts`, `lib/srs.ts`, `lib/utils.ts` — utilities
 
 ## Math Blitz (`app/brain-training/math-blitz/page.tsx`)
@@ -80,7 +83,20 @@ Three-accent system defined in `app/globals.css`:
 - Scoring: 10pts base + speed bonus (+5 if <3s, +3 if <5s) × streak multiplier (×1.5 at 3, ×2 at 5, ×3 at 10)
 - Personal best per difficulty stored in localStorage (`slubstack_mathblitz_best`)
 - All game state in `liveRef` to avoid stale closures in timer callbacks; React state only for display
-- Full roadmap (leaderboard DB schema, head-to-head rooms, multi-game lobby) in `MATH_BLITZ_PLAN.md`
+- Result screen shows inline top-5 leaderboard for the played difficulty (fetched 800ms after game ends)
+- Full leaderboard at `/stats/math-blitz`; scores stored in `math_blitz_scores` table
+- Full roadmap (head-to-head rooms, multi-game lobby) in `MATH_BLITZ_PLAN.md`
+
+## Wordle (`app/brain-training/wordle/page.tsx`)
+- NYT-style daily word puzzle: 6 tries to guess a 5-letter word
+- 3D tile flip reveal animation (Framer Motion, staggered per column via `rotateX`)
+- QWERTY on-screen keyboard with colour-coded key states (correct > present > absent priority)
+- Physical keyboard support via `window.addEventListener('keydown')`
+- Daily word from `lib/wordle-words.ts` — ~700-word pool, seeded by day index since 2026-04-19
+- Game state persisted in localStorage (`slubstack_wordle`) keyed by date — restores in-progress games on reload
+- Share button copies emoji grid to clipboard (`Slubstack Wordle #N · X/6`)
+- Daily leaderboard via `/api/scores/wordle` — shows all users' scores for today, signed-in only
+- Scores stored in `wordle_scores` table (unique per user per date — can't resubmit)
 
 ## Avatar upload
 - Upload goes through `/api/avatar` (POST, multipart) using the service role key — never direct from browser client (RLS blocks it)
@@ -103,8 +119,8 @@ Three-accent system defined in `app/globals.css`:
 
 ## Content
 - `content/mandarin/vocab.json` + `units.json` — 8 units, ~160 cards
-- `content/german/vocab.json` + `units.json` — 2 units: Greetings (20 cards), Numbers (15 cards)
-- `content/spanish/vocab.json` + `units.json` — 5 units: Greetings (16), Numbers (15), Colors (12), Food (16), Verbs (16) = 75 cards
+- `content/german/vocab.json` + `units.json` — 7 units: Greetings, Numbers, Colors, Food & Drink, Family, Verbs, Days & Time (111 cards)
+- `content/spanish/vocab.json` + `units.json` — 8 units: Greetings, Numbers, Colors, Food & Drink, Verbs, Family, Days & Time, Places (116 cards)
 
 Card shape (all languages):
 ```ts
@@ -161,8 +177,10 @@ useGameStore(s => s.xp)  // reads from nearest provider
 ```
 
 ## Supabase schema
-- `profiles` — id, username, email, avatar_url (stores emoji string or public URL)
-- `user_stats` — user_id, xp, streak, words_learned, units_done, updated_at, state_json (jsonb — full game state)
+- `profiles` — id, username, email, avatar_url, status
+- `user_stats` — user_id, xp, streak, words_learned, units_done, updated_at, state_json, german_state_json, spanish_state_json (all jsonb)
+- `math_blitz_scores` — id, user_id, difficulty (easy/medium/hard), score, correct, created_at. RLS: public read, auth insert. Index on (difficulty, score DESC).
+- `wordle_scores` — id, user_id, date, attempts (1–6), solved, created_at. Unique(user_id, date). RLS: public read, auth insert. Index on (date, solved, attempts).
 - `avatars` — Supabase Storage bucket for profile photos
 
 ## Auth flow
@@ -180,10 +198,6 @@ useGameStore(s => s.xp)  // reads from nearest provider
 - Vercel env vars needed: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (all must be set for **Production**)
 
 ## Planned / not yet built
-- Brain Training games (Memory Match, Word Puzzles, Speed Recall) — see `MATH_BLITZ_PLAN.md` for full roadmap incl. leaderboard + head-to-head
-- Math Blitz global leaderboard (needs `math_blitz_scores` Supabase table — schema in `MATH_BLITZ_PLAN.md`)
+- Brain Training games (Memory Match, Word Puzzles, Speed Recall) — see `MATH_BLITZ_PLAN.md` for full roadmap incl. head-to-head
 - Head-to-head multiplayer lobby (`/play/[roomCode]`) — see `MATH_BLITZ_PLAN.md`
 - More trivia game modes (Sports Stars, Music Icons)
-- German + Spanish progress sync to Supabase (currently only mandarin syncs)
-- More German content units (food, pronouns, family, etc.)
-- More Spanish content units
