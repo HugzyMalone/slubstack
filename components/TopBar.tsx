@@ -30,6 +30,7 @@ export function TopBar() {
   const xp = useGameStore((s) => s.xp);
   const streak = useGlobalStore((s) => s.streak);
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [loggedIn, setLoggedIn] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const isHome = pathname === "/";
@@ -67,7 +68,8 @@ export function TopBar() {
     if (cached) setAvatar(cached);
 
     supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) { setAvatar(null); localStorage.removeItem("slubstack_avatar"); return; }
+      if (!data.session) { setAvatar(null); setLoggedIn(false); localStorage.removeItem("slubstack_avatar"); return; }
+      setLoggedIn(true);
       if (!cached) {
         fetch("/api/profile", { cache: "no-store" })
           .then((r) => r.ok ? r.json() : null)
@@ -80,7 +82,8 @@ export function TopBar() {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session?.user) { setAvatar(null); localStorage.removeItem("slubstack_avatar"); return; }
+      if (!session?.user) { setAvatar(null); setLoggedIn(false); localStorage.removeItem("slubstack_avatar"); return; }
+      setLoggedIn(true);
       if (event === "SIGNED_IN") {
         fetch("/api/profile", { cache: "no-store" })
           .then((r) => r.ok ? r.json() : null)
@@ -133,55 +136,57 @@ export function TopBar() {
           </button>
         ) : <div />}
 
-        {/* Right: stats + profile */}
-        <div className="flex items-center gap-3 ml-auto">
-          {/* Streak */}
-          <div className="flex items-center gap-1" title="Streak">
-            <Flame size={12} strokeWidth={2} className="text-orange-400" />
-            <span className="text-[12px] font-semibold tabular-nums">{hydrated ? streak : 0}</span>
+        {/* Right: stats + profile (hidden when not logged in) */}
+        {loggedIn && (
+          <div className="flex items-center gap-3 ml-auto">
+            {/* Streak */}
+            <div className="flex items-center gap-1" title="Streak">
+              <Flame size={12} strokeWidth={2} className="text-orange-400" />
+              <span className="text-[12px] font-semibold tabular-nums">{hydrated ? streak : 0}</span>
+            </div>
+
+            {/* Divider */}
+            <span
+              className="h-3 w-px shrink-0"
+              style={{ background: "color-mix(in srgb, var(--fg) 12%, transparent)" }}
+            />
+
+            {/* Level (tier-coloured) */}
+            <div
+              className="flex items-center gap-0.5"
+              title={`${tier.name} · Level ${level}`}
+            >
+              <span className="text-[10px] font-bold tabular-nums" style={{ color: tier.color }}>
+                Lv.
+              </span>
+              <span className="text-[12px] font-semibold tabular-nums" style={{ color: tier.color }}>
+                {level}
+              </span>
+            </div>
+
+            {/* Profile */}
+            <Link
+              href="/stats"
+              className="ml-1 flex h-8 w-8 items-center justify-center rounded-full overflow-hidden transition-opacity duration-150 hover:opacity-80"
+              style={{
+                border: "1px solid color-mix(in srgb, var(--fg) 12%, transparent)",
+                background: avatar && !isAvatarUrl(avatar)
+                  ? "color-mix(in srgb, var(--accent) 15%, var(--surface))"
+                  : "color-mix(in srgb, var(--fg) 5%, transparent)",
+              }}
+              aria-label="Profile"
+            >
+              {isAvatarUrl(avatar) ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatar} alt="avatar" className="h-full w-full object-cover object-center" />
+              ) : avatar ? (
+                <span className="text-sm leading-none">{avatar}</span>
+              ) : (
+                <User size={13} strokeWidth={1.5} className="text-muted" />
+              )}
+            </Link>
           </div>
-
-          {/* Divider */}
-          <span
-            className="h-3 w-px shrink-0"
-            style={{ background: "color-mix(in srgb, var(--fg) 12%, transparent)" }}
-          />
-
-          {/* Level (tier-coloured) */}
-          <div
-            className="flex items-center gap-0.5"
-            title={`${tier.name} · Level ${level}`}
-          >
-            <span className="text-[10px] font-bold tabular-nums" style={{ color: tier.color }}>
-              Lv.
-            </span>
-            <span className="text-[12px] font-semibold tabular-nums" style={{ color: tier.color }}>
-              {level}
-            </span>
-          </div>
-
-          {/* Profile */}
-          <Link
-            href="/stats"
-            className="ml-1 flex h-8 w-8 items-center justify-center rounded-full overflow-hidden transition-opacity duration-150 hover:opacity-80"
-            style={{
-              border: "1px solid color-mix(in srgb, var(--fg) 12%, transparent)",
-              background: avatar && !isAvatarUrl(avatar)
-                ? "color-mix(in srgb, var(--accent) 15%, var(--surface))"
-                : "color-mix(in srgb, var(--fg) 5%, transparent)",
-            }}
-            aria-label="Profile"
-          >
-            {isAvatarUrl(avatar) ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatar} alt="avatar" className="h-full w-full object-cover object-center" />
-            ) : avatar ? (
-              <span className="text-sm leading-none">{avatar}</span>
-            ) : (
-              <User size={13} strokeWidth={1.5} className="text-muted" />
-            )}
-          </Link>
-        </div>
+        )}
       </div>
     </header>
   );

@@ -68,7 +68,7 @@ export function AppSidebar() {
       label: "Home",
       type: "icon" as const,
       Icon: HomeIcon,
-      match: (p: string) => p === "/" || p === "/mandarin" || p === "/german" || p === "/spanish" || p === "/trivia",
+      match: (p: string) => p === "/",
     },
     {
       href: "/spanish",

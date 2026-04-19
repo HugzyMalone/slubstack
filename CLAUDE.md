@@ -24,7 +24,7 @@ Three-accent system defined in `app/globals.css`:
 - `components/AppSidebar.tsx` — fixed left sidebar, **only visible on `lg+`** (hidden on mobile). Contains brand + nav links (Home, Spanish, Mandarin, German, Trivia) + Profile at bottom. Uses `usePathname` for active states. Active item: accent left border + tinted bg.
 - `app/layout.tsx` — AppSidebar added. Content wrapped in `<div className="flex flex-1 flex-col lg:ml-60">` to offset from sidebar.
 - `components/BottomNav.tsx` — has `lg:hidden` so it only shows on mobile.
-- `components/TopBar.tsx` — on mobile shows wordmark on home (`/`), shows a subtle `← Back` button on all other pages. XP/streak chips + avatar on right. Desktop sidebar handles brand.
+- `components/TopBar.tsx` — on mobile shows wordmark on home (`/`), shows a subtle `← Back` button on all other pages. XP/streak chips + avatar on right — **hidden when user is not logged in**. Desktop sidebar handles brand.
 - Lesson overlay (`CardShell`) uses `fixed inset-0` — covers sidebar during lessons (intentional, immersive).
 
 ## App structure
@@ -63,13 +63,13 @@ Three-accent system defined in `app/globals.css`:
 - `app/trivia/actors/page.tsx` — **synchronous** (no async fetch). Builds actor list from `ACTOR_CONFIGS` using local `/public/actors/*.jpg` images. No Wikipedia API calls at runtime.
 - `app/api/avatar/route.ts` — server-side avatar upload using service role key (bypasses RLS). Accepts multipart form data, uploads to `avatars/{userId}/avatar.jpg` in Supabase storage.
 - `app/api/user/[userId]/route.ts` — public profile API: returns username, avatar, status, xp, streak for any user (no auth required).
-- `components/AppSidebar.tsx` — desktop sidebar (lg+ only)
+- `components/AppSidebar.tsx` — desktop sidebar (lg+ only). Home nav item uses exact match (`p === "/"`) — do not add other paths to its match function or it will show as active on language pages.
 - `components/SkillTree.tsx` — shared skill tree, takes `units`, `basePath`, `greeting` props
 - `components/SessionRunner.tsx` — runs a lesson session, tracks `pandaMood`, resets on each card
 - `components/cards/CardShell.tsx` — **fixed full-screen** lesson layout (z-40), top 45vh = panda, bottom = question, no scrolling
 - `components/cards/CardFooter` — fixed z-50, always above CardShell
 - `components/Panda.tsx` — mood-mapped images (idle/happy/wrong/sad/celebrating/sleeping), supports `fill` prop for CSS-sized containers
-- `components/TopBar.tsx` — shows `← Back` (router.back()) on all non-home pages on mobile; wordmark on home only. Right side shows streak (from `useGlobalStore`) + level chip (from `useGameStore` XP via root mandarinStore). On mount, syncs `globalStore.streak` to the max of all three language store streaks (fixes historical divergence). Level chip colour is tier-based (see Level & Tier system).
+- `components/TopBar.tsx` — shows `← Back` (router.back()) on all non-home pages on mobile; wordmark on home only. Right side shows streak (from `useGlobalStore`) + level chip (from `useGameStore` XP via root mandarinStore) + profile avatar — all hidden when user is not logged in (gated on `loggedIn` state derived from `supabase.auth.getSession`). On mount, syncs `globalStore.streak` to the max of all three language store streaks (fixes historical divergence). Level chip colour is tier-based (see Level & Tier system).
 - `components/BottomNav.tsx` — `lg:hidden`; hidden during lessons (`/*/learn/*`) **and on all game pages** (`/brain-training/wordle`, `/brain-training/math-blitz`, `/trivia/actors`) so the nav never overlaps game UI. Uses per-tab opacity/scale transitions (not `layoutId` FLIP — avoids layout measurement jank).
 - `components/CloudSync.tsx` — syncs language store to Supabase; mounted in all three language layouts (mandarin/german/spanish). Accepts `lang` prop.
 - `components/trivia/ActorBlitz.tsx` — Actor Blitz game component. Images from local `/public/actors/`. Uses `var(--game)` (pastel mauve) for all game UI. Answer correct delay 300ms, wrong delay 700ms.
@@ -223,7 +223,14 @@ useGameStore(s => s.xp)  // reads from nearest provider
 4. Avatar cached in `localStorage` as `slubstack_avatar`
 5. Password reset: Supabase `resetPasswordForEmail` triggered from Settings tab
 
+## Testing
+- Playwright (`@playwright/test`) installed, config at `playwright.config.ts` — targets Chromium only, auto-starts dev server
+- Smoke tests: `tests/e2e/smoke.spec.ts` — home, Spanish, Mandarin load checks
+- Full verification suite: `tests/e2e/full-verification.spec.ts` — covers all routes, nav, API, 404
+- Run with: `pnpm exec playwright test`
+
 ## Deployment
+- `proxy.ts` (root) — Next.js 16 proxy (formerly `middleware.ts`); refreshes Supabase session cookies on every request. Export must be named `proxy` (not `middleware`).
 - GitHub: `HugzyMalone/slubstack` — Vercel auto-deploys on push to `main`
 - Domain: slubstack.com
 - Supabase project: `pbzpgyjyiprepxbzgkmf.supabase.co`
