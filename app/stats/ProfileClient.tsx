@@ -307,6 +307,12 @@ function AuthPage() {
 
 // ── ProfileTab ─────────────────────────────────────────────────────────────
 
+type LevelCategory = "languages" | "skills" | "brain" | "trivia";
+
+interface MathBests { easy: number; medium: number; hard: number }
+interface ActorBestData { score: number; correct?: number; total: number; bestStreak: number; accuracy: number }
+interface WordleToday { phase: string; attempts: number }
+
 function ProfileTab({ user, avatar, username, status }: {
   user: SupaUser; avatar: string | null; username: string; status: string | null;
 }) {
@@ -316,6 +322,20 @@ function ProfileTab({ user, avatar, username, status }: {
   const germanXp = useStore(germanStore, (s) => s.xp);
   const spanishXp = useStore(spanishStore, (s) => s.xp);
   const vibeXp = useStore(vibeCodingStore, (s) => s.xp);
+
+  const [levelTab, setLevelTab] = useState<LevelCategory>("languages");
+  const [mathBests, setMathBests] = useState<MathBests>({ easy: 0, medium: 0, hard: 0 });
+  const [actorBest, setActorBest] = useState<ActorBestData | null>(null);
+  const [wordleToday, setWordleToday] = useState<WordleToday | null>(null);
+
+  useEffect(() => {
+    try { setMathBests({ easy: 0, medium: 0, hard: 0, ...JSON.parse(localStorage.getItem("slubstack_mathblitz_best") ?? "{}") }); } catch {}
+    try { const s = localStorage.getItem("slubstack_actorblitz_best"); if (s) setActorBest(JSON.parse(s)); } catch {}
+    try {
+      const raw = localStorage.getItem("slubstack_wordle");
+      if (raw) { const p = JSON.parse(raw); setWordleToday({ phase: p.phase, attempts: p.guesses?.length ?? 0 }); }
+    } catch {}
+  }, []);
 
   if (!hydrated) return null;
 
@@ -385,47 +405,140 @@ function ProfileTab({ user, avatar, username, status }: {
         </div>
       </div>
 
-      {/* Language levels */}
+      {/* Activity levels — tabbed */}
       <div className="rounded-2xl border border-border bg-surface overflow-hidden">
-        <div className="px-4 py-3 border-b border-border">
-          <h3 className="text-sm font-semibold">Language Levels</h3>
-        </div>
-        <div className="divide-y divide-border">
-          {[
-            { label: "Spanish", xp: spanishXp, code: "ES", iconBg: "linear-gradient(135deg, #c2410c 0%, #ea580c 100%)" },
-            { label: "Mandarin", xp: mandarinXp, code: "中", iconBg: "linear-gradient(135deg, #be123c 0%, #e11d48 100%)" },
-            { label: "German", xp: germanXp, code: "DE", iconBg: "linear-gradient(135deg, #c2410c 0%, #f97316 100%)" },
-            { label: "Vibe Coding", xp: vibeXp, code: "🪄", iconBg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)" },
-          ].map(({ label, xp: langXp, code, iconBg }) => {
-            const langLevel = levelFromXp(langXp);
-            const langTier = getTier(langLevel);
-            const { current: lc, next: ln, progress: lp } = xpToNextLevel(langXp);
+        {/* Tab bar */}
+        <div className="flex border-b border-border">
+          {(["languages", "skills", "brain", "trivia"] as const).map((tab) => {
+            const labels: Record<LevelCategory, string> = { languages: "Languages", skills: "Skills", brain: "Brain", trivia: "Trivia" };
+            const active = levelTab === tab;
             return (
-              <div key={label} className="flex items-center gap-3 px-4 py-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white text-[11px] font-bold" style={{ background: iconBg }}>
-                  {code}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium">{label}</span>
-                    <span className="text-xs font-bold tabular-nums" style={{ color: langTier.color }}>
-                      {langTier.name} · Lv. {langLevel}
-                    </span>
-                  </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: `${Math.max(0, Math.min(1, lp)) * 100}%`, background: langTier.color }}
-                    />
-                  </div>
-                  <div className="mt-0.5 text-[10px] text-muted tabular-nums">
-                    {langXp - lc} / {ln - lc} XP
-                  </div>
-                </div>
-              </div>
+              <button
+                key={tab}
+                onClick={() => setLevelTab(tab)}
+                className="flex-1 py-2.5 text-[11px] font-semibold transition-colors duration-150"
+                style={{
+                  color: active ? "var(--accent)" : "var(--muted)",
+                  background: active ? "color-mix(in srgb, var(--accent) 6%, transparent)" : "transparent",
+                }}
+              >
+                {labels[tab]}
+              </button>
             );
           })}
         </div>
+
+        {/* Languages */}
+        {levelTab === "languages" && (
+          <div className="divide-y divide-border">
+            {[
+              { label: "Spanish",  xp: spanishXp,  code: "ES",  iconBg: "linear-gradient(135deg, #c2410c 0%, #ea580c 100%)" },
+              { label: "Mandarin", xp: mandarinXp, code: "中",  iconBg: "linear-gradient(135deg, #be123c 0%, #e11d48 100%)" },
+              { label: "German",   xp: germanXp,   code: "DE",  iconBg: "linear-gradient(135deg, #c2410c 0%, #f97316 100%)" },
+            ].map(({ label, xp: langXp, code, iconBg }) => {
+              const langLevel = levelFromXp(langXp);
+              const langTier = getTier(langLevel);
+              const { current: lc, next: ln, progress: lp } = xpToNextLevel(langXp);
+              return (
+                <div key={label} className="flex items-center gap-3 px-4 py-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white text-[11px] font-bold" style={{ background: iconBg }}>{code}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium">{label}</span>
+                      <span className="text-xs font-bold tabular-nums" style={{ color: langTier.color }}>{langTier.name} · Lv. {langLevel}</span>
+                    </div>
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
+                      <div className="h-full rounded-full" style={{ width: `${Math.max(0, Math.min(1, lp)) * 100}%`, background: langTier.color }} />
+                    </div>
+                    <div className="mt-0.5 text-[10px] text-muted tabular-nums">{langXp - lc} / {ln - lc} XP</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Skills */}
+        {levelTab === "skills" && (
+          <div className="divide-y divide-border">
+            {[
+              { label: "Vibe Coding", xp: vibeXp, code: "🪄", iconBg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)" },
+            ].map(({ label, xp: langXp, code, iconBg }) => {
+              const langLevel = levelFromXp(langXp);
+              const langTier = getTier(langLevel);
+              const { current: lc, next: ln, progress: lp } = xpToNextLevel(langXp);
+              return (
+                <div key={label} className="flex items-center gap-3 px-4 py-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-lg" style={{ background: iconBg }}>{code}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium">{label}</span>
+                      <span className="text-xs font-bold tabular-nums" style={{ color: langTier.color }}>{langTier.name} · Lv. {langLevel}</span>
+                    </div>
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
+                      <div className="h-full rounded-full" style={{ width: `${Math.max(0, Math.min(1, lp)) * 100}%`, background: langTier.color }} />
+                    </div>
+                    <div className="mt-0.5 text-[10px] text-muted tabular-nums">{langXp - lc} / {ln - lc} XP</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Brain Training */}
+        {levelTab === "brain" && (
+          <div className="divide-y divide-border">
+            {[
+              { label: "Math Blitz · Easy",   score: mathBests.easy,   color: "#10b981" },
+              { label: "Math Blitz · Medium", score: mathBests.medium, color: "#f59e0b" },
+              { label: "Math Blitz · Hard",   score: mathBests.hard,   color: "#ef4444" },
+            ].map(({ label, score, color }) => (
+              <div key={label} className="flex items-center justify-between px-4 py-3">
+                <span className="text-sm">{label}</span>
+                <span className="text-sm font-bold tabular-nums" style={{ color: score > 0 ? color : undefined }}>
+                  {score > 0 ? score : <span className="text-muted">—</span>}
+                </span>
+              </div>
+            ))}
+            <div className="flex items-center justify-between px-4 py-3">
+              <span className="text-sm">Wordle · Today</span>
+              <span className="text-sm font-bold tabular-nums" style={{ color: wordleToday?.phase === "won" ? "#10b981" : wordleToday?.phase === "lost" ? "#ef4444" : undefined }}>
+                {wordleToday?.phase === "won"
+                  ? `${wordleToday.attempts}/6 ✓`
+                  : wordleToday?.phase === "lost"
+                  ? "X/6"
+                  : wordleToday?.phase === "playing"
+                  ? `${wordleToday.attempts}/6…`
+                  : <span className="text-muted">—</span>}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Trivia */}
+        {levelTab === "trivia" && (
+          <div className="divide-y divide-border">
+            {actorBest ? (
+              <>
+                <div className="flex items-center justify-between px-4 py-3">
+                  <span className="text-sm">Actor Blitz · Best Score</span>
+                  <span className="text-sm font-bold tabular-nums" style={{ color: "var(--game)" }}>{actorBest.score}</span>
+                </div>
+                <div className="flex items-center justify-between px-4 py-3">
+                  <span className="text-sm">Best Accuracy</span>
+                  <span className="text-sm font-bold tabular-nums">{actorBest.accuracy}%</span>
+                </div>
+                <div className="flex items-center justify-between px-4 py-3">
+                  <span className="text-sm">Best Streak</span>
+                  <span className="text-sm font-bold tabular-nums">{actorBest.bestStreak}</span>
+                </div>
+              </>
+            ) : (
+              <div className="px-4 py-6 text-center text-sm text-muted">No games played yet</div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
