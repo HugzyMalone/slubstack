@@ -43,6 +43,9 @@ export function BottomNav() {
     pathname?.startsWith("/mandarin/learn/") ||
     pathname?.startsWith("/german/learn/") ||
     pathname?.startsWith("/spanish/learn/") ||
+    pathname?.startsWith("/brain-training/wordle") ||
+    pathname?.startsWith("/brain-training/math-blitz") ||
+    pathname?.startsWith("/trivia/actors") ||
     pathname === "/review-run"
   ) {
     return null;

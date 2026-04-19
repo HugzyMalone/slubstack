@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { getDailyWord, getTodayStr, getDayIndex, isValidGuess } from "@/lib/wordle-words";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -12,8 +11,11 @@ type LBEntry = { username: string; avatar: string | null; attempts: number; solv
 
 const MAX_GUESSES = 6;
 const WORD_LEN = 5;
-const TILE = 56;
-const GAP = 5;
+const TILE = 52;
+const GAP = 4;
+const KEY_H = 48;
+const KEY_W = 32;
+const KEY_W_WIDE = 52;
 const STORAGE_KEY = "slubstack_wordle";
 
 const WIN_MSGS = ["Genius!", "Magnificent!", "Impressive!", "Splendid!", "Great!", "Phew!"];
@@ -89,6 +91,27 @@ function buildShareText(guesses: string[], solution: string, phase: GamePhase, d
   return `Slubstack Wordle #${dayIdx + 1}\n${score}/${MAX_GUESSES}\n\n${rows}`;
 }
 
+// ── Styles ────────────────────────────────────────────────────────────────────
+
+function WordleStyles() {
+  return (
+    <style>{`
+      @keyframes wShake {
+        0%,100%{transform:translateX(0)}
+        15%{transform:translateX(-7px)}
+        35%{transform:translateX(7px)}
+        55%{transform:translateX(-5px)}
+        75%{transform:translateX(5px)}
+      }
+      @keyframes wBounce {
+        0%,100%{transform:translateY(0)}
+        40%{transform:translateY(-20px)}
+        70%{transform:translateY(-8px)}
+      }
+    `}</style>
+  );
+}
+
 // ── Tile ──────────────────────────────────────────────────────────────────────
 
 function WordleTile({
@@ -114,38 +137,27 @@ function WordleTile({
         initial={popKey !== undefined ? { scale: 0.85 } : false}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 600, damping: 20 }}
-        style={{
-          width: TILE, height: TILE,
-          position: "relative",
-          transformStyle: "preserve-3d",
-        }}
+        style={{ width: TILE, height: TILE, position: "relative", transformStyle: "preserve-3d" }}
       >
-        {/* Front face — plain */}
         <motion.div
           animate={isRevealing ? { rotateX: [0, -90] } : {}}
           transition={{ delay: colIdx * 0.18, duration: 0.22, ease: "easeIn" }}
           style={{
-            position: "absolute", inset: 0,
-            backfaceVisibility: "hidden",
+            position: "absolute", inset: 0, backfaceVisibility: "hidden",
             display: "flex", alignItems: "center", justifyContent: "center",
-            border: `2px solid ${borderColor}`,
-            borderRadius: 6,
-            fontSize: 22, fontWeight: 700, color: "var(--fg)",
-            background: "var(--surface)",
+            border: `2px solid ${borderColor}`, borderRadius: 5,
+            fontSize: 20, fontWeight: 700, color: "var(--fg)", background: "var(--surface)",
           }}
         >
           {letter}
         </motion.div>
-        {/* Back face — colored */}
         <motion.div
           animate={isRevealing ? { rotateX: [90, 0] } : isRevealed ? { rotateX: 0 } : { rotateX: 90 }}
           transition={{ delay: colIdx * 0.18 + 0.22, duration: 0.22, ease: "easeOut" }}
           style={{
-            position: "absolute", inset: 0,
-            backfaceVisibility: "hidden",
+            position: "absolute", inset: 0, backfaceVisibility: "hidden",
             display: "flex", alignItems: "center", justifyContent: "center",
-            borderRadius: 6,
-            fontSize: 22, fontWeight: 700, color: "#fff",
+            borderRadius: 5, fontSize: 20, fontWeight: 700, color: "#fff",
             background: color ?? "var(--surface)",
           }}
         >
@@ -169,9 +181,9 @@ function WordleKeyboard({ onKey, keyStates }: {
   keyStates: Record<string, TileState>;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1.5 px-2">
+    <div className="flex flex-col items-center gap-1 px-1">
       {KB_ROWS.map((row, ri) => (
-        <div key={ri} className="flex gap-1.5">
+        <div key={ri} className="flex gap-1">
           {row.map((key) => {
             const state = keyStates[key] ?? "empty";
             const isWide = key === "ENTER" || key === "⌫";
@@ -182,10 +194,10 @@ function WordleKeyboard({ onKey, keyStates }: {
                 style={{
                   background: KEY_COLORS[state],
                   color: state === "empty" ? "var(--fg)" : "#fff",
-                  width: isWide ? 56 : 34,
-                  height: 58,
-                  borderRadius: 6,
-                  fontSize: isWide ? 11 : 15,
+                  width: isWide ? KEY_W_WIDE : KEY_W,
+                  height: KEY_H,
+                  borderRadius: 5,
+                  fontSize: isWide ? 10 : 14,
                   fontWeight: 700,
                   border: "none",
                   cursor: "pointer",
@@ -270,6 +282,73 @@ function WordleLeaderboard({ date }: { date: string }) {
   );
 }
 
+// ── Shared grid render ────────────────────────────────────────────────────────
+
+function WordleGrid({
+  rows, guesses, solution, revealingRow, revealedRows, shakingRow, phase, current,
+}: {
+  rows: string[][];
+  guesses: string[];
+  solution: string;
+  revealingRow: number | null;
+  revealedRows: Set<number>;
+  shakingRow: number | null;
+  phase: GamePhase;
+  current: string;
+}) {
+  const gridWidth = WORD_LEN * TILE + (WORD_LEN - 1) * GAP;
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateRows: `repeat(${MAX_GUESSES}, ${TILE}px)`,
+        gap: GAP,
+        width: gridWidth,
+      }}
+    >
+      {rows.map((letters, ri) => {
+        const isRevealing = revealingRow === ri;
+        const isRevealed  = revealedRows.has(ri);
+        const isShaking   = shakingRow === ri;
+        const hasWon      = phase === "won" && ri === guesses.length - 1 && isRevealed;
+        return (
+          <div
+            key={ri}
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${WORD_LEN}, ${TILE}px)`,
+              gap: GAP,
+              animation: isShaking
+                ? "wShake 0.5s ease-in-out"
+                : hasWon
+                ? "wBounce 0.5s ease-in-out 0.6s"
+                : undefined,
+            }}
+          >
+            {letters.map((letter, ci) => {
+              const trimmed = letter.trim();
+              const ev = isRevealed && guesses[ri]
+                ? evaluate(guesses[ri], solution)[ci]
+                : trimmed ? "active" : "empty";
+              return (
+                <WordleTile
+                  key={ci}
+                  letter={trimmed}
+                  evaluation={ev}
+                  colIdx={ci}
+                  isRevealing={isRevealing}
+                  isRevealed={isRevealed}
+                  popKey={ri === guesses.length && phase === "playing" ? current.length : undefined}
+                />
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function WordlePage() {
@@ -277,17 +356,16 @@ export default function WordlePage() {
   const solution  = useRef(getDailyWord(todayStr)).current;
   const dayIdx    = useRef(getDayIndex(todayStr)).current;
 
-  const [guesses, setGuesses]       = useState<string[]>([]);
-  const [current, setCurrent]       = useState("");
-  const [phase, setPhase]           = useState<GamePhase>("playing");
+  const [guesses, setGuesses]           = useState<string[]>([]);
+  const [current, setCurrent]           = useState("");
+  const [phase, setPhase]               = useState<GamePhase>("playing");
   const [revealingRow, setRevealingRow] = useState<number | null>(null);
   const [revealedRows, setRevealedRows] = useState<Set<number>>(new Set());
   const [shakingRow, setShakingRow]     = useState<number | null>(null);
-  const [toast, setToast]           = useState<string | null>(null);
-  const [shared, setShared]         = useState(false);
-  const [hydrated, setHydrated]     = useState(false);
+  const [toast, setToast]               = useState<string | null>(null);
+  const [shared, setShared]             = useState(false);
+  const [hydrated, setHydrated]         = useState(false);
 
-  // Restore saved game on mount
   useEffect(() => {
     const saved = loadSaved(todayStr);
     if (saved) {
@@ -368,7 +446,6 @@ export default function WordlePage() {
     }
   }, [phase, revealingRow, current, submitGuess]);
 
-  // Physical keyboard
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -380,149 +457,125 @@ export default function WordlePage() {
 
   const keyStates = getKeyStates(guesses, solution);
 
-  // Build grid rows
   const rows = Array.from({ length: MAX_GUESSES }, (_, i) => {
     if (i < guesses.length) return guesses[i].padEnd(WORD_LEN, " ").split("");
     if (i === guesses.length && phase === "playing") return current.padEnd(WORD_LEN, " ").split("");
     return Array(WORD_LEN).fill(" ");
   });
 
-  const gridWidth = WORD_LEN * TILE + (WORD_LEN - 1) * GAP;
-
   if (!hydrated) return null;
 
+  // ── Toast node (reused in both layouts) ──────────────────────────────────────
+  const toastNode = (
+    <AnimatePresence>
+      {toast && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="absolute inset-x-0 flex justify-center pointer-events-none"
+        >
+          <div className="rounded-xl px-4 py-2 text-sm font-bold text-white"
+            style={{ background: "color-mix(in srgb, var(--fg) 85%, transparent)" }}>
+            {toast}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  // ── Playing phase: full-height, no-scroll layout ──────────────────────────────
+  if (phase === "playing") {
+    return (
+      <>
+        <WordleStyles />
+        <div
+          className="flex flex-col select-none overflow-hidden"
+          style={{ height: "calc(100dvh - 52px - env(safe-area-inset-top, 0px))" }}
+        >
+          {/* Compact header */}
+          <div className="shrink-0 flex items-center justify-between px-4 py-2">
+            <h1 className="text-xl font-black tracking-widest" style={{ color: "var(--game)" }}>WORDLE</h1>
+            <span className="text-xs font-semibold text-muted">#{dayIdx + 1}</span>
+          </div>
+
+          {/* Toast slot */}
+          <div className="relative shrink-0" style={{ height: 32 }}>
+            {toastNode}
+          </div>
+
+          {/* Grid — fills remaining space */}
+          <div className="flex-1 min-h-0 flex items-center justify-center overflow-hidden">
+            <WordleGrid
+              rows={rows} guesses={guesses} solution={solution}
+              revealingRow={revealingRow} revealedRows={revealedRows}
+              shakingRow={shakingRow} phase={phase} current={current}
+            />
+          </div>
+
+          {/* Keyboard */}
+          <div
+            className="shrink-0 pb-2"
+            style={{ paddingBottom: "max(8px, env(safe-area-inset-bottom))" }}
+          >
+            <WordleKeyboard onKey={handleKey} keyStates={keyStates} />
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // ── Result phase (won / lost): scrollable layout ──────────────────────────────
   return (
     <>
-      <style>{`
-        @keyframes wShake {
-          0%,100%{transform:translateX(0)}
-          15%{transform:translateX(-7px)}
-          35%{transform:translateX(7px)}
-          55%{transform:translateX(-5px)}
-          75%{transform:translateX(5px)}
-        }
-        @keyframes wBounce {
-          0%,100%{transform:translateY(0)}
-          40%{transform:translateY(-20px)}
-          70%{transform:translateY(-8px)}
-        }
-      `}</style>
-
-      <div className="mx-auto flex max-w-md flex-col items-center px-4 pb-28 pt-4 select-none">
+      <WordleStyles />
+      <div className="mx-auto flex max-w-md flex-col items-center px-4 pb-8 pt-3 select-none">
         {/* Header */}
-        <div className="mb-3 w-full">
-          <Link href="/brain-training" className="text-xs text-muted hover:text-fg transition-colors">
-            ← Brain Training
-          </Link>
-          <div className="mt-2 flex items-baseline justify-between">
-            <h1 className="text-2xl font-black tracking-widest" style={{ color: "var(--game)" }}>WORDLE</h1>
-            <span className="text-xs text-muted">#{dayIdx + 1}</span>
-          </div>
-          <p className="text-xs text-muted mt-0.5">Guess the 5-letter word in 6 tries.</p>
+        <div className="mb-2 w-full flex items-baseline justify-between">
+          <h1 className="text-2xl font-black tracking-widest" style={{ color: "var(--game)" }}>WORDLE</h1>
+          <span className="text-xs text-muted">#{dayIdx + 1}</span>
         </div>
 
         {/* Toast */}
         <div className="relative w-full mb-2" style={{ height: 36 }}>
-          <AnimatePresence>
-            {toast && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-x-0 flex justify-center"
-              >
-                <div className="rounded-xl px-4 py-2 text-sm font-bold text-white"
-                  style={{ background: "color-mix(in srgb, var(--fg) 85%, transparent)" }}>
-                  {toast}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {toastNode}
         </div>
 
         {/* Grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateRows: `repeat(${MAX_GUESSES}, ${TILE}px)`,
-            gap: GAP,
-            width: gridWidth,
-            marginBottom: 20,
-          }}
-        >
-          {rows.map((letters, ri) => {
-            const isRevealing = revealingRow === ri;
-            const isRevealed  = revealedRows.has(ri);
-            const isShaking   = shakingRow === ri;
-            const hasWon      = phase === "won" && ri === guesses.length - 1 && isRevealed;
-
-            return (
-              <div
-                key={ri}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: `repeat(${WORD_LEN}, ${TILE}px)`,
-                  gap: GAP,
-                  animation: isShaking
-                    ? "wShake 0.5s ease-in-out"
-                    : hasWon
-                    ? "wBounce 0.5s ease-in-out 0.6s"
-                    : undefined,
-                }}
-              >
-                {letters.map((letter, ci) => {
-                  const trimmed = letter.trim();
-                  const ev = isRevealed && guesses[ri]
-                    ? evaluate(guesses[ri], solution)[ci]
-                    : trimmed ? "active" : "empty";
-
-                  return (
-                    <WordleTile
-                      key={ci}
-                      letter={trimmed}
-                      evaluation={ev}
-                      colIdx={ci}
-                      isRevealing={isRevealing}
-                      isRevealed={isRevealed}
-                      popKey={ri === guesses.length && phase === "playing" ? current.length : undefined}
-                    />
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
+        <WordleGrid
+          rows={rows} guesses={guesses} solution={solution}
+          revealingRow={revealingRow} revealedRows={revealedRows}
+          shakingRow={shakingRow} phase={phase} current={current}
+        />
 
         {/* Keyboard */}
-        <WordleKeyboard onKey={handleKey} keyStates={keyStates} />
+        <div className="mt-4">
+          <WordleKeyboard onKey={handleKey} keyStates={keyStates} />
+        </div>
 
-        {/* Result + Leaderboard */}
-        {phase !== "playing" && (
-          <div className="mt-6 w-full space-y-4">
-            {/* Share */}
-            <button
-              onClick={() => {
-                const text = buildShareText(guesses, solution, phase, dayIdx);
-                navigator.clipboard.writeText(text).then(() => {
-                  setShared(true);
-                  setTimeout(() => setShared(false), 2000);
-                });
-              }}
-              className="w-full rounded-2xl py-3.5 text-sm font-bold text-white transition-all active:scale-[0.98]"
-              style={{ background: shared ? "#6aaa64" : "var(--game)" }}
-            >
-              {shared ? "Copied!" : "Share result"}
-            </button>
+        {/* Share + leaderboard */}
+        <div className="mt-6 w-full space-y-4">
+          <button
+            onClick={() => {
+              const text = buildShareText(guesses, solution, phase, dayIdx);
+              navigator.clipboard.writeText(text).then(() => {
+                setShared(true);
+                setTimeout(() => setShared(false), 2000);
+              });
+            }}
+            className="w-full rounded-2xl py-3.5 text-sm font-bold text-white transition-all active:scale-[0.98]"
+            style={{ background: shared ? "#6aaa64" : "var(--game)" }}
+          >
+            {shared ? "Copied!" : "Share result"}
+          </button>
 
-            {/* Leaderboard */}
-            <div>
-              <div className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted">
-                Today&apos;s scores
-              </div>
-              <WordleLeaderboard date={todayStr} />
+          <div>
+            <div className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted">
+              Today&apos;s scores
             </div>
+            <WordleLeaderboard date={todayStr} />
           </div>
-        )}
+        </div>
       </div>
     </>
   );

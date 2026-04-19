@@ -328,11 +328,8 @@ export default function MathBlitzPage() {
 
   if (phase === "select") {
     return (
-      <div className="mx-auto max-w-md px-4 pt-6 pb-24">
+      <div className="mx-auto max-w-md px-4 pt-6 pb-8">
         <div className="mb-6">
-          <Link href="/brain-training" className="mb-4 flex items-center gap-1 text-xs text-muted/60 hover:text-muted transition-colors">
-            ← Brain Training
-          </Link>
           <h1 className="text-2xl font-bold tracking-tight">Math Blitz</h1>
           <p className="mt-1 text-sm text-muted">Answer as many as you can in 30 seconds. 3 wrong = game over.</p>
         </div>
@@ -423,7 +420,7 @@ export default function MathBlitzPage() {
     const cfg = DIFF_CONFIG[result.difficulty];
 
     return (
-      <div className="mx-auto max-w-md px-4 pt-6 pb-24">
+      <div className="mx-auto max-w-md px-4 pt-6 pb-8">
         <div className="text-center mb-6">
           <div
             className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl"

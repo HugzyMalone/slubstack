@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import Link from "next/link";
 import { CheckCircle, XCircle, Clipboard, ClipboardCheck, ChevronDown } from "lucide-react";
 import type { ActorData } from "@/app/trivia/actors/page";
 import { globalStore } from "@/lib/globalStore";
@@ -279,7 +278,7 @@ export function ActorBlitz({ actors }: Props) {
   // ── LOBBY ──────────────────────────────────────────────────────────────────
   if (gameState === "lobby") {
     return (
-      <div className="mx-auto flex max-w-md flex-col items-center px-6 pb-24 pt-10 text-center">
+      <div className="mx-auto flex max-w-md flex-col items-center px-6 pb-8 pt-10 text-center">
         <div
           className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl text-white"
           style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)" }}
@@ -340,7 +339,6 @@ export function ActorBlitz({ actors }: Props) {
         >
           {actors.length === 0 ? "Loading actors…" : "Let's Go →"}
         </button>
-        <Link href="/trivia" className="mt-4 text-sm text-muted hover:text-fg">← Back to Trivia</Link>
       </div>
     );
   }
@@ -368,7 +366,7 @@ export function ActorBlitz({ actors }: Props) {
       accuracy >= 90 ? "Incredible!" : accuracy >= 75 ? "Great job!" : accuracy >= 55 ? "Not bad!" : "Keep practising!";
 
     return (
-      <div className="mx-auto max-w-md px-4 pb-24 pt-8">
+      <div className="mx-auto max-w-md px-4 pb-8 pt-8">
         <div className="text-center mb-6">
           <div
             className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl text-white"
@@ -439,9 +437,6 @@ export function ActorBlitz({ actors }: Props) {
           </div>
         )}
 
-        <div className="mt-6 text-center">
-          <Link href="/trivia" className="text-sm text-muted hover:text-fg">← Back to Trivia</Link>
-        </div>
       </div>
     );
   }
