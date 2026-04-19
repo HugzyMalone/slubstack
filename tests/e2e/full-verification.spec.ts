@@ -15,10 +15,10 @@ test.describe('Home page', () => {
   test('renders hero, fact, and section cards', async ({ page }) => {
     await captureConsoleErrors(page, 'home')
     await page.goto('/')
-    await expect(page.locator('img[alt*="panda" i], img[src*="panda"]').first()).toBeVisible()
-    // 3 section cards (scope to main to exclude sidebar links)
-    const cards = page.locator('main').locator('a[href="/languages"], a[href="/trivia"], a[href="/brain-training"]')
-    await expect(cards).toHaveCount(3)
+    await expect(page.locator('img[src*="panda"], img[src*="bear"]').first()).toBeVisible()
+    // 4 section cards (scope to main to exclude sidebar links)
+    const cards = page.locator('main').locator('a[href="/languages"], a[href="/skills"], a[href="/brain-training"], a[href="/trivia"]')
+    await expect(cards).toHaveCount(4)
     // Has a rotating fact text block — facts are all 50+ char sentences
     const factText = page.locator('p').filter({ hasText: /.{40,}/ }).first()
     await expect(factText).toBeVisible()

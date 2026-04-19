@@ -135,7 +135,12 @@ Three-accent system defined in `app/globals.css`:
 
 ## Profile / Settings (`app/stats/ProfileClient.tsx`)
 - Three tabs: Profile, Leaderboard, Settings
-- Profile tab: avatar, tier badge, XP bar (based on **total XP** = mandarin + german + spanish combined), streak + XP strip, **Language Levels** card (per-language XP bar + tier for Spanish/Mandarin/German). No medals, no streak shield.
+- Profile tab: avatar, tier badge, XP bar (based on **total XP** = mandarin + german + spanish + vibe-coding combined), streak + XP strip, **Activity Levels** tabbed card. No medals, no streak shield.
+- **Activity Levels card** has 4 sub-tabs you can flick between:
+  - **Languages** — Spanish, Mandarin, German XP bars with tier + level
+  - **Skills** — Vibe Coding XP bar with tier + level
+  - **Brain** — Math Blitz personal bests (Easy/Medium/Hard from `slubstack_mathblitz_best`) + today's Wordle result (from `slubstack_wordle`)
+  - **Trivia** — Actor Blitz best score, accuracy, best streak (from `slubstack_actorblitz_best`); shows "No games played yet" if empty
 - Leaderboard tab: filter pills — Overall, Mandarin, German, Spanish, Actor Blitz, Math Blitz. All filters show inline lists (no link-out buttons). Language leaderboards fetch from `/api/leaderboard?lang=X`. Math Blitz has Easy/Medium/Hard sub-filter. Actor Blitz fetches from `/api/scores/actor-blitz`.
 - Settings tab: photo upload (with crop modal), username, status (emoji allowed in status text), save button
 - Account section: signed-in email display, Forgot password button (sends Supabase reset email), Sign out
