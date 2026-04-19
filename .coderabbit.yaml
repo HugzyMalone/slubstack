@@ -1,0 +1,39 @@
+language: en-US
+tone_instructions: "Be concise and direct. Focus on correctness, security, and performance. Skip style nits unless they cause bugs."
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: true
+  auto_review:
+    enabled: true
+    drafts: false
+
+  path_instructions:
+    - path: "app/**/*.tsx"
+      instructions: |
+        This is a Next.js 16 App Router project with Tailwind CSS v4.
+        - Check for missing `"use client"` / `"use server"` directives.
+        - Ensure Supabase calls that need the service role key happen server-side only (never expose SUPABASE_SERVICE_ROLE_KEY client-side).
+        - Colour system: use CSS vars (--accent, --game, --learn) via Tailwind classes (text-accent, bg-game, etc.) — never hardcode hex values.
+        - BottomNav must stay hidden on lesson routes (/*/learn/*) and game pages (wordle, math-blitz, trivia/actors).
+        - CardShell uses fixed inset-0 z-40 — lesson overlays are intentionally fullscreen.
+    - path: "lib/store.ts"
+      instructions: "Zustand context pattern — createGameStore factory. Don't break the GameStoreProvider / useGameStore contract."
+    - path: "lib/xp.ts"
+      instructions: "levelFromXp = Math.floor(Math.sqrt(xp / 50)). Tier thresholds: Bronze 0, Silver 5, Gold 10, Platinum 20, Diamond 30, Emerald 40, Obsidian 50. Keep TopBar.tsx and ProfileClient.tsx in sync."
+    - path: "app/api/**"
+      instructions: |
+        - Avatar uploads must go through /api/avatar using the service role key — never direct browser → Supabase Storage.
+        - Check for SQL injection / RLS bypass risks in any Supabase queries.
+    - path: "content/**/*.json"
+      instructions: "Card shape: { id, category, hanzi, pinyin, english, note? }. For German/Spanish: hanzi = the word, pinyin = pronunciation guide."
+
+  finishing_touches:
+    docstrings: false
+
+chat:
+  auto_reply: true
