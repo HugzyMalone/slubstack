@@ -59,9 +59,10 @@ function accPct(c: number, w: number): number | null {
 // ── config ─────────────────────────────────────────────────────────────────────
 
 const LANG_CONFIGS = [
-  { key: "slubstack-v1",         label: "Mandarin", flag: "🇨🇳", href: "/mandarin/review",  color: "#e11d48" },
-  { key: "slubstack-german-v1",  label: "German",   flag: "🇩🇪", href: "/german/review",    color: "#f97316" },
-  { key: "slubstack-spanish-v1", label: "Spanish",  flag: "🇪🇸", href: "/spanish/review",   color: "#10b981" },
+  { key: "slubstack-v1",         label: "Mandarin",    flag: "🇨🇳", href: "/mandarin/review",     color: "#e11d48" },
+  { key: "slubstack-german-v1",  label: "German",      flag: "🇩🇪", href: "/german/review",       color: "#f97316" },
+  { key: "slubstack-spanish-v1", label: "Spanish",     flag: "🇪🇸", href: "/spanish/review",      color: "#10b981" },
+  { key: "slubstack-vibe-v1",    label: "Vibe Coding", flag: "🪄",  href: "/vibe-coding/review",  color: "#f59e0b" },
 ] as const;
 
 // ── icons ──────────────────────────────────────────────────────────────────────
@@ -229,7 +230,7 @@ function GameRow({ href, emoji, title, meta, accentColor }: { href: string; emoj
 export default function ReviewHubPage() {
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [langStats, setLangStats] = useState<LangStats[]>([
-    { due: 0, seen: 0 }, { due: 0, seen: 0 }, { due: 0, seen: 0 },
+    { due: 0, seen: 0 }, { due: 0, seen: 0 }, { due: 0, seen: 0 }, { due: 0, seen: 0 },
   ]);
   const [mathStats, setMathStats] = useState<MathOpStats>({});
   const [actorStats, setActorStats] = useState<ActorStatMap>({});
@@ -263,7 +264,7 @@ export default function ReviewHubPage() {
 
   const mathMeta = mathAcc === null ? "Play to track accuracy" : `${math.c + math.w} answered · ${mathAcc}% accuracy`;
   const actorMeta = actor.total === 0 ? "Play to track accuracy" : `${actor.total} actor${actor.total === 1 ? "" : "s"} · ${actorAcc ?? "—"}% accuracy`;
-  const langSubtitle = totalDue > 0 ? `${totalDue} card${totalDue === 1 ? "" : "s"} due` : "Mandarin · German · Spanish";
+  const langSubtitle = totalDue > 0 ? `${totalDue} card${totalDue === 1 ? "" : "s"} due` : "Languages · Vibe Coding";
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-28 pt-4 space-y-3">

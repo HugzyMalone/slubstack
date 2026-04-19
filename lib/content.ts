@@ -4,6 +4,8 @@ import germanVocab from "@/content/german/vocab.json";
 import germanUnits from "@/content/german/units.json";
 import spanishVocab from "@/content/spanish/vocab.json";
 import spanishUnits from "@/content/spanish/units.json";
+import vibeVocab from "@/content/vibe-coding/vocab.json";
+import vibeUnits from "@/content/vibe-coding/units.json";
 
 export type Category = string;
 
@@ -26,7 +28,7 @@ export type Unit = {
   cardIds: string[];
 };
 
-export type Language = "mandarin" | "german" | "spanish";
+export type Language = "mandarin" | "german" | "spanish" | "vibe-coding";
 
 export type LanguageContent = {
   cards: Card[];
@@ -87,9 +89,16 @@ const SPANISH_CONTENT = buildContent(
   ["multiple-choice", "type", "match"],
 );
 
+const VIBE_CONTENT = buildContent(
+  vibeVocab,
+  vibeUnits,
+  ["multiple-choice", "type", "match"],
+);
+
 export function getLanguageContent(lang: Language): LanguageContent {
   if (lang === "german") return GERMAN_CONTENT;
   if (lang === "spanish") return SPANISH_CONTENT;
+  if (lang === "vibe-coding") return VIBE_CONTENT;
   return MANDARIN_CONTENT;
 }
 

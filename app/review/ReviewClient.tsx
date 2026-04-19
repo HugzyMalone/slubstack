@@ -70,7 +70,7 @@ export function ReviewClient({ lang = "mandarin" }: { lang?: Language }) {
 
   if (!hydrated) return null;
 
-  const character = lang === "german" ? "bear" : "panda";
+  const character = (lang === "german" || lang === "vibe-coding") ? "bear" : "panda";
 
   if (running) {
     return <SessionRunner items={items} exitHref={exitHref} reviewHref={exitHref} character={character} lang={lang} />;

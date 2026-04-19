@@ -1,0 +1,56 @@
+[
+  {
+    "id": "vc-prompting",
+    "index": 0,
+    "title": "Prompting Basics",
+    "subtitle": "Role, context, constraints & format",
+    "emoji": "✍️",
+    "category": "vc-prompting",
+    "cardIds": ["vc-001","vc-002","vc-003","vc-004","vc-005","vc-006","vc-007","vc-008","vc-009","vc-010","vc-011","vc-012","vc-013","vc-014","vc-015","vc-016"]
+  },
+  {
+    "id": "vc-claude-code",
+    "index": 1,
+    "title": "Claude Code",
+    "subtitle": "CLAUDE.md, MCP, hooks & commands",
+    "emoji": "⚙️",
+    "category": "vc-claude-code",
+    "cardIds": ["vc-017","vc-018","vc-019","vc-020","vc-021","vc-022","vc-023","vc-024","vc-025","vc-026","vc-027","vc-028","vc-029","vc-030"]
+  },
+  {
+    "id": "vc-scaffolding",
+    "index": 2,
+    "title": "Project Scaffolding",
+    "subtitle": "Starting apps from zero with Claude",
+    "emoji": "🏗️",
+    "category": "vc-scaffolding",
+    "cardIds": ["vc-031","vc-032","vc-033","vc-034","vc-035","vc-036","vc-037","vc-038","vc-039","vc-040","vc-041","vc-042","vc-043","vc-044"]
+  },
+  {
+    "id": "vc-debugging",
+    "index": 3,
+    "title": "Debugging with Claude",
+    "subtitle": "Errors, traces, hypotheses & fixes",
+    "emoji": "🔍",
+    "category": "vc-debugging",
+    "cardIds": ["vc-045","vc-046","vc-047","vc-048","vc-049","vc-050","vc-051","vc-052","vc-053","vc-054","vc-055","vc-056","vc-057","vc-058"]
+  },
+  {
+    "id": "vc-iterate",
+    "index": 4,
+    "title": "Iterate & Refine",
+    "subtitle": "Scope control, feedback & steering",
+    "emoji": "🔄",
+    "category": "vc-iterate",
+    "cardIds": ["vc-059","vc-060","vc-061","vc-062","vc-063","vc-064","vc-065","vc-066","vc-067","vc-068","vc-069","vc-070","vc-071","vc-072"]
+  },
+  {
+    "id": "vc-web-patterns",
+    "index": 5,
+    "title": "Web App Patterns",
+    "subtitle": "Next.js, auth, state & deployment",
+    "emoji": "🌐",
+    "category": "vc-web-patterns",
+    "cardIds": ["vc-073","vc-074","vc-075","vc-076","vc-077","vc-078","vc-079","vc-080","vc-081","vc-082","vc-083","vc-084","vc-085","vc-086","vc-087","vc-088"]
+  }
+]

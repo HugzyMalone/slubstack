@@ -134,6 +134,7 @@ function createGameStore(name: string) {
 export const mandarinStore = createGameStore("slubstack-v1");
 export const germanStore = createGameStore("slubstack-german-v1");
 export const spanishStore = createGameStore("slubstack-spanish-v1");
+export const vibeCodingStore = createGameStore("slubstack-vibe-v1");
 
 type GameStoreInstance = ReturnType<typeof createGameStore>;
 

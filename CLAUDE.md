@@ -30,7 +30,7 @@ Three-accent system defined in `app/globals.css`:
 ## App structure
 
 ### Routes
-- `/` — Hub page: **static, no-scroll**. Animal hero (28vh) + hourly rotating fact + 3 section cards. Body scroll locked via `useEffect`. No dynamic data (no due-cards banner, no continue card). Fact rotates once per hour based on `Math.floor(Date.now() / 3600000) % FACTS.length` — 105 facts across languages, brain science, history, tech, etc.
+- `/` — Hub page: **static, no-scroll**. Animal hero (28vh) + hourly rotating fact + 4 section cards (Languages, Vibe Coding, Brain Training, Trivia). Body scroll locked via `useEffect`. No dynamic data. Fact rotates once per hour based on `Math.floor(Date.now() / 3600000) % FACTS.length` — 105 facts across languages, brain science, history, tech, etc.
 - `/spanish` — Spanish skill tree
 - `/spanish/learn/[unitId]` — Spanish lesson (games only: MC, Type, Match)
 - `/spanish/review` — Spanish flashcard review
@@ -40,6 +40,9 @@ Three-accent system defined in `app/globals.css`:
 - `/german` — German skill tree
 - `/german/learn/[unitId]` — German lesson
 - `/german/review` — German flashcard review
+- `/vibe-coding` — Vibe Coding skill tree (Claude/prompting curriculum)
+- `/vibe-coding/learn/[unitId]` — Vibe Coding lesson (MC, Type, Match)
+- `/vibe-coding/review` — Vibe Coding flashcard review
 - `/trivia` — Trivia hub
 - `/trivia/actors` — Actor Blitz game
 - `/brain-training` — Brain Training hub (Math Blitz + Wordle live; Memory Match, Word Puzzles, Speed Recall coming soon)
@@ -48,8 +51,8 @@ Three-accent system defined in `app/globals.css`:
 - `/stats` — Profile / leaderboard / settings
 - `/stats/user/[userId]` — Public read-only profile page for any leaderboard user
 - `/onboarding` — First-time setup (avatar, username, password)
-- `/review` — Review hub: three accordion sections (Languages, Brain Training, Trivia). Tap to expand, reveals sub-items with live localStorage stats, each navigates to that game/review page.
-- `/spanish/review`, `/mandarin/review`, `/german/review` — Flashcard review pages. **Practice button always shows** when user has learned cards (not just when SRS cards are due). When cards are due: shows due count + Practice. When nothing is due: shows "Practice to earn XP". Practice session runs via `SessionRunner` → awards XP via `completeSession` on completion. If no SRS-due cards, falls back to `buildPracticeSession` (all seen cards).
+- `/review` — Review hub: accordion sections (Languages + Vibe Coding, Brain Training, Trivia). Tap to expand, reveals sub-items with live localStorage stats, each navigates to that game/review page.
+- `/spanish/review`, `/mandarin/review`, `/german/review`, `/vibe-coding/review` — Flashcard review pages. **Practice button always shows** when user has learned cards (not just when SRS cards are due). When cards are due: shows due count + Practice. When nothing is due: shows "Practice to earn XP". Practice session runs via `SessionRunner` → awards XP via `completeSession` on completion. If no SRS-due cards, falls back to `buildPracticeSession` (all seen cards).
 - Legacy `/learn/[unitId]` and `/review` still work (mandarin defaults)
 
 ### Key files
@@ -61,6 +64,7 @@ Three-accent system defined in `app/globals.css`:
 - `app/languages/page.tsx` — **client component** (reads Zustand stores directly via `useStore`). Shows `Lv. X` badge per language using live XP.
 - `app/mandarin/layout.tsx` — provides `mandarinStore` via context
 - `app/german/layout.tsx` — provides `germanStore` via context (separate isolated progress)
+- `app/vibe-coding/layout.tsx` — provides `vibeCodingStore` via context + `<CloudSync lang="vibe-coding" />`
 - `app/trivia/actors/page.tsx` — **synchronous** (no async fetch). Builds actor list from `ACTOR_CONFIGS` using local `/public/actors/*.jpg` images. No Wikipedia API calls at runtime.
 - `app/api/avatar/route.ts` — server-side avatar upload using service role key (bypasses RLS). Accepts multipart form data, uploads to `avatars/{userId}/avatar.jpg` in Supabase storage.
 - `app/api/user/[userId]/route.ts` — public profile API: returns username, avatar, status, xp, streak for any user (no auth required).
@@ -72,10 +76,10 @@ Three-accent system defined in `app/globals.css`:
 - `components/Panda.tsx` — mood-mapped images (idle/happy/wrong/sad/celebrating/sleeping), supports `fill` prop for CSS-sized containers
 - `components/TopBar.tsx` — shows `← Back` (router.back()) on all non-home pages on mobile; wordmark on home only. Right side shows streak (from `useGlobalStore`) + level chip (from `useGameStore` XP via root mandarinStore) + profile avatar — all hidden when user is not logged in (gated on `loggedIn` state derived from `supabase.auth.getSession`). On mount, syncs `globalStore.streak` to the max of all three language store streaks (fixes historical divergence). Level chip colour is tier-based (see Level & Tier system).
 - `components/BottomNav.tsx` — `lg:hidden`; hidden during lessons (`/*/learn/*`) **and on all game pages** (`/brain-training/wordle`, `/brain-training/math-blitz`, `/trivia/actors`) so the nav never overlaps game UI. Uses per-tab opacity/scale transitions (not `layoutId` FLIP — avoids layout measurement jank).
-- `components/CloudSync.tsx` — syncs language store to Supabase; mounted in all three language layouts (mandarin/german/spanish). Accepts `lang` prop. On every push it reads XP from all three raw stores and sends `totalXp` (sum) so `user_stats.xp` always reflects the cross-language total.
+- `components/CloudSync.tsx` — syncs language store to Supabase; mounted in all four language/skill layouts (mandarin/german/spanish/vibe-coding). Accepts `lang` prop. On every push it reads XP from all four raw stores and sends `totalXp` (sum) so `user_stats.xp` always reflects the cross-language total.
 - `components/trivia/ActorBlitz.tsx` — Actor Blitz game component. Images from local `/public/actors/`. Uses `var(--game)` (pastel mauve) for all game UI. Answer correct delay 300ms, wrong delay 700ms. Submits score to `/api/scores/actor-blitz` on game end (fire-and-forget, fails silently if unauthenticated).
-- `lib/store.ts` — Zustand context pattern: `createGameStore(key)` factory, `GameStoreProvider`, `useGameStore` reads from nearest provider. `mandarinStore` = key `slubstack-v1`, `germanStore` = `slubstack-german-v1`, `spanishStore` = `slubstack-spanish-v1`
-- `lib/content.ts` — `getLanguageContent(lang)` returns `{ cards, units, getCard, getCardsForUnit, getUnit, allowedInteractions }`. Spanish/German exclude "build"; Spanish/German/Mandarin all have "match".
+- `lib/store.ts` — Zustand context pattern: `createGameStore(key)` factory, `GameStoreProvider`, `useGameStore` reads from nearest provider. `mandarinStore` = key `slubstack-v1`, `germanStore` = `slubstack-german-v1`, `spanishStore` = `slubstack-spanish-v1`, `vibeCodingStore` = `slubstack-vibe-v1`
+- `lib/content.ts` — `getLanguageContent(lang)` returns `{ cards, units, getCard, getCardsForUnit, getUnit, allowedInteractions }`. Spanish/German/Vibe Coding exclude "build"; all four languages have "match".
 - `lib/session.ts` — `buildUnitSession` uses `LESSON_ORDER` (no flip — games only). `buildReviewSession` uses `REVIEW_ORDER` (games only — MC, type, match — no flip). `buildPracticeSession` builds a session from all seen cards ignoring SRS due dates (used when no cards are due but user wants to practice). All take content as param.
 - `lib/hooks.ts` — `useHydrated` (useSyncExternalStore), `useNow` (useState/useEffect — NOT useSyncExternalStore, which caused infinite loop with Date.now())
 - `lib/supabase/admin.ts` — Supabase admin client using `SUPABASE_SERVICE_ROLE_KEY` (server-only, bypasses RLS)
@@ -151,12 +155,24 @@ Three-accent system defined in `app/globals.css`:
 - `content/mandarin/vocab.json` + `units.json` — 8 units, ~160 cards
 - `content/german/vocab.json` + `units.json` — 7 units: Greetings, Numbers, Colors, Food & Drink, Family, Verbs, Days & Time (111 cards)
 - `content/spanish/vocab.json` + `units.json` — 8 units: Greetings, Numbers, Colors, Food & Drink, Verbs, Family, Days & Time, Places (116 cards)
+- `content/vibe-coding/vocab.json` + `units.json` — 6 units, 88 cards: Prompting Basics, Claude Code Essentials, Project Scaffolding, Debugging with Claude, Iterate & Refine, Web App Patterns
 
 Card shape (all languages):
 ```ts
 { id, category, hanzi, pinyin, english, note? }
 // German/Spanish: hanzi = the word, pinyin = pronunciation guide
+// Vibe Coding: hanzi = technique name, pinyin = example snippet, english = what it achieves
 ```
+
+## Vibe Coding (`app/vibe-coding/`)
+- Full mirror of language sections (skill tree, lessons, review, CloudSync XP)
+- 88 Claude-focused flashcards: prompt patterns, Claude Code features, scaffolding strategies, debugging approaches, web app architecture rules
+- `allowedInteractions`: `["multiple-choice", "type", "match"]` — no build (Mandarin-only)
+- Card format: technique name (`hanzi`) + example snippet (`pinyin`) → purpose (`english`)
+- MC: show technique → pick purpose. Type: show purpose → type technique name. Match: 4 technique↔purpose pairs
+- `vibeCodingStore` key: `slubstack-vibe-v1`. vibeXp counted in `totalXp` sent to Supabase
+- Shown in AppSidebar (with 0/6 progress pip), Review hub, and Profile Language Levels card
+- Uses bear character (same as German)
 
 ## Interaction system
 Lessons use `LESSON_ORDER` (no flip cards — interactive games only):

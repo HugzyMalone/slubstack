@@ -40,6 +40,22 @@ function FilmIcon() {
   );
 }
 
+function WandIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 4V2" />
+      <path d="M15 16v-2" />
+      <path d="M8 9h2" />
+      <path d="M20 9h2" />
+      <path d="M17.8 11.8L19 13" />
+      <path d="M15 9h.01" />
+      <path d="M17.8 6.2L19 5" />
+      <path d="M3 21l9-9" />
+      <path d="M12.2 6.2L11 5" />
+    </svg>
+  );
+}
+
 function ChevronRight() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -55,6 +71,13 @@ const SECTIONS = [
     iconBg: "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)",
     title: "Languages",
     subtitle: "Spanish · Mandarin · German",
+  },
+  {
+    href: "/vibe-coding",
+    icon: <WandIcon />,
+    iconBg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+    title: "Vibe Coding",
+    subtitle: "Claude · Prompting · Web Apps",
   },
   {
     href: "/brain-training",

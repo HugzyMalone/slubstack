@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Home, UserCircle2 } from "lucide-react";
 import { useStore } from "zustand";
 import { cn } from "@/lib/utils";
-import { mandarinStore, germanStore, spanishStore } from "@/lib/store";
+import { mandarinStore, germanStore, spanishStore, vibeCodingStore } from "@/lib/store";
 
 function GlobeIcon() {
   return (
@@ -13,6 +13,22 @@ function GlobeIcon() {
       <circle cx="12" cy="12" r="10" />
       <path d="M2 12h20" />
       <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+    </svg>
+  );
+}
+
+function WandIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 4V2" />
+      <path d="M15 16v-2" />
+      <path d="M8 9h2" />
+      <path d="M20 9h2" />
+      <path d="M17.8 11.8L19 13" />
+      <path d="M15 9h.01" />
+      <path d="M17.8 6.2L19 5" />
+      <path d="M3 21l9-9" />
+      <path d="M12.2 6.2L11 5" />
     </svg>
   );
 }
@@ -55,11 +71,13 @@ export function AppSidebar() {
   const mandarinDone = useStore(mandarinStore, (s) => s.completedUnits.length);
   const germanDone = useStore(germanStore, (s) => s.completedUnits.length);
   const spanishDone = useStore(spanishStore, (s) => s.completedUnits.length);
+  const vibeDone = useStore(vibeCodingStore, (s) => s.completedUnits.length);
 
   const langProgress: Record<string, { done: number; total: number }> = {
-    "/spanish":  { done: spanishDone,  total: 8 },
-    "/mandarin": { done: mandarinDone, total: 8 },
-    "/german":   { done: germanDone,   total: 7 },
+    "/spanish":      { done: spanishDone,  total: 8 },
+    "/mandarin":     { done: mandarinDone, total: 8 },
+    "/german":       { done: germanDone,   total: 7 },
+    "/vibe-coding":  { done: vibeDone,     total: 6 },
   };
 
   const navItems = [
@@ -93,6 +111,13 @@ export function AppSidebar() {
       code: "DE",
       accent: "#f97316",
       match: (p: string) => p.startsWith("/german"),
+    },
+    {
+      href: "/vibe-coding",
+      label: "Vibe Coding",
+      type: "icon" as const,
+      Icon: WandIcon,
+      match: (p: string) => p.startsWith("/vibe-coding"),
     },
     {
       href: "/trivia",

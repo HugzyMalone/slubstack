@@ -6,7 +6,7 @@ import {
   CheckCircle, User, Settings, BarChart3,
 } from "lucide-react";
 import { useStore } from "zustand";
-import { mandarinStore, germanStore, spanishStore } from "@/lib/store";
+import { mandarinStore, germanStore, spanishStore, vibeCodingStore } from "@/lib/store";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -315,10 +315,11 @@ function ProfileTab({ user, avatar, username, status }: {
   const mandarinXp = useStore(mandarinStore, (s) => s.xp);
   const germanXp = useStore(germanStore, (s) => s.xp);
   const spanishXp = useStore(spanishStore, (s) => s.xp);
+  const vibeXp = useStore(vibeCodingStore, (s) => s.xp);
 
   if (!hydrated) return null;
 
-  const xp = mandarinXp + germanXp + spanishXp;
+  const xp = mandarinXp + germanXp + spanishXp + vibeXp;
   const level = levelFromXp(xp);
   const { current, next, progress } = xpToNextLevel(xp);
   const tier = getTier(level);
@@ -394,6 +395,7 @@ function ProfileTab({ user, avatar, username, status }: {
             { label: "Spanish", xp: spanishXp, code: "ES", iconBg: "linear-gradient(135deg, #c2410c 0%, #ea580c 100%)" },
             { label: "Mandarin", xp: mandarinXp, code: "中", iconBg: "linear-gradient(135deg, #be123c 0%, #e11d48 100%)" },
             { label: "German", xp: germanXp, code: "DE", iconBg: "linear-gradient(135deg, #c2410c 0%, #f97316 100%)" },
+            { label: "Vibe Coding", xp: vibeXp, code: "🪄", iconBg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)" },
           ].map(({ label, xp: langXp, code, iconBg }) => {
             const langLevel = levelFromXp(langXp);
             const langTier = getTier(langLevel);
