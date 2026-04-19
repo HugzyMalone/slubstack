@@ -40,7 +40,7 @@ export function ReviewClient({ lang = "mandarin" }: { lang?: Language }) {
 
   const items = useMemo(() => {
     if (!hydrated || !running) return [];
-    return buildReviewSession(srs, content, 10);
+    return buildReviewSession(srs, { cards: content.cards, allowedInteractions: content.allowedInteractions }, 10);
   }, [srs, hydrated, running, content]);
 
   const learnedCards = useMemo(() => {

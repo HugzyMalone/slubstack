@@ -9,7 +9,6 @@ import { useGameStore } from "@/lib/store";
 import { globalStore } from "@/lib/globalStore";
 import type { Language } from "@/lib/content";
 import { CardShell } from "@/components/cards/CardShell";
-import { FlipCard } from "@/components/cards/FlipCard";
 import { MultipleChoice } from "@/components/cards/MultipleChoice";
 import { BuildPhrase } from "@/components/cards/BuildPhrase";
 import { TypeAnswer } from "@/components/cards/TypeAnswer";
@@ -104,9 +103,6 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
     >
       <AnimatePresence mode="wait">
         <div key={`${index}-${current.kind}`}>
-          {current.kind === "flip" && (
-            <FlipCard card={current.card} onResult={handleResult} onFeedback={handleFeedback} />
-          )}
           {current.kind === "multiple-choice" && (
             <MultipleChoice
               card={current.card}

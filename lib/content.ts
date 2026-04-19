@@ -35,7 +35,7 @@ export type LanguageContent = {
   getCardsForUnit: (unitId: string) => Card[];
   getUnit: (id: string) => Unit | undefined;
   /** Interaction types allowed for this language's sessions. */
-  allowedInteractions: ("flip" | "multiple-choice" | "build" | "type" | "match")[];
+  allowedInteractions: ("multiple-choice" | "build" | "type" | "match")[];
 };
 
 function buildContent(

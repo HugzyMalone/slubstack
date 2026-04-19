@@ -3,7 +3,7 @@ import { ALL_CARDS, getCardsForUnit } from "@/lib/content";
 import { INITIAL_SRS, isDue, type SrsState } from "@/lib/srs";
 import { shuffle } from "@/lib/utils";
 
-export type InteractionKind = "flip" | "multiple-choice" | "build" | "type" | "match";
+export type InteractionKind = "multiple-choice" | "build" | "type" | "match";
 
 export type SessionItem = {
   card: Card;
@@ -25,17 +25,17 @@ const LESSON_ORDER: InteractionKind[] = [
   "multiple-choice",
 ];
 
-// Flashcard review: includes flip for self-rated review
+// Review sessions: game interactions only — SRS rated by correct/wrong automatically
 const REVIEW_ORDER: InteractionKind[] = [
-  "flip",
   "multiple-choice",
   "type",
-  "flip",
   "multiple-choice",
-  "flip",
+  "match",
   "type",
   "multiple-choice",
-  "flip",
+  "type",
+  "multiple-choice",
+  "match",
   "type",
 ];
 
@@ -101,10 +101,12 @@ export function buildUnitSession(
 
 export function buildReviewSession(
   srs: Record<string, SrsState>,
-  content?: Pick<LanguageContent, "cards">,
+  content?: Pick<LanguageContent, "cards" | "allowedInteractions">,
   size = 10,
 ): SessionItem[] {
   const allCards = content?.cards ?? ALL_CARDS;
+  const allowed: InteractionKind[] = content?.allowedInteractions ?? ["multiple-choice", "type", "match"];
+  const order = REVIEW_ORDER.filter((k) => allowed.includes(k));
   const now = Date.now();
   const due = Object.entries(srs)
     .filter(([, s]) => isDue(s, now))
@@ -114,8 +116,8 @@ export function buildReviewSession(
   const pool = shuffle(due).slice(0, size);
 
   return pool.map((card, i) => {
-    const kind = REVIEW_ORDER[i % REVIEW_ORDER.length];
-    return kind === "multiple-choice"
+    const kind = order[i % order.length];
+    return kind === "multiple-choice" || kind === "match"
       ? { card, kind, distractors: pickDistractors(card, allCards) }
       : { card, kind };
   });
