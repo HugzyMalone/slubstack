@@ -5,6 +5,7 @@ import "./globals.css";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
 import { CloudSync } from "@/components/CloudSync";
+import { BootstrapSync } from "@/components/BootstrapSync";
 import { AppSidebar } from "@/components/AppSidebar";
 import { GameStoreProvider, mandarinStore } from "@/lib/store";
 
@@ -61,6 +62,7 @@ export default function RootLayout({
           <div className="flex flex-1 flex-col lg:ml-60">
             <TopBar />
             <CloudSync />
+            <BootstrapSync />
             <main className="flex-1">{children}</main>
             <BottomNav />
           </div>
