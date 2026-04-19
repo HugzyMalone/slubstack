@@ -155,13 +155,79 @@ test.describe('Stats / Profile', () => {
 })
 
 test.describe('Review hub', () => {
-  test('review page renders accordion sections', async ({ page }) => {
+  test('review page renders Languages, Skills, Brain Training, and Trivia accordions', async ({ page }) => {
     await captureConsoleErrors(page, 'review')
     await page.goto('/review')
     await page.waitForLoadState('networkidle')
-    const sections = page.locator('button, summary, [role="button"]').filter({ hasText: /language|brain|trivia/i })
-    await expect(sections.first()).toBeVisible({ timeout: 8000 })
+    // Accordion buttons contain title + subtitle text — use contains match
+    const main = page.locator('main')
+    await expect(main.locator('button').filter({ hasText: /Languages/ }).first()).toBeVisible({ timeout: 8000 })
+    await expect(main.locator('button').filter({ hasText: /Skills/ }).first()).toBeVisible()
+    await expect(main.locator('button').filter({ hasText: /Brain Training/ }).first()).toBeVisible()
+    await expect(main.locator('button').filter({ hasText: /Trivia/ }).first()).toBeVisible()
     await page.screenshot({ path: 'tests/e2e/screenshots/review.png' })
+  })
+
+  test('review page Skills section contains Vibe Coding, not Languages', async ({ page }) => {
+    await page.goto('/review')
+    await page.waitForLoadState('networkidle')
+    const main = page.locator('main')
+    // Open the Skills accordion
+    await main.locator('button').filter({ hasText: /Skills/ }).first().click()
+    await expect(page.locator('a[href="/vibe-coding/review"]')).toBeVisible({ timeout: 5000 })
+    // Open Languages accordion and confirm Vibe Coding is NOT inside it
+    await main.locator('button').filter({ hasText: /Languages/ }).first().click()
+    // The languages section should link to the three language reviews but not vibe-coding
+    const langSection = page.locator('div').filter({ has: page.locator('a[href="/mandarin/review"]') }).first()
+    await expect(langSection.locator('a[href="/vibe-coding/review"]')).toHaveCount(0)
+  })
+})
+
+test.describe('Vibe Coding', () => {
+  test('vibe coding skill tree loads with Prompting Basics as first unit', async ({ page }) => {
+    await captureConsoleErrors(page, 'vibe-coding')
+    await page.goto('/vibe-coding')
+    await page.waitForLoadState('networkidle')
+    // First unit "Prompting Basics" should be visible
+    const firstUnit = page.locator('a, button').filter({ hasText: /prompting basics/i }).first()
+    await expect(firstUnit).toBeVisible({ timeout: 8000 })
+    await page.screenshot({ path: 'tests/e2e/screenshots/vibe-coding-skill-tree.png' })
+  })
+
+  test('vibe coding skill tree shows Start on first incomplete unit only', async ({ page }) => {
+    await page.goto('/vibe-coding')
+    await page.waitForLoadState('networkidle')
+    // With a clean store there is exactly one "Start" badge visible
+    const startBadges = page.locator('span').filter({ hasText: /^Start$/ })
+    await expect(startBadges).toHaveCount(1, { timeout: 8000 })
+  })
+
+  test('vibe coding lesson uses only multiple-choice and match — no type input', async ({ page }) => {
+    await captureConsoleErrors(page, 'vibe-lesson')
+    await page.goto('/vibe-coding/learn/vc-prompting')
+    await page.waitForLoadState('networkidle')
+    // Wait for the lesson to hydrate — bear character image appears in the lesson shell
+    await expect(page.locator('img[src*="bear"]').first()).toBeVisible({ timeout: 8000 })
+    // There must be NO text input field (type interaction would render an <input>)
+    const textInput = page.locator('input[type="text"], textarea')
+    await expect(textInput).toHaveCount(0)
+  })
+
+  test('vibe coding review page loads', async ({ page }) => {
+    await captureConsoleErrors(page, 'vibe-review')
+    await page.goto('/vibe-coding/review')
+    await page.waitForLoadState('networkidle')
+    // Shows either a practice button or an empty state with the bear character
+    const content = page.locator('button, img[src*="bear"]').first()
+    await expect(content).toBeVisible({ timeout: 8000 })
+  })
+
+  test('skills hub loads with Vibe Coding link', async ({ page }) => {
+    await captureConsoleErrors(page, 'skills')
+    await page.goto('/skills')
+    await page.waitForLoadState('networkidle')
+    // Scope to main to avoid matching the sidebar link
+    await expect(page.locator('main').locator('a[href="/vibe-coding"]')).toBeVisible({ timeout: 8000 })
   })
 })
 

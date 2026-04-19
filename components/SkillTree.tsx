@@ -22,7 +22,8 @@ export function SkillTree({ units, basePath, greeting, subGreeting, character = 
   const hydrated = useHydrated();
   const completedUnits = useGameStore((s) => s.completedUnits);
   const seenCardIds = useGameStore((s) => s.seenCardIds);
-  const unlockedIndex = hydrated ? Math.min(units.length - 1, completedUnits.length) : 0;
+  const firstIncompleteIndex = hydrated ? units.findIndex((u) => !completedUnits.includes(u.id)) : 0;
+  const unlockedIndex = firstIncompleteIndex === -1 ? units.length - 1 : firstIncompleteIndex;
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-24 pt-0">

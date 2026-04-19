@@ -59,10 +59,13 @@ function accPct(c: number, w: number): number | null {
 // ── config ─────────────────────────────────────────────────────────────────────
 
 const LANG_CONFIGS = [
-  { key: "slubstack-v1",         label: "Mandarin",    flag: "🇨🇳", href: "/mandarin/review",     color: "#e11d48" },
-  { key: "slubstack-german-v1",  label: "German",      flag: "🇩🇪", href: "/german/review",       color: "#f97316" },
-  { key: "slubstack-spanish-v1", label: "Spanish",     flag: "🇪🇸", href: "/spanish/review",      color: "#10b981" },
-  { key: "slubstack-vibe-v1",    label: "Vibe Coding", flag: "🪄",  href: "/vibe-coding/review",  color: "#f59e0b" },
+  { key: "slubstack-v1",         label: "Mandarin", flag: "🇨🇳", href: "/mandarin/review", color: "#e11d48", itemLabel: "words" },
+  { key: "slubstack-german-v1",  label: "German",   flag: "🇩🇪", href: "/german/review",   color: "#f97316", itemLabel: "words" },
+  { key: "slubstack-spanish-v1", label: "Spanish",  flag: "🇪🇸", href: "/spanish/review",  color: "#10b981", itemLabel: "words" },
+] as const;
+
+const SKILL_CONFIGS = [
+  { key: "slubstack-vibe-v1", label: "Vibe Coding", flag: "🪄", href: "/vibe-coding/review", color: "#f59e0b", itemLabel: "cards" },
 ] as const;
 
 // ── icons ──────────────────────────────────────────────────────────────────────
@@ -82,6 +85,15 @@ function BrainIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" />
       <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" />
+    </svg>
+  );
+}
+
+function CodeIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="16 18 22 12 16 6" />
+      <polyline points="8 6 2 12 8 18" />
     </svg>
   );
 }
@@ -174,8 +186,9 @@ function AccordionSection({ open, onToggle, icon, iconBg, title, subtitle, child
 
 // ── row components ─────────────────────────────────────────────────────────────
 
-function LangRow({ cfg, stats }: { cfg: typeof LANG_CONFIGS[number]; stats: LangStats }) {
+function LangRow({ cfg, stats }: { cfg: { href: string; color: string; flag: string; label: string; itemLabel: string }; stats: LangStats }) {
   const { due, seen } = stats;
+  const lbl = cfg.itemLabel;
   return (
     <Link
       href={cfg.href}
@@ -190,7 +203,7 @@ function LangRow({ cfg, stats }: { cfg: typeof LANG_CONFIGS[number]; stats: Lang
       <div className="flex-1 min-w-0">
         <div className="text-sm font-semibold">{cfg.label}</div>
         <div className="text-xs text-muted mt-0.5">
-          {seen === 0 ? "No words learned yet" : `${seen} word${seen === 1 ? "" : "s"} learned`}
+          {seen === 0 ? `No ${lbl} learned yet` : `${seen} ${lbl}${seen === 1 ? "" : "s"} learned`}
         </div>
       </div>
       {due > 0 ? (
@@ -230,14 +243,16 @@ function GameRow({ href, emoji, title, meta, accentColor }: { href: string; emoj
 export default function ReviewHubPage() {
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [langStats, setLangStats] = useState<LangStats[]>([
-    { due: 0, seen: 0 }, { due: 0, seen: 0 }, { due: 0, seen: 0 }, { due: 0, seen: 0 },
+    { due: 0, seen: 0 }, { due: 0, seen: 0 }, { due: 0, seen: 0 },
   ]);
+  const [skillStats, setSkillStats] = useState<LangStats[]>([{ due: 0, seen: 0 }]);
   const [mathStats, setMathStats] = useState<MathOpStats>({});
   const [actorStats, setActorStats] = useState<ActorStatMap>({});
   const [wordleState, setWordleState] = useState<{ phase: WordlePhase; attempts: number }>({ phase: "none", attempts: 0 });
 
   useEffect(() => {
     setLangStats(LANG_CONFIGS.map((cfg) => readLangStats(cfg.key)));
+    setSkillStats(SKILL_CONFIGS.map((cfg) => readLangStats(cfg.key)));
     setMathStats(loadMathOpStats());
     setActorStats(loadActorStats());
     setWordleState(readWordleState());
@@ -247,7 +262,7 @@ export default function ReviewHubPage() {
     setOpenSection((prev) => (prev === id ? null : id));
   }
 
-  const totalDue = langStats.reduce((a, s) => a + s.due, 0);
+  const skillDue = skillStats.reduce((a, s) => a + s.due, 0);
   const math = mathTotals(mathStats);
   const mathAcc = accPct(math.c, math.w);
   const actor = actorTotals(actorStats);
@@ -264,7 +279,9 @@ export default function ReviewHubPage() {
 
   const mathMeta = mathAcc === null ? "Play to track accuracy" : `${math.c + math.w} answered · ${mathAcc}% accuracy`;
   const actorMeta = actor.total === 0 ? "Play to track accuracy" : `${actor.total} actor${actor.total === 1 ? "" : "s"} · ${actorAcc ?? "—"}% accuracy`;
-  const langSubtitle = totalDue > 0 ? `${totalDue} card${totalDue === 1 ? "" : "s"} due` : "Languages · Vibe Coding";
+  const langDue = langStats.reduce((a, s) => a + s.due, 0);
+  const langSubtitle = langDue > 0 ? `${langDue} card${langDue === 1 ? "" : "s"} due` : "Mandarin · German · Spanish";
+  const skillSubtitle = skillDue > 0 ? `${skillDue} card${skillDue === 1 ? "" : "s"} due` : "Vibe Coding";
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-28 pt-4 space-y-3">
@@ -283,6 +300,19 @@ export default function ReviewHubPage() {
       >
         {LANG_CONFIGS.map((cfg, i) => (
           <LangRow key={cfg.label} cfg={cfg} stats={langStats[i]} />
+        ))}
+      </AccordionSection>
+
+      <AccordionSection
+        open={openSection === "skills"}
+        onToggle={() => toggle("skills")}
+        icon={<CodeIcon />}
+        iconBg="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
+        title="Skills"
+        subtitle={skillSubtitle}
+      >
+        {SKILL_CONFIGS.map((cfg, i) => (
+          <LangRow key={cfg.label} cfg={cfg} stats={skillStats[i]} />
         ))}
       </AccordionSection>
 

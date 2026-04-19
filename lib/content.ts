@@ -92,7 +92,7 @@ const SPANISH_CONTENT = buildContent(
 const VIBE_CONTENT = buildContent(
   vibeVocab,
   vibeUnits,
-  ["multiple-choice", "type", "match"],
+  ["multiple-choice", "match"],
 );
 
 export function getLanguageContent(lang: Language): LanguageContent {

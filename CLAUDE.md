@@ -42,7 +42,7 @@ Three-accent system defined in `app/globals.css`:
 - `/german/review` — German flashcard review
 - `/skills` — Skills hub: lists all skill curricula (currently just Vibe Coding), shows level badge per skill
 - `/vibe-coding` — Vibe Coding skill tree (Claude/prompting curriculum)
-- `/vibe-coding/learn/[unitId]` — Vibe Coding lesson (MC, Type, Match)
+- `/vibe-coding/learn/[unitId]` — Vibe Coding lesson (MC, Match only — no typing)
 - `/vibe-coding/review` — Vibe Coding flashcard review
 - `/trivia` — Trivia hub
 - `/trivia/actors` — Actor Blitz game
@@ -52,7 +52,7 @@ Three-accent system defined in `app/globals.css`:
 - `/stats` — Profile / leaderboard / settings
 - `/stats/user/[userId]` — Public read-only profile page for any leaderboard user
 - `/onboarding` — First-time setup (avatar, username, password)
-- `/review` — Review hub: accordion sections (Languages + Vibe Coding, Brain Training, Trivia). Tap to expand, reveals sub-items with live localStorage stats, each navigates to that game/review page.
+- `/review` — Review hub: accordion sections (Languages, Skills, Brain Training, Trivia). Languages = Mandarin/German/Spanish. Skills = Vibe Coding. Tap to expand, reveals sub-items with live localStorage stats, each navigates to that game/review page.
 - `/spanish/review`, `/mandarin/review`, `/german/review`, `/vibe-coding/review` — Flashcard review pages. **Practice button always shows** when user has learned cards (not just when SRS cards are due). When cards are due: shows due count + Practice. When nothing is due: shows "Practice to earn XP". Practice session runs via `SessionRunner` → awards XP via `completeSession` on completion. If no SRS-due cards, falls back to `buildPracticeSession` (all seen cards).
 - Legacy `/learn/[unitId]` and `/review` still work (mandarin defaults)
 
@@ -70,7 +70,7 @@ Three-accent system defined in `app/globals.css`:
 - `app/api/avatar/route.ts` — server-side avatar upload using service role key (bypasses RLS). Accepts multipart form data, uploads to `avatars/{userId}/avatar.jpg` in Supabase storage.
 - `app/api/user/[userId]/route.ts` — public profile API: returns username, avatar, status, xp, streak for any user (no auth required).
 - `components/AppSidebar.tsx` — desktop sidebar (lg+ only). Home nav item uses exact match (`p === "/"`) — do not add other paths to its match function or it will show as active on language pages.
-- `components/SkillTree.tsx` — shared skill tree, takes `units`, `basePath`, `greeting` props
+- `components/SkillTree.tsx` — shared skill tree, takes `units`, `basePath`, `greeting` props. Active unit = first unit whose ID is not in `completedUnits` (uses `findIndex`, safe against stale localStorage IDs).
 - `components/SessionRunner.tsx` — runs a lesson session, tracks `pandaMood`, resets on each card
 - `components/cards/CardShell.tsx` — **fixed full-screen** lesson layout (z-40), top 45vh = panda, bottom = question, no scrolling
 - `components/cards/CardFooter` — fixed z-50, always above CardShell
@@ -80,7 +80,7 @@ Three-accent system defined in `app/globals.css`:
 - `components/CloudSync.tsx` — syncs language store to Supabase; mounted in all four language/skill layouts (mandarin/german/spanish/vibe-coding). Accepts `lang` prop. On every push it reads XP from all four raw stores and sends `totalXp` (sum) so `user_stats.xp` always reflects the cross-language total.
 - `components/trivia/ActorBlitz.tsx` — Actor Blitz game component. Images from local `/public/actors/`. Uses `var(--game)` (pastel mauve) for all game UI. Answer correct delay 300ms, wrong delay 700ms. Submits score to `/api/scores/actor-blitz` on game end (fire-and-forget, fails silently if unauthenticated).
 - `lib/store.ts` — Zustand context pattern: `createGameStore(key)` factory, `GameStoreProvider`, `useGameStore` reads from nearest provider. `mandarinStore` = key `slubstack-v1`, `germanStore` = `slubstack-german-v1`, `spanishStore` = `slubstack-spanish-v1`, `vibeCodingStore` = `slubstack-vibe-v1`
-- `lib/content.ts` — `getLanguageContent(lang)` returns `{ cards, units, getCard, getCardsForUnit, getUnit, allowedInteractions }`. Spanish/German/Vibe Coding exclude "build"; all four languages have "match".
+- `lib/content.ts` — `getLanguageContent(lang)` returns `{ cards, units, getCard, getCardsForUnit, getUnit, allowedInteractions }`. Spanish/German/Vibe Coding exclude "build"; Vibe Coding also excludes "type".
 - `lib/session.ts` — `buildUnitSession` uses `LESSON_ORDER` (no flip — games only). `buildReviewSession` uses `REVIEW_ORDER` (games only — MC, type, match — no flip). `buildPracticeSession` builds a session from all seen cards ignoring SRS due dates (used when no cards are due but user wants to practice). All take content as param.
 - `lib/hooks.ts` — `useHydrated` (useSyncExternalStore), `useNow` (useState/useEffect — NOT useSyncExternalStore, which caused infinite loop with Date.now())
 - `lib/supabase/admin.ts` — Supabase admin client using `SUPABASE_SERVICE_ROLE_KEY` (server-only, bypasses RLS)
@@ -173,7 +173,7 @@ Card shape (all languages):
 ## Vibe Coding (`app/vibe-coding/`)
 - Full mirror of language sections (skill tree, lessons, review, CloudSync XP)
 - 88 Claude-focused flashcards: prompt patterns, Claude Code features, scaffolding strategies, debugging approaches, web app architecture rules
-- `allowedInteractions`: `["multiple-choice", "type", "match"]` — no build (Mandarin-only)
+- `allowedInteractions`: `["multiple-choice", "match"]` — no build (Mandarin-only), no type (conceptual knowledge suits recognition over recall)
 - Card format: technique name (`hanzi`) + example snippet (`pinyin`) → purpose (`english`)
 - MC: show technique → pick purpose. Type: show purpose → type technique name. Match: 4 technique↔purpose pairs
 - `vibeCodingStore` key: `slubstack-vibe-v1`. vibeXp counted in `totalXp` sent to Supabase
@@ -193,6 +193,7 @@ Per-language `allowedInteractions`:
 - Mandarin: `["multiple-choice", "build", "type", "match"]`
 - German: `["multiple-choice", "type", "match"]`
 - Spanish: `["multiple-choice", "type", "match"]`
+- Vibe Coding: `["multiple-choice", "match"]` — no typing (technique names are conceptual, not recalled verbatim)
 
 ## Lesson complete screen (`components/LessonCompleteScreen.tsx`)
 - **No-scroll**: body scroll locked on mount; fixed height `calc(100dvh - 52px - env(safe-area-inset-top, 0px))`.
