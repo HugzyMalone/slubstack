@@ -46,6 +46,7 @@ export function BottomNav() {
     pathname?.startsWith("/vibe-coding/learn/") ||
     pathname?.startsWith("/brain-training/wordle") ||
     pathname?.startsWith("/brain-training/math-blitz") ||
+    pathname?.startsWith("/brain-training/connections") ||
     pathname?.startsWith("/trivia/actors") ||
     pathname === "/review-run"
   ) {

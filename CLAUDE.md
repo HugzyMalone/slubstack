@@ -1,4 +1,16 @@
 @AGENTS.md
+@/home/hugoidle/Brain/Projects/slubstack/overview.md
+@/home/hugoidle/Brain/Projects/slubstack/progress.md
+@/home/hugoidle/Brain/Projects/slubstack/decisions.md
+@/home/hugoidle/Brain/Projects/slubstack/problems.md
+@/home/hugoidle/Brain/Projects/slubstack/roadmap.md
+@/home/hugoidle/Brain/Projects/slubstack/ideas.md
+
+# Brain vault updates
+After completing any significant piece of work in a session, automatically update the relevant Brain files:
+- `/home/hugoidle/Brain/Projects/slubstack/progress.md` — mark completed items, add new focus/backlog items
+- `/home/hugoidle/Brain/Projects/slubstack/decisions.md` — log any key technical or product decisions made
+- `/home/hugoidle/Brain/Projects/slubstack/overview.md` — update only if the project direction or stack changes
 
 # Slubstack
 

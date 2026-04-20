@@ -52,6 +52,17 @@ function WordleIcon() {
   );
 }
 
+function ConnectionsIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="8" height="8" rx="1.5" />
+      <rect x="13" y="3" width="8" height="8" rx="1.5" />
+      <rect x="3" y="13" width="8" height="8" rx="1.5" />
+      <rect x="13" y="13" width="8" height="8" rx="1.5" />
+    </svg>
+  );
+}
+
 const LIVE = [
   {
     href: "/brain-training/math-blitz",
@@ -68,6 +79,14 @@ const LIVE = [
     title: "Wordle",
     description: "Daily word puzzle · 6 tries to guess",
     badge: null,
+  },
+  {
+    href: "/brain-training/connections",
+    Icon: ConnectionsIcon,
+    iconBg: "linear-gradient(135deg, #f9e04b 0%, #9b59d0 100%)",
+    title: "Connections",
+    description: "Daily · group four sets of four",
+    badge: "New",
   },
 ];
 
