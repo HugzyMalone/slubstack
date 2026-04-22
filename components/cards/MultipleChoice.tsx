@@ -7,6 +7,7 @@ import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
 import { shuffle, cn } from "@/lib/utils";
 import { speak, cardLang } from "@/lib/speech";
+import { cardGender, GENDER_COLORS, isGerman } from "@/lib/german";
 import { CardFooter } from "./CardShell";
 
 function wordSize(text: string) {
@@ -55,17 +56,26 @@ export function MultipleChoice({ card, distractors, onResult, onFeedback }: Prop
         Choose the meaning
       </div>
 
-      <div className="mx-auto mt-2 max-w-sm rounded-3xl border border-border bg-surface px-5 py-3 text-center relative">
-        <div className={`hanzi ${wordSize(card.hanzi)} w-full break-words leading-tight text-fg`}>{card.hanzi}</div>
-        <div className="mt-2 text-base text-muted">{card.pinyin}</div>
-        <button
-          onClick={() => speak(card.hanzi, cardLang(card.id))}
-          className="absolute right-3 top-3 rounded-full p-1.5 text-muted hover:text-fg hover:bg-border/50 transition-colors"
-          aria-label="Listen"
-        >
-          <Volume2 size={15} />
-        </button>
-      </div>
+      {(() => {
+        const gender = isGerman(card.id) ? cardGender(card) : undefined;
+        const accent = gender ? GENDER_COLORS[gender] : undefined;
+        return (
+          <div
+            className="mx-auto mt-2 max-w-sm rounded-3xl border border-border bg-surface px-5 py-3 text-center relative"
+            style={accent ? { borderLeftColor: accent, borderLeftWidth: 3 } : undefined}
+          >
+            <div className={`hanzi ${wordSize(card.hanzi)} w-full break-words leading-tight text-fg`}>{card.hanzi}</div>
+            <div className="mt-2 text-base text-muted">{card.pinyin}</div>
+            <button
+              onClick={() => speak(card.hanzi, cardLang(card.id))}
+              className="absolute right-3 top-3 rounded-full p-1.5 text-muted hover:text-fg hover:bg-border/50 transition-colors"
+              aria-label="Listen"
+            >
+              <Volume2 size={15} />
+            </button>
+          </div>
+        );
+      })()}
 
       <div className="mx-auto mt-2 grid max-w-sm grid-cols-1 gap-2">
         {options.map((opt) => {

@@ -13,6 +13,10 @@ import { MultipleChoice } from "@/components/cards/MultipleChoice";
 import { BuildPhrase } from "@/components/cards/BuildPhrase";
 import { TypeAnswer } from "@/components/cards/TypeAnswer";
 import { MatchPairs } from "@/components/cards/MatchPairs";
+import { GenderPick } from "@/components/cards/GenderPick";
+import { CasePick } from "@/components/cards/CasePick";
+import { PluralDrill } from "@/components/cards/PluralDrill";
+import { Conjugate } from "@/components/cards/Conjugate";
 import { LessonCompleteScreen } from "@/components/LessonCompleteScreen";
 
 type Props = {
@@ -91,6 +95,7 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
 
   const current = items[index];
   const progress = index / items.length;
+  const isGerman = lang === "german";
 
   return (
     <CardShell
@@ -115,7 +120,12 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
             <BuildPhrase card={current.card} onResult={handleResult} onFeedback={handleFeedback} />
           )}
           {current.kind === "type" && (
-            <TypeAnswer card={current.card} onResult={handleResult} onFeedback={handleFeedback} />
+            <TypeAnswer
+              card={current.card}
+              onResult={handleResult}
+              onFeedback={handleFeedback}
+              umlautBar={isGerman}
+            />
           )}
           {current.kind === "match" && (
             <MatchPairs
@@ -123,6 +133,28 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
               distractors={current.distractors ?? []}
               onResult={handleResult}
               onFeedback={handleFeedback}
+            />
+          )}
+          {current.kind === "gender-pick" && (
+            <GenderPick card={current.card} onResult={handleResult} onFeedback={handleFeedback} />
+          )}
+          {current.kind === "case-pick" && (
+            <CasePick card={current.card} onResult={handleResult} onFeedback={handleFeedback} />
+          )}
+          {current.kind === "plural-drill" && (
+            <PluralDrill
+              card={current.card}
+              onResult={handleResult}
+              onFeedback={handleFeedback}
+              umlautBar={isGerman}
+            />
+          )}
+          {current.kind === "conjugate" && (
+            <Conjugate
+              card={current.card}
+              onResult={handleResult}
+              onFeedback={handleFeedback}
+              umlautBar={isGerman}
             />
           )}
         </div>

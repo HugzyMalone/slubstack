@@ -1,9 +1,9 @@
-import type { Card, LanguageContent } from "@/lib/content";
+import type { Card, LanguageContent, Unit, InteractionKind } from "@/lib/content";
 import { ALL_CARDS, getCardsForUnit } from "@/lib/content";
 import { INITIAL_SRS, isDue, type SrsState } from "@/lib/srs";
 import { shuffle } from "@/lib/utils";
 
-export type InteractionKind = "multiple-choice" | "build" | "type" | "match";
+export type { InteractionKind };
 
 export type SessionItem = {
   card: Card;
@@ -39,6 +39,11 @@ const REVIEW_ORDER: InteractionKind[] = [
   "type",
 ];
 
+/** Grammar-biased order: heavy primary, light MC. `P` gets replaced by the unit's primaryInteraction. */
+const GRAMMAR_ORDER_TEMPLATE: ("P" | InteractionKind)[] = [
+  "P", "P", "multiple-choice", "P", "P", "multiple-choice", "P", "multiple-choice", "P", "P",
+];
+
 function pickDistractors(correct: Card, pool: Card[], n = 3): Card[] {
   const candidates = pool.filter((c) => c.id !== correct.id);
   const sameCat = candidates.filter((c) => c.category === correct.category);
@@ -53,17 +58,39 @@ function pickDistractors(correct: Card, pool: Card[], n = 3): Card[] {
   return chosen.slice(0, n);
 }
 
+/** Card must have the required metadata for a grammar interaction kind. Fallback = multiple-choice. */
+function cardSupportsKind(card: Card, kind: InteractionKind): boolean {
+  if (kind === "gender-pick") return !!card.gender;
+  if (kind === "case-pick") return !!card.cases && Object.keys(card.cases).length >= 2;
+  if (kind === "plural-drill") return !!card.plural;
+  if (kind === "conjugate") return !!card.conjugations;
+  return true;
+}
+
+function needsDistractors(kind: InteractionKind): boolean {
+  return kind === "multiple-choice" || kind === "match";
+}
+
+function resolveKind(card: Card, desired: InteractionKind): InteractionKind {
+  return cardSupportsKind(card, desired) ? desired : "multiple-choice";
+}
+
 export function buildUnitSession(
   unitId: string,
   srs: Record<string, SrsState>,
-  content?: Pick<LanguageContent, "cards" | "getCardsForUnit" | "allowedInteractions">,
+  content?: Pick<LanguageContent, "cards" | "getCardsForUnit" | "getUnit" | "allowedInteractions">,
   size = 10,
 ): SessionItem[] {
   const allCards = content?.cards ?? ALL_CARDS;
   const getCards = content?.getCardsForUnit ?? getCardsForUnit;
   const allowed: InteractionKind[] = content?.allowedInteractions ?? ["multiple-choice", "build", "type", "match"];
+  const unit: Unit | undefined = content?.getUnit?.(unitId);
 
-  const interactionOrder = LESSON_ORDER.filter((k) => allowed.includes(k));
+  const primary = unit?.primaryInteraction;
+  const useGrammarOrder = !!primary && allowed.includes(primary);
+  const interactionOrder: InteractionKind[] = useGrammarOrder
+    ? GRAMMAR_ORDER_TEMPLATE.map((k) => (k === "P" ? primary! : k)).filter((k) => allowed.includes(k))
+    : LESSON_ORDER.filter((k) => allowed.includes(k));
 
   const unitCards = getCards(unitId);
   const now = Date.now();
@@ -92,8 +119,9 @@ export function buildUnitSession(
   }
 
   return pool.map((card, i) => {
-    const kind = interactionOrder[i % interactionOrder.length];
-    return kind === "multiple-choice" || kind === "match"
+    const desired = interactionOrder[i % interactionOrder.length];
+    const kind = resolveKind(card, desired);
+    return needsDistractors(kind)
       ? { card, kind, distractors: pickDistractors(card, allCards) }
       : { card, kind };
   });
@@ -111,8 +139,9 @@ export function buildPracticeSession(
     .filter((c): c is Card => !!c);
   const pool = shuffle(seenCards).slice(0, size);
   return pool.map((card, i) => {
-    const kind = order[i % order.length];
-    return kind === "multiple-choice" || kind === "match"
+    const desired = order[i % order.length];
+    const kind = resolveKind(card, desired);
+    return needsDistractors(kind)
       ? { card, kind, distractors: pickDistractors(card, content.cards) }
       : { card, kind };
   });
@@ -135,8 +164,9 @@ export function buildReviewSession(
   const pool = shuffle(due).slice(0, size);
 
   return pool.map((card, i) => {
-    const kind = order[i % order.length];
-    return kind === "multiple-choice" || kind === "match"
+    const desired = order[i % order.length];
+    const kind = resolveKind(card, desired);
+    return needsDistractors(kind)
       ? { card, kind, distractors: pickDistractors(card, allCards) }
       : { card, kind };
   });

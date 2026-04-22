@@ -5,7 +5,7 @@ import { Volume2 } from "lucide-react";
 import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
 import { speak, cardLang } from "@/lib/speech";
-import { germanFold } from "@/lib/german";
+import { germanFold, cardGender, stripArticle } from "@/lib/german";
 import { CardFooter } from "./CardShell";
 
 function wordSize(text: string) {
@@ -24,57 +24,38 @@ type Props = {
   umlautBar?: boolean;
 };
 
-const NUMBER_WORDS: Record<string, string> = {
-  zero: "0", one: "1", two: "2", three: "3", four: "4",
-  five: "5", six: "6", seven: "7", eight: "8", nine: "9",
-  ten: "10", eleven: "11", twelve: "12", thirteen: "13",
-  fourteen: "14", fifteen: "15", sixteen: "16", seventeen: "17",
-  eighteen: "18", nineteen: "19", twenty: "20",
-  "one hundred": "100", "one thousand": "1000", "ten thousand": "10000",
-};
-const DIGIT_WORDS: Record<string, string> = Object.fromEntries(
-  Object.entries(NUMBER_WORDS).map(([w, d]) => [d, w])
-);
-
-export function norm(s: string) {
-  return germanFold(s.trim().toLowerCase()).replace(/[^\p{L}\d\s]/gu, "").replace(/\s+/g, " ");
+function normDE(s: string) {
+  return germanFold(s.trim().toLowerCase()).replace(/[^\p{L}\s]/gu, "").replace(/\s+/g, " ");
 }
 
-export function acceptedAnswers(english: string): string[] {
-  const base = english
-    .split(/\/|,/)
-    .map((s) => s.replace(/\([^)]*\)/g, "").trim())
-    .map(norm)
-    .filter(Boolean);
-  const extras: string[] = [];
-  for (const a of base) {
-    if (NUMBER_WORDS[a]) extras.push(NUMBER_WORDS[a]);
-    else if (DIGIT_WORDS[a]) extras.push(norm(DIGIT_WORDS[a]));
-  }
-  return [...new Set([...base, ...extras])];
+function acceptedPlurals(plural: string): string[] {
+  // Accept "die Frauen" or "Frauen" interchangeably.
+  const full = normDE(plural);
+  const withoutArticle = full.replace(/^die\s+/, "");
+  return [...new Set([full, withoutArticle].filter(Boolean))];
 }
 
 const UMLAUT_KEYS = ["ä", "ö", "ü", "ß"] as const;
 
-export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Props) {
+export function PluralDrill({ card, onResult, onFeedback, umlautBar = true }: Props) {
   const [value, setValue] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [firstTryFailed, setFirstTryFailed] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const accepted = acceptedAnswers(card.english);
-  const correct = accepted.some((a) => norm(value) === a);
+  const singular = stripArticle(card.hanzi);
+  const gender = cardGender(card);
+  const singularWithArticle = gender ? `${gender} ${singular}` : singular;
+  const plural = card.plural ?? "";
+  const accepted = acceptedPlurals(plural);
+  const correct = accepted.includes(normDE(value));
 
   function insertChar(ch: string) {
     const el = inputRef.current;
-    if (!el) {
-      setValue((v) => v + ch);
-      return;
-    }
+    if (!el) { setValue((v) => v + ch); return; }
     const start = el.selectionStart ?? value.length;
     const end = el.selectionEnd ?? value.length;
-    const next = value.slice(0, start) + ch + value.slice(end);
-    setValue(next);
+    setValue(value.slice(0, start) + ch + value.slice(end));
     requestAnimationFrame(() => {
       el.focus();
       const caret = start + ch.length;
@@ -87,31 +68,32 @@ export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Pr
       onResult({ quality: correct ? (firstTryFailed ? 2 : 4) : 0, correct, firstTry: !firstTryFailed });
       return;
     }
-    if (correct) {
-      setSubmitted(true);
-      onFeedback?.(true);
-      return;
-    }
-    if (firstTryFailed) {
-      setSubmitted(true);
-      onFeedback?.(false);
-    } else {
-      setFirstTryFailed(true);
-      onFeedback?.(false);
-    }
+    if (correct) { setSubmitted(true); onFeedback?.(true); return; }
+    if (firstTryFailed) { setSubmitted(true); onFeedback?.(false); }
+    else { setFirstTryFailed(true); onFeedback?.(false); }
+  }
+
+  if (!plural) {
+    return (
+      <div className="mx-auto mt-6 max-w-sm rounded-2xl border border-border bg-surface px-5 py-4 text-center text-sm text-muted">
+        This card is missing plural data.
+      </div>
+    );
   }
 
   return (
     <>
       <div className="pt-2 text-center text-xs uppercase tracking-widest text-muted">
-        Type the meaning
+        Type the plural
       </div>
 
       <div className="mx-auto mt-4 max-w-sm rounded-3xl border border-border bg-surface px-5 py-5 text-center relative">
-        <div className={`hanzi ${wordSize(card.hanzi)} w-full break-words leading-tight text-fg`}>{card.hanzi}</div>
-        <div className="mt-2 text-base text-muted">{card.pinyin}</div>
+        <div className={`hanzi ${wordSize(singularWithArticle)} w-full break-words leading-tight text-fg`}>
+          {singularWithArticle}
+        </div>
+        <div className="mt-1 text-xs text-muted">singular — {card.english}</div>
         <button
-          onClick={() => speak(card.hanzi, cardLang(card.id))}
+          onClick={() => speak(singularWithArticle, cardLang(card.id))}
           className="absolute right-3 top-3 rounded-full p-1.5 text-muted hover:text-fg hover:bg-border/50 transition-colors"
           aria-label="Listen"
         >
@@ -119,7 +101,6 @@ export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Pr
         </button>
       </div>
 
-      {/* Input + inline Check — stays visible above keyboard, no fixed footer before submit */}
       {!submitted && (
         <div className="mx-auto mt-4 max-w-sm space-y-2">
           {umlautBar && (
@@ -144,13 +125,11 @@ export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Pr
               value={value}
               onChange={(e) => setValue(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && value.trim().length > 0) submit(); }}
-              placeholder="Type in English…"
+              placeholder="die …"
               autoComplete="off"
               autoCorrect="off"
-              autoCapitalize="none"
+              autoCapitalize="words"
               spellCheck={false}
-              inputMode="text"
-              enterKeyHint="go"
               className="flex-1 rounded-xl border border-border bg-surface px-4 py-3 text-base outline-none placeholder:text-muted focus:border-[var(--accent)]"
             />
             <button
@@ -165,7 +144,6 @@ export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Pr
               Check
             </button>
           </div>
-
           {firstTryFailed && (
             <div className="rounded-xl border border-amber-300/50 bg-amber-50/60 dark:border-amber-700/40 dark:bg-amber-950/20 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
               Not quite — try again.
@@ -174,18 +152,17 @@ export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Pr
         </div>
       )}
 
-      {/* Footer only appears after submission — keyboard will be dismissed by then */}
       {submitted && (
         <CardFooter
           variant={correct ? "correct" : "wrong"}
           feedback={
             correct ? (
               <span className="font-medium text-emerald-800 dark:text-emerald-200">
-                Correct — {card.english}
+                Correct — {plural}
               </span>
             ) : (
               <span className="font-medium text-rose-800 dark:text-rose-200">
-                Answer: {card.english}
+                Answer: {plural}
               </span>
             )
           }
