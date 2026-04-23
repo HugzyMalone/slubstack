@@ -6,7 +6,7 @@
     "subtitle": "Hello, thanks, sorry",
     "emoji": "👋",
     "category": "greetings",
-    "cardIds": ["greet-01","greet-02","greet-03","greet-04","greet-05","greet-06","greet-07","greet-08","greet-09","greet-10","greet-11","greet-12","greet-13","greet-14","greet-15","greet-16","greet-17","greet-18","greet-19","greet-20"]
+    "cardIds": ["p-greet-01","p-greet-02","p-greet-03","p-greet-04","p-greet-05","p-greet-06","p-greet-07","p-greet-08","p-greet-09","p-greet-10","p-greet-11","p-greet-12","greet-01","greet-02","greet-03","greet-04","greet-05","greet-06","greet-07","greet-08","greet-09","greet-10","greet-11","greet-12","greet-13","greet-14","greet-15","greet-16","greet-17","greet-18","greet-19","greet-20"]
   },
   {
     "id": "pronouns-verbs",
@@ -15,7 +15,7 @@
     "subtitle": "I, you, go, eat",
     "emoji": "🧩",
     "category": "pronouns-verbs",
-    "cardIds": ["pv-01","pv-02","pv-03","pv-04","pv-05","pv-06","pv-07","pv-08","pv-09","pv-10","pv-11","pv-12","pv-13","pv-14","pv-15","pv-16","pv-17","pv-18","pv-19","pv-20"]
+    "cardIds": ["p-pv-01","p-pv-02","p-pv-03","p-pv-04","p-pv-05","p-pv-06","p-pv-07","p-pv-08","p-pv-09","p-pv-10","p-pv-11","p-pv-12","p-pv-13","p-pv-14","p-pv-15","p-pv-16","p-pv-17","p-pv-18","p-pv-19","p-pv-20","p-pv-21","pv-01","pv-02","pv-03","pv-04","pv-05","pv-06","pv-07","pv-08","pv-09","pv-10","pv-11","pv-12","pv-13","pv-14","pv-15","pv-16","pv-17","pv-18","pv-19","pv-20"]
   },
   {
     "id": "numbers",
@@ -24,16 +24,16 @@
     "subtitle": "0 to 10,000",
     "emoji": "🔢",
     "category": "numbers",
-    "cardIds": ["num-01","num-02","num-03","num-04","num-05","num-06","num-07","num-08","num-09","num-10","num-11","num-12","num-13","num-14","num-15","num-16","num-17","num-18","num-19","num-20"]
+    "cardIds": ["p-num-01","p-num-02","p-num-03","p-num-04","num-01","num-02","num-03","num-04","num-05","num-06","num-07","num-08","num-09","num-10","num-11","num-12","num-13","num-14","num-15","num-16","num-17","num-18","num-19","num-20"]
   },
   {
-    "id": "family",
+    "id": "dates",
     "index": 3,
-    "title": "Family",
-    "subtitle": "Mom, dad, friends",
-    "emoji": "👨‍👩‍👧",
-    "category": "family",
-    "cardIds": ["fam-01","fam-02","fam-03","fam-04","fam-05","fam-06","fam-07","fam-08","fam-09","fam-10","fam-11","fam-12","fam-13","fam-14","fam-15","fam-16","fam-17","fam-18","fam-19","fam-20"]
+    "title": "Dates",
+    "subtitle": "Days, months, years",
+    "emoji": "📅",
+    "category": "dates",
+    "cardIds": ["p-date-01","p-date-02","p-date-03","p-date-04","p-date-05","p-date-06","p-date-07","date-01","date-02","date-03","date-04","date-05","date-06","date-07","date-08","date-09","date-10","date-11","date-12","date-13","date-14","date-15","date-16","date-17","date-18","date-19","date-20"]
   },
   {
     "id": "time",
@@ -42,16 +42,16 @@
     "subtitle": "Now, today, minutes",
     "emoji": "⏰",
     "category": "time",
-    "cardIds": ["time-01","time-02","time-03","time-04","time-05","time-06","time-07","time-08","time-09","time-10","time-11","time-12","time-13","time-14","time-15","time-16","time-17","time-18","time-19","time-20"]
+    "cardIds": ["p-time-01","p-time-02","p-time-03","p-time-04","p-time-05","p-time-06","p-time-07","p-time-08","p-time-09","p-time-10","p-time-11","p-time-12","p-time-13","time-01","time-02","time-03","time-04","time-05","time-06","time-07","time-08","time-09","time-10","time-11","time-12","time-13","time-14","time-15","time-16","time-17","time-18","time-19","time-20"]
   },
   {
-    "id": "dates",
+    "id": "family",
     "index": 5,
-    "title": "Dates",
-    "subtitle": "Days, months, years",
-    "emoji": "📅",
-    "category": "dates",
-    "cardIds": ["date-01","date-02","date-03","date-04","date-05","date-06","date-07","date-08","date-09","date-10","date-11","date-12","date-13","date-14","date-15","date-16","date-17","date-18","date-19","date-20"]
+    "title": "Family",
+    "subtitle": "Mom, dad, friends",
+    "emoji": "👨‍👩‍👧",
+    "category": "family",
+    "cardIds": ["p-fam-01","p-fam-02","p-fam-03","p-fam-04","p-fam-05","p-fam-06","p-fam-07","fam-01","fam-02","fam-03","fam-04","fam-05","fam-06","fam-07","fam-08","fam-09","fam-10","fam-11","fam-12","fam-13","fam-14","fam-15","fam-16","fam-17","fam-18","fam-19","fam-20"]
   },
   {
     "id": "food",
@@ -60,7 +60,7 @@
     "subtitle": "Rice, tea, dumplings",
     "emoji": "🥟",
     "category": "food",
-    "cardIds": ["food-01","food-02","food-03","food-04","food-05","food-06","food-07","food-08","food-09","food-10","food-11","food-12","food-13","food-14","food-15","food-16","food-17","food-18","food-19","food-20"]
+    "cardIds": ["p-food-01","p-food-02","p-food-03","p-food-04","food-01","food-02","food-03","food-04","food-05","food-06","food-07","food-08","food-09","food-10","food-11","food-12","food-13","food-14","food-15","food-16","food-17","food-18","food-19","food-20"]
   },
   {
     "id": "places",
@@ -69,6 +69,46 @@
     "subtitle": "Home, left, right",
     "emoji": "🧭",
     "category": "places",
-    "cardIds": ["place-01","place-02","place-03","place-04","place-05","place-06","place-07","place-08","place-09","place-10","place-11","place-12","place-13","place-14","place-15","place-16","place-17","place-18","place-19","place-20"]
+    "cardIds": ["p-place-01","p-place-02","p-place-03","p-place-04","p-place-05","p-place-06","place-01","place-02","place-03","place-04","place-05","place-06","place-07","place-08","place-09","place-10","place-11","place-12","place-13","place-14","place-15","place-16","place-17","place-18","place-19","place-20"]
+  },
+  {
+    "id": "zh-tones",
+    "index": 8,
+    "title": "Tones",
+    "subtitle": "1st, 2nd, 3rd, 4th, neutral",
+    "emoji": "🎵",
+    "category": "zh-tones",
+    "primaryInteraction": "tone-pick",
+    "cardIds": ["num-02","num-03","num-05","num-06","num-07","num-08","num-09","num-10","num-11","num-12","pv-01","pv-02","pv-03","pv-04","pv-10","pv-11","pv-12","pv-13","pv-15","pv-17"]
+  },
+  {
+    "id": "zh-measures",
+    "index": 9,
+    "title": "Measure Words",
+    "subtitle": "个, 本, 只, 条, 位…",
+    "emoji": "🔢",
+    "category": "zh-measures",
+    "primaryInteraction": "measure-pick",
+    "cardIds": ["food-09","food-14","food-15","food-16","food-17","food-12","place-12","p-fam-01","p-fam-04","p-fam-05","p-pv-19","p-fam-07"]
+  },
+  {
+    "id": "zh-recognition",
+    "index": 10,
+    "title": "Pinyin → Character",
+    "subtitle": "Read pinyin, pick the hanzi",
+    "emoji": "🀄",
+    "category": "zh-recognition",
+    "primaryInteraction": "char-from-pinyin",
+    "cardIds": ["greet-01","greet-09","greet-16","pv-01","pv-02","pv-10","pv-15","pv-17","num-02","num-05","num-12","fam-02","fam-03","fam-09","time-01","time-02","food-01","food-14","place-01","place-12"]
+  },
+  {
+    "id": "zh-grammar",
+    "index": 11,
+    "title": "Grammar",
+    "subtitle": "的, 有, 吗, 都, 因为…所以",
+    "emoji": "📖",
+    "category": "zh-grammar",
+    "primaryInteraction": "multiple-choice",
+    "cardIds": ["gr-01","gr-02","gr-03","gr-04","gr-05","gr-06","gr-07","gr-08","gr-09","gr-10","gr-11","gr-12","gr-13","gr-14","gr-15"]
   }
 ]

@@ -17,6 +17,9 @@ import { GenderPick } from "@/components/cards/GenderPick";
 import { CasePick } from "@/components/cards/CasePick";
 import { PluralDrill } from "@/components/cards/PluralDrill";
 import { Conjugate } from "@/components/cards/Conjugate";
+import { TonePick } from "@/components/cards/TonePick";
+import { MeasureWordPick } from "@/components/cards/MeasureWordPick";
+import { CharacterFromPinyin } from "@/components/cards/CharacterFromPinyin";
 import { LessonCompleteScreen } from "@/components/LessonCompleteScreen";
 
 type Props = {
@@ -145,6 +148,20 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
           )}
           {current.kind === "conjugate" && (
             <Conjugate card={current.card} onResult={handleResult} onFeedback={handleFeedback} />
+          )}
+          {current.kind === "tone-pick" && (
+            <TonePick card={current.card} onResult={handleResult} onFeedback={handleFeedback} />
+          )}
+          {current.kind === "measure-pick" && (
+            <MeasureWordPick card={current.card} onResult={handleResult} onFeedback={handleFeedback} />
+          )}
+          {current.kind === "char-from-pinyin" && (
+            <CharacterFromPinyin
+              card={current.card}
+              distractors={current.distractors ?? []}
+              onResult={handleResult}
+              onFeedback={handleFeedback}
+            />
           )}
         </div>
       </AnimatePresence>

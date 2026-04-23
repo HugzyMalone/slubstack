@@ -11,6 +11,7 @@ export type Category = string;
 
 export type Gender = "der" | "die" | "das";
 export type GermanCase = "nom" | "acc" | "dat" | "gen";
+export type Tone = 1 | 2 | 3 | 4 | 5;
 
 export type InteractionKind =
   | "multiple-choice"
@@ -20,7 +21,10 @@ export type InteractionKind =
   | "gender-pick"
   | "case-pick"
   | "plural-drill"
-  | "conjugate";
+  | "conjugate"
+  | "tone-pick"
+  | "measure-pick"
+  | "char-from-pinyin";
 
 export type Card = {
   id: string;
@@ -42,6 +46,11 @@ export type Card = {
     sie: string;
   };
   separable?: { prefix: string; root: string };
+  tone?: Tone;
+  tones?: Tone[];
+  measureWord?: string;
+  priority?: boolean;
+  recognitionOnly?: boolean;
 };
 
 export type Unit = {
@@ -100,7 +109,7 @@ function buildContent(
 const MANDARIN_CONTENT = buildContent(
   mandarinVocab,
   mandarinUnits,
-  ["multiple-choice", "build", "type", "match"],
+  ["multiple-choice", "build", "type", "match", "tone-pick", "measure-pick", "char-from-pinyin"],
 );
 
 const GERMAN_CONTENT = buildContent(

@@ -44,10 +44,12 @@ const GRAMMAR_ORDER_TEMPLATE = (P: InteractionKind): InteractionKind[] => [
 
 /** Returns true if the card has the metadata needed to render `kind`. */
 export function cardSupportsKind(card: Card, kind: InteractionKind): boolean {
+  if (card.recognitionOnly && (kind === "build" || kind === "char-from-pinyin")) return false;
   if (kind === "gender-pick") return !!card.gender;
   if (kind === "case-pick") return !!card.cases && Object.keys(card.cases).length > 0;
   if (kind === "plural-drill") return !!card.plural;
   if (kind === "conjugate") return !!card.conjugations;
+  if (kind === "measure-pick") return !!card.measureWord;
   return true;
 }
 
@@ -70,7 +72,12 @@ function pickDistractors(correct: Card, pool: Card[], n = 3): Card[] {
 }
 
 function needsDistractors(kind: InteractionKind): boolean {
-  return kind === "multiple-choice" || kind === "match" || kind === "case-pick";
+  return (
+    kind === "multiple-choice" ||
+    kind === "match" ||
+    kind === "case-pick" ||
+    kind === "char-from-pinyin"
+  );
 }
 
 export function buildUnitSession(
@@ -92,7 +99,10 @@ export function buildUnitSession(
   const unitCards = getCards(unitId);
   const now = Date.now();
 
-  const newCards = unitCards.filter((c) => !srs[c.id] || srs[c.id].reps === 0);
+  const unseenCards = unitCards.filter((c) => !srs[c.id] || srs[c.id].reps === 0);
+  const priorityNew = shuffle(unseenCards.filter((c) => c.priority));
+  const regularNew = shuffle(unseenCards.filter((c) => !c.priority));
+  const newCards = [...priorityNew, ...regularNew];
   const dueFromUnit = unitCards.filter(
     (c) => srs[c.id] && isDue(srs[c.id] ?? INITIAL_SRS, now),
   );
@@ -106,7 +116,7 @@ export function buildUnitSession(
   const dueTarget = size - newTarget;
 
   const pool = [
-    ...shuffle(newCards).slice(0, newTarget),
+    ...newCards.slice(0, newTarget),
     ...shuffle(dueFromUnit).slice(0, dueTarget),
     ...shuffle(globalDue),
   ].slice(0, size);
