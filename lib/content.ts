@@ -9,6 +9,19 @@ import vibeUnits from "@/content/vibe-coding/units.json";
 
 export type Category = string;
 
+export type Gender = "der" | "die" | "das";
+export type GermanCase = "nom" | "acc" | "dat" | "gen";
+
+export type InteractionKind =
+  | "multiple-choice"
+  | "build"
+  | "type"
+  | "match"
+  | "gender-pick"
+  | "case-pick"
+  | "plural-drill"
+  | "conjugate";
+
 export type Card = {
   id: string;
   category: Category;
@@ -16,6 +29,19 @@ export type Card = {
   pinyin: string;
   english: string;
   note?: string;
+  example?: { de: string; en: string };
+  gender?: Gender;
+  plural?: string;
+  cases?: Partial<Record<GermanCase, string>>;
+  conjugations?: {
+    ich: string;
+    du: string;
+    er: string;
+    wir: string;
+    ihr: string;
+    sie: string;
+  };
+  separable?: { prefix: string; root: string };
 };
 
 export type Unit = {
@@ -26,6 +52,7 @@ export type Unit = {
   emoji: string;
   category: Category;
   cardIds: string[];
+  primaryInteraction?: InteractionKind;
 };
 
 export type Language = "mandarin" | "german" | "spanish" | "vibe-coding";
@@ -36,14 +63,13 @@ export type LanguageContent = {
   getCard: (id: string) => Card;
   getCardsForUnit: (unitId: string) => Card[];
   getUnit: (id: string) => Unit | undefined;
-  /** Interaction types allowed for this language's sessions. */
-  allowedInteractions: ("multiple-choice" | "build" | "type" | "match")[];
+  allowedInteractions: InteractionKind[];
 };
 
 function buildContent(
   vocab: unknown[],
   unitList: unknown[],
-  allowedInteractions: LanguageContent["allowedInteractions"],
+  allowedInteractions: InteractionKind[],
 ): LanguageContent {
   const cards = vocab as Card[];
   const units = unitList as Unit[];
@@ -80,7 +106,7 @@ const MANDARIN_CONTENT = buildContent(
 const GERMAN_CONTENT = buildContent(
   germanVocab,
   germanUnits,
-  ["multiple-choice", "type", "match"],
+  ["multiple-choice", "type", "match", "gender-pick", "case-pick", "plural-drill", "conjugate"],
 );
 
 const SPANISH_CONTENT = buildContent(

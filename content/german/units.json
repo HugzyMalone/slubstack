@@ -15,7 +15,7 @@
     "subtitle": "0 to 1000",
     "emoji": "🔢",
     "category": "de-numbers",
-    "cardIds": ["de-num-01","de-num-02","de-num-03","de-num-04","de-num-05","de-num-06","de-num-07","de-num-08","de-num-09","de-num-10","de-num-11","de-num-12","de-num-13","de-num-14","de-num-15"]
+    "cardIds": ["de-num-01","de-num-02","de-num-03","de-num-04","de-num-05","de-num-06","de-num-07","de-num-08","de-num-09","de-num-10","de-num-11","de-num-12","de-num-13","de-num-14","de-num-15","de-num-16","de-num-17","de-num-18","de-num-19"]
   },
   {
     "id": "de-colors",
@@ -33,7 +33,7 @@
     "subtitle": "Water, bread, coffee & more",
     "emoji": "🍞",
     "category": "de-food",
-    "cardIds": ["de-food-01","de-food-02","de-food-03","de-food-04","de-food-05","de-food-06","de-food-07","de-food-08","de-food-09","de-food-10","de-food-11","de-food-12","de-food-13","de-food-14","de-food-15","de-food-16"]
+    "cardIds": ["de-food-01","de-food-02","de-food-03","de-food-04","de-food-05","de-food-06","de-food-07","de-food-08","de-food-09","de-food-10","de-food-11","de-food-12","de-food-13","de-food-14","de-food-15","de-food-16","de-food-17","de-food-18"]
   },
   {
     "id": "de-family",
@@ -51,7 +51,7 @@
     "subtitle": "Be, have, go, speak & more",
     "emoji": "⚡",
     "category": "de-verbs",
-    "cardIds": ["de-verb-01","de-verb-02","de-verb-03","de-verb-04","de-verb-05","de-verb-06","de-verb-07","de-verb-08","de-verb-09","de-verb-10","de-verb-11","de-verb-12","de-verb-13","de-verb-14","de-verb-15","de-verb-16"]
+    "cardIds": ["de-verb-01","de-verb-02","de-verb-03","de-verb-04","de-verb-05","de-verb-06","de-verb-07","de-verb-08","de-verb-09","de-verb-10","de-verb-11","de-verb-12","de-verb-13","de-verb-14","de-verb-15","de-verb-16","de-verb-17","de-verb-18"]
   },
   {
     "id": "de-time",
@@ -61,5 +61,64 @@
     "emoji": "📅",
     "category": "de-time",
     "cardIds": ["de-time-01","de-time-02","de-time-03","de-time-04","de-time-05","de-time-06","de-time-07","de-time-08","de-time-09","de-time-10","de-time-11","de-time-12","de-time-13","de-time-14","de-time-15"]
+  },
+  {
+    "id": "de-places",
+    "index": 7,
+    "title": "Places",
+    "subtitle": "City, house, station, park",
+    "emoji": "🏙️",
+    "category": "de-places",
+    "cardIds": ["de-place-01","de-place-02","de-place-03","de-place-04","de-place-05","de-place-06","de-place-07","de-place-08","de-place-09","de-place-10","de-place-11","de-place-12","de-place-13","de-place-14","de-place-15"]
+  },
+  {
+    "id": "de-articles",
+    "index": 8,
+    "title": "Articles & Gender",
+    "subtitle": "der, die, das — pick the right one",
+    "emoji": "🎯",
+    "category": "de-articles",
+    "primaryInteraction": "gender-pick",
+    "cardIds": ["de-food-01","de-food-02","de-food-03","de-food-07","de-food-09","de-food-10","de-food-13","de-food-17","de-fam-01","de-fam-02","de-fam-08","de-fam-11","de-fam-12","de-place-01","de-place-03","de-place-04","de-place-06","de-place-11"]
+  },
+  {
+    "id": "de-plurals",
+    "index": 9,
+    "title": "Plurals",
+    "subtitle": "die Frauen, die Kinder, die Häuser",
+    "emoji": "🔢",
+    "category": "de-plurals",
+    "primaryInteraction": "plural-drill",
+    "cardIds": ["de-fam-12","de-fam-08","de-fam-11","de-food-12","de-food-17","de-food-15","de-food-13","de-place-03","de-place-01","de-place-06","de-place-12","de-time-11","de-time-12","de-time-13","de-fam-01","de-fam-02"]
+  },
+  {
+    "id": "de-cases",
+    "index": 10,
+    "title": "Noun Cases",
+    "subtitle": "Nominative, accusative, dative",
+    "emoji": "📐",
+    "category": "de-cases",
+    "primaryInteraction": "case-pick",
+    "cardIds": ["de-fam-11","de-fam-12","de-fam-08","de-fam-02","de-fam-09","de-food-07","de-food-08","de-food-10","de-food-15","de-food-17","de-place-03","de-place-06","de-place-11","de-time-12","de-time-13","de-food-01","de-food-02","de-food-09","de-place-01","de-place-04"]
+  },
+  {
+    "id": "de-conjugation",
+    "index": 11,
+    "title": "Verb Conjugation",
+    "subtitle": "ich bin, du bist, er ist…",
+    "emoji": "⚙️",
+    "category": "de-conjugation",
+    "primaryInteraction": "conjugate",
+    "cardIds": ["de-verb-01","de-verb-02","de-verb-03","de-verb-04","de-verb-05","de-verb-06","de-verb-07","de-verb-08","de-verb-11","de-verb-12","de-verb-13","de-verb-14","de-verb-16","de-verb-17","de-verb-18","de-verb-09","de-verb-10","de-verb-15"]
+  },
+  {
+    "id": "de-separable",
+    "index": 12,
+    "title": "Separable Verbs",
+    "subtitle": "aufstehen, anrufen, einkaufen",
+    "emoji": "✂️",
+    "category": "de-separable",
+    "primaryInteraction": "conjugate",
+    "cardIds": ["de-sep-01","de-sep-02","de-sep-03","de-sep-04","de-sep-05","de-sep-06","de-sep-07","de-sep-08","de-sep-09","de-sep-10","de-sep-11","de-sep-12"]
   }
 ]

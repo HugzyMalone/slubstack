@@ -7,6 +7,7 @@ import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
 import { shuffle, cn } from "@/lib/utils";
 import { speak, cardLang } from "@/lib/speech";
+import { cardGender, GENDER_COLORS } from "@/lib/german";
 import { CardFooter } from "./CardShell";
 
 function wordSize(text: string) {
@@ -34,6 +35,7 @@ export function MultipleChoice({ card, distractors, onResult, onFeedback }: Prop
   const [submitted, setSubmitted] = useState(false);
 
   const correct = selected === card.id;
+  const gender = card.id.startsWith("de-") ? cardGender(card) : undefined;
 
   function submit() {
     if (submitted) {
@@ -55,7 +57,10 @@ export function MultipleChoice({ card, distractors, onResult, onFeedback }: Prop
         Choose the meaning
       </div>
 
-      <div className="mx-auto mt-2 max-w-sm rounded-3xl border border-border bg-surface px-5 py-3 text-center relative">
+      <div
+        className="mx-auto mt-2 max-w-sm rounded-3xl border border-border bg-surface px-5 py-3 text-center relative"
+        style={gender ? { borderLeft: `3px solid ${GENDER_COLORS[gender]}` } : undefined}
+      >
         <div className={`hanzi ${wordSize(card.hanzi)} w-full break-words leading-tight text-fg`}>{card.hanzi}</div>
         <div className="mt-2 text-base text-muted">{card.pinyin}</div>
         <button
