@@ -6,6 +6,7 @@ import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
 import { speak, cardLang } from "@/lib/speech";
 import { germanFold } from "@/lib/german";
+import { meaningOf, useNativeLanguage } from "@/lib/native";
 import { CardFooter } from "./CardShell";
 
 function wordSize(text: string) {
@@ -42,8 +43,8 @@ function norm(s: string) {
   return germanFold(s.trim()).replace(/[^\p{L}\d\s]/gu, "").replace(/\s+/g, " ");
 }
 
-function acceptedAnswers(english: string): string[] {
-  const base = english
+function acceptedAnswers(meaning: string): string[] {
+  const base = meaning
     .split(/\/|,/)
     .map((s) => s.replace(/\([^)]*\)/g, "").trim())
     .map(norm)
@@ -57,6 +58,8 @@ function acceptedAnswers(english: string): string[] {
 }
 
 export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Props) {
+  const native = useNativeLanguage();
+  const meaning = meaningOf(card, native);
   const [value, setValue] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [firstTryFailed, setFirstTryFailed] = useState(false);
@@ -76,7 +79,7 @@ export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Pr
     });
   }
 
-  const accepted = acceptedAnswers(card.english);
+  const accepted = acceptedAnswers(meaning);
   const correct = accepted.some((a) => norm(value) === a);
 
   function submit() {
@@ -139,7 +142,7 @@ export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Pr
               value={value}
               onChange={(e) => setValue(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && value.trim().length > 0) submit(); }}
-              placeholder="Type in English…"
+              placeholder={native === "de" ? "Auf Deutsch tippen…" : "Type in English…"}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="none"
@@ -176,11 +179,11 @@ export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Pr
           feedback={
             correct ? (
               <span className="font-medium text-emerald-800 dark:text-emerald-200">
-                Correct — {card.english}
+                Correct — {meaning}
               </span>
             ) : (
               <span className="font-medium text-rose-800 dark:text-rose-200">
-                Answer: {card.english}
+                Answer: {meaning}
               </span>
             )
           }

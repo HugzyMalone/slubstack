@@ -8,6 +8,7 @@ import type { Quality } from "@/lib/srs";
 import { speak, cardLang } from "@/lib/speech";
 import { tonesOf, stripTones, TONE_COLORS, TONE_LABELS, TONE_CONTOURS } from "@/lib/mandarin";
 import { cn } from "@/lib/utils";
+import { meaningOf, useNativeLanguage } from "@/lib/native";
 import { CardFooter } from "./CardShell";
 
 type Props = {
@@ -19,6 +20,7 @@ type Props = {
 const TONE_OPTIONS: Tone[] = [1, 2, 3, 4, 5];
 
 export function TonePick({ card, onResult, onFeedback }: Props) {
+  const native = useNativeLanguage();
   const { syllableIdx, expectedTone, hanziChars, pinyinParts } = useMemo(() => {
     const tones: Tone[] = card.tones && card.tones.length > 0 ? card.tones : tonesOf(card.pinyin);
     const parts = card.pinyin.split(/\s+|'/).filter(Boolean);
@@ -68,7 +70,7 @@ export function TonePick({ card, onResult, onFeedback }: Props) {
             </span>
           ))}
         </div>
-        <div className="mt-1 text-sm text-muted">{card.english}</div>
+        <div className="mt-1 text-sm text-muted">{meaningOf(card, native)}</div>
         <button
           onClick={() => speak(card.hanzi, cardLang(card.id))}
           className="absolute right-3 top-3 rounded-full p-1.5 text-muted hover:text-fg hover:bg-border/50 transition-colors"

@@ -4,6 +4,7 @@ create table if not exists public.profiles (
   email text,
   avatar_url text,
   status text,
+  native_language text not null default 'en' check (native_language in ('en', 'de')),
   created_at timestamptz not null default timezone('utc', now())
 );
 

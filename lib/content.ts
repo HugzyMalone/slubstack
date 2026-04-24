@@ -32,6 +32,7 @@ export type Card = {
   hanzi: string;
   pinyin: string;
   english: string;
+  german?: string;
   note?: string;
   example?: { de: string; en: string };
   gender?: Gender;

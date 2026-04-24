@@ -5,6 +5,7 @@ import { CheckCircle, XCircle, Clipboard, ClipboardCheck, ChevronDown } from "lu
 import type { ActorData } from "@/app/trivia/actors/page";
 import { globalStore } from "@/lib/globalStore";
 import { triviaStore } from "@/lib/store";
+import { playCorrect, playWrong } from "@/lib/sound";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -248,6 +249,7 @@ export function ActorBlitz({ actors }: Props) {
       const currentMultiplier = streak >= 5 ? 3 : streak >= 3 ? 2 : 1;
       setSelected(option);
       setFeedback(isCorrect ? "correct" : "wrong");
+      if (isCorrect) playCorrect(); else playWrong();
       setTotal((t) => t + 1);
       setHistory((h) => [...h, { name: currentActor.name, image: currentActor.image, correct: isCorrect }]);
 

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
 import { shuffle, cn } from "@/lib/utils";
+import { meaningOf, useNativeLanguage } from "@/lib/native";
 
 type ItemState = "idle" | "selected" | "matched" | "wrong";
 
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function MatchPairs({ card, distractors, onResult, onFeedback }: Props) {
+  const native = useNativeLanguage();
   // Shuffle once on mount — stable for the lifetime of this game
   const allCards = useRef(shuffle([card, ...distractors].slice(0, 4))).current;
   const rightOrder = useRef(shuffle([...allCards])).current;
@@ -124,7 +126,7 @@ export function MatchPairs({ card, distractors, onResult, onFeedback }: Props) {
           {rightOrder.map((c) => (
             <MatchTile
               key={`${c.id}-right-${shakeCount[c.id] ?? 0}`}
-              label={c.english.split("/")[0].trim()}
+              label={meaningOf(c, native).split("/")[0].trim()}
               state={getRightState(c.id)}
               onClick={() => selectRight(c.id)}
             />

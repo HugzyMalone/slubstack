@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
 import { shuffle } from "@/lib/utils";
+import { meaningOf, useNativeLanguage } from "@/lib/native";
 import { CardFooter } from "./CardShell";
 
 type Props = {
@@ -19,6 +20,8 @@ const DECOY_POOL = ["了", "吗", "的", "在", "和", "不", "很", "个", "也
 
 /** Let the user tap character tiles to reconstruct the hanzi. */
 export function BuildPhrase({ card, onResult, onFeedback }: Props) {
+  const native = useNativeLanguage();
+  const meaning = meaningOf(card, native);
   const tiles = useMemo<Tile[]>(() => {
     const chars = Array.from(card.hanzi);
     const realTiles: Tile[] = chars.map((ch, i) => ({ id: `r-${i}`, text: ch }));
@@ -87,7 +90,7 @@ export function BuildPhrase({ card, onResult, onFeedback }: Props) {
       <div className="mt-6">
         <div className="text-center">
           <div className="text-base text-muted">Translate to Mandarin:</div>
-          <div className="mt-2 text-3xl font-semibold text-fg">{card.english}</div>
+          <div className="mt-2 text-3xl font-semibold text-fg">{meaning}</div>
           <div className="mt-1 text-sm text-muted">({card.pinyin})</div>
         </div>
 
@@ -135,7 +138,7 @@ export function BuildPhrase({ card, onResult, onFeedback }: Props) {
           submitted ? (
             correct ? (
               <span className="font-medium text-emerald-800 dark:text-emerald-200">
-                Nice! {card.hanzi} — {card.english}
+                Nice! {card.hanzi} — {meaning}
               </span>
             ) : (
               <span className="font-medium text-rose-800 dark:text-rose-200">

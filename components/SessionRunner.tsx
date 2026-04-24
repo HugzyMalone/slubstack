@@ -7,6 +7,7 @@ import type { Quality } from "@/lib/srs";
 import type { PandaMood } from "@/components/Panda";
 import { useGameStore } from "@/lib/store";
 import { globalStore } from "@/lib/globalStore";
+import { playCorrect, playWrong } from "@/lib/sound";
 import type { Language } from "@/lib/content";
 import { CardShell } from "@/components/cards/CardShell";
 import { MultipleChoice } from "@/components/cards/MultipleChoice";
@@ -44,6 +45,7 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
 
   const handleFeedback = useCallback((correct: boolean) => {
     setPandaMood(correct ? "happy" : "wrong");
+    if (correct) playCorrect(); else playWrong();
   }, []);
 
   const handleResult = useCallback(

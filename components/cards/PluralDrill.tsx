@@ -6,6 +6,7 @@ import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
 import { speak, cardLang } from "@/lib/speech";
 import { germanFold, cardNoun, cardGender, GENDER_COLORS } from "@/lib/german";
+import { meaningOf, useNativeLanguage } from "@/lib/native";
 import { CardFooter } from "./CardShell";
 
 type Props = {
@@ -21,6 +22,7 @@ function normalise(s: string) {
 }
 
 export function PluralDrill({ card, onResult, onFeedback }: Props) {
+  const native = useNativeLanguage();
   const noun = cardNoun(card);
   const gender = cardGender(card);
   const plural = card.plural ?? "";
@@ -83,7 +85,7 @@ export function PluralDrill({ card, onResult, onFeedback }: Props) {
           {card.hanzi}
         </div>
         <div className="mt-1 text-sm text-muted">singular → plural</div>
-        <div className="mt-1 text-sm text-muted">{card.english}</div>
+        <div className="mt-1 text-sm text-muted">{meaningOf(card, native)}</div>
         <button
           onClick={() => speak(noun, cardLang(card.id))}
           className="absolute right-3 top-3 rounded-full p-1.5 text-muted hover:text-fg hover:bg-border/50 transition-colors"

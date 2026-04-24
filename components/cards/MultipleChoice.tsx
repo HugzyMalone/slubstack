@@ -8,6 +8,7 @@ import type { Quality } from "@/lib/srs";
 import { shuffle, cn } from "@/lib/utils";
 import { speak, cardLang } from "@/lib/speech";
 import { cardGender, GENDER_COLORS } from "@/lib/german";
+import { meaningOf, useNativeLanguage } from "@/lib/native";
 import { CardFooter } from "./CardShell";
 
 function wordSize(text: string) {
@@ -27,6 +28,7 @@ type Props = {
 };
 
 export function MultipleChoice({ card, distractors, onResult, onFeedback }: Props) {
+  const native = useNativeLanguage();
   const options = useMemo(
     () => shuffle([card, ...distractors].slice(0, 4)),
     [card, distractors],
@@ -93,7 +95,7 @@ export function MultipleChoice({ card, distractors, onResult, onFeedback }: Prop
                       : "border-border bg-surface hover:bg-border/40",
               )}
             >
-              {opt.english}
+              {meaningOf(opt, native)}
             </motion.button>
           );
         })}
@@ -105,11 +107,11 @@ export function MultipleChoice({ card, distractors, onResult, onFeedback }: Prop
           submitted ? (
             correct ? (
               <span className="font-medium text-emerald-800 dark:text-emerald-200">
-                Correct! {card.hanzi} — {card.english}
+                Correct! {card.hanzi} — {meaningOf(card, native)}
               </span>
             ) : (
               <span className="font-medium text-rose-800 dark:text-rose-200">
-                {card.hanzi} means &quot;{card.english}&quot;
+                {card.hanzi} means &quot;{meaningOf(card, native)}&quot;
               </span>
             )
           ) : null

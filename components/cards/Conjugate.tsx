@@ -6,6 +6,7 @@ import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
 import { speak, cardLang } from "@/lib/speech";
 import { germanFold } from "@/lib/german";
+import { meaningOf, useNativeLanguage } from "@/lib/native";
 import { CardFooter } from "./CardShell";
 
 type Props = {
@@ -33,6 +34,7 @@ function normalise(s: string) {
 }
 
 export function Conjugate({ card, onResult, onFeedback }: Props) {
+  const native = useNativeLanguage();
   const conj = card.conjugations;
 
   const pronoun: Pronoun = useMemo(() => {
@@ -93,7 +95,7 @@ export function Conjugate({ card, onResult, onFeedback }: Props) {
       <div className="mx-auto mt-2 max-w-sm rounded-3xl border border-border bg-surface px-5 py-4 text-center relative">
         <div className="text-xs uppercase tracking-widest text-muted">infinitive</div>
         <div className="hanzi text-3xl w-full break-words leading-tight text-fg">{infinitive}</div>
-        <div className="mt-1 text-sm text-muted">{card.english}</div>
+        <div className="mt-1 text-sm text-muted">{meaningOf(card, native)}</div>
         <div className="mt-3 rounded-xl border border-[var(--accent)]/40 bg-[var(--accent-soft)] px-3 py-2 text-base font-semibold text-fg">
           {PRONOUN_LABEL[pronoun]} ___
         </div>

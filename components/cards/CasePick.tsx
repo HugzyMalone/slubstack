@@ -8,6 +8,7 @@ import type { Quality } from "@/lib/srs";
 import { speak, cardLang } from "@/lib/speech";
 import { CASE_LABELS, cardNoun, cardGender, GENDER_COLORS } from "@/lib/german";
 import { shuffle, cn } from "@/lib/utils";
+import { meaningOf, useNativeLanguage } from "@/lib/native";
 import { CardFooter } from "./CardShell";
 
 type Props = {
@@ -26,6 +27,7 @@ const CASE_TEMPLATES: Record<GermanCase, (noun: string) => string> = {
 const ARTICLE_POOL = ["der", "die", "das", "den", "dem", "des"];
 
 export function CasePick({ card, onResult, onFeedback }: Props) {
+  const native = useNativeLanguage();
   const noun = cardNoun(card);
   const gender = cardGender(card);
 
@@ -78,7 +80,7 @@ export function CasePick({ card, onResult, onFeedback }: Props) {
 
       <div className="mx-auto mt-2 max-w-sm rounded-3xl border border-border bg-surface px-5 py-4 text-center relative">
         <div className="hanzi text-2xl w-full break-words leading-snug text-fg">{sentence}</div>
-        <div className="mt-2 text-sm text-muted">{card.english}</div>
+        <div className="mt-2 text-sm text-muted">{meaningOf(card, native)}</div>
         <button
           onClick={() => speak(sentence.replace("___", correctArticle), cardLang(card.id))}
           className="absolute right-3 top-3 rounded-full p-1.5 text-muted hover:text-fg hover:bg-border/50 transition-colors"

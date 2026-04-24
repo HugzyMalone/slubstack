@@ -7,6 +7,7 @@ import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
 import { shuffle, cn } from "@/lib/utils";
 import { speak, cardLang } from "@/lib/speech";
+import { meaningOf, useNativeLanguage } from "@/lib/native";
 import { CardFooter } from "./CardShell";
 
 type Props = {
@@ -25,6 +26,7 @@ function hanziSize(text: string) {
 }
 
 export function CharacterFromPinyin({ card, distractors, onResult, onFeedback }: Props) {
+  const native = useNativeLanguage();
   const options = useMemo(
     () => shuffle([card, ...distractors].slice(0, 4)),
     [card, distractors],
@@ -52,7 +54,7 @@ export function CharacterFromPinyin({ card, distractors, onResult, onFeedback }:
 
       <div className="mx-auto mt-2 max-w-sm rounded-3xl border border-border bg-surface px-5 py-4 text-center relative">
         <div className="text-3xl font-semibold text-fg leading-tight">{card.pinyin}</div>
-        <div className="mt-1 text-sm text-muted">{card.english}</div>
+        <div className="mt-1 text-sm text-muted">{meaningOf(card, native)}</div>
         <button
           onClick={() => speak(card.hanzi, cardLang(card.id))}
           className="absolute right-3 top-3 rounded-full p-1.5 text-muted hover:text-fg hover:bg-border/50 transition-colors"

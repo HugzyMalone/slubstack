@@ -8,6 +8,7 @@ import type { Quality } from "@/lib/srs";
 import { speak, cardLang } from "@/lib/speech";
 import { MEASURE_POOL } from "@/lib/mandarin";
 import { shuffle, cn } from "@/lib/utils";
+import { meaningOf, useNativeLanguage } from "@/lib/native";
 import { CardFooter } from "./CardShell";
 
 type Props = {
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function MeasureWordPick({ card, onResult, onFeedback }: Props) {
+  const native = useNativeLanguage();
   const correctMw = card.measureWord ?? "个";
 
   const options = useMemo(() => {
@@ -48,7 +50,7 @@ export function MeasureWordPick({ card, onResult, onFeedback }: Props) {
         <div className="text-xs uppercase tracking-widest text-muted">一 ___ {card.hanzi}</div>
         <div className="hanzi mt-2 text-5xl w-full break-words leading-tight text-fg">{card.hanzi}</div>
         <div className="mt-1 text-sm text-muted">{card.pinyin}</div>
-        <div className="mt-1 text-sm text-muted">{card.english}</div>
+        <div className="mt-1 text-sm text-muted">{meaningOf(card, native)}</div>
         <button
           onClick={() => speak(`一${correctMw}${card.hanzi}`, cardLang(card.id))}
           className="absolute right-3 top-3 rounded-full p-1.5 text-muted hover:text-fg hover:bg-border/50 transition-colors"

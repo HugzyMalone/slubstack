@@ -26,6 +26,7 @@ function getTier(level: number) {
   return TIERS.find((t) => level >= t.min) ?? TIERS[TIERS.length - 1];
 }
 import { useHydrated } from "@/lib/hooks";
+import { readNativeLanguage, writeNativeLanguage, type NativeLanguage } from "@/lib/native";
 import type { LeaderboardEntry } from "@/lib/supabase/queries";
 import Link from "next/link";
 
@@ -741,22 +742,27 @@ function SettingsTab({
   avatar,
   username,
   status,
+  nativeLanguage,
   onAvatarChange,
   onUsernameChange,
   onStatusChange,
+  onNativeLanguageChange,
   onSignOut,
 }: {
   user: SupaUser;
   avatar: string | null;
   username: string;
   status: string | null;
+  nativeLanguage: NativeLanguage;
   onAvatarChange: (a: string) => void;
   onUsernameChange: (u: string) => void;
   onStatusChange: (s: string | null) => void;
+  onNativeLanguageChange: (n: NativeLanguage) => void;
   onSignOut: () => void;
 }) {
   const [localUsername, setLocalUsername] = useState(username);
   const [localStatus, setLocalStatus] = useState(status ?? "");
+  const [localNative, setLocalNative] = useState<NativeLanguage>(nativeLanguage);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -767,6 +773,7 @@ function SettingsTab({
 
   useEffect(() => { setLocalUsername(username); }, [username]);
   useEffect(() => { setLocalStatus(status ?? ""); }, [status]);
+  useEffect(() => { setLocalNative(nativeLanguage); }, [nativeLanguage]);
 
   function onFileSelected(file: File) {
     const url = URL.createObjectURL(file);
@@ -804,7 +811,12 @@ function SettingsTab({
     const res = await fetch("/api/profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: localUsername, avatar, status: localStatus }),
+      body: JSON.stringify({
+        username: localUsername,
+        avatar,
+        status: localStatus,
+        nativeLanguage: localNative,
+      }),
     });
     const payload = (await res.json()) as { error?: string; ok?: boolean };
 
@@ -812,6 +824,8 @@ function SettingsTab({
 
     onUsernameChange(localUsername);
     onStatusChange(localStatus.trim() || null);
+    onNativeLanguageChange(localNative);
+    writeNativeLanguage(localNative);
     localStorage.setItem("slubstack_username", localUsername);
     localStorage.setItem("slubstack_avatar", avatar ?? "");
     setSaving(false);
@@ -916,6 +930,37 @@ function SettingsTab({
                   {localStatus.length}/100
                 </span>
               </div>
+            </div>
+
+            {/* Native language */}
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted">
+                Answer language <span className="normal-case font-normal text-muted/60">— shown for card meanings</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { v: "en", label: "English" },
+                  { v: "de", label: "Deutsch" },
+                ] as const).map(({ v, label }) => {
+                  const active = localNative === v;
+                  return (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setLocalNative(v)}
+                      className="rounded-xl border px-4 py-3 text-sm font-semibold transition-colors"
+                      style={active
+                        ? { borderColor: "var(--accent)", background: "var(--accent-soft)", color: "var(--accent)" }
+                        : { borderColor: "var(--border)", background: "var(--bg)", color: "var(--fg)" }}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-1.5 text-[11px] text-muted">
+                Answer in {localNative === "de" ? "German (where available, otherwise English)" : "English"}.
+              </p>
             </div>
 
           </div>
@@ -1328,6 +1373,7 @@ export function ProfileClient() {
   const [username, setUsername] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [nativeLanguage, setNativeLanguage] = useState<NativeLanguage>("en");
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoaded, setLeaderboardLoaded] = useState(false);
   const [lbFilter, setLbFilter] = useState<LBFilter>("overall");
@@ -1339,6 +1385,7 @@ export function ProfileClient() {
     if (cachedAvatar) setAvatar(cachedAvatar);
     const cachedUsername = localStorage.getItem("slubstack_username");
     if (cachedUsername) setUsername(cachedUsername);
+    setNativeLanguage(readNativeLanguage());
   }, []);
 
   useEffect(() => {
@@ -1371,6 +1418,9 @@ export function ProfileClient() {
         const av = data.profile.avatar ?? null;
         setAvatar(av);
         setStatus(data.profile.status ?? null);
+        const nl: NativeLanguage = data.profile.nativeLanguage === "de" ? "de" : "en";
+        setNativeLanguage(nl);
+        writeNativeLanguage(nl);
         if (uname) localStorage.setItem("slubstack_username", uname);
         if (av) localStorage.setItem("slubstack_avatar", av);
       })
@@ -1442,8 +1492,10 @@ export function ProfileClient() {
       )}
       {tab === "settings" && (
         <SettingsTab user={user} avatar={avatar} username={username} status={status}
+          nativeLanguage={nativeLanguage}
           onAvatarChange={setAvatar} onUsernameChange={setUsername}
-          onStatusChange={setStatus} onSignOut={handleSignOut} />
+          onStatusChange={setStatus} onNativeLanguageChange={setNativeLanguage}
+          onSignOut={handleSignOut} />
       )}
     </div>
   );

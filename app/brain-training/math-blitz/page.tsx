@@ -7,6 +7,7 @@ import { Heart, Trophy, RotateCcw } from "lucide-react";
 import { globalStore } from "@/lib/globalStore";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { brainTrainingStore } from "@/lib/store";
+import { playCorrect, playWrong } from "@/lib/sound";
 
 type Difficulty = "easy" | "medium" | "hard";
 type Phase = "select" | "countdown" | "playing" | "result";
@@ -273,6 +274,7 @@ export default function MathBlitzPage() {
       if (g.streak > g.bestStreak) g.bestStreak = g.streak;
       syncDisp();
       setFeedback("correct");
+      playCorrect();
       setTimeout(() => {
         setFeedback(null);
         if (gameActiveRef.current) spawnQuestion();
@@ -284,6 +286,7 @@ export default function MathBlitzPage() {
       g.wrong++;
       syncDisp();
       setFeedback("wrong");
+      playWrong();
       setTimeout(() => {
         setFeedback(null);
         if (g.lives <= 0) {

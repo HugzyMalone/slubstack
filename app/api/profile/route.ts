@@ -18,7 +18,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("username, email, avatar_url, status")
+    .select("username, email, avatar_url, status, native_language")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -26,8 +26,20 @@ export async function GET() {
 
   return NextResponse.json({
     profile: data
-      ? { username: data.username, email: data.email, avatar: data.avatar_url, status: data.status ?? null }
-      : { username: fallbackUsername(user.id), email: user.email ?? null, avatar: null, status: null },
+      ? {
+          username: data.username,
+          email: data.email,
+          avatar: data.avatar_url,
+          status: data.status ?? null,
+          nativeLanguage: data.native_language === "de" ? "de" : "en",
+        }
+      : {
+          username: fallbackUsername(user.id),
+          email: user.email ?? null,
+          avatar: null,
+          status: null,
+          nativeLanguage: "en",
+        },
   });
 }
 
@@ -40,10 +52,16 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = (await request.json()) as { username?: string; avatar?: string; status?: string };
+  const body = (await request.json()) as {
+    username?: string;
+    avatar?: string;
+    status?: string;
+    nativeLanguage?: string;
+  };
   const username = body.username?.trim();
   const avatar = body.avatar?.trim() ?? null;
   const status = (body.status ?? "").trim().slice(0, 100) || null;
+  const nativeLanguage = body.nativeLanguage === "de" ? "de" : "en";
 
   if (!username || !USERNAME_RE.test(username)) {
     return NextResponse.json(
@@ -53,7 +71,14 @@ export async function POST(request: Request) {
   }
 
   const { error } = await supabase.from("profiles").upsert(
-    { id: user.id, username, email: user.email ?? null, avatar_url: avatar, status },
+    {
+      id: user.id,
+      username,
+      email: user.email ?? null,
+      avatar_url: avatar,
+      status,
+      native_language: nativeLanguage,
+    },
     { onConflict: "id" },
   );
 

@@ -10,6 +10,7 @@ import type { Card } from "@/lib/content";
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
 import { useHydrated, useNow } from "@/lib/hooks";
+import { meaningOf, useNativeLanguage } from "@/lib/native";
 import Link from "next/link";
 
 type SortBy = "newest" | "oldest" | "best" | "worst";
@@ -148,6 +149,7 @@ export function ReviewClient({ lang = "mandarin" }: { lang?: Language }) {
 }
 
 function FlipCard({ card, ease }: { card: Card; ease?: number }) {
+  const native = useNativeLanguage();
   const [flipped, setFlipped] = useState(false);
 
   // colour-code the dot: green (ease>2.2), amber (1.6–2.2), red (<1.6)
@@ -189,7 +191,7 @@ function FlipCard({ card, ease }: { card: Card; ease?: number }) {
             background: "color-mix(in srgb, var(--accent) 8%, var(--surface))",
           }}
         >
-          <span className="text-sm font-semibold">{card.english}</span>
+          <span className="text-sm font-semibold">{meaningOf(card, native)}</span>
           {card.note && (
             <span className="text-center text-[10px] leading-tight text-muted">{card.note}</span>
           )}
