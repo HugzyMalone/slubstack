@@ -323,9 +323,9 @@ function ProfileTab({ user, avatar, username, status }: {
   const tier = getTier(level);
 
   return (
-    <div className="space-y-3">
-      {/* Profile card */}
-      <div className="rounded-3xl border border-border bg-surface shadow-sm overflow-hidden">
+    <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-[minmax(320px,380px)_1fr] lg:gap-6 lg:items-start">
+      {/* Profile card (sticky on desktop) */}
+      <div className="rounded-3xl border border-border bg-surface shadow-sm overflow-hidden lg:sticky lg:top-24">
         {/* Header section */}
         <div className="px-6 pt-6 pb-5 text-center">
           <div className="flex justify-center mb-4">
@@ -835,7 +835,7 @@ function SettingsTab({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 lg:max-w-2xl">
       {cropSrc && (
         <CropModal
           src={cropSrc}
@@ -1421,9 +1421,9 @@ export function ProfileClient() {
   if (!user) return <AuthPage />;
 
   return (
-    <div className="mx-auto max-w-xl px-4 pb-28 pt-4">
-      {/* Tabs */}
-      <div className="mb-5 flex gap-1 rounded-2xl bg-border/30 p-1">
+    <div className="mx-auto w-full max-w-xl px-4 pb-28 pt-4 lg:max-w-[1100px] lg:px-8 lg:pt-10 lg:pb-16">
+      {/* Tabs — constrained width on desktop so they don't stretch */}
+      <div className="mb-5 flex gap-1 rounded-2xl bg-border/30 p-1 lg:max-w-md lg:mb-8">
         <TabBtn active={tab === "profile"} onClick={() => setTab("profile")} icon={<User size={14} />}>
           Profile
         </TabBtn>

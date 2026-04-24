@@ -310,15 +310,23 @@ export default function HubPage() {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const apply = () => {
+      document.body.style.overflow = mql.matches ? "" : "hidden";
+    };
+    apply();
+    mql.addEventListener("change", apply);
+    return () => {
+      mql.removeEventListener("change", apply);
+      document.body.style.overflow = "";
+    };
   }, []);
 
   const cycleFact = () => setFactIdx(prev => (prev + 1) % FACTS.length);
 
   return (
     <div
-      className="relative flex flex-col overflow-hidden px-4 lg:px-6"
+      className="relative overflow-hidden px-4 lg:h-auto lg:overflow-visible lg:px-8 lg:py-10 lg:max-w-[1200px] lg:mx-auto"
       style={{ height: "calc(100dvh - 52px - env(safe-area-inset-top, 0px))" }}
     >
       {/* Subtle accent glow behind hero */}
@@ -331,118 +339,220 @@ export default function HubPage() {
         }}
       />
 
-      {/* Greeting */}
-      <motion.p
-        className="flex-shrink-0 pt-2.5 pb-0.5 text-center text-[11px] font-semibold tracking-widest text-muted uppercase"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: greeting ? 1 : 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        {greeting || "\u00A0"}
-      </motion.p>
-
-      {/* Hero animal — floating animation */}
-      <motion.div
-        className="relative flex-shrink-0"
-        style={{ height: "26vh", maxHeight: 210 }}
-        animate={prefersReducedMotion ? {} : { y: [0, -7, 0] }}
-        transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
-      >
-        {hero.char === "bear"
-          ? <Bear mood={hero.mood} fill />
-          : <Panda mood={hero.mood} fill />}
-      </motion.div>
-
-      {/* Fact of the hour — tappable callout */}
-      <motion.div
-        className="flex-shrink-0 mb-2.5"
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <button
-          onClick={cycleFact}
-          className="w-full text-left"
-          aria-label="Show another fact"
+      {/* Mobile layout (no-scroll, 2x2 tiles) */}
+      <div className="flex h-full flex-col lg:hidden">
+        <motion.p
+          className="flex-shrink-0 pt-2.5 pb-0.5 text-center text-[11px] font-semibold tracking-widest text-muted uppercase"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: greeting ? 1 : 0 }}
+          transition={{ duration: 0.6 }}
         >
-          <div
-            className="flex items-start gap-2.5 rounded-2xl px-4 py-2.5 transition-opacity duration-150 active:opacity-70"
-            style={{
-              background: "color-mix(in srgb, var(--accent) 8%, var(--surface))",
-              border: "1px solid color-mix(in srgb, var(--accent) 18%, transparent)",
-            }}
-          >
-            <SparkleIcon />
-            <div className="flex-1 overflow-hidden">
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={factIdx}
-                  initial={{ opacity: 0, x: 14 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -14 }}
-                  transition={{ duration: 0.22, ease: "easeOut" }}
-                  className="text-[12px] leading-relaxed text-muted"
-                >
-                  {FACTS[factIdx]}
-                </motion.p>
-              </AnimatePresence>
-            </div>
-          </div>
-        </button>
-      </motion.div>
+          {greeting || " "}
+        </motion.p>
 
-      {/* Section cards — 2×2 on mobile, 4-col row on desktop */}
-      <div className="flex-1 min-h-0 grid grid-cols-2 gap-2.5 pb-[max(calc(env(safe-area-inset-bottom,0px)+72px),88px)] lg:grid-cols-4 lg:flex-none lg:max-h-[280px] lg:pb-4">
-        {SECTIONS.map(({ href, icon, iconBg, cardTint, title, subtitle }, i) => {
-          const level = sectionLevels[i];
-          return (
-            <motion.div
-              key={href}
-              className="h-full"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: 0.15 + i * 0.07,
-                duration: 0.4,
-                ease: [0.25, 0.46, 0.45, 0.94],
+        <motion.div
+          className="relative flex-shrink-0"
+          style={{ height: "26vh", maxHeight: 210 }}
+          animate={prefersReducedMotion ? {} : { y: [0, -7, 0] }}
+          transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
+        >
+          {hero.char === "bear"
+            ? <Bear mood={hero.mood} fill />
+            : <Panda mood={hero.mood} fill />}
+        </motion.div>
+
+        <motion.div
+          className="flex-shrink-0 mb-2.5"
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <button onClick={cycleFact} className="w-full text-left" aria-label="Show another fact">
+            <div
+              className="flex items-start gap-2.5 rounded-2xl px-4 py-2.5 transition-opacity duration-150 active:opacity-70"
+              style={{
+                background: "color-mix(in srgb, var(--accent) 8%, var(--surface))",
+                border: "1px solid color-mix(in srgb, var(--accent) 18%, transparent)",
               }}
             >
-              <Link
-                href={href}
-                className="relative flex h-full flex-col items-center justify-center gap-2.5 rounded-2xl p-3 transition-transform duration-150 active:scale-[0.97]"
-                style={{
-                  background: `color-mix(in srgb, ${cardTint} 10%, var(--surface))`,
-                  border: `1px solid color-mix(in srgb, ${cardTint} 22%, transparent)`,
-                  boxShadow: `0 4px 20px color-mix(in srgb, ${cardTint} 10%, transparent)`,
-                }}
+              <SparkleIcon />
+              <div className="flex-1 overflow-hidden">
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={factIdx}
+                    initial={{ opacity: 0, x: 14 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -14 }}
+                    transition={{ duration: 0.22, ease: "easeOut" }}
+                    className="text-[12px] leading-relaxed text-muted"
+                  >
+                    {FACTS[factIdx]}
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+            </div>
+          </button>
+        </motion.div>
+
+        <div className="flex-1 min-h-0 grid grid-cols-2 gap-2.5 pb-[max(calc(env(safe-area-inset-bottom,0px)+72px),88px)]">
+          {SECTIONS.map(({ href, icon, iconBg, cardTint, title, subtitle }, i) => {
+            const level = sectionLevels[i];
+            return (
+              <motion.div
+                key={href}
+                className="h-full"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 + i * 0.07, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
-                {/* Live level badge */}
-                {level > 0 && (
-                  <span
-                    className="absolute top-2 right-2 rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none"
+                <Link
+                  href={href}
+                  className="relative flex h-full flex-col items-center justify-center gap-2.5 rounded-2xl p-3 transition-transform duration-150 active:scale-[0.97]"
+                  style={{
+                    background: `color-mix(in srgb, ${cardTint} 10%, var(--surface))`,
+                    border: `1px solid color-mix(in srgb, ${cardTint} 22%, transparent)`,
+                    boxShadow: `0 4px 20px color-mix(in srgb, ${cardTint} 10%, transparent)`,
+                  }}
+                >
+                  {level > 0 && (
+                    <span
+                      className="absolute top-2 right-2 rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none"
+                      style={{
+                        background: `color-mix(in srgb, ${cardTint} 20%, var(--surface))`,
+                        color: cardTint,
+                        border: `1px solid color-mix(in srgb, ${cardTint} 30%, transparent)`,
+                      }}
+                    >
+                      Lv.{level}
+                    </span>
+                  )}
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white" style={{ background: iconBg }}>
+                    {icon}
+                  </div>
+                  <div className="text-center">
+                    <div className="text-[14px] font-bold leading-tight">{title}</div>
+                    <div className="mt-0.5 text-[11px] leading-tight text-muted">{subtitle}</div>
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Desktop dashboard (lg+) */}
+      <div className="hidden lg:grid lg:grid-cols-[minmax(320px,2fr)_3fr] lg:gap-10">
+        <div className="flex flex-col gap-6">
+          <div>
+            <p className="text-[11px] font-semibold tracking-widest text-muted uppercase">
+              {greeting || " "}
+            </p>
+            <h1 className="mt-1 text-3xl font-bold leading-tight tracking-tight">
+              Welcome back to Slubstack.
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-muted">
+              Learn a language, sharpen your mind, or play a round of trivia. Pick up where you left off.
+            </p>
+          </div>
+
+          <motion.div
+            className="relative flex items-center justify-center"
+            style={{ height: 280 }}
+            animate={prefersReducedMotion ? {} : { y: [0, -7, 0] }}
+            transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
+          >
+            {hero.char === "bear"
+              ? <Bear mood={hero.mood} fill />
+              : <Panda mood={hero.mood} fill />}
+          </motion.div>
+
+          <button onClick={cycleFact} className="w-full text-left group" aria-label="Show another fact">
+            <div
+              className="flex items-start gap-3 rounded-2xl px-5 py-4 transition-all duration-150 group-hover:border-[color:var(--border-hi)]"
+              style={{
+                background: "color-mix(in srgb, var(--accent) 8%, var(--surface))",
+                border: "1px solid color-mix(in srgb, var(--accent) 18%, transparent)",
+              }}
+            >
+              <SparkleIcon />
+              <div className="flex-1">
+                <div className="text-[10px] font-semibold tracking-widest text-muted uppercase mb-1">Did you know?</div>
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={factIdx}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.22, ease: "easeOut" }}
+                    className="text-[13px] leading-relaxed"
+                    style={{ color: "var(--fg)" }}
+                  >
+                    {FACTS[factIdx]}
+                  </motion.p>
+                </AnimatePresence>
+                <div className="mt-2 text-[11px] text-muted opacity-70">Click for another fact</div>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <div>
+          <h2 className="text-xs font-semibold tracking-widest text-muted uppercase mb-4">Continue</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {SECTIONS.map(({ href, icon, iconBg, cardTint, title, subtitle }, i) => {
+              const level = sectionLevels[i];
+              return (
+                <motion.div
+                  key={href}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.12 + i * 0.06, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+                >
+                  <Link
+                    href={href}
+                    className="group relative flex flex-col gap-4 rounded-2xl p-6 transition-all duration-150 hover:-translate-y-0.5"
                     style={{
-                      background: `color-mix(in srgb, ${cardTint} 20%, var(--surface))`,
-                      color: cardTint,
-                      border: `1px solid color-mix(in srgb, ${cardTint} 30%, transparent)`,
+                      background: `color-mix(in srgb, ${cardTint} 8%, var(--surface))`,
+                      border: `1px solid color-mix(in srgb, ${cardTint} 22%, transparent)`,
+                      minHeight: 170,
                     }}
                   >
-                    Lv.{level}
-                  </span>
-                )}
-                <div
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white"
-                  style={{ background: iconBg }}
-                >
-                  {icon}
-                </div>
-                <div className="text-center">
-                  <div className="text-[14px] font-bold leading-tight">{title}</div>
-                  <div className="mt-0.5 text-[11px] leading-tight text-muted">{subtitle}</div>
-                </div>
-              </Link>
-            </motion.div>
-          );
-        })}
+                    <div className="flex items-start justify-between">
+                      <div
+                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm"
+                        style={{ background: iconBg }}
+                      >
+                        {icon}
+                      </div>
+                      {level > 0 && (
+                        <span
+                          className="rounded-full px-2 py-0.5 text-[11px] font-bold leading-none"
+                          style={{
+                            background: `color-mix(in srgb, ${cardTint} 18%, var(--surface))`,
+                            color: cardTint,
+                            border: `1px solid color-mix(in srgb, ${cardTint} 28%, transparent)`,
+                          }}
+                        >
+                          Lv. {level}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <div className="text-[17px] font-bold leading-tight">{title}</div>
+                      <div className="mt-1 text-[13px] leading-snug text-muted">{subtitle}</div>
+                    </div>
+                    <div
+                      className="absolute right-5 bottom-5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-[13px] font-semibold"
+                      style={{ color: cardTint }}
+                    >
+                      Open →
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );

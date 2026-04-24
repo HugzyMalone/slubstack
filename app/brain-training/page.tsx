@@ -63,6 +63,14 @@ function ConnectionsIcon() {
   );
 }
 
+function ChevronRight() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-muted">
+      <path d="M9 18l6-6-6-6" />
+    </svg>
+  );
+}
+
 const LIVE = [
   {
     href: "/brain-training/math-blitz",
@@ -113,13 +121,15 @@ const COMING_SOON = [
 
 export default function BrainTrainingPage() {
   return (
-    <div className="mx-auto max-w-md px-4 pb-24 pt-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Brain Training</h1>
-        <p className="mt-1 text-sm text-muted">Sharpen your memory, focus &amp; logic.</p>
+    <div className="w-full px-4 pb-24 pt-8 lg:max-w-[1200px] lg:mx-auto lg:px-8 lg:py-10 lg:pb-16">
+      <div className="mb-6 lg:mb-10 lg:max-w-2xl">
+        <p className="text-[11px] font-semibold tracking-widest text-muted uppercase mb-1">Brain Training</p>
+        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Sharpen your memory, focus &amp; logic.</h1>
+        <p className="mt-2 text-sm lg:text-base text-muted">Short daily games that build real cognitive habits. XP counts toward your overall level.</p>
       </div>
 
-      <div className="flex flex-col gap-3">
+      {/* Mobile — vertical list */}
+      <div className="flex flex-col gap-3 lg:hidden">
         {LIVE.map(({ href, Icon, iconBg, title, description, badge }) => (
           <Link
             key={title}
@@ -131,27 +141,21 @@ export default function BrainTrainingPage() {
               boxShadow: "0 2px 8px color-mix(in srgb, var(--fg) 4%, transparent)",
             }}
           >
-            <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
-              style={{ background: iconBg }}
-            >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white" style={{ background: iconBg }}>
               <Icon />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-[15px] font-semibold">{title}</span>
                 {badge && (
-                  <span className="rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white"
-                    style={{ background: iconBg }}>
+                  <span className="rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white" style={{ background: iconBg }}>
                     {badge}
                   </span>
                 )}
               </div>
               <div className="text-sm text-muted">{description}</div>
             </div>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-muted">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <ChevronRight />
           </Link>
         ))}
 
@@ -161,26 +165,78 @@ export default function BrainTrainingPage() {
           <div
             key={title}
             className="flex items-center gap-4 rounded-2xl px-5 py-4 opacity-45"
-            style={{
-              background: "var(--surface)",
-              border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)",
-            }}
+            style={{ background: "var(--surface)", border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)" }}
           >
-            <div
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
-              style={{ background: iconBg }}
-            >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white" style={{ background: iconBg }}>
               <Icon />
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-[15px] font-semibold">{title}</div>
               <div className="text-sm text-muted">{description}</div>
             </div>
-            <span className="shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-muted">
-              Soon
-            </span>
+            <span className="shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-muted">Soon</span>
           </div>
         ))}
+      </div>
+
+      {/* Desktop — card grid */}
+      <div className="hidden lg:block">
+        <h2 className="text-xs font-semibold tracking-widest text-muted uppercase mb-4">Daily games</h2>
+        <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
+          {LIVE.map(({ href, Icon, iconBg, title, description, badge }) => (
+            <Link
+              key={title}
+              href={href}
+              className="group flex flex-col gap-4 rounded-2xl p-6 transition-all duration-150 hover:-translate-y-0.5"
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                boxShadow: "var(--shadow-panel)",
+                minHeight: 170,
+              }}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm" style={{ background: iconBg }}>
+                  <Icon />
+                </div>
+                {badge && (
+                  <span className="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white" style={{ background: iconBg }}>
+                    {badge}
+                  </span>
+                )}
+              </div>
+              <div>
+                <div className="text-[17px] font-bold leading-tight">{title}</div>
+                <div className="mt-1 text-[13px] leading-snug text-muted">{description}</div>
+              </div>
+              <div className="mt-auto flex items-center gap-1 text-[13px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-150" style={{ color: "var(--accent)" }}>
+                Play <ChevronRight />
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        <h2 className="text-xs font-semibold tracking-widest text-muted uppercase mt-10 mb-4">Coming soon</h2>
+        <div className="grid grid-cols-3 gap-4">
+          {COMING_SOON.map(({ Icon, iconBg, title, description }) => (
+            <div
+              key={title}
+              className="flex flex-col gap-3 rounded-2xl p-5 opacity-55"
+              style={{ background: "var(--surface)", border: "1px dashed var(--border)" }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white" style={{ background: iconBg }}>
+                  <Icon />
+                </div>
+                <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted">Soon</span>
+              </div>
+              <div>
+                <div className="text-[15px] font-bold leading-tight">{title}</div>
+                <div className="mt-1 text-[12px] leading-snug text-muted">{description}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

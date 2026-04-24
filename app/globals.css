@@ -3,9 +3,11 @@
 :root {
   --bg: #f8f6fd;
   --surface: #ffffff;
+  --elevated: #fbf9ff;
   --fg: #1e1a2e;
   --muted: #8b7aaa;
   --border: #e4ddf5;
+  --border-hi: #c9bce8;
   --accent: #b08ee8;
   --accent-fg: #ffffff;
   --accent-soft: #f3effe;
@@ -16,15 +18,19 @@
   --danger: #fb7185;
   --success: #6ee7b7;
   --radius: 14px;
+  --shadow-panel: 0 1px 3px rgb(17 12 46 / 0.06), 0 1px 2px rgb(17 12 46 / 0.04);
+  --shadow-panel-hi: 0 6px 24px rgb(17 12 46 / 0.08), 0 2px 6px rgb(17 12 46 / 0.05);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #100e1a;
     --surface: #1c1830;
+    --elevated: #241f3a;
     --fg: #ede8ff;
     --muted: #b0a0cc;
     --border: #2e2845;
+    --border-hi: #46395f;
     --accent: #c4a8f0;
     --accent-fg: #1e0a40;
     --accent-soft: #2a1f45;
@@ -32,15 +38,19 @@
     --game-soft: #3a1a35;
     --learn: #a5d8f3;
     --learn-soft: #0a2030;
+    --shadow-panel: 0 1px 3px rgb(0 0 0 / 0.35), 0 1px 2px rgb(0 0 0 / 0.25);
+    --shadow-panel-hi: 0 8px 30px rgb(0 0 0 / 0.45), 0 2px 8px rgb(0 0 0 / 0.3);
   }
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --color-border-hi: var(--border-hi);
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
   --color-accent-soft: var(--accent-soft);
@@ -54,6 +64,21 @@
   --font-mono: var(--font-geist-mono);
   --font-hanzi: var(--font-noto-sc);
   --radius: var(--radius);
+  --shadow-panel: var(--shadow-panel);
+  --shadow-panel-hi: var(--shadow-panel-hi);
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Panel — shared card surface used across desktop dashboards */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  transition: border-color 150ms var(--ease-out-expo), box-shadow 150ms var(--ease-out-expo), transform 150ms var(--ease-out-expo);
+}
+.panel-hover:hover {
+  border-color: var(--border-hi);
+  box-shadow: var(--shadow-panel);
 }
 
 html, body {

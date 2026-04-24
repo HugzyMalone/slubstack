@@ -139,20 +139,20 @@ function AccordionSection({ open, onToggle, icon, iconBg, title, subtitle, child
   return (
     <div
       className="overflow-hidden rounded-2xl border border-border bg-surface"
-      style={{ boxShadow: "0 2px 8px color-mix(in srgb, var(--fg) 4%, transparent)" }}
+      style={{ boxShadow: "var(--shadow-panel)" }}
     >
       <button
         onClick={onToggle}
-        className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors duration-150 active:bg-[color-mix(in_srgb,var(--fg)_5%,transparent)]"
+        className="flex w-full items-center gap-4 px-5 py-4 lg:px-6 lg:py-5 text-left transition-colors duration-150 active:bg-[color-mix(in_srgb,var(--fg)_5%,transparent)]"
       >
         <div
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white"
+          className="flex h-11 w-11 lg:h-12 lg:w-12 shrink-0 items-center justify-center rounded-xl text-white"
           style={{ background: iconBg }}
         >
           {icon}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[15px] font-semibold">{title}</div>
+          <div className="text-[15px] lg:text-base font-semibold">{title}</div>
           <div className="mt-0.5 text-sm text-muted">{subtitle}</div>
         </div>
         <motion.span
@@ -174,7 +174,7 @@ function AccordionSection({ open, onToggle, icon, iconBg, title, subtitle, child
             transition={{ duration: 0.22, ease: EASE }}
             style={{ overflow: "hidden" }}
           >
-            <div className="border-t border-border divide-y divide-border">
+            <div className="border-t border-border lg:grid lg:grid-cols-2 lg:gap-px lg:bg-border">
               {children}
             </div>
           </motion.div>
@@ -192,7 +192,7 @@ function LangRow({ cfg, stats }: { cfg: { href: string; color: string; flag: str
   return (
     <Link
       href={cfg.href}
-      className="flex items-center gap-4 px-5 py-3.5 transition-colors duration-150 active:bg-[color-mix(in_srgb,var(--fg)_5%,transparent)]"
+      className="flex items-center gap-4 px-5 py-3.5 lg:px-6 lg:py-4 bg-surface transition-colors duration-150 hover:bg-[color:var(--elevated)] active:bg-[color-mix(in_srgb,var(--fg)_5%,transparent)]"
     >
       <div
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg"
@@ -221,7 +221,7 @@ function GameRow({ href, emoji, title, meta, accentColor }: { href: string; emoj
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 px-5 py-3.5 transition-colors duration-150 active:bg-[color-mix(in_srgb,var(--fg)_5%,transparent)]"
+      className="flex items-center gap-4 px-5 py-3.5 lg:px-6 lg:py-4 bg-surface transition-colors duration-150 hover:bg-[color:var(--elevated)] active:bg-[color-mix(in_srgb,var(--fg)_5%,transparent)]"
     >
       <div
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg"
@@ -256,6 +256,10 @@ export default function ReviewHubPage() {
     setMathStats(loadMathOpStats());
     setActorStats(loadActorStats());
     setWordleState(readWordleState());
+    // Auto-open Languages on desktop so users aren't staring at a collapsed wall
+    if (typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches) {
+      setOpenSection((prev) => prev ?? "languages");
+    }
   }, []);
 
   function toggle(id: string) {
@@ -284,10 +288,11 @@ export default function ReviewHubPage() {
   const skillSubtitle = skillDue > 0 ? `${skillDue} card${skillDue === 1 ? "" : "s"} due` : "Vibe Coding";
 
   return (
-    <div className="mx-auto max-w-xl px-4 pb-28 pt-4 space-y-3">
-      <div className="pb-1">
-        <h1 className="text-2xl font-bold tracking-tight">Review</h1>
-        <p className="mt-1 text-sm text-muted">Practice what you know and focus on weak spots.</p>
+    <div className="mx-auto w-full max-w-xl px-4 pb-28 pt-4 space-y-3 lg:max-w-[1100px] lg:px-8 lg:pt-10 lg:pb-16 lg:space-y-4">
+      <div className="pb-1 lg:max-w-2xl">
+        <p className="text-[11px] font-semibold tracking-widest text-muted uppercase mb-1">Review</p>
+        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Practice what you know and focus on weak spots.</h1>
+        <p className="mt-2 text-sm lg:text-base text-muted">Your spaced-repetition queue and game activity in one place. Tap a section to expand it.</p>
       </div>
 
       <AccordionSection

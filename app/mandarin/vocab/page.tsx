@@ -62,16 +62,17 @@ export default function MandarinVocabPage() {
   const total = groups.reduce((n, g) => n + g.cards.length, 0);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 pb-24 pt-6">
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold tracking-tight">Mandarin vocab</h1>
-        <p className="mt-1 text-sm text-muted">
-          {total} card{total === 1 ? "" : "s"} across {groups.length} unit{groups.length === 1 ? "" : "s"}. Tap any card for notes.
-        </p>
+    <div className="w-full px-4 pb-24 pt-6 lg:max-w-[1200px] lg:mx-auto lg:px-8 lg:py-8">
+      <div className="mb-4 lg:mb-6 lg:max-w-2xl">
+        <p className="text-[11px] font-semibold tracking-widest text-muted uppercase mb-1">Mandarin vocab</p>
+        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">
+          {total} card{total === 1 ? "" : "s"} across {groups.length} unit{groups.length === 1 ? "" : "s"}
+        </h1>
+        <p className="mt-2 text-sm lg:text-base text-muted">Tone-coloured pinyin, measure words, and priority flags. Search any field.</p>
       </div>
 
       <div
-        className="sticky top-0 z-10 -mx-4 px-4 pb-3 pt-2 backdrop-blur"
+        className="sticky z-10 -mx-4 px-4 pb-3 pt-2 backdrop-blur lg:top-14 top-0 lg:-mx-8 lg:px-8"
         style={{ background: "color-mix(in srgb, var(--bg) 85%, transparent)" }}
       >
         <input
@@ -120,7 +121,7 @@ export default function MandarinVocabPage() {
               >
                 {unit.emoji} {unit.title} · {cards.length}
               </h2>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {cards.map((c) => (
                   <div
                     key={c.id}

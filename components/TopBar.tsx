@@ -115,7 +115,7 @@ export function TopBar() {
       }}
     >
       <div style={{ height: "env(safe-area-inset-top)" }} />
-      <div className="mx-auto flex h-13 max-w-xl lg:max-w-none items-center justify-between px-4 lg:px-6">
+      <div className="flex h-13 w-full items-center justify-between px-4 lg:px-8">
 
         {/* Wordmark or back button — mobile only */}
         {isHome ? (
