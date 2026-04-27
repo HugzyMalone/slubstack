@@ -4,7 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, ChevronUp, ChevronDown, Minus } from "lucide-react";
+import { toast } from "sonner";
 import { spring, springy } from "@/lib/motion";
+import { playLeaguePromote, playLeagueDemote } from "@/lib/sound";
+import { levelUp as hapticLevelUp } from "@/lib/haptics";
+
+const TIER_SEEN_KEY = "league_last_seen_tier";
 
 type Tier = { id: number; name: string; rank: number };
 type Member = {
@@ -105,6 +110,46 @@ export function LeagueClient() {
   const tierColour = TIER_COLOURS[tierName] ?? "#cd7c54";
   const isTopTier = tier?.rank === Math.max(...data.tiers.map((t) => t.rank));
   const isBottomTier = tier?.rank === Math.min(...data.tiers.map((t) => t.rank));
+
+  return <LeagueView
+    data={data}
+    tierName={tierName}
+    tierColour={tierColour}
+    tierRank={tier?.rank ?? 1}
+    isTopTier={isTopTier}
+    isBottomTier={isBottomTier}
+    countdown={countdown}
+  />;
+}
+
+type ViewProps = {
+  data: LeagueData;
+  tierName: string;
+  tierColour: string;
+  tierRank: number;
+  isTopTier: boolean;
+  isBottomTier: boolean;
+  countdown: string;
+};
+
+function LeagueView({ data, tierName, tierColour, tierRank, isTopTier, isBottomTier, countdown }: ViewProps) {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const seenRaw = window.localStorage.getItem(TIER_SEEN_KEY);
+    const seen = seenRaw ? Number(seenRaw) : null;
+    if (seen !== null && Number.isFinite(seen) && seen !== tierRank) {
+      if (tierRank > seen) {
+        playLeaguePromote();
+        hapticLevelUp();
+        toast.success(`Promoted to ${tierName} League`);
+      } else {
+        playLeagueDemote();
+        hapticLevelUp();
+        toast(`Demoted to ${tierName} League`);
+      }
+    }
+    window.localStorage.setItem(TIER_SEEN_KEY, String(tierRank));
+  }, [tierRank, tierName]);
 
   return (
     <div className="mx-auto max-w-xl px-4 pb-32 pt-4 lg:max-w-2xl lg:px-8 lg:py-10">
