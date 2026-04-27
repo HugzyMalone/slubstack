@@ -12,6 +12,10 @@
 
 # testing
 /coverage
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
 
 # next.js
 /.next/
@@ -35,6 +39,12 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# claude / agent local state
+.claude/
+
+# supabase CLI local state
+supabase/.temp/
 
 # typescript
 *.tsbuildinfo

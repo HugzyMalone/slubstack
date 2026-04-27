@@ -29,7 +29,7 @@ export type RemoteState = {
 type Actions = {
   rateCard: (cardId: string, quality: Quality) => void;
   addXp: (amount: number) => void;
-  completeSession: (firstTryCorrect: number, totalCorrect: number) => { gained: number; streakIncremented: boolean };
+  completeSession: (firstTryCorrect: number, totalCorrect: number) => { gained: number; streakIncremented: boolean; freezeUsed: boolean; freezeGranted: boolean };
   completeUnit: (unitId: string) => void;
   getSrs: (cardId: string) => SrsState;
   reset: () => void;
@@ -88,8 +88,8 @@ function createGameStore(name: string) {
           }
           const gained = bonus + firstTryCorrect * 10 + (totalCorrect - firstTryCorrect) * 5;
           set((s) => ({ xp: s.xp + gained, streak: newStreak, lastActiveDate: today }));
-          const { streakIncremented } = globalStore.getState().touchStreak();
-          return { gained, streakIncremented };
+          const { streakIncremented, freezeUsed, freezeGranted } = globalStore.getState().touchStreak();
+          return { gained, streakIncremented, freezeUsed, freezeGranted };
         },
 
         completeUnit: (unitId) =>

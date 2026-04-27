@@ -4,7 +4,15 @@ import { useEffect, useRef } from "react";
 import { useStore } from "zustand";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { useGameStore, mandarinStore, germanStore, spanishStore, vibeCodingStore } from "@/lib/store";
+import {
+  useGameStore,
+  mandarinStore,
+  germanStore,
+  spanishStore,
+  vibeCodingStore,
+  brainTrainingStore,
+  triviaStore,
+} from "@/lib/store";
 
 type Props = { lang?: "mandarin" | "german" | "spanish" | "vibe-coding" };
 
@@ -15,6 +23,8 @@ export function CloudSync({ lang = "mandarin" }: Props) {
   const germanXp = useStore(germanStore, (s) => s.xp);
   const spanishXp = useStore(spanishStore, (s) => s.xp);
   const vibeXp = useStore(vibeCodingStore, (s) => s.xp);
+  const brainXp = useStore(brainTrainingStore, (s) => s.xp);
+  const triviaXp = useStore(triviaStore, (s) => s.xp);
   const hasPulled = useRef(false);
   const langParam = lang !== "mandarin" ? `?lang=${lang}` : "";
 
@@ -56,7 +66,7 @@ export function CloudSync({ lang = "mandarin" }: Props) {
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
 
-    const totalXp = mandarinXp + germanXp + spanishXp + vibeXp;
+    const totalXp = mandarinXp + germanXp + spanishXp + vibeXp + brainXp + triviaXp;
     const timeout = window.setTimeout(async () => {
       const { data } = await supabase.auth.getSession();
       if (!data.session) return;
@@ -79,7 +89,7 @@ export function CloudSync({ lang = "mandarin" }: Props) {
     }, 700);
 
     return () => window.clearTimeout(timeout);
-  }, [store.xp, store.streak, store.seenCardIds, store.completedUnits, store.srs, store.lastActiveDate, langParam, mandarinXp, germanXp, spanishXp, vibeXp]);
+  }, [store.xp, store.streak, store.seenCardIds, store.completedUnits, store.srs, store.lastActiveDate, langParam, mandarinXp, germanXp, spanishXp, vibeXp, brainXp, triviaXp]);
 
   return null;
 }

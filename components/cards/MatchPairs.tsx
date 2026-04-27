@@ -102,7 +102,7 @@ export function MatchPairs({ card, distractors, onResult, onFeedback }: Props) {
       <div className="flex items-center justify-between pt-2">
         <span className="text-xs uppercase tracking-widest text-muted">Tap to match</span>
         {matchedCount > 0 && (
-          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+          <span className="text-xs font-bold text-success">
             {matchedCount}/{allCards.length} matched
           </span>
         )}
@@ -155,9 +155,9 @@ function MatchTile({
       className={cn(
         "min-h-[52px] w-full rounded-xl border px-2.5 py-2 text-sm font-medium leading-snug transition-colors duration-150",
         state === "matched"
-          ? "border-emerald-400 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 cursor-default"
+          ? "border-success bg-success-soft text-fg cursor-default"
           : state === "wrong"
-            ? "border-rose-400 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+            ? "border-game bg-game-soft text-fg"
             : state === "selected"
               ? "border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] text-[var(--accent)]"
               : "border-border bg-surface text-fg hover:border-[var(--accent)]/50 hover:bg-[color-mix(in_srgb,var(--accent)_4%,transparent)]",

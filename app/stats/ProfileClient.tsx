@@ -3,8 +3,10 @@
 import { useEffect, useState, useRef } from "react";
 import {
   Flame, Zap, Trophy, Lock, Mail, Eye, EyeOff, Camera,
-  User, Settings, BarChart3,
+  User, Settings, BarChart3, Users, Volume2, Vibrate,
 } from "lucide-react";
+import { isMuted as isSoundMuted, setMuted as setSoundMuted } from "@/lib/sound";
+import { isHapticMuted, setHapticMuted } from "@/lib/haptics";
 import { useStore } from "zustand";
 import { mandarinStore, germanStore, spanishStore, vibeCodingStore, brainTrainingStore, triviaStore } from "@/lib/store";
 import type { User as SupaUser } from "@supabase/supabase-js";
@@ -335,13 +337,14 @@ function ProfileTab({ user, avatar, username, status }: {
 
           {/* Name + level badge */}
           <div className="flex items-center justify-center gap-2">
-            <span className="text-lg font-bold leading-none">{username || "Learner"}</span>
+            <span className="font-display text-xl font-extrabold leading-none">{username || "Learner"}</span>
             <span
-              className="rounded-full px-2 py-0.5 text-[11px] font-bold leading-none"
+              className="font-display rounded-full px-2.5 py-1 text-[12px] font-extrabold leading-none"
               style={{
-                background: `color-mix(in srgb, ${tier.color} 15%, var(--surface))`,
+                background: `color-mix(in srgb, ${tier.color} 16%, var(--surface))`,
                 color: tier.color,
-                border: `1px solid color-mix(in srgb, ${tier.color} 35%, transparent)`,
+                border: `1.5px solid color-mix(in srgb, ${tier.color} 38%, transparent)`,
+                boxShadow: `0 2px 0 color-mix(in srgb, ${tier.color} 30%, transparent)`,
               }}
             >
               {tier.name} · Lv. {level}
@@ -357,30 +360,45 @@ function ProfileTab({ user, avatar, username, status }: {
 
           {/* XP bar */}
           <div className="mt-4">
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
+            <div
+              className="h-2.5 w-full overflow-hidden rounded-full"
+              style={{ background: "color-mix(in srgb, var(--accent) 12%, var(--surface))" }}
+            >
               <div
                 className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${Math.max(0, Math.min(1, progress)) * 100}%`, background: tier.color }}
+                style={{
+                  width: `${Math.max(0, Math.min(1, progress)) * 100}%`,
+                  background: "linear-gradient(90deg, var(--accent) 0%, var(--game) 100%)",
+                  boxShadow: "0 0 12px color-mix(in srgb, var(--accent) 50%, transparent)",
+                }}
               />
             </div>
-            <div className="mt-1.5 text-xs text-muted tabular-nums">
+            <div className="mt-2 font-display text-[12px] font-bold text-muted tabular-nums">
               {xp - current} <span className="opacity-50">/</span> {next - current} XP to level {level + 1}
             </div>
           </div>
         </div>
 
         {/* Stats strip */}
-        <div className="grid grid-cols-2 border-t border-border divide-x divide-border">
+        <div className="grid grid-cols-3 border-t border-border divide-x divide-border">
           <div className="flex flex-col items-center gap-1 py-3 px-1">
-            <Flame size={14} className="text-orange-400" />
-            <span className="text-sm font-bold tabular-nums leading-none">{streak}d</span>
-            <span className="text-[9px] text-muted leading-none">streak</span>
+            <Flame size={16} strokeWidth={2.5} fill="#ff8a4c" className="text-[#ff6a1c]" />
+            <span className="font-display text-base font-extrabold tabular-nums leading-none">{streak}d</span>
+            <span className="text-[10px] font-bold uppercase tracking-wide text-muted leading-none">streak</span>
           </div>
           <div className="flex flex-col items-center gap-1 py-3 px-1">
-            <Zap size={14} className="text-amber-400" />
-            <span className="text-sm font-bold tabular-nums leading-none">{xp}</span>
-            <span className="text-[9px] text-muted leading-none">xp</span>
+            <Zap size={16} strokeWidth={2.5} className="text-[var(--accent)]" />
+            <span className="font-display text-base font-extrabold tabular-nums leading-none">{xp}</span>
+            <span className="text-[10px] font-bold uppercase tracking-wide text-muted leading-none">XP</span>
           </div>
+          <Link
+            href="/stats/friends"
+            className="flex flex-col items-center gap-1 py-3 px-1 transition-colors hover:bg-[var(--accent-soft)]"
+          >
+            <Users size={16} strokeWidth={2.5} className="text-[var(--game)]" />
+            <span className="font-display text-base font-extrabold leading-none">→</span>
+            <span className="text-[10px] font-bold uppercase tracking-wide text-muted leading-none">Friends</span>
+          </Link>
         </div>
       </div>
 
@@ -735,6 +753,80 @@ function CropModal({ src, onConfirm, onCancel }: {
   );
 }
 
+// ── FeedbackSection (sound + haptics toggles) ─────────────────────────────
+
+function FeedbackToggle({
+  icon, label, hint, value, onChange,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  hint: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={value}
+      onClick={() => onChange(!value)}
+      className="w-full px-4 py-3.5 flex items-center gap-3 text-left transition-colors hover:bg-border/30"
+    >
+      <span className="text-muted shrink-0">{icon}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-medium">{label}</span>
+        <span className="block text-xs text-muted">{hint}</span>
+      </span>
+      <span
+        className="relative h-6 w-11 shrink-0 rounded-full transition-colors"
+        style={{ background: value ? "var(--accent)" : "var(--border)" }}
+      >
+        <span
+          className="absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform"
+          style={{ transform: value ? "translateX(22px)" : "translateX(2px)" }}
+        />
+      </span>
+    </button>
+  );
+}
+
+function FeedbackSection() {
+  const hydrated = useHydrated();
+  const [sound, setSound] = useState(true);
+  const [haptics, setHaptics] = useState(true);
+
+  useEffect(() => {
+    setSound(!isSoundMuted());
+    setHaptics(!isHapticMuted());
+  }, []);
+
+  if (!hydrated) return null;
+
+  return (
+    <section className="rounded-2xl border border-border bg-surface overflow-hidden">
+      <div className="px-4 py-3 border-b border-border">
+        <h3 className="text-sm font-semibold">Audio &amp; feedback</h3>
+      </div>
+      <div className="divide-y divide-border">
+        <FeedbackToggle
+          icon={<Volume2 size={16} />}
+          label="Sound effects"
+          hint="Chimes on correct/wrong, fanfares on milestones"
+          value={sound}
+          onChange={(v) => { setSound(v); setSoundMuted(!v); }}
+        />
+        <FeedbackToggle
+          icon={<Vibrate size={16} />}
+          label="Haptics"
+          hint="Vibration feedback on phone (no effect on desktop)"
+          value={haptics}
+          onChange={(v) => { setHaptics(v); setHapticMuted(!v); }}
+        />
+      </div>
+    </section>
+  );
+}
+
 // ── SettingsTab ────────────────────────────────────────────────────────────
 
 function SettingsTab({
@@ -985,6 +1077,9 @@ function SettingsTab({
           {saving ? "Saving…" : "Save changes"}
         </button>
       </form>
+
+      {/* Audio & feedback */}
+      <FeedbackSection />
 
       {/* Account actions */}
       <section className="rounded-2xl border border-border bg-surface overflow-hidden">

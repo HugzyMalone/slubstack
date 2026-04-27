@@ -5,6 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getDailyPuzzle, getTodayStr, getPuzzleNumber, type ConnectionsCategory, type DifficultyColor } from "@/lib/connections-puzzles";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { brainTrainingStore } from "@/lib/store";
+import { awardQuestProgress } from "@/lib/questsStore";
+import { pushLeagueXp } from "@/lib/leagues";
+import { globalStore } from "@/lib/globalStore";
+import { PBCelebration } from "@/components/PBCelebration";
+import { connectionsShareCard } from "@/lib/share";
+import { FriendsCompare } from "@/components/FriendsCompare";
 
 const MAX_MISTAKES = 4;
 const STORAGE_KEY = "slubstack_connections";
@@ -91,6 +97,7 @@ export default function ConnectionsPage() {
   const [oneAway, setOneAway] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LBEntry[] | null>(null);
   const [xpAwarded, setXpAwarded] = useState(false);
+  const [pbOpen, setPbOpen] = useState(false);
 
   // Init or restore
   useEffect(() => {
@@ -119,6 +126,13 @@ export default function ConnectionsPage() {
       setXpAwarded(true);
       const xp = phase === "won" ? XP_WIN : XP_LOSE;
       brainTrainingStore.getState().addXp(xp);
+      awardQuestProgress("xp", xp);
+      if (phase === "won") awardQuestProgress("correct", 1);
+      pushLeagueXp(xp);
+      if (phase === "won") {
+        globalStore.getState().recordBeat();
+        setTimeout(() => setPbOpen(true), 700);
+      }
 
       const supabase = getSupabaseBrowserClient();
       if (supabase) {
@@ -208,8 +222,24 @@ export default function ConnectionsPage() {
 
   const mistakeDots = Array.from({ length: MAX_MISTAKES }, (_, i) => i < (MAX_MISTAKES - mistakes));
 
+  const groupColours = solved as ("yellow" | "green" | "blue" | "purple")[];
+  const colourGrid = groupColours.map(() => groupColours);
+
   return (
     <div className="mx-auto max-w-md px-4 pb-24 pt-6 flex flex-col min-h-[calc(100dvh-52px)]">
+      <PBCelebration
+        open={pbOpen}
+        onClose={() => setPbOpen(false)}
+        value={`${4 - mistakes}/4`}
+        label="Solved!"
+        gameLabel="Connections"
+        shareText={connectionsShareCard({
+          dayNumber: puzzleNumber,
+          mistakes,
+          solved: phase === "won",
+          groupColours: colourGrid.length ? colourGrid : [groupColours],
+        })}
+      />
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div>
@@ -327,6 +357,11 @@ export default function ConnectionsPage() {
               {solved.map(c => (
                 <div key={c} className="h-5 w-5 rounded" style={{ background: COLOR_STYLES[c].bg }} />
               ))}
+            </div>
+
+            {/* Friends today */}
+            <div className="my-4 text-left">
+              <FriendsCompare game="connections" date={todayStr} />
             </div>
 
             {/* Leaderboard */}

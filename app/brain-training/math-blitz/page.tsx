@@ -7,7 +7,11 @@ import { Heart, Trophy, RotateCcw } from "lucide-react";
 import { globalStore } from "@/lib/globalStore";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { brainTrainingStore } from "@/lib/store";
+import { awardQuestProgress } from "@/lib/questsStore";
+import { pushLeagueXp } from "@/lib/leagues";
 import { playCorrect, playWrong } from "@/lib/sound";
+import { PBCelebration } from "@/components/PBCelebration";
+import { mathBlitzShareCard } from "@/lib/share";
 
 type Difficulty = "easy" | "medium" | "hard";
 type Phase = "select" | "countdown" | "playing" | "result";
@@ -152,6 +156,7 @@ export default function MathBlitzPage() {
   const [bests, setBests]       = useState<Record<Difficulty, number>>({ easy: 0, medium: 0, hard: 0 });
   const [leaderboard, setLeaderboard] = useState<LBEntry[] | null>(null);
   const [lbLoading, setLbLoading]     = useState(false);
+  const [pbOpen, setPbOpen]           = useState(false);
 
   // Live game state in refs to avoid stale closures in intervals
   const liveRef = useRef({ score: 0, lives: MAX_LIVES, streak: 0, bestStreak: 0, correct: 0, wrong: 0 });
@@ -185,11 +190,20 @@ export default function MathBlitzPage() {
     setBests(loadBests());
     setResult({ score, correct, wrong, bestStreak, isNewBest, reason, difficulty: diffRef.current });
     setPhase("result");
+    if (isNewBest && score > 0) {
+      globalStore.getState().recordBeat();
+      setTimeout(() => setPbOpen(true), 600);
+    }
     globalStore.getState().touchStreak();
     const thresholds: Record<string, [number, number]> = { easy: [80, 40], medium: [150, 80], hard: [200, 100] };
     const [goldT, silverT] = thresholds[diffRef.current];
     globalStore.getState().awardMedal(score >= goldT ? "gold" : score >= silverT ? "silver" : "bronze");
-    if (correct > 0) brainTrainingStore.getState().addXp(correct * 5);
+    if (correct > 0) {
+      brainTrainingStore.getState().addXp(correct * 5);
+      awardQuestProgress("xp", correct * 5);
+      awardQuestProgress("correct", correct);
+      pushLeagueXp(correct * 5);
+    }
     // Submit score to leaderboard if signed in
     const supabase = getSupabaseBrowserClient();
     if (supabase && score > 0) {
@@ -426,10 +440,22 @@ export default function MathBlitzPage() {
 
     return (
       <div className="mx-auto max-w-md px-4 pt-6 pb-8">
+        <PBCelebration
+          open={pbOpen}
+          onClose={() => setPbOpen(false)}
+          value={result.score}
+          gameLabel="Math Blitz"
+          shareText={mathBlitzShareCard({
+            score: result.score,
+            difficulty: result.difficulty,
+            correct: result.correct,
+            pb: true,
+          })}
+        />
         <div className="text-center mb-6">
           <div
             className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl"
-            style={{ background: result.isNewBest ? "linear-gradient(135deg, #f59e0b, #f97316)" : "var(--surface)", border: "1px solid var(--border)" }}
+            style={{ background: result.isNewBest ? "linear-gradient(135deg, var(--accent), var(--game))" : "var(--surface)", border: "1px solid var(--border)" }}
           >
             <Trophy size={28} style={{ color: result.isNewBest ? "white" : "var(--muted)" }} />
           </div>

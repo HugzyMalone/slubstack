@@ -1,15 +1,21 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import type { SessionItem } from "@/lib/session";
 import type { Quality } from "@/lib/srs";
 import type { PandaMood } from "@/components/Panda";
 import { useGameStore } from "@/lib/store";
 import { globalStore } from "@/lib/globalStore";
-import { playCorrect, playWrong } from "@/lib/sound";
+import { heartsStore, useHeartsStore } from "@/lib/heartsStore";
+import { awardQuestProgress } from "@/lib/questsStore";
+import { pushLeagueXp } from "@/lib/leagues";
+import { playCorrect, playWrong, playHeartLoss, playStreakSave } from "@/lib/sound";
+import { success as hapticSuccess, fail as hapticFail, tapMedium, streak as hapticStreak } from "@/lib/haptics";
 import type { Language } from "@/lib/content";
 import { CardShell } from "@/components/cards/CardShell";
+import { OutOfHearts } from "@/components/OutOfHearts";
 import { MultipleChoice } from "@/components/cards/MultipleChoice";
 import { BuildPhrase } from "@/components/cards/BuildPhrase";
 import { TypeAnswer } from "@/components/cards/TypeAnswer";
@@ -28,7 +34,7 @@ type Props = {
   unitId?: string;
   exitHref?: string;
   reviewHref?: string;
-  character?: "panda" | "bear";
+  character?: "panda" | "bear" | "bull";
   lang?: Language;
 };
 
@@ -42,11 +48,32 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
   const [totalCorrect, setTotalCorrect] = useState(0);
   const [finished, setFinished] = useState<{ gained: number; streakIncremented: boolean } | null>(null);
   const [pandaMood, setPandaMood] = useState<PandaMood>("idle");
+  const [shieldUsedThisLesson, setShieldUsedThisLesson] = useState(false);
+  const hearts = useHeartsStore((s) => s.hearts);
+
+  useEffect(() => {
+    heartsStore.getState().applyRegen();
+  }, []);
 
   const handleFeedback = useCallback((correct: boolean) => {
     setPandaMood(correct ? "happy" : "wrong");
-    if (correct) playCorrect(); else playWrong();
-  }, []);
+    if (correct) {
+      playCorrect();
+      hapticSuccess();
+      return;
+    }
+    playWrong();
+    hapticFail();
+    const activeStreak = globalStore.getState().streak > 0;
+    if (activeStreak && !shieldUsedThisLesson) {
+      setShieldUsedThisLesson(true);
+      toast("Streak shield kept your heart");
+      return;
+    }
+    heartsStore.getState().loseHeart();
+    playHeartLoss();
+    tapMedium();
+  }, [shieldUsedThisLesson]);
 
   const handleResult = useCallback(
     (r: { quality: Quality; correct: boolean; firstTry: boolean }) => {
@@ -60,11 +87,23 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
       if (index + 1 >= items.length) {
         const firstTry = firstTryCorrect + (r.correct && r.firstTry ? 1 : 0);
         const total = totalCorrect + (r.correct ? 1 : 0);
-        const { gained, streakIncremented } = completeSession(firstTry, total);
+        const { gained, streakIncremented, freezeUsed, freezeGranted } = completeSession(firstTry, total);
         if (unitId) completeUnit(unitId);
         const medalRatio = items.length > 0 ? firstTry / items.length : 0;
         const medalType = medalRatio === 1 ? "gold" : medalRatio >= 0.7 ? "silver" : "bronze";
         globalStore.getState().awardMedal(medalType);
+        awardQuestProgress("xp", gained);
+        awardQuestProgress("lessons", 1);
+        awardQuestProgress("correct", total);
+        pushLeagueXp(gained);
+        if (freezeUsed) {
+          playStreakSave();
+          hapticStreak();
+          toast.success("Streak shield used — you're safe");
+        }
+        if (freezeGranted) {
+          toast.success("New streak shield earned");
+        }
         setFinished({ gained, streakIncremented });
       } else {
         setIndex((i) => i + 1);
@@ -73,6 +112,10 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
     },
     [items, index, rateCard, completeSession, completeUnit, unitId, firstTryCorrect, totalCorrect],
   );
+
+  if (hearts === 0 && !finished) {
+    return <OutOfHearts exitHref={exitHref} reviewHref={reviewHref} />;
+  }
 
   if (items.length === 0) {
     return (

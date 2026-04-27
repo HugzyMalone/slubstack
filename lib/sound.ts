@@ -120,3 +120,52 @@ export function playWrong() {
   void playTone(146.83, 0.06, 0.36, 0.30, "square"); // D3 drop
   void playNoiseBurst(0, 0.18, 0.22);
 }
+
+/** Bigger fanfare for personal-best beats — ascending C-major arpeggio */
+export function playFanfare() {
+  if (isMuted()) return;
+  void playTone(523.25, 0,    0.18, 0.34, "triangle"); // C5
+  void playTone(659.25, 0.10, 0.20, 0.32, "triangle"); // E5
+  void playTone(783.99, 0.20, 0.22, 0.30, "triangle"); // G5
+  void playTone(1046.50, 0.32, 0.32, 0.30, "triangle"); // C6
+  void playTone(1318.51, 0.44, 0.36, 0.26, "triangle"); // E6
+  void playTone(1567.98, 0.56, 0.46, 0.22, "triangle"); // G6 sparkle
+}
+
+export function playHeartLoss() {
+  if (isMuted()) return;
+  void playTone(523.25, 0,    0.18, 0.30, "triangle"); // C5
+  void playTone(440.00, 0.09, 0.20, 0.28, "triangle"); // A4
+  void playTone(349.23, 0.18, 0.30, 0.32, "triangle"); // F4
+  void playNoiseBurst(0.05, 0.12, 0.16);
+}
+
+export function playLeaguePromote() {
+  if (isMuted()) return;
+  void playTone(523.25, 0,    0.16, 0.32, "triangle"); // C5
+  void playTone(659.25, 0.08, 0.18, 0.30, "triangle"); // E5
+  void playTone(783.99, 0.16, 0.20, 0.30, "triangle"); // G5
+  void playTone(1046.50, 0.26, 0.28, 0.30, "triangle"); // C6
+  void playTone(1318.51, 0.38, 0.32, 0.26, "triangle"); // E6
+  void playTone(1760.00, 0.50, 0.40, 0.22, "triangle"); // A6
+  void playTone(2093.00, 0.62, 0.50, 0.18, "triangle"); // C7 sparkle
+}
+
+export function playLeagueDemote() {
+  if (isMuted()) return;
+  void playTone(369.99, 0,    0.22, 0.28, "sawtooth"); // F#4
+  void playTone(293.66, 0.16, 0.32, 0.30, "sawtooth"); // D4
+}
+
+export function playQuestComplete() {
+  if (isMuted()) return;
+  void playTone(523.25, 0,    0.14, 0.30, "triangle"); // C5
+  void playTone(659.25, 0.08, 0.16, 0.30, "triangle"); // E5
+  void playTone(783.99, 0.16, 0.22, 0.30, "triangle"); // G5
+}
+
+export function playStreakSave() {
+  if (isMuted()) return;
+  void playTone(440.00, 0,    0.36, 0.26, "triangle"); // A4
+  void playTone(659.25, 0,    0.36, 0.22, "triangle"); // E5
+}

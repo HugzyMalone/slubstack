@@ -5,7 +5,11 @@ import { CheckCircle, XCircle, Clipboard, ClipboardCheck, ChevronDown } from "lu
 import type { ActorData } from "@/app/trivia/actors/page";
 import { globalStore } from "@/lib/globalStore";
 import { triviaStore } from "@/lib/store";
+import { awardQuestProgress } from "@/lib/questsStore";
+import { pushLeagueXp } from "@/lib/leagues";
 import { playCorrect, playWrong } from "@/lib/sound";
+import { PBCelebration } from "@/components/PBCelebration";
+import { actorBlitzShareCard } from "@/lib/share";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -126,6 +130,8 @@ export function ActorBlitz({ actors }: Props) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [personalBest, setPersonalBest] = useState<ActorBest | null>(null);
+  const [pbOpen, setPbOpen] = useState(false);
+  const [pbScore, setPbScore] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
 
   // Refs for stable values when saving PB on game end
@@ -203,19 +209,31 @@ export function ActorBlitz({ actors }: Props) {
       const bs = bestStreakRef.current;
       const accuracy = t > 0 ? Math.round((c / t) * 100) : 0;
       const pb: ActorBest = { score: s, correct: c, total: t, bestStreak: bs, accuracy };
+      let isPB = false;
       try {
         const saved = localStorage.getItem(PB_KEY);
         const prev: ActorBest | null = saved ? JSON.parse(saved) : null;
         if (!prev || s > prev.score || (s === prev.score && bs > prev.bestStreak)) {
           localStorage.setItem(PB_KEY, JSON.stringify(pb));
           setPersonalBest(pb);
+          isPB = true;
         }
       } catch {}
+      if (isPB && s > 0) {
+        globalStore.getState().recordBeat();
+        setPbScore(s);
+        setTimeout(() => setPbOpen(true), 600);
+      }
       // Update global streak and award medal
       globalStore.getState().touchStreak();
       const acc = t > 0 ? c / t : 0;
       globalStore.getState().awardMedal(acc >= 0.9 ? "gold" : acc >= 0.7 ? "silver" : "bronze");
-      if (c > 0) triviaStore.getState().addXp(c * 8);
+      if (c > 0) {
+        triviaStore.getState().addXp(c * 8);
+        awardQuestProgress("xp", c * 8);
+        awardQuestProgress("correct", c);
+        pushLeagueXp(c * 8);
+      }
       // Submit score to leaderboard
       fetch("/api/scores/actor-blitz", {
         method: "POST",
@@ -377,10 +395,17 @@ export function ActorBlitz({ actors }: Props) {
 
     return (
       <div className="mx-auto max-w-md px-4 pb-8 pt-8">
+        <PBCelebration
+          open={pbOpen}
+          onClose={() => setPbOpen(false)}
+          value={pbScore}
+          gameLabel="Actor Blitz"
+          shareText={actorBlitzShareCard({ score: pbScore, correct: c, total: t, pb: true })}
+        />
         <div className="text-center mb-6">
           <div
             className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl text-white"
-            style={{ background: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)" }}
+            style={{ background: "linear-gradient(135deg, var(--accent) 0%, var(--game) 100%)" }}
           >
             <FilmIcon size={24} />
           </div>
