@@ -1,14 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useAnimationControls } from "framer-motion";
 import { CheckCircle2, Lock } from "lucide-react";
+import { toast } from "sonner";
 import { type Unit } from "@/lib/content";
 import { useGameStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
 import { useHydrated } from "@/lib/hooks";
+import { tapMedium } from "@/lib/haptics";
+import { wrongVariants } from "@/lib/motion";
+
+function useLockedShake() {
+  const controls = useAnimationControls();
+  return {
+    controls,
+    onTap: () => {
+      tapMedium();
+      controls.start("shake");
+      toast("Finish the previous unit first", { duration: 1600 });
+    },
+  };
+}
 
 type Props = {
   units: Unit[];
@@ -143,15 +158,23 @@ export function SkillTree({ units, basePath, greeting, subGreeting, character = 
 }
 
 function UnitRow({ unit, state, basePath }: { unit: Unit; state: "locked" | "active" | "done"; basePath: string }) {
+  const locked = useLockedShake();
   if (state === "locked") {
     return (
-      <div className="ml-4 flex cursor-not-allowed items-center gap-3 rounded-2xl border border-border bg-surface/50 px-4 py-3.5 opacity-50">
+      <motion.button
+        type="button"
+        animate={locked.controls}
+        variants={wrongVariants}
+        onClick={locked.onTap}
+        className="ml-4 flex w-full items-center gap-3 rounded-2xl border border-border bg-surface/50 px-4 py-3.5 text-left opacity-60"
+      >
         <span className="text-xl">{unit.emoji}</span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="text-sm font-medium text-muted">{unit.title}</div>
           <div className="truncate text-xs text-muted/70">{unit.subtitle}</div>
         </div>
-      </div>
+        <Lock size={14} className="shrink-0 text-muted" />
+      </motion.button>
     );
   }
   return (
@@ -224,8 +247,21 @@ function UnitCard({ unit, index, state, basePath }: { unit: Unit; index: number;
     background: "var(--surface)",
     border: "1px solid var(--border)",
   };
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const locked = useLockedShake();
   if (state === "locked") {
-    return <div className={cn(base, "opacity-50 cursor-not-allowed")} style={baseStyle}>{content}</div>;
+    return (
+      <motion.button
+        type="button"
+        animate={locked.controls}
+        variants={wrongVariants}
+        onClick={locked.onTap}
+        className={cn(base, "w-full text-left opacity-60")}
+        style={baseStyle}
+      >
+        {content}
+      </motion.button>
+    );
   }
   return (
     <Link

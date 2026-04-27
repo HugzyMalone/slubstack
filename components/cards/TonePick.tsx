@@ -94,9 +94,9 @@ export function TonePick({ card, onResult, onFeedback }: Props) {
               className={cn(
                 "rounded-xl border-2 py-3 text-center transition",
                 showCorrect
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100"
+                  ? "border-success bg-success-soft text-fg"
                   : showWrong
-                    ? "border-rose-500 bg-rose-50 text-rose-900 dark:bg-rose-950/40 dark:text-rose-100"
+                    ? "border-game bg-game-soft text-fg"
                     : "",
               )}
               style={
@@ -121,11 +121,11 @@ export function TonePick({ card, onResult, onFeedback }: Props) {
         feedback={
           submitted ? (
             correct ? (
-              <span className="font-medium text-emerald-800 dark:text-emerald-200">
+              <span className="font-bold text-success">
                 Correct — {TONE_LABELS[expectedTone]}
               </span>
             ) : (
-              <span className="font-medium text-rose-800 dark:text-rose-200">
+              <span className="font-bold text-game">
                 {TONE_LABELS[expectedTone]}: {pinyinParts[syllableIdx] ?? card.pinyin}
               </span>
             )

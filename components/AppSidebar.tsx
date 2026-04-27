@@ -2,24 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, UserCircle2 } from "lucide-react";
+import { UserCircle2 } from "lucide-react";
 import { useStore } from "zustand";
 import { cn } from "@/lib/utils";
 import { mandarinStore, germanStore, spanishStore, vibeCodingStore } from "@/lib/store";
-
-function GlobeIcon() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <path d="M2 12h20" />
-      <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
-    </svg>
-  );
-}
+import { BullMascot } from "@/components/BullMascot";
 
 function WandIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M15 4V2" />
       <path d="M15 16v-2" />
       <path d="M8 9h2" />
@@ -35,7 +26,7 @@ function WandIcon() {
 
 function FilmIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="2" y="2" width="20" height="20" rx="2.5" />
       <line x1="7" y1="2" x2="7" y2="22" />
       <line x1="17" y1="2" x2="17" y2="22" />
@@ -50,9 +41,18 @@ function FilmIcon() {
 
 function HomeIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 10.5L12 3l9 7.5" />
       <path d="M5 9V20a1 1 0 001 1h3.5v-5h5v5H18a1 1 0 001-1V9" />
+    </svg>
+  );
+}
+
+function BrainIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0-2 5 3 3 0 0 0 2 5v1a3 3 0 0 0 6 0V4a0 0 0 0 1 0 0 3 3 0 0 0-3 0z" />
+      <path d="M15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 2 5 3 3 0 0 1-2 5v1a3 3 0 0 1-6 0V4a0 0 0 0 0 0 0 3 3 0 0 1 3 0z" />
     </svg>
   );
 }
@@ -60,8 +60,42 @@ function HomeIcon() {
 function ProgressPip({ done, total }: { done: number; total: number }) {
   if (done === 0) return null;
   return (
-    <span className="ml-auto text-[10px] tabular-nums text-muted/70">
+    <span
+      className="ml-auto rounded-full px-2 py-0.5 font-display text-[11px] font-extrabold tabular-nums"
+      style={{
+        background: "color-mix(in srgb, var(--accent) 12%, transparent)",
+        color: "var(--accent)",
+      }}
+    >
       {done}/{total}
+    </span>
+  );
+}
+
+type MascotKind = "panda" | "bear" | "bull";
+
+function Mascot({ kind, active }: { kind: MascotKind; active: boolean }) {
+  const ringColor = active ? "var(--accent)" : "color-mix(in srgb, var(--fg) 12%, transparent)";
+  const bg = active ? "color-mix(in srgb, var(--accent-soft) 90%, var(--surface))" : "var(--surface)";
+
+  return (
+    <span
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full overflow-hidden transition-all duration-150"
+      style={{
+        background: bg,
+        border: `1.5px solid ${ringColor}`,
+      }}
+    >
+      {kind === "bull" ? (
+        <BullMascot size={28} />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={kind === "panda" ? "/3dpanda.png" : "/happy-bear1.png"}
+          alt=""
+          className="h-7 w-7 object-contain"
+        />
+      )}
     </span>
   );
 }
@@ -80,49 +114,62 @@ export function AppSidebar() {
     "/vibe-coding":  { done: vibeDone,     total: 6 },
   };
 
-  const navItems = [
+  type NavItem = {
+    href: string;
+    label: string;
+    match: (p: string) => boolean;
+  } & (
+    | { kind: "icon"; Icon: () => React.JSX.Element }
+    | { kind: "mascot"; mascot: MascotKind }
+  );
+
+  const navItems: NavItem[] = [
     {
       href: "/",
       label: "Home",
-      type: "icon" as const,
+      kind: "icon",
       Icon: HomeIcon,
       match: (p: string) => p === "/",
     },
     {
       href: "/spanish",
       label: "Spanish",
-      type: "code" as const,
-      code: "ES",
-      accent: "#c2410c",
+      kind: "mascot",
+      mascot: "bull",
       match: (p: string) => p.startsWith("/spanish"),
     },
     {
       href: "/mandarin",
       label: "Mandarin",
-      type: "code" as const,
-      code: "中",
-      accent: "#e11d48",
+      kind: "mascot",
+      mascot: "panda",
       match: (p: string) => p.startsWith("/mandarin"),
     },
     {
       href: "/german",
       label: "German",
-      type: "code" as const,
-      code: "DE",
-      accent: "#f97316",
+      kind: "mascot",
+      mascot: "bear",
       match: (p: string) => p.startsWith("/german"),
     },
     {
       href: "/vibe-coding",
-      label: "Vibe Coding",
-      type: "icon" as const,
+      label: "Skills",
+      kind: "icon",
       Icon: WandIcon,
       match: (p: string) => p.startsWith("/vibe-coding") || p.startsWith("/skills"),
     },
     {
+      href: "/brain-training",
+      label: "Brain",
+      kind: "icon",
+      Icon: BrainIcon,
+      match: (p: string) => p.startsWith("/brain-training"),
+    },
+    {
       href: "/trivia",
       label: "Trivia",
-      type: "icon" as const,
+      kind: "icon",
       Icon: FilmIcon,
       match: (p: string) => p.startsWith("/trivia"),
     },
@@ -133,20 +180,25 @@ export function AppSidebar() {
       {/* Brand */}
       <Link
         href="/"
-        className="flex items-center gap-2 px-5 py-4 border-b border-border"
+        className="flex items-center gap-2 px-5 py-5 border-b border-border"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/slubstack-logo.png" alt="" className="h-6 w-6 rounded object-contain" />
+        <img src="/slubstack-logo.png" alt="" className="h-8 w-8 rounded-lg object-contain" />
         <span
-          className="text-[15px] font-semibold"
-          style={{ letterSpacing: "-0.02em" }}
+          className="font-display text-[22px] font-extrabold"
+          style={{
+            letterSpacing: "-0.03em",
+            background: "linear-gradient(120deg, var(--accent) 0%, var(--game) 100%)",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+          }}
         >
           slubstack
         </span>
       </Link>
 
-      {/* Nav */}
-      <nav className="flex flex-1 flex-col gap-0.5 px-3 py-4">
+      <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
         {navItems.map((item) => {
           const active = item.match(pathname ?? "");
           const progress = item.href in langProgress ? langProgress[item.href] : null;
@@ -155,37 +207,40 @@ export function AppSidebar() {
               key={item.label}
               href={item.href}
               className={cn(
-                "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-150",
+                "group relative flex items-center gap-3 rounded-2xl px-3 py-2 text-[14px] font-semibold transition-all duration-150",
                 active
-                  ? "bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)]"
-                  : "text-muted hover:bg-[color-mix(in_srgb,var(--fg)_5%,transparent)] hover:text-fg"
+                  ? "text-[var(--accent)]"
+                  : "text-fg/75 hover:text-fg"
               )}
+              style={
+                active
+                  ? {
+                      background: "linear-gradient(135deg, var(--accent-soft) 0%, var(--game-soft) 100%)",
+                      boxShadow: "var(--shadow-bouncy)",
+                      border: "1.5px solid color-mix(in srgb, var(--accent) 24%, transparent)",
+                    }
+                  : {
+                      background: "transparent",
+                      border: "1.5px solid transparent",
+                    }
+              }
             >
-              {active && (
-                <span
-                  className="absolute left-0 h-5 w-0.5 rounded-r"
-                  style={{ background: "var(--accent)" }}
-                />
-              )}
-
-              {item.type === "code" ? (
-                <span
-                  className="flex h-5 w-6 shrink-0 items-center justify-center rounded text-[10px] font-bold text-white"
-                  style={{
-                    background: active
-                      ? item.accent
-                      : "color-mix(in srgb, var(--fg) 18%, transparent)",
-                    color: active ? "#fff" : "var(--muted)",
-                  }}
-                >
-                  {item.code}
-                </span>
+              {item.kind === "mascot" ? (
+                <Mascot kind={item.mascot} active={active} />
               ) : (
                 <span
                   className={cn(
-                    "shrink-0 transition-colors duration-150",
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-150",
                     active ? "text-[var(--accent)]" : "text-muted group-hover:text-fg"
                   )}
+                  style={{
+                    background: active
+                      ? "var(--surface)"
+                      : "color-mix(in srgb, var(--fg) 4%, transparent)",
+                    border: active
+                      ? "1.5px solid color-mix(in srgb, var(--accent) 28%, transparent)"
+                      : "1.5px solid transparent",
+                  }}
                 >
                   <item.Icon />
                 </span>
@@ -199,25 +254,41 @@ export function AppSidebar() {
         })}
       </nav>
 
-      {/* Profile */}
       <div className="border-t border-border px-3 py-4">
         <Link
           href="/stats"
           className={cn(
-            "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-150",
+            "group relative flex items-center gap-3 rounded-2xl px-3 py-2 text-[14px] font-semibold transition-all duration-150",
             pathname?.startsWith("/stats")
-              ? "bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)]"
-              : "text-muted hover:bg-[color-mix(in_srgb,var(--fg)_5%,transparent)] hover:text-fg"
+              ? "text-[var(--accent)]"
+              : "text-fg/75 hover:text-fg"
           )}
+          style={
+            pathname?.startsWith("/stats")
+              ? {
+                  background: "linear-gradient(135deg, var(--accent-soft) 0%, var(--game-soft) 100%)",
+                  boxShadow: "var(--shadow-bouncy)",
+                  border: "1.5px solid color-mix(in srgb, var(--accent) 24%, transparent)",
+                }
+              : { border: "1.5px solid transparent" }
+          }
         >
-          <UserCircle2
-            size={15}
-            strokeWidth={1.8}
+          <span
             className={cn(
-              "shrink-0 transition-colors duration-150",
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-150",
               pathname?.startsWith("/stats") ? "text-[var(--accent)]" : "text-muted group-hover:text-fg"
             )}
-          />
+            style={{
+              background: pathname?.startsWith("/stats")
+                ? "var(--surface)"
+                : "color-mix(in srgb, var(--fg) 4%, transparent)",
+              border: pathname?.startsWith("/stats")
+                ? "1.5px solid color-mix(in srgb, var(--accent) 28%, transparent)"
+                : "1.5px solid transparent",
+            }}
+          >
+            <UserCircle2 size={22} strokeWidth={2} />
+          </span>
           Profile
         </Link>
       </div>

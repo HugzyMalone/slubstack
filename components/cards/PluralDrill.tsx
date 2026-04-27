@@ -147,11 +147,11 @@ export function PluralDrill({ card, onResult, onFeedback }: Props) {
           variant={correct ? "correct" : "wrong"}
           feedback={
             correct ? (
-              <span className="font-medium text-emerald-800 dark:text-emerald-200">
+              <span className="font-bold text-success">
                 Correct — {plural}
               </span>
             ) : (
-              <span className="font-medium text-rose-800 dark:text-rose-200">
+              <span className="font-bold text-game">
                 Answer: {plural}
               </span>
             )

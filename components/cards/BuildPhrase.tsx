@@ -137,11 +137,11 @@ export function BuildPhrase({ card, onResult, onFeedback }: Props) {
         feedback={
           submitted ? (
             correct ? (
-              <span className="font-medium text-emerald-800 dark:text-emerald-200">
+              <span className="font-bold text-success">
                 Nice! {card.hanzi} — {meaning}
               </span>
             ) : (
-              <span className="font-medium text-rose-800 dark:text-rose-200">
+              <span className="font-bold text-game">
                 The answer was {card.hanzi}
               </span>
             )

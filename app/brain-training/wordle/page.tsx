@@ -5,6 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getDailyWord, getTodayStr, getDayIndex, isValidGuess } from "@/lib/wordle-words";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { brainTrainingStore } from "@/lib/store";
+import { awardQuestProgress } from "@/lib/questsStore";
+import { pushLeagueXp } from "@/lib/leagues";
+import { globalStore } from "@/lib/globalStore";
+import { PBCelebration } from "@/components/PBCelebration";
+import { wordleShareCard, type WordleRow } from "@/lib/share";
+import { FriendsCompare } from "@/components/FriendsCompare";
 
 type TileState = "correct" | "present" | "absent" | "empty" | "active";
 type GamePhase = "playing" | "won" | "lost";
@@ -360,6 +366,7 @@ export default function WordlePage() {
   const [guesses, setGuesses]           = useState<string[]>([]);
   const [current, setCurrent]           = useState("");
   const [phase, setPhase]               = useState<GamePhase>("playing");
+  const [pbOpen, setPbOpen]             = useState(false);
   const [revealingRow, setRevealingRow] = useState<number | null>(null);
   const [revealedRows, setRevealedRows] = useState<Set<number>>(new Set());
   const [shakingRow, setShakingRow]     = useState<number | null>(null);
@@ -429,7 +436,17 @@ export default function WordlePage() {
         if (won) showToast(WIN_MSGS[Math.min(rowIdx, WIN_MSGS.length - 1)], 2500);
         else showToast(`The word was ${solution}`, 3000);
         submitScore(newGuesses.length, won);
-        brainTrainingStore.getState().addXp(won ? 75 : 15);
+        {
+          const wordleXp = won ? 75 : 15;
+          brainTrainingStore.getState().addXp(wordleXp);
+          awardQuestProgress("xp", wordleXp);
+          if (won) awardQuestProgress("correct", 1);
+          pushLeagueXp(wordleXp);
+        }
+        if (won) {
+          globalStore.getState().recordBeat();
+          setTimeout(() => setPbOpen(true), 400);
+        }
       } else {
         saveGame({ date: todayStr, guesses: newGuesses, phase: "playing" });
       }
@@ -528,14 +545,34 @@ export default function WordlePage() {
   }
 
   // ── Result phase (won / lost): scrollable layout ──────────────────────────────
+  const resultRows: WordleRow[] = guesses.map((g) =>
+    evaluate(g, solution).map((s) =>
+      s === "correct" ? "correct" : s === "present" ? "present" : "absent"
+    ) as WordleRow
+  );
+  const wordleShareText = wordleShareCard({
+    dayNumber: dayIdx + 1,
+    attempts: guesses.length,
+    rows: resultRows,
+    solved: phase === "won",
+  });
+
   return (
     <>
       <WordleStyles />
+      <PBCelebration
+        open={pbOpen}
+        onClose={() => setPbOpen(false)}
+        value={`${guesses.length}/6`}
+        label={phase === "won" ? "Solved!" : "Nice try"}
+        gameLabel="Daily Wordle"
+        shareText={wordleShareText}
+      />
       <div className="mx-auto flex max-w-md flex-col items-center px-4 pb-8 pt-3 select-none">
         {/* Header */}
         <div className="mb-2 w-full flex items-baseline justify-between">
-          <h1 className="text-2xl font-black tracking-widest" style={{ color: "var(--game)" }}>WORDLE</h1>
-          <span className="text-xs text-muted">#{dayIdx + 1}</span>
+          <h1 className="font-display text-3xl font-black tracking-widest" style={{ color: "var(--game)" }}>WORDLE</h1>
+          <span className="font-display text-[13px] font-extrabold text-muted">#{dayIdx + 1}</span>
         </div>
 
         {/* Toast */}
@@ -553,6 +590,11 @@ export default function WordlePage() {
         {/* Keyboard */}
         <div className="mt-4">
           <WordleKeyboard onKey={handleKey} keyStates={keyStates} />
+        </div>
+
+        {/* Friends today */}
+        <div className="mt-5 w-full">
+          <FriendsCompare game="wordle" date={todayStr} />
         </div>
 
         {/* Share + leaderboard */}
