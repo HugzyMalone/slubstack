@@ -57,6 +57,45 @@ function pickKind(card: Card, desired: InteractionKind, fallback: InteractionKin
   return cardSupportsKind(card, desired) ? desired : fallback;
 }
 
+function weightedOrder(
+  base: InteractionKind[],
+  allowed: InteractionKind[],
+  weights: Partial<Record<InteractionKind, number>>,
+  size: number,
+): InteractionKind[] {
+  const totalWeight = allowed.reduce((sum, k) => sum + (weights[k] ?? 1), 0);
+  const counts = new Map<InteractionKind, number>();
+  let assigned = 0;
+  for (const k of allowed) {
+    const target = Math.floor(((weights[k] ?? 1) / totalWeight) * size);
+    counts.set(k, target);
+    assigned += target;
+  }
+  const sorted = [...allowed].sort((a, b) => (weights[b] ?? 1) - (weights[a] ?? 1));
+  let i = 0;
+  while (assigned < size && sorted.length > 0) {
+    const k = sorted[i % sorted.length];
+    counts.set(k, (counts.get(k) ?? 0) + 1);
+    assigned++;
+    i++;
+  }
+  const out: InteractionKind[] = [];
+  const remaining = new Map(counts);
+  while (out.length < size) {
+    let progressed = false;
+    for (const k of base) {
+      if ((remaining.get(k) ?? 0) > 0) {
+        out.push(k);
+        remaining.set(k, (remaining.get(k) ?? 0) - 1);
+        progressed = true;
+        if (out.length >= size) break;
+      }
+    }
+    if (!progressed) break;
+  }
+  return out;
+}
+
 function pickDistractors(correct: Card, pool: Card[], n = 3): Card[] {
   const candidates = pool.filter((c) => c.id !== correct.id);
   const sameCat = candidates.filter((c) => c.category === correct.category);
@@ -83,7 +122,7 @@ function needsDistractors(kind: InteractionKind): boolean {
 export function buildUnitSession(
   unitId: string,
   srs: Record<string, SrsState>,
-  content?: Pick<LanguageContent, "cards" | "getCardsForUnit" | "allowedInteractions"> & Partial<Pick<LanguageContent, "getUnit">>,
+  content?: Pick<LanguageContent, "cards" | "getCardsForUnit" | "allowedInteractions" | "kindWeights"> & Partial<Pick<LanguageContent, "getUnit">>,
   size = 10,
 ): SessionItem[] {
   const allCards = content?.cards ?? ALL_CARDS;
@@ -94,7 +133,10 @@ export function buildUnitSession(
   const baseOrder: InteractionKind[] = unit?.primaryInteraction
     ? GRAMMAR_ORDER_TEMPLATE(unit.primaryInteraction)
     : LESSON_ORDER;
-  const interactionOrder = baseOrder.filter((k) => allowed.includes(k));
+  const filteredBase = baseOrder.filter((k) => allowed.includes(k));
+  const interactionOrder = !unit?.primaryInteraction && content?.kindWeights
+    ? weightedOrder(filteredBase, allowed.filter((k) => filteredBase.includes(k)), content.kindWeights, size)
+    : filteredBase;
 
   const unitCards = getCards(unitId);
   const now = Date.now();

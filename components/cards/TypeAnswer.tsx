@@ -4,9 +4,12 @@ import { useRef, useState } from "react";
 import { Volume2 } from "lucide-react";
 import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
+import { langFromCardId } from "@/lib/content";
 import { speak, cardLang } from "@/lib/speech";
 import { germanFold } from "@/lib/german";
+import { classifyAnswer } from "@/lib/fuzzy";
 import { meaningOf, useNativeLanguage } from "@/lib/native";
+import { Tappable } from "@/components/Tappable";
 import { CardFooter } from "./CardShell";
 
 function wordSize(text: string) {
@@ -23,6 +26,7 @@ type Props = {
   onResult: (r: { quality: Quality; correct: boolean; firstTry: boolean }) => void;
   onFeedback?: (correct: boolean) => void;
   umlautBar?: boolean;
+  strictTypos?: boolean;
 };
 
 const UMLAUTS = ["ä", "ö", "ü", "ß"];
@@ -57,9 +61,10 @@ function acceptedAnswers(meaning: string): string[] {
   return [...new Set([...base, ...extras])];
 }
 
-export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Props) {
+export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false, strictTypos = false }: Props) {
   const native = useNativeLanguage();
   const meaning = meaningOf(card, native);
+  const canonical = meaning.split("/")[0].split(",")[0].trim();
   const [value, setValue] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [firstTryFailed, setFirstTryFailed] = useState(false);
@@ -80,14 +85,16 @@ export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Pr
   }
 
   const accepted = acceptedAnswers(meaning);
-  const correct = accepted.some((a) => norm(value) === a);
+  const classification = classifyAnswer(norm(value), accepted, { strict: strictTypos });
+  const isNearMissOnFirstTry = classification === "near" && !firstTryFailed;
+  const isCorrect = classification === "exact" || isNearMissOnFirstTry;
 
   function submit() {
     if (submitted) {
-      onResult({ quality: correct ? (firstTryFailed ? 2 : 4) : 0, correct, firstTry: !firstTryFailed });
+      onResult({ quality: isCorrect ? (firstTryFailed ? 2 : 4) : 0, correct: isCorrect, firstTry: !firstTryFailed });
       return;
     }
-    if (correct) {
+    if (isCorrect) {
       setSubmitted(true);
       onFeedback?.(true);
       return;
@@ -108,7 +115,9 @@ export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Pr
       </div>
 
       <div className="mx-auto mt-4 max-w-sm rounded-3xl border border-border bg-surface px-5 py-5 text-center relative">
-        <div className={`hanzi ${wordSize(card.hanzi)} w-full break-words leading-tight text-fg`}>{card.hanzi}</div>
+        <div className={`hanzi ${wordSize(card.hanzi)} w-full break-words leading-tight text-fg`}>
+          <Tappable text={card.hanzi} card={card} lang={langFromCardId(card.id)} />
+        </div>
         <div className="mt-2 text-base text-muted">{card.pinyin}</div>
         <button
           onClick={() => speak(card.hanzi, cardLang(card.id))}
@@ -175,12 +184,18 @@ export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false }: Pr
       {/* Footer only appears after submission — keyboard will be dismissed by then */}
       {submitted && (
         <CardFooter
-          variant={correct ? "correct" : "wrong"}
+          variant={isCorrect ? "correct" : "wrong"}
           feedback={
-            correct ? (
-              <span className="font-bold text-success">
-                Correct — {meaning}
-              </span>
+            isCorrect ? (
+              isNearMissOnFirstTry ? (
+                <span className="font-bold text-success">
+                  Almost — correct spelling: {canonical}
+                </span>
+              ) : (
+                <span className="font-bold text-success">
+                  Correct — {meaning}
+                </span>
+              )
             ) : (
               <span className="font-bold text-game">
                 Answer: {meaning}

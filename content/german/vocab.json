@@ -1,156 +1,2928 @@
 [
-  { "id": "de-greet-01", "category": "de-greetings", "hanzi": "Hallo", "pinyin": "", "english": "hello / hi" },
-  { "id": "de-greet-02", "category": "de-greetings", "hanzi": "Guten Morgen", "pinyin": "GOO-ten MOR-gen", "english": "good morning" },
-  { "id": "de-greet-03", "category": "de-greetings", "hanzi": "Guten Tag", "pinyin": "GOO-ten TAHK", "english": "good day / good afternoon" },
-  { "id": "de-greet-04", "category": "de-greetings", "hanzi": "Guten Abend", "pinyin": "GOO-ten AH-bent", "english": "good evening" },
-  { "id": "de-greet-05", "category": "de-greetings", "hanzi": "Gute Nacht", "pinyin": "GOO-teh NAKHT", "english": "good night" },
-  { "id": "de-greet-06", "category": "de-greetings", "hanzi": "Tschüss", "pinyin": "chüss", "english": "bye / see you", "note": "The casual goodbye — used constantly." },
-  { "id": "de-greet-07", "category": "de-greetings", "hanzi": "Auf Wiedersehen", "pinyin": "owf VEE-der-zay-en", "english": "goodbye (formal)", "note": "More formal than Tschüss — used in business or with strangers." },
-  { "id": "de-greet-08", "category": "de-greetings", "hanzi": "Bitte", "pinyin": "BIT-eh", "english": "please / you're welcome", "note": "Works for both 'please' and 'you're welcome'." },
-  { "id": "de-greet-09", "category": "de-greetings", "hanzi": "Danke", "pinyin": "DANK-eh", "english": "thank you" },
-  { "id": "de-greet-10", "category": "de-greetings", "hanzi": "Danke schön", "pinyin": "DANK-eh shern", "english": "thank you very much" },
-  { "id": "de-greet-11", "category": "de-greetings", "hanzi": "Entschuldigung", "pinyin": "ent-SHOOL-dee-goong", "english": "excuse me / sorry", "note": "Use to get someone's attention or apologise for small things." },
-  { "id": "de-greet-12", "category": "de-greetings", "hanzi": "Es tut mir leid", "pinyin": "es toot meer lide", "english": "I'm sorry (sincere)" },
-  { "id": "de-greet-13", "category": "de-greetings", "hanzi": "Wie geht's?", "pinyin": "vee gates", "english": "how are you? (informal)" },
-  { "id": "de-greet-14", "category": "de-greetings", "hanzi": "Gut, danke", "pinyin": "goot DANK-eh", "english": "good, thank you" },
-  { "id": "de-greet-15", "category": "de-greetings", "hanzi": "Nicht so gut", "pinyin": "nisht zo goot", "english": "not so good" },
-  { "id": "de-greet-16", "category": "de-greetings", "hanzi": "Ja", "pinyin": "yah", "english": "yes" },
-  { "id": "de-greet-17", "category": "de-greetings", "hanzi": "Nein", "pinyin": "nine", "english": "no" },
-  { "id": "de-greet-18", "category": "de-greetings", "hanzi": "Vielleicht", "pinyin": "fee-LYSHT", "english": "maybe / perhaps" },
-  { "id": "de-greet-19", "category": "de-greetings", "hanzi": "Wie heißt du?", "pinyin": "vee hysst doo", "english": "what's your name? (informal)" },
-  { "id": "de-greet-20", "category": "de-greetings", "hanzi": "Ich heiße…", "pinyin": "ikh HY-seh", "english": "my name is…" },
-
-  { "id": "de-num-01", "category": "de-numbers", "hanzi": "null", "pinyin": "", "english": "zero" },
-  { "id": "de-num-02", "category": "de-numbers", "hanzi": "eins", "pinyin": "einss", "english": "one" },
-  { "id": "de-num-03", "category": "de-numbers", "hanzi": "zwei", "pinyin": "tsvye", "english": "two" },
-  { "id": "de-num-04", "category": "de-numbers", "hanzi": "drei", "pinyin": "dry", "english": "three" },
-  { "id": "de-num-05", "category": "de-numbers", "hanzi": "vier", "pinyin": "fear", "english": "four" },
-  { "id": "de-num-06", "category": "de-numbers", "hanzi": "fünf", "pinyin": "fünf", "english": "five" },
-  { "id": "de-num-07", "category": "de-numbers", "hanzi": "sechs", "pinyin": "zex", "english": "six" },
-  { "id": "de-num-08", "category": "de-numbers", "hanzi": "sieben", "pinyin": "ZEE-ben", "english": "seven" },
-  { "id": "de-num-09", "category": "de-numbers", "hanzi": "acht", "pinyin": "akht", "english": "eight" },
-  { "id": "de-num-10", "category": "de-numbers", "hanzi": "neun", "pinyin": "noyn", "english": "nine" },
-  { "id": "de-num-11", "category": "de-numbers", "hanzi": "zehn", "pinyin": "tsayn", "english": "ten" },
-  { "id": "de-num-12", "category": "de-numbers", "hanzi": "elf", "pinyin": "elf", "english": "eleven" },
-  { "id": "de-num-13", "category": "de-numbers", "hanzi": "zwölf", "pinyin": "tsvölf", "english": "twelve" },
-  { "id": "de-num-14", "category": "de-numbers", "hanzi": "zwanzig", "pinyin": "TSVAN-tsig", "english": "twenty" },
-  { "id": "de-num-15", "category": "de-numbers", "hanzi": "dreißig", "pinyin": "DRY-ssig", "english": "thirty" },
-  { "id": "de-num-16", "category": "de-numbers", "hanzi": "vierzig", "pinyin": "FEER-tsig", "english": "forty" },
-  { "id": "de-num-17", "category": "de-numbers", "hanzi": "fünfzig", "pinyin": "FÜNF-tsig", "english": "fifty" },
-  { "id": "de-num-18", "category": "de-numbers", "hanzi": "hundert", "pinyin": "HOON-dert", "english": "one hundred" },
-  { "id": "de-num-19", "category": "de-numbers", "hanzi": "tausend", "pinyin": "TOW-zent", "english": "one thousand" },
-
-  { "id": "de-col-01", "category": "de-colors", "hanzi": "rot", "pinyin": "roht", "english": "red" },
-  { "id": "de-col-02", "category": "de-colors", "hanzi": "blau", "pinyin": "blow", "english": "blue" },
-  { "id": "de-col-03", "category": "de-colors", "hanzi": "grün", "pinyin": "grün", "english": "green" },
-  { "id": "de-col-04", "category": "de-colors", "hanzi": "gelb", "pinyin": "gelp", "english": "yellow" },
-  { "id": "de-col-05", "category": "de-colors", "hanzi": "schwarz", "pinyin": "shvarts", "english": "black" },
-  { "id": "de-col-06", "category": "de-colors", "hanzi": "weiß", "pinyin": "vice", "english": "white" },
-  { "id": "de-col-07", "category": "de-colors", "hanzi": "grau", "pinyin": "grow", "english": "grey" },
-  { "id": "de-col-08", "category": "de-colors", "hanzi": "braun", "pinyin": "brown", "english": "brown" },
-  { "id": "de-col-09", "category": "de-colors", "hanzi": "orange", "pinyin": "oh-RAN-zheh", "english": "orange" },
-  { "id": "de-col-10", "category": "de-colors", "hanzi": "rosa", "pinyin": "ROH-zah", "english": "pink" },
-  { "id": "de-col-11", "category": "de-colors", "hanzi": "lila", "pinyin": "LEE-lah", "english": "purple" },
-  { "id": "de-col-12", "category": "de-colors", "hanzi": "hell", "pinyin": "hel", "english": "light (colour)" },
-  { "id": "de-col-13", "category": "de-colors", "hanzi": "dunkel", "pinyin": "DOON-kel", "english": "dark" },
-  { "id": "de-col-14", "category": "de-colors", "hanzi": "bunt", "pinyin": "boont", "english": "colourful" },
-  { "id": "de-col-15", "category": "de-colors", "hanzi": "die Farbe", "pinyin": "dee FAR-beh", "english": "the colour", "gender": "die", "plural": "die Farben" },
-
-  { "id": "de-food-01", "category": "de-food", "hanzi": "das Wasser", "pinyin": "das VAS-er", "english": "water", "gender": "das", "plural": "die Wasser", "cases": { "nom": "das Wasser", "acc": "das Wasser", "dat": "dem Wasser" }, "example": { "de": "Ich trinke Wasser.", "en": "I drink water." } },
-  { "id": "de-food-02", "category": "de-food", "hanzi": "das Brot", "pinyin": "das broht", "english": "bread", "gender": "das", "plural": "die Brote", "cases": { "nom": "das Brot", "acc": "das Brot", "dat": "dem Brot" } },
-  { "id": "de-food-03", "category": "de-food", "hanzi": "die Milch", "pinyin": "dee milkh", "english": "milk", "gender": "die", "cases": { "nom": "die Milch", "acc": "die Milch", "dat": "der Milch" } },
-  { "id": "de-food-04", "category": "de-food", "hanzi": "das Fleisch", "pinyin": "das flysh", "english": "meat", "gender": "das", "cases": { "nom": "das Fleisch", "acc": "das Fleisch", "dat": "dem Fleisch" } },
-  { "id": "de-food-05", "category": "de-food", "hanzi": "das Gemüse", "pinyin": "das geh-MÜ-zeh", "english": "vegetables", "gender": "das" },
-  { "id": "de-food-06", "category": "de-food", "hanzi": "das Obst", "pinyin": "das ohpst", "english": "fruit", "gender": "das" },
-  { "id": "de-food-07", "category": "de-food", "hanzi": "der Kaffee", "pinyin": "dair KAF-fay", "english": "coffee", "gender": "der", "plural": "die Kaffees", "cases": { "nom": "der Kaffee", "acc": "den Kaffee", "dat": "dem Kaffee" }, "example": { "de": "Ich trinke den Kaffee.", "en": "I drink the coffee." } },
-  { "id": "de-food-08", "category": "de-food", "hanzi": "der Tee", "pinyin": "dair tay", "english": "tea", "gender": "der", "plural": "die Tees", "cases": { "nom": "der Tee", "acc": "den Tee", "dat": "dem Tee" } },
-  { "id": "de-food-09", "category": "de-food", "hanzi": "das Bier", "pinyin": "das beer", "english": "beer", "gender": "das", "plural": "die Biere", "cases": { "nom": "das Bier", "acc": "das Bier", "dat": "dem Bier" } },
-  { "id": "de-food-10", "category": "de-food", "hanzi": "der Wein", "pinyin": "dair vine", "english": "wine", "gender": "der", "plural": "die Weine", "cases": { "nom": "der Wein", "acc": "den Wein", "dat": "dem Wein" } },
-  { "id": "de-food-11", "category": "de-food", "hanzi": "der Käse", "pinyin": "dair KAY-zeh", "english": "cheese", "gender": "der", "cases": { "nom": "der Käse", "acc": "den Käse", "dat": "dem Käse" } },
-  { "id": "de-food-12", "category": "de-food", "hanzi": "das Ei", "pinyin": "das eye", "english": "egg", "gender": "das", "plural": "die Eier", "cases": { "nom": "das Ei", "acc": "das Ei", "dat": "dem Ei" } },
-  { "id": "de-food-13", "category": "de-food", "hanzi": "die Suppe", "pinyin": "dee ZUP-eh", "english": "soup", "gender": "die", "plural": "die Suppen", "cases": { "nom": "die Suppe", "acc": "die Suppe", "dat": "der Suppe" } },
-  { "id": "de-food-14", "category": "de-food", "hanzi": "der Kuchen", "pinyin": "dair KOO-khen", "english": "cake", "gender": "der", "plural": "die Kuchen", "cases": { "nom": "der Kuchen", "acc": "den Kuchen", "dat": "dem Kuchen" } },
-  { "id": "de-food-15", "category": "de-food", "hanzi": "der Fisch", "pinyin": "dair fish", "english": "fish", "gender": "der", "plural": "die Fische", "cases": { "nom": "der Fisch", "acc": "den Fisch", "dat": "dem Fisch" } },
-  { "id": "de-food-16", "category": "de-food", "hanzi": "das Huhn", "pinyin": "das hoon", "english": "chicken", "gender": "das", "plural": "die Hühner", "cases": { "nom": "das Huhn", "acc": "das Huhn", "dat": "dem Huhn" } },
-  { "id": "de-food-17", "category": "de-food", "hanzi": "der Apfel", "pinyin": "dair AP-fel", "english": "apple", "gender": "der", "plural": "die Äpfel", "cases": { "nom": "der Apfel", "acc": "den Apfel", "dat": "dem Apfel" } },
-  { "id": "de-food-18", "category": "de-food", "hanzi": "die Butter", "pinyin": "dee BUT-er", "english": "butter", "gender": "die", "cases": { "nom": "die Butter", "acc": "die Butter", "dat": "der Butter" } },
-
-  { "id": "de-fam-01", "category": "de-family", "hanzi": "die Mutter", "pinyin": "dee MOO-ter", "english": "mother", "gender": "die", "plural": "die Mütter", "cases": { "nom": "die Mutter", "acc": "die Mutter", "dat": "der Mutter" } },
-  { "id": "de-fam-02", "category": "de-family", "hanzi": "der Vater", "pinyin": "dair FAH-ter", "english": "father", "gender": "der", "plural": "die Väter", "cases": { "nom": "der Vater", "acc": "den Vater", "dat": "dem Vater" } },
-  { "id": "de-fam-03", "category": "de-family", "hanzi": "die Schwester", "pinyin": "dee SHVES-ter", "english": "sister", "gender": "die", "plural": "die Schwestern", "cases": { "nom": "die Schwester", "acc": "die Schwester", "dat": "der Schwester" } },
-  { "id": "de-fam-04", "category": "de-family", "hanzi": "der Bruder", "pinyin": "dair BROO-der", "english": "brother", "gender": "der", "plural": "die Brüder", "cases": { "nom": "der Bruder", "acc": "den Bruder", "dat": "dem Bruder" } },
-  { "id": "de-fam-05", "category": "de-family", "hanzi": "die Großmutter", "pinyin": "dee GROHS-moo-ter", "english": "grandmother", "gender": "die", "plural": "die Großmütter", "cases": { "nom": "die Großmutter", "acc": "die Großmutter", "dat": "der Großmutter" } },
-  { "id": "de-fam-06", "category": "de-family", "hanzi": "der Großvater", "pinyin": "dair GROHS-fah-ter", "english": "grandfather", "gender": "der", "plural": "die Großväter", "cases": { "nom": "der Großvater", "acc": "den Großvater", "dat": "dem Großvater" } },
-  { "id": "de-fam-07", "category": "de-family", "hanzi": "die Familie", "pinyin": "dee fah-MEE-lee-eh", "english": "family", "gender": "die", "plural": "die Familien", "cases": { "nom": "die Familie", "acc": "die Familie", "dat": "der Familie" } },
-  { "id": "de-fam-08", "category": "de-family", "hanzi": "das Kind", "pinyin": "das kint", "english": "child", "gender": "das", "plural": "die Kinder", "cases": { "nom": "das Kind", "acc": "das Kind", "dat": "dem Kind" }, "example": { "de": "Das Kind ist klein.", "en": "The child is small." } },
-  { "id": "de-fam-09", "category": "de-family", "hanzi": "der Sohn", "pinyin": "dair zohn", "english": "son", "gender": "der", "plural": "die Söhne", "cases": { "nom": "der Sohn", "acc": "den Sohn", "dat": "dem Sohn" } },
-  { "id": "de-fam-10", "category": "de-family", "hanzi": "die Tochter", "pinyin": "dee TOKH-ter", "english": "daughter", "gender": "die", "plural": "die Töchter", "cases": { "nom": "die Tochter", "acc": "die Tochter", "dat": "der Tochter" } },
-  { "id": "de-fam-11", "category": "de-family", "hanzi": "der Mann", "pinyin": "dair man", "english": "man / husband", "gender": "der", "plural": "die Männer", "cases": { "nom": "der Mann", "acc": "den Mann", "dat": "dem Mann", "gen": "des Mannes" }, "example": { "de": "Ich sehe den Mann.", "en": "I see the man." } },
-  { "id": "de-fam-12", "category": "de-family", "hanzi": "die Frau", "pinyin": "dee frow", "english": "woman / wife", "gender": "die", "plural": "die Frauen", "cases": { "nom": "die Frau", "acc": "die Frau", "dat": "der Frau", "gen": "der Frau" } },
-  { "id": "de-fam-13", "category": "de-family", "hanzi": "der Freund", "pinyin": "dair froynt", "english": "boyfriend / male friend", "gender": "der", "plural": "die Freunde", "cases": { "nom": "der Freund", "acc": "den Freund", "dat": "dem Freund" } },
-  { "id": "de-fam-14", "category": "de-family", "hanzi": "die Freundin", "pinyin": "dee FROYN-din", "english": "girlfriend / female friend", "gender": "die", "plural": "die Freundinnen", "cases": { "nom": "die Freundin", "acc": "die Freundin", "dat": "der Freundin" } },
-
-  { "id": "de-verb-01", "category": "de-verbs", "hanzi": "sein", "pinyin": "zine", "english": "to be", "conjugations": { "ich": "bin", "du": "bist", "er": "ist", "wir": "sind", "ihr": "seid", "sie": "sind" }, "example": { "de": "Ich bin müde.", "en": "I am tired." } },
-  { "id": "de-verb-02", "category": "de-verbs", "hanzi": "haben", "pinyin": "HAH-ben", "english": "to have", "conjugations": { "ich": "habe", "du": "hast", "er": "hat", "wir": "haben", "ihr": "habt", "sie": "haben" }, "example": { "de": "Ich habe Hunger.", "en": "I am hungry." } },
-  { "id": "de-verb-03", "category": "de-verbs", "hanzi": "gehen", "pinyin": "GAY-en", "english": "to go", "conjugations": { "ich": "gehe", "du": "gehst", "er": "geht", "wir": "gehen", "ihr": "geht", "sie": "gehen" } },
-  { "id": "de-verb-04", "category": "de-verbs", "hanzi": "kommen", "pinyin": "KOM-en", "english": "to come", "conjugations": { "ich": "komme", "du": "kommst", "er": "kommt", "wir": "kommen", "ihr": "kommt", "sie": "kommen" } },
-  { "id": "de-verb-05", "category": "de-verbs", "hanzi": "machen", "pinyin": "MAKH-en", "english": "to do / make", "conjugations": { "ich": "mache", "du": "machst", "er": "macht", "wir": "machen", "ihr": "macht", "sie": "machen" } },
-  { "id": "de-verb-06", "category": "de-verbs", "hanzi": "sagen", "pinyin": "ZAH-gen", "english": "to say", "conjugations": { "ich": "sage", "du": "sagst", "er": "sagt", "wir": "sagen", "ihr": "sagt", "sie": "sagen" } },
-  { "id": "de-verb-07", "category": "de-verbs", "hanzi": "sehen", "pinyin": "ZAY-en", "english": "to see", "conjugations": { "ich": "sehe", "du": "siehst", "er": "sieht", "wir": "sehen", "ihr": "seht", "sie": "sehen" }, "note": "Stem-changing: e → ie in du/er forms." },
-  { "id": "de-verb-08", "category": "de-verbs", "hanzi": "wollen", "pinyin": "VOL-en", "english": "to want", "conjugations": { "ich": "will", "du": "willst", "er": "will", "wir": "wollen", "ihr": "wollt", "sie": "wollen" } },
-  { "id": "de-verb-09", "category": "de-verbs", "hanzi": "können", "pinyin": "KÖN-en", "english": "to be able to / can", "conjugations": { "ich": "kann", "du": "kannst", "er": "kann", "wir": "können", "ihr": "könnt", "sie": "können" } },
-  { "id": "de-verb-10", "category": "de-verbs", "hanzi": "müssen", "pinyin": "MÜS-en", "english": "to must / have to", "conjugations": { "ich": "muss", "du": "musst", "er": "muss", "wir": "müssen", "ihr": "müsst", "sie": "müssen" } },
-  { "id": "de-verb-11", "category": "de-verbs", "hanzi": "sprechen", "pinyin": "SHPREKH-en", "english": "to speak", "conjugations": { "ich": "spreche", "du": "sprichst", "er": "spricht", "wir": "sprechen", "ihr": "sprecht", "sie": "sprechen" }, "note": "Stem-changing: e → i in du/er forms." },
-  { "id": "de-verb-12", "category": "de-verbs", "hanzi": "essen", "pinyin": "ES-en", "english": "to eat", "conjugations": { "ich": "esse", "du": "isst", "er": "isst", "wir": "essen", "ihr": "esst", "sie": "essen" } },
-  { "id": "de-verb-13", "category": "de-verbs", "hanzi": "trinken", "pinyin": "TRINK-en", "english": "to drink", "conjugations": { "ich": "trinke", "du": "trinkst", "er": "trinkt", "wir": "trinken", "ihr": "trinkt", "sie": "trinken" } },
-  { "id": "de-verb-14", "category": "de-verbs", "hanzi": "lesen", "pinyin": "LAY-zen", "english": "to read", "conjugations": { "ich": "lese", "du": "liest", "er": "liest", "wir": "lesen", "ihr": "lest", "sie": "lesen" } },
-  { "id": "de-verb-15", "category": "de-verbs", "hanzi": "schreiben", "pinyin": "SHRY-ben", "english": "to write", "conjugations": { "ich": "schreibe", "du": "schreibst", "er": "schreibt", "wir": "schreiben", "ihr": "schreibt", "sie": "schreiben" } },
-  { "id": "de-verb-16", "category": "de-verbs", "hanzi": "wohnen", "pinyin": "VOH-nen", "english": "to live / reside", "conjugations": { "ich": "wohne", "du": "wohnst", "er": "wohnt", "wir": "wohnen", "ihr": "wohnt", "sie": "wohnen" } },
-  { "id": "de-verb-17", "category": "de-verbs", "hanzi": "arbeiten", "pinyin": "AR-by-ten", "english": "to work", "conjugations": { "ich": "arbeite", "du": "arbeitest", "er": "arbeitet", "wir": "arbeiten", "ihr": "arbeitet", "sie": "arbeiten" } },
-  { "id": "de-verb-18", "category": "de-verbs", "hanzi": "lieben", "pinyin": "LEE-ben", "english": "to love", "conjugations": { "ich": "liebe", "du": "liebst", "er": "liebt", "wir": "lieben", "ihr": "liebt", "sie": "lieben" } },
-
-  { "id": "de-time-01", "category": "de-time", "hanzi": "der Montag", "pinyin": "dair MON-tahk", "english": "Monday", "gender": "der" },
-  { "id": "de-time-02", "category": "de-time", "hanzi": "der Dienstag", "pinyin": "dair DEENS-tahk", "english": "Tuesday", "gender": "der" },
-  { "id": "de-time-03", "category": "de-time", "hanzi": "der Mittwoch", "pinyin": "dair MIT-vokh", "english": "Wednesday", "gender": "der" },
-  { "id": "de-time-04", "category": "de-time", "hanzi": "der Donnerstag", "pinyin": "dair DON-ers-tahk", "english": "Thursday", "gender": "der" },
-  { "id": "de-time-05", "category": "de-time", "hanzi": "der Freitag", "pinyin": "dair FRY-tahk", "english": "Friday", "gender": "der" },
-  { "id": "de-time-06", "category": "de-time", "hanzi": "der Samstag", "pinyin": "dair ZAM-stahk", "english": "Saturday", "gender": "der" },
-  { "id": "de-time-07", "category": "de-time", "hanzi": "der Sonntag", "pinyin": "dair ZON-tahk", "english": "Sunday", "gender": "der" },
-  { "id": "de-time-08", "category": "de-time", "hanzi": "heute", "pinyin": "HOY-teh", "english": "today" },
-  { "id": "de-time-09", "category": "de-time", "hanzi": "morgen", "pinyin": "MOR-gen", "english": "tomorrow" },
-  { "id": "de-time-10", "category": "de-time", "hanzi": "gestern", "pinyin": "GES-tern", "english": "yesterday" },
-  { "id": "de-time-11", "category": "de-time", "hanzi": "die Woche", "pinyin": "dee VOH-kheh", "english": "week", "gender": "die", "plural": "die Wochen", "cases": { "nom": "die Woche", "acc": "die Woche", "dat": "der Woche" } },
-  { "id": "de-time-12", "category": "de-time", "hanzi": "der Monat", "pinyin": "dair MOH-naht", "english": "month", "gender": "der", "plural": "die Monate", "cases": { "nom": "der Monat", "acc": "den Monat", "dat": "dem Monat" } },
-  { "id": "de-time-13", "category": "de-time", "hanzi": "das Jahr", "pinyin": "das yahr", "english": "year", "gender": "das", "plural": "die Jahre", "cases": { "nom": "das Jahr", "acc": "das Jahr", "dat": "dem Jahr" } },
-  { "id": "de-time-14", "category": "de-time", "hanzi": "jetzt", "pinyin": "yetst", "english": "now" },
-  { "id": "de-time-15", "category": "de-time", "hanzi": "später", "pinyin": "SHPAY-ter", "english": "later" },
-
-  { "id": "de-place-01", "category": "de-places", "hanzi": "die Stadt", "pinyin": "dee shtat", "english": "city", "gender": "die", "plural": "die Städte", "cases": { "nom": "die Stadt", "acc": "die Stadt", "dat": "der Stadt" } },
-  { "id": "de-place-02", "category": "de-places", "hanzi": "das Dorf", "pinyin": "das dorf", "english": "village", "gender": "das", "plural": "die Dörfer", "cases": { "nom": "das Dorf", "acc": "das Dorf", "dat": "dem Dorf" } },
-  { "id": "de-place-03", "category": "de-places", "hanzi": "das Haus", "pinyin": "das hows", "english": "house", "gender": "das", "plural": "die Häuser", "cases": { "nom": "das Haus", "acc": "das Haus", "dat": "dem Haus" }, "example": { "de": "Ich gehe nach Hause.", "en": "I go home." } },
-  { "id": "de-place-04", "category": "de-places", "hanzi": "die Schule", "pinyin": "dee SHOO-leh", "english": "school", "gender": "die", "plural": "die Schulen", "cases": { "nom": "die Schule", "acc": "die Schule", "dat": "der Schule" } },
-  { "id": "de-place-05", "category": "de-places", "hanzi": "das Büro", "pinyin": "das BÜ-roh", "english": "office", "gender": "das", "plural": "die Büros", "cases": { "nom": "das Büro", "acc": "das Büro", "dat": "dem Büro" } },
-  { "id": "de-place-06", "category": "de-places", "hanzi": "der Bahnhof", "pinyin": "dair BAHN-hohf", "english": "train station", "gender": "der", "plural": "die Bahnhöfe", "cases": { "nom": "der Bahnhof", "acc": "den Bahnhof", "dat": "dem Bahnhof" } },
-  { "id": "de-place-07", "category": "de-places", "hanzi": "der Flughafen", "pinyin": "dair FLOOK-hah-fen", "english": "airport", "gender": "der", "plural": "die Flughäfen", "cases": { "nom": "der Flughafen", "acc": "den Flughafen", "dat": "dem Flughafen" } },
-  { "id": "de-place-08", "category": "de-places", "hanzi": "das Restaurant", "pinyin": "das res-toh-RAHN", "english": "restaurant", "gender": "das", "plural": "die Restaurants", "cases": { "nom": "das Restaurant", "acc": "das Restaurant", "dat": "dem Restaurant" } },
-  { "id": "de-place-09", "category": "de-places", "hanzi": "das Geschäft", "pinyin": "das geh-SHEFT", "english": "shop / store", "gender": "das", "plural": "die Geschäfte", "cases": { "nom": "das Geschäft", "acc": "das Geschäft", "dat": "dem Geschäft" } },
-  { "id": "de-place-10", "category": "de-places", "hanzi": "die Kirche", "pinyin": "dee KEER-kheh", "english": "church", "gender": "die", "plural": "die Kirchen", "cases": { "nom": "die Kirche", "acc": "die Kirche", "dat": "der Kirche" } },
-  { "id": "de-place-11", "category": "de-places", "hanzi": "der Park", "pinyin": "dair park", "english": "park", "gender": "der", "plural": "die Parks", "cases": { "nom": "der Park", "acc": "den Park", "dat": "dem Park" } },
-  { "id": "de-place-12", "category": "de-places", "hanzi": "die Straße", "pinyin": "dee SHTRAH-seh", "english": "street", "gender": "die", "plural": "die Straßen", "cases": { "nom": "die Straße", "acc": "die Straße", "dat": "der Straße" } },
-  { "id": "de-place-13", "category": "de-places", "hanzi": "das Krankenhaus", "pinyin": "das KRAN-ken-hows", "english": "hospital", "gender": "das", "plural": "die Krankenhäuser", "cases": { "nom": "das Krankenhaus", "acc": "das Krankenhaus", "dat": "dem Krankenhaus" } },
-  { "id": "de-place-14", "category": "de-places", "hanzi": "das Museum", "pinyin": "das moo-ZAY-oom", "english": "museum", "gender": "das", "plural": "die Museen", "cases": { "nom": "das Museum", "acc": "das Museum", "dat": "dem Museum" } },
-  { "id": "de-place-15", "category": "de-places", "hanzi": "der Markt", "pinyin": "dair markt", "english": "market", "gender": "der", "plural": "die Märkte", "cases": { "nom": "der Markt", "acc": "den Markt", "dat": "dem Markt" } },
-
-  { "id": "de-sep-01", "category": "de-separable", "hanzi": "aufstehen", "pinyin": "OWF-shtay-en", "english": "to get up", "separable": { "prefix": "auf", "root": "stehen" }, "conjugations": { "ich": "stehe auf", "du": "stehst auf", "er": "steht auf", "wir": "stehen auf", "ihr": "steht auf", "sie": "stehen auf" }, "example": { "de": "Ich stehe um sieben auf.", "en": "I get up at seven." } },
-  { "id": "de-sep-02", "category": "de-separable", "hanzi": "anrufen", "pinyin": "AN-roo-fen", "english": "to call (phone)", "separable": { "prefix": "an", "root": "rufen" }, "conjugations": { "ich": "rufe an", "du": "rufst an", "er": "ruft an", "wir": "rufen an", "ihr": "ruft an", "sie": "rufen an" } },
-  { "id": "de-sep-03", "category": "de-separable", "hanzi": "ankommen", "pinyin": "AN-kom-en", "english": "to arrive", "separable": { "prefix": "an", "root": "kommen" }, "conjugations": { "ich": "komme an", "du": "kommst an", "er": "kommt an", "wir": "kommen an", "ihr": "kommt an", "sie": "kommen an" } },
-  { "id": "de-sep-04", "category": "de-separable", "hanzi": "abfahren", "pinyin": "AP-fah-ren", "english": "to depart", "separable": { "prefix": "ab", "root": "fahren" }, "conjugations": { "ich": "fahre ab", "du": "fährst ab", "er": "fährt ab", "wir": "fahren ab", "ihr": "fahrt ab", "sie": "fahren ab" } },
-  { "id": "de-sep-05", "category": "de-separable", "hanzi": "einkaufen", "pinyin": "EYN-kow-fen", "english": "to shop", "separable": { "prefix": "ein", "root": "kaufen" }, "conjugations": { "ich": "kaufe ein", "du": "kaufst ein", "er": "kauft ein", "wir": "kaufen ein", "ihr": "kauft ein", "sie": "kaufen ein" } },
-  { "id": "de-sep-06", "category": "de-separable", "hanzi": "mitkommen", "pinyin": "MIT-kom-en", "english": "to come along", "separable": { "prefix": "mit", "root": "kommen" }, "conjugations": { "ich": "komme mit", "du": "kommst mit", "er": "kommt mit", "wir": "kommen mit", "ihr": "kommt mit", "sie": "kommen mit" } },
-  { "id": "de-sep-07", "category": "de-separable", "hanzi": "fernsehen", "pinyin": "FERN-zay-en", "english": "to watch TV", "separable": { "prefix": "fern", "root": "sehen" }, "conjugations": { "ich": "sehe fern", "du": "siehst fern", "er": "sieht fern", "wir": "sehen fern", "ihr": "seht fern", "sie": "sehen fern" } },
-  { "id": "de-sep-08", "category": "de-separable", "hanzi": "zuhören", "pinyin": "TSOO-hö-ren", "english": "to listen", "separable": { "prefix": "zu", "root": "hören" }, "conjugations": { "ich": "höre zu", "du": "hörst zu", "er": "hört zu", "wir": "hören zu", "ihr": "hört zu", "sie": "hören zu" } },
-  { "id": "de-sep-09", "category": "de-separable", "hanzi": "aufmachen", "pinyin": "OWF-makh-en", "english": "to open", "separable": { "prefix": "auf", "root": "machen" }, "conjugations": { "ich": "mache auf", "du": "machst auf", "er": "macht auf", "wir": "machen auf", "ihr": "macht auf", "sie": "machen auf" } },
-  { "id": "de-sep-10", "category": "de-separable", "hanzi": "zumachen", "pinyin": "TSOO-makh-en", "english": "to close", "separable": { "prefix": "zu", "root": "machen" }, "conjugations": { "ich": "mache zu", "du": "machst zu", "er": "macht zu", "wir": "machen zu", "ihr": "macht zu", "sie": "machen zu" } },
-  { "id": "de-sep-11", "category": "de-separable", "hanzi": "ausgehen", "pinyin": "OWS-gay-en", "english": "to go out", "separable": { "prefix": "aus", "root": "gehen" }, "conjugations": { "ich": "gehe aus", "du": "gehst aus", "er": "geht aus", "wir": "gehen aus", "ihr": "geht aus", "sie": "gehen aus" } },
-  { "id": "de-sep-12", "category": "de-separable", "hanzi": "zurückkommen", "pinyin": "tsoo-RÜK-kom-en", "english": "to come back", "separable": { "prefix": "zurück", "root": "kommen" }, "conjugations": { "ich": "komme zurück", "du": "kommst zurück", "er": "kommt zurück", "wir": "kommen zurück", "ihr": "kommt zurück", "sie": "kommen zurück" } }
+  {
+    "id": "de-greet-01",
+    "category": "de-greetings",
+    "hanzi": "Hallo",
+    "pinyin": "",
+    "english": "hello / hi"
+  },
+  {
+    "id": "de-greet-02",
+    "category": "de-greetings",
+    "hanzi": "Guten Morgen",
+    "pinyin": "GOO-ten MOR-gen",
+    "english": "good morning"
+  },
+  {
+    "id": "de-greet-03",
+    "category": "de-greetings",
+    "hanzi": "Guten Tag",
+    "pinyin": "GOO-ten TAHK",
+    "english": "good day / good afternoon"
+  },
+  {
+    "id": "de-greet-04",
+    "category": "de-greetings",
+    "hanzi": "Guten Abend",
+    "pinyin": "GOO-ten AH-bent",
+    "english": "good evening"
+  },
+  {
+    "id": "de-greet-05",
+    "category": "de-greetings",
+    "hanzi": "Gute Nacht",
+    "pinyin": "GOO-teh NAKHT",
+    "english": "good night"
+  },
+  {
+    "id": "de-greet-06",
+    "category": "de-greetings",
+    "hanzi": "Tschüss",
+    "pinyin": "chüss",
+    "english": "bye / see you",
+    "note": "The casual goodbye — used constantly."
+  },
+  {
+    "id": "de-greet-07",
+    "category": "de-greetings",
+    "hanzi": "Auf Wiedersehen",
+    "pinyin": "owf VEE-der-zay-en",
+    "english": "goodbye (formal)",
+    "note": "More formal than Tschüss — used in business or with strangers."
+  },
+  {
+    "id": "de-greet-08",
+    "category": "de-greetings",
+    "hanzi": "Bitte",
+    "pinyin": "BIT-eh",
+    "english": "please / you're welcome",
+    "note": "Works for both 'please' and 'you're welcome'."
+  },
+  {
+    "id": "de-greet-09",
+    "category": "de-greetings",
+    "hanzi": "Danke",
+    "pinyin": "DANK-eh",
+    "english": "thank you"
+  },
+  {
+    "id": "de-greet-10",
+    "category": "de-greetings",
+    "hanzi": "Danke schön",
+    "pinyin": "DANK-eh shern",
+    "english": "thank you very much"
+  },
+  {
+    "id": "de-greet-11",
+    "category": "de-greetings",
+    "hanzi": "Entschuldigung",
+    "pinyin": "ent-SHOOL-dee-goong",
+    "english": "excuse me / sorry",
+    "note": "Use to get someone's attention or apologise for small things."
+  },
+  {
+    "id": "de-greet-12",
+    "category": "de-greetings",
+    "hanzi": "Es tut mir leid",
+    "pinyin": "es toot meer lide",
+    "english": "I'm sorry (sincere)"
+  },
+  {
+    "id": "de-greet-13",
+    "category": "de-greetings",
+    "hanzi": "Wie geht's?",
+    "pinyin": "vee gates",
+    "english": "how are you? (informal)"
+  },
+  {
+    "id": "de-greet-14",
+    "category": "de-greetings",
+    "hanzi": "Gut, danke",
+    "pinyin": "goot DANK-eh",
+    "english": "good, thank you"
+  },
+  {
+    "id": "de-greet-15",
+    "category": "de-greetings",
+    "hanzi": "Nicht so gut",
+    "pinyin": "nisht zo goot",
+    "english": "not so good"
+  },
+  {
+    "id": "de-greet-16",
+    "category": "de-greetings",
+    "hanzi": "Ja",
+    "pinyin": "yah",
+    "english": "yes"
+  },
+  {
+    "id": "de-greet-17",
+    "category": "de-greetings",
+    "hanzi": "Nein",
+    "pinyin": "nine",
+    "english": "no"
+  },
+  {
+    "id": "de-greet-18",
+    "category": "de-greetings",
+    "hanzi": "Vielleicht",
+    "pinyin": "fee-LYSHT",
+    "english": "maybe / perhaps"
+  },
+  {
+    "id": "de-greet-19",
+    "category": "de-greetings",
+    "hanzi": "Wie heißt du?",
+    "pinyin": "vee hysst doo",
+    "english": "what's your name? (informal)"
+  },
+  {
+    "id": "de-greet-20",
+    "category": "de-greetings",
+    "hanzi": "Ich heiße…",
+    "pinyin": "ikh HY-seh",
+    "english": "my name is…"
+  },
+  {
+    "id": "de-num-01",
+    "category": "de-numbers",
+    "hanzi": "null",
+    "pinyin": "",
+    "english": "zero"
+  },
+  {
+    "id": "de-num-02",
+    "category": "de-numbers",
+    "hanzi": "eins",
+    "pinyin": "einss",
+    "english": "one"
+  },
+  {
+    "id": "de-num-03",
+    "category": "de-numbers",
+    "hanzi": "zwei",
+    "pinyin": "tsvye",
+    "english": "two"
+  },
+  {
+    "id": "de-num-04",
+    "category": "de-numbers",
+    "hanzi": "drei",
+    "pinyin": "dry",
+    "english": "three"
+  },
+  {
+    "id": "de-num-05",
+    "category": "de-numbers",
+    "hanzi": "vier",
+    "pinyin": "fear",
+    "english": "four"
+  },
+  {
+    "id": "de-num-06",
+    "category": "de-numbers",
+    "hanzi": "fünf",
+    "pinyin": "fünf",
+    "english": "five"
+  },
+  {
+    "id": "de-num-07",
+    "category": "de-numbers",
+    "hanzi": "sechs",
+    "pinyin": "zex",
+    "english": "six"
+  },
+  {
+    "id": "de-num-08",
+    "category": "de-numbers",
+    "hanzi": "sieben",
+    "pinyin": "ZEE-ben",
+    "english": "seven"
+  },
+  {
+    "id": "de-num-09",
+    "category": "de-numbers",
+    "hanzi": "acht",
+    "pinyin": "akht",
+    "english": "eight"
+  },
+  {
+    "id": "de-num-10",
+    "category": "de-numbers",
+    "hanzi": "neun",
+    "pinyin": "noyn",
+    "english": "nine"
+  },
+  {
+    "id": "de-num-11",
+    "category": "de-numbers",
+    "hanzi": "zehn",
+    "pinyin": "tsayn",
+    "english": "ten"
+  },
+  {
+    "id": "de-num-12",
+    "category": "de-numbers",
+    "hanzi": "elf",
+    "pinyin": "elf",
+    "english": "eleven"
+  },
+  {
+    "id": "de-num-13",
+    "category": "de-numbers",
+    "hanzi": "zwölf",
+    "pinyin": "tsvölf",
+    "english": "twelve"
+  },
+  {
+    "id": "de-num-14",
+    "category": "de-numbers",
+    "hanzi": "zwanzig",
+    "pinyin": "TSVAN-tsig",
+    "english": "twenty"
+  },
+  {
+    "id": "de-num-15",
+    "category": "de-numbers",
+    "hanzi": "dreißig",
+    "pinyin": "DRY-ssig",
+    "english": "thirty"
+  },
+  {
+    "id": "de-num-16",
+    "category": "de-numbers",
+    "hanzi": "vierzig",
+    "pinyin": "FEER-tsig",
+    "english": "forty"
+  },
+  {
+    "id": "de-num-17",
+    "category": "de-numbers",
+    "hanzi": "fünfzig",
+    "pinyin": "FÜNF-tsig",
+    "english": "fifty"
+  },
+  {
+    "id": "de-num-18",
+    "category": "de-numbers",
+    "hanzi": "hundert",
+    "pinyin": "HOON-dert",
+    "english": "one hundred"
+  },
+  {
+    "id": "de-num-19",
+    "category": "de-numbers",
+    "hanzi": "tausend",
+    "pinyin": "TOW-zent",
+    "english": "one thousand"
+  },
+  {
+    "id": "de-col-01",
+    "category": "de-colors",
+    "hanzi": "rot",
+    "pinyin": "roht",
+    "english": "red"
+  },
+  {
+    "id": "de-col-02",
+    "category": "de-colors",
+    "hanzi": "blau",
+    "pinyin": "blow",
+    "english": "blue"
+  },
+  {
+    "id": "de-col-03",
+    "category": "de-colors",
+    "hanzi": "grün",
+    "pinyin": "grün",
+    "english": "green"
+  },
+  {
+    "id": "de-col-04",
+    "category": "de-colors",
+    "hanzi": "gelb",
+    "pinyin": "gelp",
+    "english": "yellow"
+  },
+  {
+    "id": "de-col-05",
+    "category": "de-colors",
+    "hanzi": "schwarz",
+    "pinyin": "shvarts",
+    "english": "black"
+  },
+  {
+    "id": "de-col-06",
+    "category": "de-colors",
+    "hanzi": "weiß",
+    "pinyin": "vice",
+    "english": "white"
+  },
+  {
+    "id": "de-col-07",
+    "category": "de-colors",
+    "hanzi": "grau",
+    "pinyin": "grow",
+    "english": "grey"
+  },
+  {
+    "id": "de-col-08",
+    "category": "de-colors",
+    "hanzi": "braun",
+    "pinyin": "brown",
+    "english": "brown"
+  },
+  {
+    "id": "de-col-09",
+    "category": "de-colors",
+    "hanzi": "orange",
+    "pinyin": "oh-RAN-zheh",
+    "english": "orange"
+  },
+  {
+    "id": "de-col-10",
+    "category": "de-colors",
+    "hanzi": "rosa",
+    "pinyin": "ROH-zah",
+    "english": "pink"
+  },
+  {
+    "id": "de-col-11",
+    "category": "de-colors",
+    "hanzi": "lila",
+    "pinyin": "LEE-lah",
+    "english": "purple"
+  },
+  {
+    "id": "de-col-12",
+    "category": "de-colors",
+    "hanzi": "hell",
+    "pinyin": "hel",
+    "english": "light (colour)"
+  },
+  {
+    "id": "de-col-13",
+    "category": "de-colors",
+    "hanzi": "dunkel",
+    "pinyin": "DOON-kel",
+    "english": "dark"
+  },
+  {
+    "id": "de-col-14",
+    "category": "de-colors",
+    "hanzi": "bunt",
+    "pinyin": "boont",
+    "english": "colourful"
+  },
+  {
+    "id": "de-col-15",
+    "category": "de-colors",
+    "hanzi": "die Farbe",
+    "pinyin": "dee FAR-beh",
+    "english": "the colour",
+    "gender": "die",
+    "plural": "die Farben"
+  },
+  {
+    "id": "de-food-01",
+    "category": "de-food",
+    "hanzi": "das Wasser",
+    "pinyin": "das VAS-er",
+    "english": "the water",
+    "gender": "das",
+    "plural": "die Wasser",
+    "cases": {
+      "nom": "das Wasser",
+      "acc": "das Wasser",
+      "dat": "dem Wasser"
+    },
+    "example": {
+      "de": "Ich trinke Wasser.",
+      "en": "I drink water."
+    }
+  },
+  {
+    "id": "de-food-02",
+    "category": "de-food",
+    "hanzi": "das Brot",
+    "pinyin": "das broht",
+    "english": "the bread",
+    "gender": "das",
+    "plural": "die Brote",
+    "cases": {
+      "nom": "das Brot",
+      "acc": "das Brot",
+      "dat": "dem Brot"
+    }
+  },
+  {
+    "id": "de-food-03",
+    "category": "de-food",
+    "hanzi": "die Milch",
+    "pinyin": "dee milkh",
+    "english": "the milk",
+    "gender": "die",
+    "cases": {
+      "nom": "die Milch",
+      "acc": "die Milch",
+      "dat": "der Milch"
+    }
+  },
+  {
+    "id": "de-food-04",
+    "category": "de-food",
+    "hanzi": "das Fleisch",
+    "pinyin": "das flysh",
+    "english": "the meat",
+    "gender": "das",
+    "cases": {
+      "nom": "das Fleisch",
+      "acc": "das Fleisch",
+      "dat": "dem Fleisch"
+    }
+  },
+  {
+    "id": "de-food-05",
+    "category": "de-food",
+    "hanzi": "das Gemüse",
+    "pinyin": "das geh-MÜ-zeh",
+    "english": "the vegetables",
+    "gender": "das"
+  },
+  {
+    "id": "de-food-06",
+    "category": "de-food",
+    "hanzi": "das Obst",
+    "pinyin": "das ohpst",
+    "english": "the fruit",
+    "gender": "das"
+  },
+  {
+    "id": "de-food-07",
+    "category": "de-food",
+    "hanzi": "der Kaffee",
+    "pinyin": "dair KAF-fay",
+    "english": "the coffee",
+    "gender": "der",
+    "plural": "die Kaffees",
+    "cases": {
+      "nom": "der Kaffee",
+      "acc": "den Kaffee",
+      "dat": "dem Kaffee"
+    },
+    "example": {
+      "de": "Ich trinke den Kaffee.",
+      "en": "I drink the coffee."
+    }
+  },
+  {
+    "id": "de-food-08",
+    "category": "de-food",
+    "hanzi": "der Tee",
+    "pinyin": "dair tay",
+    "english": "the tea",
+    "gender": "der",
+    "plural": "die Tees",
+    "cases": {
+      "nom": "der Tee",
+      "acc": "den Tee",
+      "dat": "dem Tee"
+    }
+  },
+  {
+    "id": "de-food-09",
+    "category": "de-food",
+    "hanzi": "das Bier",
+    "pinyin": "das beer",
+    "english": "the beer",
+    "gender": "das",
+    "plural": "die Biere",
+    "cases": {
+      "nom": "das Bier",
+      "acc": "das Bier",
+      "dat": "dem Bier"
+    }
+  },
+  {
+    "id": "de-food-10",
+    "category": "de-food",
+    "hanzi": "der Wein",
+    "pinyin": "dair vine",
+    "english": "the wine",
+    "gender": "der",
+    "plural": "die Weine",
+    "cases": {
+      "nom": "der Wein",
+      "acc": "den Wein",
+      "dat": "dem Wein"
+    }
+  },
+  {
+    "id": "de-food-11",
+    "category": "de-food",
+    "hanzi": "der Käse",
+    "pinyin": "dair KAY-zeh",
+    "english": "the cheese",
+    "gender": "der",
+    "cases": {
+      "nom": "der Käse",
+      "acc": "den Käse",
+      "dat": "dem Käse"
+    }
+  },
+  {
+    "id": "de-food-12",
+    "category": "de-food",
+    "hanzi": "das Ei",
+    "pinyin": "das eye",
+    "english": "the egg",
+    "gender": "das",
+    "plural": "die Eier",
+    "cases": {
+      "nom": "das Ei",
+      "acc": "das Ei",
+      "dat": "dem Ei"
+    }
+  },
+  {
+    "id": "de-food-13",
+    "category": "de-food",
+    "hanzi": "die Suppe",
+    "pinyin": "dee ZUP-eh",
+    "english": "the soup",
+    "gender": "die",
+    "plural": "die Suppen",
+    "cases": {
+      "nom": "die Suppe",
+      "acc": "die Suppe",
+      "dat": "der Suppe"
+    }
+  },
+  {
+    "id": "de-food-14",
+    "category": "de-food",
+    "hanzi": "der Kuchen",
+    "pinyin": "dair KOO-khen",
+    "english": "the cake",
+    "gender": "der",
+    "plural": "die Kuchen",
+    "cases": {
+      "nom": "der Kuchen",
+      "acc": "den Kuchen",
+      "dat": "dem Kuchen"
+    }
+  },
+  {
+    "id": "de-food-15",
+    "category": "de-food",
+    "hanzi": "der Fisch",
+    "pinyin": "dair fish",
+    "english": "the fish",
+    "gender": "der",
+    "plural": "die Fische",
+    "cases": {
+      "nom": "der Fisch",
+      "acc": "den Fisch",
+      "dat": "dem Fisch"
+    }
+  },
+  {
+    "id": "de-food-16",
+    "category": "de-food",
+    "hanzi": "das Huhn",
+    "pinyin": "das hoon",
+    "english": "the chicken",
+    "gender": "das",
+    "plural": "die Hühner",
+    "cases": {
+      "nom": "das Huhn",
+      "acc": "das Huhn",
+      "dat": "dem Huhn"
+    }
+  },
+  {
+    "id": "de-food-17",
+    "category": "de-food",
+    "hanzi": "der Apfel",
+    "pinyin": "dair AP-fel",
+    "english": "the apple",
+    "gender": "der",
+    "plural": "die Äpfel",
+    "cases": {
+      "nom": "der Apfel",
+      "acc": "den Apfel",
+      "dat": "dem Apfel"
+    }
+  },
+  {
+    "id": "de-food-18",
+    "category": "de-food",
+    "hanzi": "die Butter",
+    "pinyin": "dee BUT-er",
+    "english": "the butter",
+    "gender": "die",
+    "cases": {
+      "nom": "die Butter",
+      "acc": "die Butter",
+      "dat": "der Butter"
+    }
+  },
+  {
+    "id": "de-fam-01",
+    "category": "de-family",
+    "hanzi": "die Mutter",
+    "pinyin": "dee MOO-ter",
+    "english": "the mother",
+    "gender": "die",
+    "plural": "die Mütter",
+    "cases": {
+      "nom": "die Mutter",
+      "acc": "die Mutter",
+      "dat": "der Mutter"
+    }
+  },
+  {
+    "id": "de-fam-02",
+    "category": "de-family",
+    "hanzi": "der Vater",
+    "pinyin": "dair FAH-ter",
+    "english": "the father",
+    "gender": "der",
+    "plural": "die Väter",
+    "cases": {
+      "nom": "der Vater",
+      "acc": "den Vater",
+      "dat": "dem Vater"
+    }
+  },
+  {
+    "id": "de-fam-03",
+    "category": "de-family",
+    "hanzi": "die Schwester",
+    "pinyin": "dee SHVES-ter",
+    "english": "the sister",
+    "gender": "die",
+    "plural": "die Schwestern",
+    "cases": {
+      "nom": "die Schwester",
+      "acc": "die Schwester",
+      "dat": "der Schwester"
+    }
+  },
+  {
+    "id": "de-fam-04",
+    "category": "de-family",
+    "hanzi": "der Bruder",
+    "pinyin": "dair BROO-der",
+    "english": "the brother",
+    "gender": "der",
+    "plural": "die Brüder",
+    "cases": {
+      "nom": "der Bruder",
+      "acc": "den Bruder",
+      "dat": "dem Bruder"
+    }
+  },
+  {
+    "id": "de-fam-05",
+    "category": "de-family",
+    "hanzi": "die Großmutter",
+    "pinyin": "dee GROHS-moo-ter",
+    "english": "the grandmother",
+    "gender": "die",
+    "plural": "die Großmütter",
+    "cases": {
+      "nom": "die Großmutter",
+      "acc": "die Großmutter",
+      "dat": "der Großmutter"
+    }
+  },
+  {
+    "id": "de-fam-06",
+    "category": "de-family",
+    "hanzi": "der Großvater",
+    "pinyin": "dair GROHS-fah-ter",
+    "english": "the grandfather",
+    "gender": "der",
+    "plural": "die Großväter",
+    "cases": {
+      "nom": "der Großvater",
+      "acc": "den Großvater",
+      "dat": "dem Großvater"
+    }
+  },
+  {
+    "id": "de-fam-07",
+    "category": "de-family",
+    "hanzi": "die Familie",
+    "pinyin": "dee fah-MEE-lee-eh",
+    "english": "the family",
+    "gender": "die",
+    "plural": "die Familien",
+    "cases": {
+      "nom": "die Familie",
+      "acc": "die Familie",
+      "dat": "der Familie"
+    }
+  },
+  {
+    "id": "de-fam-08",
+    "category": "de-family",
+    "hanzi": "das Kind",
+    "pinyin": "das kint",
+    "english": "the child",
+    "gender": "das",
+    "plural": "die Kinder",
+    "cases": {
+      "nom": "das Kind",
+      "acc": "das Kind",
+      "dat": "dem Kind"
+    },
+    "example": {
+      "de": "Das Kind ist klein.",
+      "en": "The child is small."
+    }
+  },
+  {
+    "id": "de-fam-09",
+    "category": "de-family",
+    "hanzi": "der Sohn",
+    "pinyin": "dair zohn",
+    "english": "the son",
+    "gender": "der",
+    "plural": "die Söhne",
+    "cases": {
+      "nom": "der Sohn",
+      "acc": "den Sohn",
+      "dat": "dem Sohn"
+    }
+  },
+  {
+    "id": "de-fam-10",
+    "category": "de-family",
+    "hanzi": "die Tochter",
+    "pinyin": "dee TOKH-ter",
+    "english": "the daughter",
+    "gender": "die",
+    "plural": "die Töchter",
+    "cases": {
+      "nom": "die Tochter",
+      "acc": "die Tochter",
+      "dat": "der Tochter"
+    }
+  },
+  {
+    "id": "de-fam-11",
+    "category": "de-family",
+    "hanzi": "der Mann",
+    "pinyin": "dair man",
+    "english": "the man / the husband",
+    "gender": "der",
+    "plural": "die Männer",
+    "cases": {
+      "nom": "der Mann",
+      "acc": "den Mann",
+      "dat": "dem Mann",
+      "gen": "des Mannes"
+    },
+    "example": {
+      "de": "Ich sehe den Mann.",
+      "en": "I see the man."
+    }
+  },
+  {
+    "id": "de-fam-12",
+    "category": "de-family",
+    "hanzi": "die Frau",
+    "pinyin": "dee frow",
+    "english": "the woman / the wife",
+    "gender": "die",
+    "plural": "die Frauen",
+    "cases": {
+      "nom": "die Frau",
+      "acc": "die Frau",
+      "dat": "der Frau",
+      "gen": "der Frau"
+    }
+  },
+  {
+    "id": "de-fam-13",
+    "category": "de-family",
+    "hanzi": "der Freund",
+    "pinyin": "dair froynt",
+    "english": "the boyfriend / the male friend",
+    "gender": "der",
+    "plural": "die Freunde",
+    "cases": {
+      "nom": "der Freund",
+      "acc": "den Freund",
+      "dat": "dem Freund"
+    }
+  },
+  {
+    "id": "de-fam-14",
+    "category": "de-family",
+    "hanzi": "die Freundin",
+    "pinyin": "dee FROYN-din",
+    "english": "the girlfriend / the female friend",
+    "gender": "die",
+    "plural": "die Freundinnen",
+    "cases": {
+      "nom": "die Freundin",
+      "acc": "die Freundin",
+      "dat": "der Freundin"
+    }
+  },
+  {
+    "id": "de-verb-01",
+    "category": "de-verbs",
+    "hanzi": "sein",
+    "pinyin": "zine",
+    "english": "to be",
+    "conjugations": {
+      "ich": "bin",
+      "du": "bist",
+      "er": "ist",
+      "wir": "sind",
+      "ihr": "seid",
+      "sie": "sind"
+    },
+    "example": {
+      "de": "Ich bin müde.",
+      "en": "I am tired."
+    }
+  },
+  {
+    "id": "de-verb-02",
+    "category": "de-verbs",
+    "hanzi": "haben",
+    "pinyin": "HAH-ben",
+    "english": "to have",
+    "conjugations": {
+      "ich": "habe",
+      "du": "hast",
+      "er": "hat",
+      "wir": "haben",
+      "ihr": "habt",
+      "sie": "haben"
+    },
+    "example": {
+      "de": "Ich habe Hunger.",
+      "en": "I am hungry."
+    }
+  },
+  {
+    "id": "de-verb-03",
+    "category": "de-verbs",
+    "hanzi": "gehen",
+    "pinyin": "GAY-en",
+    "english": "to go",
+    "conjugations": {
+      "ich": "gehe",
+      "du": "gehst",
+      "er": "geht",
+      "wir": "gehen",
+      "ihr": "geht",
+      "sie": "gehen"
+    }
+  },
+  {
+    "id": "de-verb-04",
+    "category": "de-verbs",
+    "hanzi": "kommen",
+    "pinyin": "KOM-en",
+    "english": "to come",
+    "conjugations": {
+      "ich": "komme",
+      "du": "kommst",
+      "er": "kommt",
+      "wir": "kommen",
+      "ihr": "kommt",
+      "sie": "kommen"
+    }
+  },
+  {
+    "id": "de-verb-05",
+    "category": "de-verbs",
+    "hanzi": "machen",
+    "pinyin": "MAKH-en",
+    "english": "to do / make",
+    "conjugations": {
+      "ich": "mache",
+      "du": "machst",
+      "er": "macht",
+      "wir": "machen",
+      "ihr": "macht",
+      "sie": "machen"
+    }
+  },
+  {
+    "id": "de-verb-06",
+    "category": "de-verbs",
+    "hanzi": "sagen",
+    "pinyin": "ZAH-gen",
+    "english": "to say",
+    "conjugations": {
+      "ich": "sage",
+      "du": "sagst",
+      "er": "sagt",
+      "wir": "sagen",
+      "ihr": "sagt",
+      "sie": "sagen"
+    }
+  },
+  {
+    "id": "de-verb-07",
+    "category": "de-verbs",
+    "hanzi": "sehen",
+    "pinyin": "ZAY-en",
+    "english": "to see",
+    "conjugations": {
+      "ich": "sehe",
+      "du": "siehst",
+      "er": "sieht",
+      "wir": "sehen",
+      "ihr": "seht",
+      "sie": "sehen"
+    },
+    "note": "Stem-changing: e → ie in du/er forms."
+  },
+  {
+    "id": "de-verb-08",
+    "category": "de-verbs",
+    "hanzi": "wollen",
+    "pinyin": "VOL-en",
+    "english": "to want",
+    "conjugations": {
+      "ich": "will",
+      "du": "willst",
+      "er": "will",
+      "wir": "wollen",
+      "ihr": "wollt",
+      "sie": "wollen"
+    }
+  },
+  {
+    "id": "de-verb-09",
+    "category": "de-verbs",
+    "hanzi": "können",
+    "pinyin": "KÖN-en",
+    "english": "to be able to / can",
+    "conjugations": {
+      "ich": "kann",
+      "du": "kannst",
+      "er": "kann",
+      "wir": "können",
+      "ihr": "könnt",
+      "sie": "können"
+    }
+  },
+  {
+    "id": "de-verb-10",
+    "category": "de-verbs",
+    "hanzi": "müssen",
+    "pinyin": "MÜS-en",
+    "english": "to must / have to",
+    "conjugations": {
+      "ich": "muss",
+      "du": "musst",
+      "er": "muss",
+      "wir": "müssen",
+      "ihr": "müsst",
+      "sie": "müssen"
+    }
+  },
+  {
+    "id": "de-verb-11",
+    "category": "de-verbs",
+    "hanzi": "sprechen",
+    "pinyin": "SHPREKH-en",
+    "english": "to speak",
+    "conjugations": {
+      "ich": "spreche",
+      "du": "sprichst",
+      "er": "spricht",
+      "wir": "sprechen",
+      "ihr": "sprecht",
+      "sie": "sprechen"
+    },
+    "note": "Stem-changing: e → i in du/er forms."
+  },
+  {
+    "id": "de-verb-12",
+    "category": "de-verbs",
+    "hanzi": "essen",
+    "pinyin": "ES-en",
+    "english": "to eat",
+    "conjugations": {
+      "ich": "esse",
+      "du": "isst",
+      "er": "isst",
+      "wir": "essen",
+      "ihr": "esst",
+      "sie": "essen"
+    }
+  },
+  {
+    "id": "de-verb-13",
+    "category": "de-verbs",
+    "hanzi": "trinken",
+    "pinyin": "TRINK-en",
+    "english": "to drink",
+    "conjugations": {
+      "ich": "trinke",
+      "du": "trinkst",
+      "er": "trinkt",
+      "wir": "trinken",
+      "ihr": "trinkt",
+      "sie": "trinken"
+    }
+  },
+  {
+    "id": "de-verb-14",
+    "category": "de-verbs",
+    "hanzi": "lesen",
+    "pinyin": "LAY-zen",
+    "english": "to read",
+    "conjugations": {
+      "ich": "lese",
+      "du": "liest",
+      "er": "liest",
+      "wir": "lesen",
+      "ihr": "lest",
+      "sie": "lesen"
+    }
+  },
+  {
+    "id": "de-verb-15",
+    "category": "de-verbs",
+    "hanzi": "schreiben",
+    "pinyin": "SHRY-ben",
+    "english": "to write",
+    "conjugations": {
+      "ich": "schreibe",
+      "du": "schreibst",
+      "er": "schreibt",
+      "wir": "schreiben",
+      "ihr": "schreibt",
+      "sie": "schreiben"
+    }
+  },
+  {
+    "id": "de-verb-16",
+    "category": "de-verbs",
+    "hanzi": "wohnen",
+    "pinyin": "VOH-nen",
+    "english": "to live / reside",
+    "conjugations": {
+      "ich": "wohne",
+      "du": "wohnst",
+      "er": "wohnt",
+      "wir": "wohnen",
+      "ihr": "wohnt",
+      "sie": "wohnen"
+    }
+  },
+  {
+    "id": "de-verb-17",
+    "category": "de-verbs",
+    "hanzi": "arbeiten",
+    "pinyin": "AR-by-ten",
+    "english": "to work",
+    "conjugations": {
+      "ich": "arbeite",
+      "du": "arbeitest",
+      "er": "arbeitet",
+      "wir": "arbeiten",
+      "ihr": "arbeitet",
+      "sie": "arbeiten"
+    }
+  },
+  {
+    "id": "de-verb-18",
+    "category": "de-verbs",
+    "hanzi": "lieben",
+    "pinyin": "LEE-ben",
+    "english": "to love",
+    "conjugations": {
+      "ich": "liebe",
+      "du": "liebst",
+      "er": "liebt",
+      "wir": "lieben",
+      "ihr": "liebt",
+      "sie": "lieben"
+    }
+  },
+  {
+    "id": "de-time-01",
+    "category": "de-time",
+    "hanzi": "der Montag",
+    "pinyin": "dair MON-tahk",
+    "english": "the Monday",
+    "gender": "der"
+  },
+  {
+    "id": "de-time-02",
+    "category": "de-time",
+    "hanzi": "der Dienstag",
+    "pinyin": "dair DEENS-tahk",
+    "english": "the Tuesday",
+    "gender": "der"
+  },
+  {
+    "id": "de-time-03",
+    "category": "de-time",
+    "hanzi": "der Mittwoch",
+    "pinyin": "dair MIT-vokh",
+    "english": "the Wednesday",
+    "gender": "der"
+  },
+  {
+    "id": "de-time-04",
+    "category": "de-time",
+    "hanzi": "der Donnerstag",
+    "pinyin": "dair DON-ers-tahk",
+    "english": "the Thursday",
+    "gender": "der"
+  },
+  {
+    "id": "de-time-05",
+    "category": "de-time",
+    "hanzi": "der Freitag",
+    "pinyin": "dair FRY-tahk",
+    "english": "the Friday",
+    "gender": "der"
+  },
+  {
+    "id": "de-time-06",
+    "category": "de-time",
+    "hanzi": "der Samstag",
+    "pinyin": "dair ZAM-stahk",
+    "english": "the Saturday",
+    "gender": "der"
+  },
+  {
+    "id": "de-time-07",
+    "category": "de-time",
+    "hanzi": "der Sonntag",
+    "pinyin": "dair ZON-tahk",
+    "english": "the Sunday",
+    "gender": "der"
+  },
+  {
+    "id": "de-time-08",
+    "category": "de-time",
+    "hanzi": "heute",
+    "pinyin": "HOY-teh",
+    "english": "today"
+  },
+  {
+    "id": "de-time-09",
+    "category": "de-time",
+    "hanzi": "morgen",
+    "pinyin": "MOR-gen",
+    "english": "tomorrow"
+  },
+  {
+    "id": "de-time-10",
+    "category": "de-time",
+    "hanzi": "gestern",
+    "pinyin": "GES-tern",
+    "english": "yesterday"
+  },
+  {
+    "id": "de-time-11",
+    "category": "de-time",
+    "hanzi": "die Woche",
+    "pinyin": "dee VOH-kheh",
+    "english": "the week",
+    "gender": "die",
+    "plural": "die Wochen",
+    "cases": {
+      "nom": "die Woche",
+      "acc": "die Woche",
+      "dat": "der Woche"
+    }
+  },
+  {
+    "id": "de-time-12",
+    "category": "de-time",
+    "hanzi": "der Monat",
+    "pinyin": "dair MOH-naht",
+    "english": "the month",
+    "gender": "der",
+    "plural": "die Monate",
+    "cases": {
+      "nom": "der Monat",
+      "acc": "den Monat",
+      "dat": "dem Monat"
+    }
+  },
+  {
+    "id": "de-time-13",
+    "category": "de-time",
+    "hanzi": "das Jahr",
+    "pinyin": "das yahr",
+    "english": "the year",
+    "gender": "das",
+    "plural": "die Jahre",
+    "cases": {
+      "nom": "das Jahr",
+      "acc": "das Jahr",
+      "dat": "dem Jahr"
+    }
+  },
+  {
+    "id": "de-time-14",
+    "category": "de-time",
+    "hanzi": "jetzt",
+    "pinyin": "yetst",
+    "english": "now"
+  },
+  {
+    "id": "de-time-15",
+    "category": "de-time",
+    "hanzi": "später",
+    "pinyin": "SHPAY-ter",
+    "english": "later"
+  },
+  {
+    "id": "de-place-01",
+    "category": "de-places",
+    "hanzi": "die Stadt",
+    "pinyin": "dee shtat",
+    "english": "the city",
+    "gender": "die",
+    "plural": "die Städte",
+    "cases": {
+      "nom": "die Stadt",
+      "acc": "die Stadt",
+      "dat": "der Stadt"
+    }
+  },
+  {
+    "id": "de-place-02",
+    "category": "de-places",
+    "hanzi": "das Dorf",
+    "pinyin": "das dorf",
+    "english": "the village",
+    "gender": "das",
+    "plural": "die Dörfer",
+    "cases": {
+      "nom": "das Dorf",
+      "acc": "das Dorf",
+      "dat": "dem Dorf"
+    }
+  },
+  {
+    "id": "de-place-03",
+    "category": "de-places",
+    "hanzi": "das Haus",
+    "pinyin": "das hows",
+    "english": "the house",
+    "gender": "das",
+    "plural": "die Häuser",
+    "cases": {
+      "nom": "das Haus",
+      "acc": "das Haus",
+      "dat": "dem Haus"
+    },
+    "example": {
+      "de": "Ich gehe nach Hause.",
+      "en": "I go home."
+    }
+  },
+  {
+    "id": "de-place-04",
+    "category": "de-places",
+    "hanzi": "die Schule",
+    "pinyin": "dee SHOO-leh",
+    "english": "the school",
+    "gender": "die",
+    "plural": "die Schulen",
+    "cases": {
+      "nom": "die Schule",
+      "acc": "die Schule",
+      "dat": "der Schule"
+    }
+  },
+  {
+    "id": "de-place-05",
+    "category": "de-places",
+    "hanzi": "das Büro",
+    "pinyin": "das BÜ-roh",
+    "english": "the office",
+    "gender": "das",
+    "plural": "die Büros",
+    "cases": {
+      "nom": "das Büro",
+      "acc": "das Büro",
+      "dat": "dem Büro"
+    }
+  },
+  {
+    "id": "de-place-06",
+    "category": "de-places",
+    "hanzi": "der Bahnhof",
+    "pinyin": "dair BAHN-hohf",
+    "english": "the train station",
+    "gender": "der",
+    "plural": "die Bahnhöfe",
+    "cases": {
+      "nom": "der Bahnhof",
+      "acc": "den Bahnhof",
+      "dat": "dem Bahnhof"
+    }
+  },
+  {
+    "id": "de-place-07",
+    "category": "de-places",
+    "hanzi": "der Flughafen",
+    "pinyin": "dair FLOOK-hah-fen",
+    "english": "the airport",
+    "gender": "der",
+    "plural": "die Flughäfen",
+    "cases": {
+      "nom": "der Flughafen",
+      "acc": "den Flughafen",
+      "dat": "dem Flughafen"
+    }
+  },
+  {
+    "id": "de-place-08",
+    "category": "de-places",
+    "hanzi": "das Restaurant",
+    "pinyin": "das res-toh-RAHN",
+    "english": "the restaurant",
+    "gender": "das",
+    "plural": "die Restaurants",
+    "cases": {
+      "nom": "das Restaurant",
+      "acc": "das Restaurant",
+      "dat": "dem Restaurant"
+    }
+  },
+  {
+    "id": "de-place-09",
+    "category": "de-places",
+    "hanzi": "das Geschäft",
+    "pinyin": "das geh-SHEFT",
+    "english": "the shop / the store",
+    "gender": "das",
+    "plural": "die Geschäfte",
+    "cases": {
+      "nom": "das Geschäft",
+      "acc": "das Geschäft",
+      "dat": "dem Geschäft"
+    }
+  },
+  {
+    "id": "de-place-10",
+    "category": "de-places",
+    "hanzi": "die Kirche",
+    "pinyin": "dee KEER-kheh",
+    "english": "the church",
+    "gender": "die",
+    "plural": "die Kirchen",
+    "cases": {
+      "nom": "die Kirche",
+      "acc": "die Kirche",
+      "dat": "der Kirche"
+    }
+  },
+  {
+    "id": "de-place-11",
+    "category": "de-places",
+    "hanzi": "der Park",
+    "pinyin": "dair park",
+    "english": "the park",
+    "gender": "der",
+    "plural": "die Parks",
+    "cases": {
+      "nom": "der Park",
+      "acc": "den Park",
+      "dat": "dem Park"
+    }
+  },
+  {
+    "id": "de-place-12",
+    "category": "de-places",
+    "hanzi": "die Straße",
+    "pinyin": "dee SHTRAH-seh",
+    "english": "the street",
+    "gender": "die",
+    "plural": "die Straßen",
+    "cases": {
+      "nom": "die Straße",
+      "acc": "die Straße",
+      "dat": "der Straße"
+    }
+  },
+  {
+    "id": "de-place-13",
+    "category": "de-places",
+    "hanzi": "das Krankenhaus",
+    "pinyin": "das KRAN-ken-hows",
+    "english": "the hospital",
+    "gender": "das",
+    "plural": "die Krankenhäuser",
+    "cases": {
+      "nom": "das Krankenhaus",
+      "acc": "das Krankenhaus",
+      "dat": "dem Krankenhaus"
+    }
+  },
+  {
+    "id": "de-place-14",
+    "category": "de-places",
+    "hanzi": "das Museum",
+    "pinyin": "das moo-ZAY-oom",
+    "english": "the museum",
+    "gender": "das",
+    "plural": "die Museen",
+    "cases": {
+      "nom": "das Museum",
+      "acc": "das Museum",
+      "dat": "dem Museum"
+    }
+  },
+  {
+    "id": "de-place-15",
+    "category": "de-places",
+    "hanzi": "der Markt",
+    "pinyin": "dair markt",
+    "english": "the market",
+    "gender": "der",
+    "plural": "die Märkte",
+    "cases": {
+      "nom": "der Markt",
+      "acc": "den Markt",
+      "dat": "dem Markt"
+    }
+  },
+  {
+    "id": "de-sep-01",
+    "category": "de-separable",
+    "hanzi": "aufstehen",
+    "pinyin": "OWF-shtay-en",
+    "english": "to get up",
+    "separable": {
+      "prefix": "auf",
+      "root": "stehen"
+    },
+    "conjugations": {
+      "ich": "stehe auf",
+      "du": "stehst auf",
+      "er": "steht auf",
+      "wir": "stehen auf",
+      "ihr": "steht auf",
+      "sie": "stehen auf"
+    },
+    "example": {
+      "de": "Ich stehe um sieben auf.",
+      "en": "I get up at seven."
+    }
+  },
+  {
+    "id": "de-sep-02",
+    "category": "de-separable",
+    "hanzi": "anrufen",
+    "pinyin": "AN-roo-fen",
+    "english": "to call (phone)",
+    "separable": {
+      "prefix": "an",
+      "root": "rufen"
+    },
+    "conjugations": {
+      "ich": "rufe an",
+      "du": "rufst an",
+      "er": "ruft an",
+      "wir": "rufen an",
+      "ihr": "ruft an",
+      "sie": "rufen an"
+    }
+  },
+  {
+    "id": "de-sep-03",
+    "category": "de-separable",
+    "hanzi": "ankommen",
+    "pinyin": "AN-kom-en",
+    "english": "to arrive",
+    "separable": {
+      "prefix": "an",
+      "root": "kommen"
+    },
+    "conjugations": {
+      "ich": "komme an",
+      "du": "kommst an",
+      "er": "kommt an",
+      "wir": "kommen an",
+      "ihr": "kommt an",
+      "sie": "kommen an"
+    }
+  },
+  {
+    "id": "de-sep-04",
+    "category": "de-separable",
+    "hanzi": "abfahren",
+    "pinyin": "AP-fah-ren",
+    "english": "to depart",
+    "separable": {
+      "prefix": "ab",
+      "root": "fahren"
+    },
+    "conjugations": {
+      "ich": "fahre ab",
+      "du": "fährst ab",
+      "er": "fährt ab",
+      "wir": "fahren ab",
+      "ihr": "fahrt ab",
+      "sie": "fahren ab"
+    }
+  },
+  {
+    "id": "de-sep-05",
+    "category": "de-separable",
+    "hanzi": "einkaufen",
+    "pinyin": "EYN-kow-fen",
+    "english": "to shop",
+    "separable": {
+      "prefix": "ein",
+      "root": "kaufen"
+    },
+    "conjugations": {
+      "ich": "kaufe ein",
+      "du": "kaufst ein",
+      "er": "kauft ein",
+      "wir": "kaufen ein",
+      "ihr": "kauft ein",
+      "sie": "kaufen ein"
+    }
+  },
+  {
+    "id": "de-sep-06",
+    "category": "de-separable",
+    "hanzi": "mitkommen",
+    "pinyin": "MIT-kom-en",
+    "english": "to come along",
+    "separable": {
+      "prefix": "mit",
+      "root": "kommen"
+    },
+    "conjugations": {
+      "ich": "komme mit",
+      "du": "kommst mit",
+      "er": "kommt mit",
+      "wir": "kommen mit",
+      "ihr": "kommt mit",
+      "sie": "kommen mit"
+    }
+  },
+  {
+    "id": "de-sep-07",
+    "category": "de-separable",
+    "hanzi": "fernsehen",
+    "pinyin": "FERN-zay-en",
+    "english": "to watch TV",
+    "separable": {
+      "prefix": "fern",
+      "root": "sehen"
+    },
+    "conjugations": {
+      "ich": "sehe fern",
+      "du": "siehst fern",
+      "er": "sieht fern",
+      "wir": "sehen fern",
+      "ihr": "seht fern",
+      "sie": "sehen fern"
+    }
+  },
+  {
+    "id": "de-sep-08",
+    "category": "de-separable",
+    "hanzi": "zuhören",
+    "pinyin": "TSOO-hö-ren",
+    "english": "to listen",
+    "separable": {
+      "prefix": "zu",
+      "root": "hören"
+    },
+    "conjugations": {
+      "ich": "höre zu",
+      "du": "hörst zu",
+      "er": "hört zu",
+      "wir": "hören zu",
+      "ihr": "hört zu",
+      "sie": "hören zu"
+    }
+  },
+  {
+    "id": "de-sep-09",
+    "category": "de-separable",
+    "hanzi": "aufmachen",
+    "pinyin": "OWF-makh-en",
+    "english": "to open",
+    "separable": {
+      "prefix": "auf",
+      "root": "machen"
+    },
+    "conjugations": {
+      "ich": "mache auf",
+      "du": "machst auf",
+      "er": "macht auf",
+      "wir": "machen auf",
+      "ihr": "macht auf",
+      "sie": "machen auf"
+    }
+  },
+  {
+    "id": "de-sep-10",
+    "category": "de-separable",
+    "hanzi": "zumachen",
+    "pinyin": "TSOO-makh-en",
+    "english": "to close",
+    "separable": {
+      "prefix": "zu",
+      "root": "machen"
+    },
+    "conjugations": {
+      "ich": "mache zu",
+      "du": "machst zu",
+      "er": "macht zu",
+      "wir": "machen zu",
+      "ihr": "macht zu",
+      "sie": "machen zu"
+    }
+  },
+  {
+    "id": "de-sep-11",
+    "category": "de-separable",
+    "hanzi": "ausgehen",
+    "pinyin": "OWS-gay-en",
+    "english": "to go out",
+    "separable": {
+      "prefix": "aus",
+      "root": "gehen"
+    },
+    "conjugations": {
+      "ich": "gehe aus",
+      "du": "gehst aus",
+      "er": "geht aus",
+      "wir": "gehen aus",
+      "ihr": "geht aus",
+      "sie": "gehen aus"
+    }
+  },
+  {
+    "id": "de-sep-12",
+    "category": "de-separable",
+    "hanzi": "zurückkommen",
+    "pinyin": "tsoo-RÜK-kom-en",
+    "english": "to come back",
+    "separable": {
+      "prefix": "zurück",
+      "root": "kommen"
+    },
+    "conjugations": {
+      "ich": "komme zurück",
+      "du": "kommst zurück",
+      "er": "kommt zurück",
+      "wir": "kommen zurück",
+      "ihr": "kommt zurück",
+      "sie": "kommen zurück"
+    }
+  },
+  {
+    "id": "de-col-16",
+    "category": "de-colors",
+    "hanzi": "hellblau",
+    "pinyin": "HELL-blow",
+    "english": "light blue"
+  },
+  {
+    "id": "de-col-17",
+    "category": "de-colors",
+    "hanzi": "dunkelblau",
+    "pinyin": "DOON-kel-blow",
+    "english": "dark blue"
+  },
+  {
+    "id": "de-col-18",
+    "category": "de-colors",
+    "hanzi": "silbern",
+    "pinyin": "ZIL-bern",
+    "english": "silver"
+  },
+  {
+    "id": "de-col-19",
+    "category": "de-colors",
+    "hanzi": "golden",
+    "pinyin": "GOL-den",
+    "english": "golden"
+  },
+  {
+    "id": "de-col-20",
+    "category": "de-colors",
+    "hanzi": "türkis",
+    "pinyin": "TUR-kiss",
+    "english": "turquoise"
+  },
+  {
+    "id": "de-food-19",
+    "category": "de-food",
+    "hanzi": "die Pasta",
+    "pinyin": "dee PAS-tah",
+    "english": "the pasta",
+    "gender": "die"
+  },
+  {
+    "id": "de-food-20",
+    "category": "de-food",
+    "hanzi": "die Pizza",
+    "pinyin": "dee PIT-sa",
+    "english": "the pizza",
+    "gender": "die",
+    "plural": "die Pizzen"
+  },
+  {
+    "id": "de-food-21",
+    "category": "de-food",
+    "hanzi": "der Salat",
+    "pinyin": "der ZA-laht",
+    "english": "the salad",
+    "gender": "der",
+    "plural": "die Salate"
+  },
+  {
+    "id": "de-food-22",
+    "category": "de-food",
+    "hanzi": "der Reis",
+    "pinyin": "der rice",
+    "english": "the rice",
+    "gender": "der"
+  },
+  {
+    "id": "de-food-23",
+    "category": "de-food",
+    "hanzi": "die Schokolade",
+    "pinyin": "dee shoh-koh-LAH-deh",
+    "english": "the chocolate",
+    "gender": "die",
+    "plural": "die Schokoladen"
+  },
+  {
+    "id": "de-food-24",
+    "category": "de-food",
+    "hanzi": "das Hähnchen",
+    "pinyin": "das HEN-khen",
+    "english": "the chicken (dish)",
+    "gender": "das",
+    "plural": "die Hähnchen"
+  },
+  {
+    "id": "de-food-25",
+    "category": "de-food",
+    "hanzi": "der Joghurt",
+    "pinyin": "der YOH-gurt",
+    "english": "the yoghurt",
+    "gender": "der"
+  },
+  {
+    "id": "de-food-26",
+    "category": "de-food",
+    "hanzi": "das Frühstück",
+    "pinyin": "das FRUH-shtuk",
+    "english": "the breakfast",
+    "gender": "das"
+  },
+  {
+    "id": "de-food-27",
+    "category": "de-food",
+    "hanzi": "das Mittagessen",
+    "pinyin": "das MIT-tahg-ess-en",
+    "english": "the lunch",
+    "gender": "das"
+  },
+  {
+    "id": "de-food-28",
+    "category": "de-food",
+    "hanzi": "das Abendessen",
+    "pinyin": "das AH-bent-ess-en",
+    "english": "the dinner",
+    "gender": "das"
+  },
+  {
+    "id": "de-food-29",
+    "category": "de-food",
+    "hanzi": "der Hunger",
+    "pinyin": "der HOON-ger",
+    "english": "the hunger",
+    "gender": "der"
+  },
+  {
+    "id": "de-food-30",
+    "category": "de-food",
+    "hanzi": "der Durst",
+    "pinyin": "der DOORST",
+    "english": "the thirst",
+    "gender": "der"
+  },
+  {
+    "id": "de-food-31",
+    "category": "de-food",
+    "hanzi": "lecker",
+    "pinyin": "LEK-er",
+    "english": "tasty / delicious"
+  },
+  {
+    "id": "de-food-32",
+    "category": "de-food",
+    "hanzi": "scharf",
+    "pinyin": "sharf",
+    "english": "spicy / sharp"
+  },
+  {
+    "id": "de-food-33",
+    "category": "de-food",
+    "hanzi": "süß",
+    "pinyin": "zoos",
+    "english": "sweet"
+  },
+  {
+    "id": "de-fam-15",
+    "category": "de-family",
+    "hanzi": "der Partner",
+    "pinyin": "der PART-ner",
+    "english": "the partner",
+    "gender": "der",
+    "plural": "die Partner"
+  },
+  {
+    "id": "de-fam-16",
+    "category": "de-family",
+    "hanzi": "der Schatz",
+    "pinyin": "der shats",
+    "english": "the treasure / the love",
+    "gender": "der",
+    "plural": "die Schätze"
+  },
+  {
+    "id": "de-fam-17",
+    "category": "de-family",
+    "hanzi": "der Liebling",
+    "pinyin": "der LEEB-ling",
+    "english": "the darling / the favourite",
+    "gender": "der",
+    "plural": "die Lieblinge"
+  },
+  {
+    "id": "de-fam-18",
+    "category": "de-family",
+    "hanzi": "die Eltern",
+    "pinyin": "dee EL-tern",
+    "english": "the parents",
+    "gender": "die",
+    "plural": "die Eltern"
+  },
+  {
+    "id": "de-fam-19",
+    "category": "de-family",
+    "hanzi": "die Geschwister",
+    "pinyin": "dee geh-SHVIS-ter",
+    "english": "the siblings",
+    "gender": "die",
+    "plural": "die Geschwister"
+  },
+  {
+    "id": "de-fam-20",
+    "category": "de-family",
+    "hanzi": "der Cousin",
+    "pinyin": "der koo-ZAN",
+    "english": "the cousin (m.)",
+    "gender": "der",
+    "plural": "die Cousins"
+  },
+  {
+    "id": "de-fam-21",
+    "category": "de-family",
+    "hanzi": "die Cousine",
+    "pinyin": "dee koo-ZEE-neh",
+    "english": "the cousin (f.)",
+    "gender": "die",
+    "plural": "die Cousinen"
+  },
+  {
+    "id": "de-fam-22",
+    "category": "de-family",
+    "hanzi": "die Tante",
+    "pinyin": "dee TAN-teh",
+    "english": "the aunt",
+    "gender": "die",
+    "plural": "die Tanten"
+  },
+  {
+    "id": "de-fam-23",
+    "category": "de-family",
+    "hanzi": "der Onkel",
+    "pinyin": "der ON-kel",
+    "english": "the uncle",
+    "gender": "der",
+    "plural": "die Onkel"
+  },
+  {
+    "id": "de-fam-24",
+    "category": "de-family",
+    "hanzi": "der Enkel",
+    "pinyin": "der EN-kel",
+    "english": "the grandchild / the grandson",
+    "gender": "der",
+    "plural": "die Enkel"
+  },
+  {
+    "id": "de-verb-19",
+    "category": "de-verbs",
+    "hanzi": "treffen",
+    "pinyin": "TREF-en",
+    "english": "to meet",
+    "conjugations": {
+      "ich": "treffe",
+      "du": "triffst",
+      "er": "trifft",
+      "wir": "treffen",
+      "ihr": "trefft",
+      "sie": "treffen"
+    },
+    "example": {
+      "de": "Wir treffen uns morgen.",
+      "en": "We're meeting tomorrow."
+    }
+  },
+  {
+    "id": "de-verb-20",
+    "category": "de-verbs",
+    "hanzi": "vermissen",
+    "pinyin": "fer-MIS-en",
+    "english": "to miss (someone)",
+    "conjugations": {
+      "ich": "vermisse",
+      "du": "vermissst",
+      "er": "vermisst",
+      "wir": "vermissen",
+      "ihr": "vermisst",
+      "sie": "vermissen"
+    },
+    "example": {
+      "de": "Ich vermisse dich.",
+      "en": "I miss you."
+    }
+  },
+  {
+    "id": "de-verb-21",
+    "category": "de-verbs",
+    "hanzi": "küssen",
+    "pinyin": "KUS-en",
+    "english": "to kiss",
+    "conjugations": {
+      "ich": "küsse",
+      "du": "küssst",
+      "er": "küsst",
+      "wir": "küssen",
+      "ihr": "küsst",
+      "sie": "küssen"
+    },
+    "example": {
+      "de": "Ich küsse dich.",
+      "en": "I kiss you."
+    }
+  },
+  {
+    "id": "de-verb-22",
+    "category": "de-verbs",
+    "hanzi": "umarmen",
+    "pinyin": "oom-AR-men",
+    "english": "to hug",
+    "conjugations": {
+      "ich": "umarme",
+      "du": "umarmst",
+      "er": "umarmt",
+      "wir": "umarmen",
+      "ihr": "umarmt",
+      "sie": "umarmen"
+    },
+    "example": {
+      "de": "Ich umarme dich.",
+      "en": "I hug you."
+    }
+  },
+  {
+    "id": "de-verb-23",
+    "category": "de-verbs",
+    "hanzi": "lachen",
+    "pinyin": "LAKH-en",
+    "english": "to laugh",
+    "conjugations": {
+      "ich": "lache",
+      "du": "lachst",
+      "er": "lacht",
+      "wir": "lachen",
+      "ihr": "lacht",
+      "sie": "lachen"
+    },
+    "example": {
+      "de": "Wir lachen viel.",
+      "en": "We laugh a lot."
+    }
+  },
+  {
+    "id": "de-verb-24",
+    "category": "de-verbs",
+    "hanzi": "weinen",
+    "pinyin": "VINE-en",
+    "english": "to cry",
+    "conjugations": {
+      "ich": "weine",
+      "du": "weinst",
+      "er": "weint",
+      "wir": "weinen",
+      "ihr": "weint",
+      "sie": "weinen"
+    },
+    "example": {
+      "de": "Sie weint.",
+      "en": "She is crying."
+    }
+  },
+  {
+    "id": "de-verb-25",
+    "category": "de-verbs",
+    "hanzi": "sich freuen",
+    "pinyin": "zikh FROY-en",
+    "english": "to be glad / look forward to",
+    "example": {
+      "de": "Ich freue mich auf dich.",
+      "en": "I'm looking forward to seeing you."
+    }
+  },
+  {
+    "id": "de-verb-26",
+    "category": "de-verbs",
+    "hanzi": "denken",
+    "pinyin": "DENK-en",
+    "english": "to think",
+    "conjugations": {
+      "ich": "denke",
+      "du": "denkst",
+      "er": "denkt",
+      "wir": "denken",
+      "ihr": "denkt",
+      "sie": "denken"
+    },
+    "example": {
+      "de": "Ich denke an dich.",
+      "en": "I'm thinking of you."
+    }
+  },
+  {
+    "id": "de-verb-27",
+    "category": "de-verbs",
+    "hanzi": "hoffen",
+    "pinyin": "HOF-en",
+    "english": "to hope",
+    "conjugations": {
+      "ich": "hoffe",
+      "du": "hoffst",
+      "er": "hofft",
+      "wir": "hoffen",
+      "ihr": "hofft",
+      "sie": "hoffen"
+    },
+    "example": {
+      "de": "Ich hoffe, du kommst.",
+      "en": "I hope you'll come."
+    }
+  },
+  {
+    "id": "de-verb-28",
+    "category": "de-verbs",
+    "hanzi": "vergessen",
+    "pinyin": "fer-GES-en",
+    "english": "to forget",
+    "conjugations": {
+      "ich": "vergesse",
+      "du": "vergisst",
+      "er": "vergisst",
+      "wir": "vergessen",
+      "ihr": "vergesst",
+      "sie": "vergessen"
+    },
+    "example": {
+      "de": "Ich vergesse dich nie.",
+      "en": "I'll never forget you."
+    }
+  },
+  {
+    "id": "de-verb-29",
+    "category": "de-verbs",
+    "hanzi": "sich erinnern",
+    "pinyin": "zikh er-IN-ern",
+    "english": "to remember",
+    "example": {
+      "de": "Ich erinnere mich an dich.",
+      "en": "I remember you."
+    }
+  },
+  {
+    "id": "de-verb-30",
+    "category": "de-verbs",
+    "hanzi": "erzählen",
+    "pinyin": "er-TSAY-len",
+    "english": "to tell / narrate",
+    "conjugations": {
+      "ich": "erzähle",
+      "du": "erzählst",
+      "er": "erzählt",
+      "wir": "erzählen",
+      "ihr": "erzählt",
+      "sie": "erzählen"
+    },
+    "example": {
+      "de": "Erzähl mir mehr.",
+      "en": "Tell me more."
+    }
+  },
+  {
+    "id": "de-verb-31",
+    "category": "de-verbs",
+    "hanzi": "träumen",
+    "pinyin": "TROY-men",
+    "english": "to dream",
+    "conjugations": {
+      "ich": "träume",
+      "du": "träumst",
+      "er": "träumt",
+      "wir": "träumen",
+      "ihr": "träumt",
+      "sie": "träumen"
+    },
+    "example": {
+      "de": "Ich träume von dir.",
+      "en": "I dream of you."
+    }
+  },
+  {
+    "id": "de-verb-32",
+    "category": "de-verbs",
+    "hanzi": "planen",
+    "pinyin": "PLAH-nen",
+    "english": "to plan",
+    "conjugations": {
+      "ich": "plane",
+      "du": "planst",
+      "er": "plant",
+      "wir": "planen",
+      "ihr": "plant",
+      "sie": "planen"
+    },
+    "example": {
+      "de": "Wir planen ein Wochenende.",
+      "en": "We're planning a weekend."
+    }
+  },
+  {
+    "id": "de-verb-33",
+    "category": "de-verbs",
+    "hanzi": "fühlen",
+    "pinyin": "FUE-len",
+    "english": "to feel",
+    "conjugations": {
+      "ich": "fühle",
+      "du": "fühlst",
+      "er": "fühlt",
+      "wir": "fühlen",
+      "ihr": "fühlt",
+      "sie": "fühlen"
+    },
+    "example": {
+      "de": "Wie fühlst du dich?",
+      "en": "How do you feel?"
+    }
+  },
+  {
+    "id": "de-time-16",
+    "category": "de-time",
+    "hanzi": "das Wochenende",
+    "pinyin": "das VOKH-en-en-deh",
+    "english": "the weekend",
+    "gender": "das",
+    "plural": "die Wochenenden"
+  },
+  {
+    "id": "de-time-17",
+    "category": "de-time",
+    "hanzi": "der Urlaub",
+    "pinyin": "der OOR-lowp",
+    "english": "the holiday / vacation",
+    "gender": "der",
+    "plural": "die Urlaube"
+  },
+  {
+    "id": "de-time-18",
+    "category": "de-time",
+    "hanzi": "der Geburtstag",
+    "pinyin": "der geh-BOORTS-tahg",
+    "english": "the birthday",
+    "gender": "der",
+    "plural": "die Geburtstage"
+  },
+  {
+    "id": "de-time-19",
+    "category": "de-time",
+    "hanzi": "gleich",
+    "pinyin": "glykh",
+    "english": "shortly / right away"
+  },
+  {
+    "id": "de-time-20",
+    "category": "de-time",
+    "hanzi": "früh",
+    "pinyin": "frue",
+    "english": "early"
+  },
+  {
+    "id": "de-time-21",
+    "category": "de-time",
+    "hanzi": "spät",
+    "pinyin": "shpate",
+    "english": "late"
+  },
+  {
+    "id": "de-time-22",
+    "category": "de-time",
+    "hanzi": "oft",
+    "pinyin": "oft",
+    "english": "often"
+  },
+  {
+    "id": "de-time-23",
+    "category": "de-time",
+    "hanzi": "manchmal",
+    "pinyin": "MANKH-mahl",
+    "english": "sometimes"
+  },
+  {
+    "id": "de-time-24",
+    "category": "de-time",
+    "hanzi": "immer",
+    "pinyin": "IM-er",
+    "english": "always"
+  },
+  {
+    "id": "de-time-25",
+    "category": "de-time",
+    "hanzi": "nie",
+    "pinyin": "nee",
+    "english": "never"
+  },
+  {
+    "id": "de-time-26",
+    "category": "de-time",
+    "hanzi": "bald",
+    "pinyin": "balt",
+    "english": "soon"
+  },
+  {
+    "id": "de-time-27",
+    "category": "de-time",
+    "hanzi": "vorgestern",
+    "pinyin": "FOR-ges-tern",
+    "english": "the day before yesterday"
+  },
+  {
+    "id": "de-time-28",
+    "category": "de-time",
+    "hanzi": "übermorgen",
+    "pinyin": "UE-ber-mor-gen",
+    "english": "the day after tomorrow"
+  },
+  {
+    "id": "de-time-29",
+    "category": "de-time",
+    "hanzi": "der Morgen",
+    "pinyin": "der MOR-gen",
+    "english": "the morning",
+    "gender": "der",
+    "plural": "die Morgen"
+  },
+  {
+    "id": "de-time-30",
+    "category": "de-time",
+    "hanzi": "der Abend",
+    "pinyin": "der AH-bent",
+    "english": "the evening",
+    "gender": "der",
+    "plural": "die Abende"
+  },
+  {
+    "id": "de-modal-01",
+    "category": "de-modals",
+    "hanzi": "dürfen",
+    "pinyin": "DUR-fen",
+    "english": "to be allowed to / may",
+    "conjugations": {
+      "ich": "darf",
+      "du": "darfst",
+      "er": "darf",
+      "wir": "dürfen",
+      "ihr": "dürft",
+      "sie": "dürfen"
+    },
+    "example": {
+      "de": "Darf ich rein?",
+      "en": "May I come in?"
+    }
+  },
+  {
+    "id": "de-modal-02",
+    "category": "de-modals",
+    "hanzi": "sollen",
+    "pinyin": "ZOL-en",
+    "english": "to be supposed to / should",
+    "conjugations": {
+      "ich": "soll",
+      "du": "sollst",
+      "er": "soll",
+      "wir": "sollen",
+      "ihr": "sollt",
+      "sie": "sollen"
+    },
+    "example": {
+      "de": "Du sollst schlafen.",
+      "en": "You should sleep."
+    }
+  },
+  {
+    "id": "de-modal-03",
+    "category": "de-modals",
+    "hanzi": "mögen",
+    "pinyin": "MEU-gen",
+    "english": "to like",
+    "conjugations": {
+      "ich": "mag",
+      "du": "magst",
+      "er": "mag",
+      "wir": "mögen",
+      "ihr": "mögt",
+      "sie": "mögen"
+    },
+    "example": {
+      "de": "Ich mag dich.",
+      "en": "I like you."
+    }
+  },
+  {
+    "id": "de-modal-04",
+    "category": "de-modals",
+    "hanzi": "Ich kann Deutsch sprechen.",
+    "pinyin": "",
+    "english": "I can speak German."
+  },
+  {
+    "id": "de-modal-05",
+    "category": "de-modals",
+    "hanzi": "Kannst du mir helfen?",
+    "pinyin": "",
+    "english": "Can you help me?"
+  },
+  {
+    "id": "de-modal-06",
+    "category": "de-modals",
+    "hanzi": "Ich muss jetzt gehen.",
+    "pinyin": "",
+    "english": "I have to go now."
+  },
+  {
+    "id": "de-modal-07",
+    "category": "de-modals",
+    "hanzi": "Was möchtest du essen?",
+    "pinyin": "",
+    "english": "What would you like to eat?"
+  },
+  {
+    "id": "de-modal-08",
+    "category": "de-modals",
+    "hanzi": "Ich will dich sehen.",
+    "pinyin": "",
+    "english": "I want to see you."
+  },
+  {
+    "id": "de-modal-09",
+    "category": "de-modals",
+    "hanzi": "Du solltest mehr schlafen.",
+    "pinyin": "",
+    "english": "You should sleep more."
+  },
+  {
+    "id": "de-modal-10",
+    "category": "de-modals",
+    "hanzi": "Wir können zusammen kochen.",
+    "pinyin": "",
+    "english": "We can cook together."
+  },
+  {
+    "id": "de-modal-11",
+    "category": "de-modals",
+    "hanzi": "Ich darf Wein trinken.",
+    "pinyin": "",
+    "english": "I'm allowed to drink wine."
+  },
+  {
+    "id": "de-modal-12",
+    "category": "de-modals",
+    "hanzi": "Magst du Schokolade?",
+    "pinyin": "",
+    "english": "Do you like chocolate?"
+  },
+  {
+    "id": "de-modal-13",
+    "category": "de-modals",
+    "hanzi": "Möchtest du Kaffee?",
+    "pinyin": "",
+    "english": "Would you like coffee?"
+  },
+  {
+    "id": "de-perf-01",
+    "category": "de-perfekt",
+    "hanzi": "Ich habe gegessen.",
+    "pinyin": "",
+    "english": "I have eaten."
+  },
+  {
+    "id": "de-perf-02",
+    "category": "de-perfekt",
+    "hanzi": "Wir sind nach Berlin gefahren.",
+    "pinyin": "",
+    "english": "We went to Berlin."
+  },
+  {
+    "id": "de-perf-03",
+    "category": "de-perfekt",
+    "hanzi": "Hast du gut geschlafen?",
+    "pinyin": "",
+    "english": "Did you sleep well?"
+  },
+  {
+    "id": "de-perf-04",
+    "category": "de-perfekt",
+    "hanzi": "Ich habe dich vermisst.",
+    "pinyin": "",
+    "english": "I missed you."
+  },
+  {
+    "id": "de-perf-05",
+    "category": "de-perfekt",
+    "hanzi": "Was hast du gemacht?",
+    "pinyin": "",
+    "english": "What did you do?"
+  },
+  {
+    "id": "de-perf-06",
+    "category": "de-perfekt",
+    "hanzi": "Ich bin spät aufgestanden.",
+    "pinyin": "",
+    "english": "I got up late."
+  },
+  {
+    "id": "de-perf-07",
+    "category": "de-perfekt",
+    "hanzi": "Sie hat den Film gesehen.",
+    "pinyin": "",
+    "english": "She has seen the film."
+  },
+  {
+    "id": "de-perf-08",
+    "category": "de-perfekt",
+    "hanzi": "Ich habe Deutsch gelernt.",
+    "pinyin": "",
+    "english": "I have learnt German."
+  },
+  {
+    "id": "de-perf-09",
+    "category": "de-perfekt",
+    "hanzi": "Wir haben zusammen gekocht.",
+    "pinyin": "",
+    "english": "We cooked together."
+  },
+  {
+    "id": "de-perf-10",
+    "category": "de-perfekt",
+    "hanzi": "Bist du müde geworden?",
+    "pinyin": "",
+    "english": "Did you get tired?"
+  },
+  {
+    "id": "de-perf-11",
+    "category": "de-perfekt",
+    "hanzi": "Ich habe dich angerufen.",
+    "pinyin": "",
+    "english": "I called you."
+  },
+  {
+    "id": "de-perf-12",
+    "category": "de-perfekt",
+    "hanzi": "Hast du das Buch gelesen?",
+    "pinyin": "",
+    "english": "Have you read the book?"
+  },
+  {
+    "id": "de-perf-13",
+    "category": "de-perfekt",
+    "hanzi": "Wir sind ins Kino gegangen.",
+    "pinyin": "",
+    "english": "We went to the cinema."
+  },
+  {
+    "id": "de-perf-14",
+    "category": "de-perfekt",
+    "hanzi": "Ich habe Kaffee getrunken.",
+    "pinyin": "",
+    "english": "I drank coffee."
+  },
+  {
+    "id": "de-perf-15",
+    "category": "de-perfekt",
+    "hanzi": "Was hast du heute gemacht?",
+    "pinyin": "",
+    "english": "What did you do today?"
+  },
+  {
+    "id": "de-perf-16",
+    "category": "de-perfekt",
+    "hanzi": "Ich habe an dich gedacht.",
+    "pinyin": "",
+    "english": "I thought about you."
+  },
+  {
+    "id": "de-adj-01",
+    "category": "de-adjektive",
+    "hanzi": "Die schöne Frau ist hier.",
+    "pinyin": "",
+    "english": "The beautiful woman is here."
+  },
+  {
+    "id": "de-adj-02",
+    "category": "de-adjektive",
+    "hanzi": "Der liebe Mann kommt.",
+    "pinyin": "",
+    "english": "The kind man is coming."
+  },
+  {
+    "id": "de-adj-03",
+    "category": "de-adjektive",
+    "hanzi": "Das kleine Kind schläft.",
+    "pinyin": "",
+    "english": "The little child is sleeping."
+  },
+  {
+    "id": "de-adj-04",
+    "category": "de-adjektive",
+    "hanzi": "Ich sehe die schöne Frau.",
+    "pinyin": "",
+    "english": "I see the beautiful woman."
+  },
+  {
+    "id": "de-adj-05",
+    "category": "de-adjektive",
+    "hanzi": "Ich sehe den lieben Mann.",
+    "pinyin": "",
+    "english": "I see the kind man."
+  },
+  {
+    "id": "de-adj-06",
+    "category": "de-adjektive",
+    "hanzi": "Ich sehe das kleine Kind.",
+    "pinyin": "",
+    "english": "I see the little child."
+  },
+  {
+    "id": "de-adj-07",
+    "category": "de-adjektive",
+    "hanzi": "Mit der schönen Frau.",
+    "pinyin": "",
+    "english": "With the beautiful woman."
+  },
+  {
+    "id": "de-adj-08",
+    "category": "de-adjektive",
+    "hanzi": "Mit dem lieben Mann.",
+    "pinyin": "",
+    "english": "With the kind man."
+  },
+  {
+    "id": "de-adj-09",
+    "category": "de-adjektive",
+    "hanzi": "Mit dem kleinen Kind.",
+    "pinyin": "",
+    "english": "With the little child."
+  },
+  {
+    "id": "de-adj-10",
+    "category": "de-adjektive",
+    "hanzi": "Eine schöne Frau ist hier.",
+    "pinyin": "",
+    "english": "A beautiful woman is here."
+  },
+  {
+    "id": "de-adj-11",
+    "category": "de-adjektive",
+    "hanzi": "Ein lieber Mann.",
+    "pinyin": "",
+    "english": "A kind man."
+  },
+  {
+    "id": "de-adj-12",
+    "category": "de-adjektive",
+    "hanzi": "Ein kleines Kind.",
+    "pinyin": "",
+    "english": "A little child."
+  },
+  {
+    "id": "de-adj-13",
+    "category": "de-adjektive",
+    "hanzi": "Mein lieber Schatz.",
+    "pinyin": "",
+    "english": "My dear love."
+  },
+  {
+    "id": "de-adj-14",
+    "category": "de-adjektive",
+    "hanzi": "Meine süße Freundin.",
+    "pinyin": "",
+    "english": "My sweet girlfriend."
+  },
+  {
+    "id": "de-adj-15",
+    "category": "de-adjektive",
+    "hanzi": "Ein guter Tag.",
+    "pinyin": "",
+    "english": "A good day."
+  },
+  {
+    "id": "de-adj-16",
+    "category": "de-adjektive",
+    "hanzi": "Mit meiner besten Freundin.",
+    "pinyin": "",
+    "english": "With my best (girl)friend."
+  },
+  {
+    "id": "de-wechsel-01",
+    "category": "de-wechsel",
+    "hanzi": "Ich gehe in die Küche.",
+    "pinyin": "",
+    "english": "I'm going into the kitchen."
+  },
+  {
+    "id": "de-wechsel-02",
+    "category": "de-wechsel",
+    "hanzi": "Ich bin in der Küche.",
+    "pinyin": "",
+    "english": "I am in the kitchen."
+  },
+  {
+    "id": "de-wechsel-03",
+    "category": "de-wechsel",
+    "hanzi": "Das Buch liegt auf dem Tisch.",
+    "pinyin": "",
+    "english": "The book is on the table."
+  },
+  {
+    "id": "de-wechsel-04",
+    "category": "de-wechsel",
+    "hanzi": "Ich lege das Buch auf den Tisch.",
+    "pinyin": "",
+    "english": "I put the book on the table."
+  },
+  {
+    "id": "de-wechsel-05",
+    "category": "de-wechsel",
+    "hanzi": "Wir gehen in den Park.",
+    "pinyin": "",
+    "english": "We're going to the park."
+  },
+  {
+    "id": "de-wechsel-06",
+    "category": "de-wechsel",
+    "hanzi": "Wir sind im Park.",
+    "pinyin": "",
+    "english": "We are in the park."
+  },
+  {
+    "id": "de-wechsel-07",
+    "category": "de-wechsel",
+    "hanzi": "Sie sitzt vor dem Fenster.",
+    "pinyin": "",
+    "english": "She is sitting in front of the window."
+  },
+  {
+    "id": "de-wechsel-08",
+    "category": "de-wechsel",
+    "hanzi": "Ich stelle es vor das Fenster.",
+    "pinyin": "",
+    "english": "I'm placing it in front of the window."
+  },
+  {
+    "id": "de-wechsel-09",
+    "category": "de-wechsel",
+    "hanzi": "Die Lampe hängt über dem Bett.",
+    "pinyin": "",
+    "english": "The lamp hangs above the bed."
+  },
+  {
+    "id": "de-wechsel-10",
+    "category": "de-wechsel",
+    "hanzi": "Ich hänge die Lampe über das Bett.",
+    "pinyin": "",
+    "english": "I'm hanging the lamp above the bed."
+  },
+  {
+    "id": "de-wechsel-11",
+    "category": "de-wechsel",
+    "hanzi": "Der Hund ist unter dem Tisch.",
+    "pinyin": "",
+    "english": "The dog is under the table."
+  },
+  {
+    "id": "de-wechsel-12",
+    "category": "de-wechsel",
+    "hanzi": "Der Hund läuft unter den Tisch.",
+    "pinyin": "",
+    "english": "The dog runs under the table."
+  },
+  {
+    "id": "de-wechsel-13",
+    "category": "de-wechsel",
+    "hanzi": "Ich warte vor der Tür.",
+    "pinyin": "",
+    "english": "I'm waiting in front of the door."
+  },
+  {
+    "id": "de-wechsel-14",
+    "category": "de-wechsel",
+    "hanzi": "Ich gehe an den Strand.",
+    "pinyin": "",
+    "english": "I'm going to the beach."
+  },
+  {
+    "id": "de-wechsel-15",
+    "category": "de-wechsel",
+    "hanzi": "Ich bin am Strand.",
+    "pinyin": "",
+    "english": "I am at the beach."
+  },
+  {
+    "id": "de-wechsel-16",
+    "category": "de-wechsel",
+    "hanzi": "Wir treffen uns zwischen den Häusern.",
+    "pinyin": "",
+    "english": "We're meeting between the houses."
+  },
+  {
+    "id": "de-talk-01",
+    "category": "de-smalltalk",
+    "hanzi": "Wie war dein Tag?",
+    "pinyin": "",
+    "english": "How was your day?"
+  },
+  {
+    "id": "de-talk-02",
+    "category": "de-smalltalk",
+    "hanzi": "Was möchtest du essen?",
+    "pinyin": "",
+    "english": "What would you like to eat?"
+  },
+  {
+    "id": "de-talk-03",
+    "category": "de-smalltalk",
+    "hanzi": "Ich vermisse dich.",
+    "pinyin": "",
+    "english": "I miss you."
+  },
+  {
+    "id": "de-talk-04",
+    "category": "de-smalltalk",
+    "hanzi": "Ich liebe dich.",
+    "pinyin": "",
+    "english": "I love you."
+  },
+  {
+    "id": "de-talk-05",
+    "category": "de-smalltalk",
+    "hanzi": "Bist du müde?",
+    "pinyin": "",
+    "english": "Are you tired?"
+  },
+  {
+    "id": "de-talk-06",
+    "category": "de-smalltalk",
+    "hanzi": "Hast du Hunger?",
+    "pinyin": "",
+    "english": "Are you hungry?"
+  },
+  {
+    "id": "de-talk-07",
+    "category": "de-smalltalk",
+    "hanzi": "Sollen wir zusammen kochen?",
+    "pinyin": "",
+    "english": "Shall we cook together?"
+  },
+  {
+    "id": "de-talk-08",
+    "category": "de-smalltalk",
+    "hanzi": "Was machst du heute Abend?",
+    "pinyin": "",
+    "english": "What are you doing tonight?"
+  },
+  {
+    "id": "de-talk-09",
+    "category": "de-smalltalk",
+    "hanzi": "Können wir reden?",
+    "pinyin": "",
+    "english": "Can we talk?"
+  },
+  {
+    "id": "de-talk-10",
+    "category": "de-smalltalk",
+    "hanzi": "Ich freue mich auf dich.",
+    "pinyin": "",
+    "english": "I'm looking forward to seeing you."
+  },
+  {
+    "id": "de-talk-11",
+    "category": "de-smalltalk",
+    "hanzi": "Ich denke an dich.",
+    "pinyin": "",
+    "english": "I'm thinking of you."
+  },
+  {
+    "id": "de-talk-12",
+    "category": "de-smalltalk",
+    "hanzi": "Schlaf gut.",
+    "pinyin": "",
+    "english": "Sleep well."
+  },
+  {
+    "id": "de-talk-13",
+    "category": "de-smalltalk",
+    "hanzi": "Träum süß.",
+    "pinyin": "",
+    "english": "Sweet dreams."
+  },
+  {
+    "id": "de-talk-14",
+    "category": "de-smalltalk",
+    "hanzi": "Bis bald.",
+    "pinyin": "",
+    "english": "See you soon."
+  },
+  {
+    "id": "de-talk-15",
+    "category": "de-smalltalk",
+    "hanzi": "Bis morgen.",
+    "pinyin": "",
+    "english": "See you tomorrow."
+  },
+  {
+    "id": "de-talk-16",
+    "category": "de-smalltalk",
+    "hanzi": "Pass auf dich auf.",
+    "pinyin": "",
+    "english": "Take care."
+  },
+  {
+    "id": "de-talk-17",
+    "category": "de-smalltalk",
+    "hanzi": "Ich bin gleich da.",
+    "pinyin": "",
+    "english": "I'll be there shortly."
+  },
+  {
+    "id": "de-talk-18",
+    "category": "de-smalltalk",
+    "hanzi": "Komm her.",
+    "pinyin": "",
+    "english": "Come here."
+  },
+  {
+    "id": "de-talk-19",
+    "category": "de-smalltalk",
+    "hanzi": "Du fehlst mir.",
+    "pinyin": "",
+    "english": "You are missed."
+  },
+  {
+    "id": "de-talk-20",
+    "category": "de-smalltalk",
+    "hanzi": "Ich hab dich lieb.",
+    "pinyin": "",
+    "english": "I love you (softer)."
+  }
 ]

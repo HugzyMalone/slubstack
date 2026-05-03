@@ -6,6 +6,7 @@ import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
 import { speak, cardLang } from "@/lib/speech";
 import { germanFold } from "@/lib/german";
+import { classifyAnswer } from "@/lib/fuzzy";
 import { meaningOf, useNativeLanguage } from "@/lib/native";
 import { CardFooter } from "./CardShell";
 
@@ -13,6 +14,7 @@ type Props = {
   card: Card;
   onResult: (r: { quality: Quality; correct: boolean; firstTry: boolean }) => void;
   onFeedback?: (correct: boolean) => void;
+  strictTypos?: boolean;
 };
 
 const PRONOUNS = ["ich", "du", "er", "wir", "ihr", "sie"] as const;
@@ -33,7 +35,7 @@ function normalise(s: string) {
   return germanFold(s.trim()).replace(/[^\p{L}\s]/gu, "").replace(/\s+/g, " ");
 }
 
-export function Conjugate({ card, onResult, onFeedback }: Props) {
+export function Conjugate({ card, onResult, onFeedback, strictTypos = true }: Props) {
   const native = useNativeLanguage();
   const conj = card.conjugations;
 
@@ -51,7 +53,10 @@ export function Conjugate({ card, onResult, onFeedback }: Props) {
   const [firstTryFailed, setFirstTryFailed] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const correct = normalise(value) === normalise(expected);
+  const accepted = [normalise(expected)].filter(Boolean);
+  const classification = classifyAnswer(normalise(value), accepted, { strict: strictTypos });
+  const isNearMissOnFirstTry = classification === "near" && !firstTryFailed;
+  const isCorrect = classification === "exact" || isNearMissOnFirstTry;
 
   function insertChar(ch: string) {
     const el = inputRef.current;
@@ -69,10 +74,10 @@ export function Conjugate({ card, onResult, onFeedback }: Props) {
 
   function submit() {
     if (submitted) {
-      onResult({ quality: correct ? (firstTryFailed ? 2 : 4) : 0, correct, firstTry: !firstTryFailed });
+      onResult({ quality: isCorrect ? (firstTryFailed ? 2 : 4) : 0, correct: isCorrect, firstTry: !firstTryFailed });
       return;
     }
-    if (correct) {
+    if (isCorrect) {
       setSubmitted(true);
       onFeedback?.(true);
       return;
@@ -157,12 +162,18 @@ export function Conjugate({ card, onResult, onFeedback }: Props) {
 
       {submitted && (
         <CardFooter
-          variant={correct ? "correct" : "wrong"}
+          variant={isCorrect ? "correct" : "wrong"}
           feedback={
-            correct ? (
-              <span className="font-bold text-success">
-                Correct — {pronoun} {expected}
-              </span>
+            isCorrect ? (
+              isNearMissOnFirstTry ? (
+                <span className="font-bold text-success">
+                  Almost — correct spelling: {pronoun} {expected}
+                </span>
+              ) : (
+                <span className="font-bold text-success">
+                  Correct — {pronoun} {expected}
+                </span>
+              )
             ) : (
               <span className="font-bold text-game">
                 Answer: {pronoun} {expected}

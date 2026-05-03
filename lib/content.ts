@@ -52,6 +52,7 @@ export type Card = {
   measureWord?: string;
   priority?: boolean;
   recognitionOnly?: boolean;
+  glosses?: Record<string, string>;
 };
 
 export type Unit = {
@@ -67,6 +68,13 @@ export type Unit = {
 
 export type Language = "mandarin" | "german" | "spanish" | "vibe-coding";
 
+export function langFromCardId(id: string): Language {
+  if (id.startsWith("de-")) return "german";
+  if (id.startsWith("es-")) return "spanish";
+  if (id.startsWith("vc-")) return "vibe-coding";
+  return "mandarin";
+}
+
 export type LanguageContent = {
   cards: Card[];
   units: Unit[];
@@ -74,12 +82,14 @@ export type LanguageContent = {
   getCardsForUnit: (unitId: string) => Card[];
   getUnit: (id: string) => Unit | undefined;
   allowedInteractions: InteractionKind[];
+  kindWeights?: Partial<Record<InteractionKind, number>>;
 };
 
 function buildContent(
   vocab: unknown[],
   unitList: unknown[],
   allowedInteractions: InteractionKind[],
+  kindWeights?: Partial<Record<InteractionKind, number>>,
 ): LanguageContent {
   const cards = vocab as Card[];
   const units = unitList as Unit[];
@@ -104,6 +114,7 @@ function buildContent(
     },
     getUnit: (id) => units.find((u) => u.id === id),
     allowedInteractions,
+    kindWeights,
   };
 }
 
@@ -117,6 +128,7 @@ const GERMAN_CONTENT = buildContent(
   germanVocab,
   germanUnits,
   ["multiple-choice", "type", "match", "gender-pick", "case-pick", "plural-drill", "conjugate"],
+  { type: 2, "multiple-choice": 1, match: 1 },
 );
 
 const SPANISH_CONTENT = buildContent(

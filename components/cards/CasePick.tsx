@@ -5,10 +5,12 @@ import { motion } from "framer-motion";
 import { Volume2 } from "lucide-react";
 import type { Card, GermanCase } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
+import { langFromCardId } from "@/lib/content";
 import { speak, cardLang } from "@/lib/speech";
 import { CASE_LABELS, cardNoun, cardGender, GENDER_COLORS } from "@/lib/german";
 import { shuffle, cn } from "@/lib/utils";
 import { meaningOf, useNativeLanguage } from "@/lib/native";
+import { Tappable } from "@/components/Tappable";
 import { CardFooter } from "./CardShell";
 
 type Props = {
@@ -79,7 +81,9 @@ export function CasePick({ card, onResult, onFeedback }: Props) {
       </div>
 
       <div className="mx-auto mt-2 max-w-sm rounded-3xl border border-border bg-surface px-5 py-4 text-center relative">
-        <div className="hanzi text-2xl w-full break-words leading-snug text-fg">{sentence}</div>
+        <div className="hanzi text-2xl w-full break-words leading-snug text-fg">
+          <Tappable text={sentence} card={card} lang={langFromCardId(card.id)} />
+        </div>
         <div className="mt-2 text-sm text-muted">{meaningOf(card, native)}</div>
         <button
           onClick={() => speak(sentence.replace("___", correctArticle), cardLang(card.id))}

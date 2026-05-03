@@ -38,14 +38,14 @@ type Lang = {
 
 const LANGUAGES: Lang[] = [
   {
-    code: "es",
-    href: "/spanish",
-    badge: "ES",
-    title: "Spanish",
-    description: "Match, quiz & type through the core vocab tree.",
-    meta: "5 units · 75 words",
-    gradient: "linear-gradient(135deg, #c2410c 0%, #ea580c 100%)",
-    xpKey: "spanish",
+    code: "de",
+    href: "/german",
+    badge: "DE",
+    title: "German",
+    description: "Gender, cases, verbs — grammar-first drills.",
+    meta: "18 units · 287 cards",
+    gradient: "linear-gradient(135deg, #c2410c 0%, #f97316 100%)",
+    xpKey: "german",
   },
   {
     code: "zh",
@@ -62,14 +62,14 @@ const LANGUAGES: Lang[] = [
     ],
   },
   {
-    code: "de",
-    href: "/german",
-    badge: "DE",
-    title: "German",
-    description: "Gender, cases, verbs — grammar-first drills.",
-    meta: "7 units · 111 cards",
-    gradient: "linear-gradient(135deg, #c2410c 0%, #f97316 100%)",
-    xpKey: "german",
+    code: "es",
+    href: "/spanish",
+    badge: "ES",
+    title: "Spanish",
+    description: "Match, quiz & type through the core vocab tree.",
+    meta: "8 units · 116 cards",
+    gradient: "linear-gradient(135deg, #c2410c 0%, #ea580c 100%)",
+    xpKey: "spanish",
   },
 ];
 

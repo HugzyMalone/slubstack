@@ -9,6 +9,7 @@ import type { PandaMood } from "@/components/Panda";
 import { useGameStore } from "@/lib/store";
 import { globalStore } from "@/lib/globalStore";
 import { heartsStore, useHeartsStore } from "@/lib/heartsStore";
+import { hintTracker } from "@/lib/hintTracker";
 import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
 import { playCorrect, playWrong, playHeartLoss, playStreakSave } from "@/lib/sound";
@@ -55,6 +56,10 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
     heartsStore.getState().applyRegen();
   }, []);
 
+  useEffect(() => {
+    hintTracker.getState().reset();
+  }, [index]);
+
   const handleFeedback = useCallback((correct: boolean) => {
     setPandaMood(correct ? "happy" : "wrong");
     if (correct) {
@@ -64,6 +69,7 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
     }
     playWrong();
     hapticFail();
+    if (!unitId) return;
     const activeStreak = globalStore.getState().streak > 0;
     if (activeStreak && !shieldUsedThisLesson) {
       setShieldUsedThisLesson(true);
@@ -73,12 +79,14 @@ export function SessionRunner({ items, unitId, exitHref = "/", reviewHref = "/re
     heartsStore.getState().loseHeart();
     playHeartLoss();
     tapMedium();
-  }, [shieldUsedThisLesson]);
+  }, [shieldUsedThisLesson, unitId]);
 
   const handleResult = useCallback(
     (r: { quality: Quality; correct: boolean; firstTry: boolean }) => {
       const item = items[index];
-      rateCard(item.card.id, r.quality);
+      const hintUsed = hintTracker.getState().consume();
+      const quality: Quality = hintUsed && r.quality > 2 ? 2 : r.quality;
+      rateCard(item.card.id, quality);
       if (r.correct) {
         setTotalCorrect((n) => n + 1);
         if (r.firstTry) setFirstTryCorrect((n) => n + 1);

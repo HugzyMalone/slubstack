@@ -42,6 +42,8 @@ yarn-error.log*
 
 # claude / agent local state
 .claude/
+.codex/
+.mcp.json
 
 # supabase CLI local state
 supabase/.temp/
