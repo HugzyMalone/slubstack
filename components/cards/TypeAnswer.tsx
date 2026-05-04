@@ -188,7 +188,7 @@ export function TypeAnswer({ card, onResult, onFeedback, umlautBar = false, stri
           feedback={
             isCorrect ? (
               isNearMissOnFirstTry ? (
-                <span className="font-bold text-success">
+                <span className="font-bold text-success" data-testid="near-miss-pill">
                   Almost — correct spelling: {canonical}
                 </span>
               ) : (

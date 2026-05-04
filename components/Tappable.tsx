@@ -140,6 +140,7 @@ function HintPopover({ word, card, lang, anchor, onClose }: PopoverProps) {
     <AnimatePresence>
       <motion.div
         ref={popRef}
+        data-testid="hint-popover"
         initial={{ opacity: 0, scale: 0.9, y: 4 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 4 }}
