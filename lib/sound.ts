@@ -169,3 +169,22 @@ export function playStreakSave() {
   void playTone(440.00, 0,    0.36, 0.26, "triangle"); // A4
   void playTone(659.25, 0,    0.36, 0.22, "triangle"); // E5
 }
+
+export function playWordleTap() {
+  if (isMuted()) return;
+  void playTone(880.00, 0, 0.03, 0.10, "square");
+}
+
+export function playWordleSubmit() {
+  if (isMuted()) return;
+  void playTone(523.25, 0,    0.18, 0.22, "triangle"); // C5
+  void playTone(659.25, 0.06, 0.18, 0.20, "triangle"); // E5
+  void playTone(783.99, 0.12, 0.20, 0.20, "triangle"); // G5
+}
+
+export function playWordleInvalid() {
+  if (isMuted()) return;
+  void playTone(220.00, 0, 0.14, 0.30, "sawtooth");
+  void playTone(207.65, 0, 0.16, 0.24, "sawtooth");
+  void playNoiseBurst(0.02, 0.08, 0.14);
+}

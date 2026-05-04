@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import {
   Flame, Zap, Trophy, Lock, Mail, Eye, EyeOff, Camera,
-  User, Settings, BarChart3, Users, Volume2, Vibrate,
+  User, Settings, BarChart3, Users, Volume2, Vibrate, Target,
 } from "lucide-react";
 import { isMuted as isSoundMuted, setMuted as setSoundMuted } from "@/lib/sound";
 import { isHapticMuted, setHapticMuted } from "@/lib/haptics";
@@ -827,6 +827,41 @@ function FeedbackSection() {
   );
 }
 
+// ── WordleSettingsSection (Hard mode) ──────────────────────────────────────
+
+const WORDLE_HARD_KEY = "slubstack_wordle_hard";
+
+function WordleSettingsSection() {
+  const hydrated = useHydrated();
+  const [hard, setHard] = useState(false);
+
+  useEffect(() => {
+    try { setHard(localStorage.getItem(WORDLE_HARD_KEY) === "1"); } catch {}
+  }, []);
+
+  if (!hydrated) return null;
+
+  return (
+    <section className="rounded-2xl border border-border bg-surface overflow-hidden">
+      <div className="px-4 py-3 border-b border-border">
+        <h3 className="text-sm font-semibold">Wordle</h3>
+      </div>
+      <div className="divide-y divide-border">
+        <FeedbackToggle
+          icon={<Target size={16} />}
+          label="Hard mode"
+          hint="Revealed hints must be reused in subsequent guesses"
+          value={hard}
+          onChange={(v) => {
+            setHard(v);
+            try { localStorage.setItem(WORDLE_HARD_KEY, v ? "1" : "0"); } catch {}
+          }}
+        />
+      </div>
+    </section>
+  );
+}
+
 // ── SettingsTab ────────────────────────────────────────────────────────────
 
 function SettingsTab({
@@ -1080,6 +1115,9 @@ function SettingsTab({
 
       {/* Audio & feedback */}
       <FeedbackSection />
+
+      {/* Wordle settings */}
+      <WordleSettingsSection />
 
       {/* Account actions */}
       <section className="rounded-2xl border border-border bg-surface overflow-hidden">

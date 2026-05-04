@@ -160,3 +160,7 @@ export function getDailyWord(dateStr = getTodayStr()): string {
   const idx = getDayIndex(dateStr);
   return ANSWERS[idx % ANSWERS.length].toUpperCase();
 }
+
+export function getRandomWord(): string {
+  return ANSWERS[Math.floor(Math.random() * ANSWERS.length)].toUpperCase();
+}
