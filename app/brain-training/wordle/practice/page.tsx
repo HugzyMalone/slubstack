@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { RotateCcw } from "lucide-react";
-import { getRandomWord, isValidGuess } from "@/lib/wordle-words";
+import { getRandomWord, isValidGuess, getDefinition } from "@/lib/wordle-words";
 import { WordleGame, type GamePhase } from "../WordleGame";
 import { playWordleTap, playWordleSubmit, playWordleInvalid, playCorrect, playWrong } from "@/lib/sound";
 
@@ -225,6 +225,13 @@ export default function WordlePracticePage() {
       <div className="relative shrink-0" style={{ height: 32 }}>
         {toastNode}
       </div>
+
+      {phase !== "playing" && getDefinition(solution) && (
+        <div className="shrink-0 px-4 pb-2 text-center">
+          <div className="font-display text-base font-black tracking-[0.2em]">{solution}</div>
+          <div className="mt-0.5 text-xs text-muted">{getDefinition(solution)}</div>
+        </div>
+      )}
 
       <WordleGame
         guesses={guesses}

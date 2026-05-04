@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Sparkles, Flame } from "lucide-react";
-import { getDailyWord, getTodayStr, getDayIndex, isValidGuess } from "@/lib/wordle-words";
+import { getDailyWord, getTodayStr, getDayIndex, isValidGuess, getDefinition } from "@/lib/wordle-words";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { brainTrainingStore } from "@/lib/store";
 import { awardQuestProgress } from "@/lib/questsStore";
@@ -56,6 +56,27 @@ function readStreak(todayStr: string): number {
 }
 
 const WIN_MSGS = ["Genius!", "Magnificent!", "Impressive!", "Splendid!", "Great!", "Phew!"];
+
+type Season = "winter" | "spring" | "summer" | "autumn";
+
+function getSeason(date: Date): Season {
+  const m = date.getMonth() + 1;
+  if (m === 12 || m <= 2) return "winter";
+  if (m <= 5) return "spring";
+  if (m <= 8) return "summer";
+  return "autumn";
+}
+
+const SEASON_BACKDROPS: Record<Season, string> = {
+  winter:
+    "radial-gradient(circle at 50% 0%, color-mix(in srgb, #93c5fd 18%, transparent) 0%, transparent 55%), radial-gradient(circle at 50% 100%, color-mix(in srgb, #c4b5fd 12%, transparent) 0%, transparent 60%)",
+  spring:
+    "radial-gradient(circle at 50% 0%, color-mix(in srgb, #fbcfe8 22%, transparent) 0%, transparent 55%), radial-gradient(circle at 50% 100%, color-mix(in srgb, #bbf7d0 14%, transparent) 0%, transparent 60%)",
+  summer:
+    "radial-gradient(circle at 50% 0%, color-mix(in srgb, #fde68a 20%, transparent) 0%, transparent 55%), radial-gradient(circle at 50% 100%, color-mix(in srgb, #fdba74 14%, transparent) 0%, transparent 60%)",
+  autumn:
+    "radial-gradient(circle at 50% 0%, color-mix(in srgb, #fdba74 20%, transparent) 0%, transparent 55%), radial-gradient(circle at 50% 100%, color-mix(in srgb, #b45309 12%, transparent) 0%, transparent 60%)",
+};
 
 interface SavedGame {
   date: string;
@@ -180,6 +201,9 @@ export default function WordlePage() {
   const todayStr = useRef(getTodayStr()).current;
   const solution  = useRef(getDailyWord(todayStr)).current;
   const dayIdx    = useRef(getDayIndex(todayStr)).current;
+  const season    = useRef(getSeason(new Date())).current;
+  const backdrop  = SEASON_BACKDROPS[season];
+  const definition = getDefinition(solution);
 
   const [guesses, setGuesses]           = useState<string[]>([]);
   const [current, setCurrent]           = useState("");
@@ -341,8 +365,7 @@ export default function WordlePage() {
         className="flex flex-col select-none overflow-hidden"
         style={{
           height: "calc(100dvh - 52px - env(safe-area-inset-top, 0px))",
-          background:
-            "radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--game) 14%, transparent) 0%, transparent 55%), radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 60%)",
+          background: backdrop,
         }}
       >
         <div className="shrink-0 flex items-center justify-between px-4 py-2">
@@ -414,10 +437,7 @@ export default function WordlePage() {
       />
       <div
         className="mx-auto flex max-w-md flex-col items-center px-4 pb-8 pt-3 select-none"
-        style={{
-          background:
-            "radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--game) 14%, transparent) 0%, transparent 55%), radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 60%)",
-        }}
+        style={{ background: backdrop }}
       >
         <div className="mb-2 w-full flex items-baseline justify-between">
           <h1 className="font-display text-3xl font-black tracking-widest" style={{ color: "var(--game)" }}>WORDLE</h1>
@@ -454,6 +474,13 @@ export default function WordlePage() {
           onKey={handleKey}
           layout="stacked"
         />
+
+        <div className="mt-5 w-full text-center">
+          <div className="font-display text-2xl font-black tracking-[0.2em]">{solution}</div>
+          {definition && (
+            <div className="mt-1 text-xs text-muted">{definition}</div>
+          )}
+        </div>
 
         <div className="mt-5 w-full">
           <FriendsCompare game="wordle" date={todayStr} />
