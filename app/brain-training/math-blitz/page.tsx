@@ -148,7 +148,6 @@ function TimerRing({ secs, total }: { secs: number; total: number }) {
 
 export default function MathBlitzPage() {
   const [phase, setPhase]       = useState<Phase>("select");
-  const [difficulty, setDiff]   = useState<Difficulty>("medium");
   const [question, setQuestion] = useState<Question | null>(null);
   const [answer, setAnswer]     = useState("");
   const [secsLeft, setSecsLeft] = useState(GAME_SECS);
@@ -319,7 +318,6 @@ export default function MathBlitzPage() {
 
   function startGame(d: Difficulty) {
     diffRef.current = d;
-    setDiff(d);
     setPhase("countdown");
   }
 
