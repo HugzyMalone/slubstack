@@ -185,11 +185,15 @@ export default function WordlePracticePage() {
     <div
       key={round}
       className="flex flex-col select-none overflow-hidden"
-      style={{ height: "calc(100dvh - 52px - env(safe-area-inset-top, 0px))" }}
+      style={{
+        height: "calc(100dvh - 52px - env(safe-area-inset-top, 0px))",
+        background:
+          "radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--game) 14%, transparent) 0%, transparent 55%), radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 60%)",
+      }}
     >
       <div className="shrink-0 flex items-center justify-between px-4 py-2">
         <div className="flex items-baseline gap-2">
-          <h1 className="text-xl font-black tracking-widest" style={{ color: "var(--game)" }}>WORDLE</h1>
+          <h1 className="font-display text-xl font-black tracking-widest" style={{ color: "var(--game)" }}>WORDLE</h1>
           <span className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"
             style={{ background: "var(--game)" }}>Practice</span>
         </div>

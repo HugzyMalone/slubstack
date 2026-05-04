@@ -92,7 +92,10 @@ function WordleTile({
   const flipDuration = 0.3;
 
   return (
-    <div style={{ perspective: 600, width: TILE, height: TILE }}>
+    <div
+      data-flipped={isRevealed || isRevealing ? "true" : "false"}
+      style={{ perspective: 600, width: TILE, height: TILE }}
+    >
       <motion.div
         key={popKey}
         initial={popKey !== undefined ? { scale: 0.8 } : false}
@@ -108,23 +111,27 @@ function WordleTile({
       >
         {/* Front face — letter on surface */}
         <div
+          className="font-display"
           style={{
             position: "absolute", inset: 0, backfaceVisibility: "hidden",
             display: "flex", alignItems: "center", justifyContent: "center",
             border: `2px solid ${borderColor}`, borderRadius: 5,
-            fontSize: 20, fontWeight: 700, color: "var(--fg)", background: "var(--surface)",
+            fontSize: 24, fontWeight: 800, color: "var(--fg)", background: "var(--surface)",
+            letterSpacing: "0.02em",
           }}
         >
           {letter}
         </div>
         {/* Back face — verdict colour */}
         <div
+          className="font-display"
           style={{
             position: "absolute", inset: 0, backfaceVisibility: "hidden",
             transform: "rotateX(180deg)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            borderRadius: 5, fontSize: 20, fontWeight: 700, color: "#fff",
+            borderRadius: 5, fontSize: 24, fontWeight: 800, color: "#fff",
             background: verdictColor ?? "var(--surface)",
+            letterSpacing: "0.02em",
           }}
         >
           {letter}

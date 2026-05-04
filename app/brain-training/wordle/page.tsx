@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Flame } from "lucide-react";
 import { getDailyWord, getTodayStr, getDayIndex, isValidGuess } from "@/lib/wordle-words";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { brainTrainingStore } from "@/lib/store";
@@ -21,6 +21,39 @@ const MAX_GUESSES = 6;
 const WORD_LEN = 5;
 const STORAGE_KEY = "slubstack_wordle";
 const HARD_KEY = "slubstack_wordle_hard";
+const STREAK_KEY = "slubstack_wordle_streak";
+const LAST_WON_KEY = "slubstack_wordle_last_won";
+
+function yesterdayStr(todayStr: string): string {
+  const [y, m, d] = todayStr.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setDate(dt.getDate() - 1);
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+}
+
+function recordStreakWin(todayStr: string): number {
+  try {
+    const lastWon = localStorage.getItem(LAST_WON_KEY);
+    if (lastWon === todayStr) {
+      return Number(localStorage.getItem(STREAK_KEY)) || 1;
+    }
+    const prev = Number(localStorage.getItem(STREAK_KEY)) || 0;
+    const next = lastWon === yesterdayStr(todayStr) ? prev + 1 : 1;
+    localStorage.setItem(STREAK_KEY, String(next));
+    localStorage.setItem(LAST_WON_KEY, todayStr);
+    return next;
+  } catch { return 0; }
+}
+
+function readStreak(todayStr: string): number {
+  try {
+    const lastWon = localStorage.getItem(LAST_WON_KEY);
+    const stored = Number(localStorage.getItem(STREAK_KEY)) || 0;
+    if (!lastWon || stored === 0) return 0;
+    if (lastWon === todayStr || lastWon === yesterdayStr(todayStr)) return stored;
+    return 0;
+  } catch { return 0; }
+}
 
 const WIN_MSGS = ["Genius!", "Magnificent!", "Impressive!", "Splendid!", "Great!", "Phew!"];
 
@@ -157,6 +190,7 @@ export default function WordlePage() {
   const [shakingRow, setShakingRow]     = useState<number | null>(null);
   const [toastMsg, setToastMsg]         = useState<string | null>(null);
   const [hardMode, setHardMode]         = useState(false);
+  const [streak, setStreak]             = useState(0);
   const [hydrated, setHydrated]         = useState(false);
 
   useEffect(() => {
@@ -169,6 +203,7 @@ export default function WordlePage() {
       setRevealedRows(revealed);
     }
     try { setHardMode(localStorage.getItem(HARD_KEY) === "1"); } catch {}
+    setStreak(readStreak(todayStr));
     setHydrated(true);
   }, [todayStr]);
 
@@ -233,6 +268,7 @@ export default function WordlePage() {
         setPhase(newPhase);
         saveGame({ date: todayStr, guesses: newGuesses, phase: newPhase });
         if (won) {
+          setStreak(recordStreakWin(todayStr));
           playCorrect();
           showToast(WIN_MSGS[Math.min(rowIdx, WIN_MSGS.length - 1)], 2500);
         } else {
@@ -303,11 +339,24 @@ export default function WordlePage() {
     return (
       <div
         className="flex flex-col select-none overflow-hidden"
-        style={{ height: "calc(100dvh - 52px - env(safe-area-inset-top, 0px))" }}
+        style={{
+          height: "calc(100dvh - 52px - env(safe-area-inset-top, 0px))",
+          background:
+            "radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--game) 14%, transparent) 0%, transparent 55%), radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 60%)",
+        }}
       >
         <div className="shrink-0 flex items-center justify-between px-4 py-2">
-          <h1 className="text-xl font-black tracking-widest" style={{ color: "var(--game)" }}>WORDLE</h1>
+          <h1 className="font-display text-xl font-black tracking-widest" style={{ color: "var(--game)" }}>WORDLE</h1>
           <div className="flex items-center gap-2">
+            {streak > 0 && (
+              <span
+                data-testid="wordle-streak"
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-[11px] font-bold tabular-nums"
+              >
+                <Flame size={12} strokeWidth={2.5} fill="#ff8a4c" className="text-[#ff6a1c]" />
+                {streak}
+              </span>
+            )}
             {hardMode && (
               <span className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"
                 style={{ background: "#c9b458" }}>Hard</span>
@@ -363,10 +412,25 @@ export default function WordlePage() {
         gameLabel="Daily Wordle"
         shareText={wordleShareText}
       />
-      <div className="mx-auto flex max-w-md flex-col items-center px-4 pb-8 pt-3 select-none">
+      <div
+        className="mx-auto flex max-w-md flex-col items-center px-4 pb-8 pt-3 select-none"
+        style={{
+          background:
+            "radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--game) 14%, transparent) 0%, transparent 55%), radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 60%)",
+        }}
+      >
         <div className="mb-2 w-full flex items-baseline justify-between">
           <h1 className="font-display text-3xl font-black tracking-widest" style={{ color: "var(--game)" }}>WORDLE</h1>
           <div className="flex items-center gap-2">
+            {streak > 0 && (
+              <span
+                data-testid="wordle-streak"
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2 py-0.5 text-[11px] font-bold tabular-nums"
+              >
+                <Flame size={12} strokeWidth={2.5} fill="#ff8a4c" className="text-[#ff6a1c]" />
+                {streak}
+              </span>
+            )}
             {hardMode && (
               <span className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"
                 style={{ background: "#c9b458" }}>Hard</span>
