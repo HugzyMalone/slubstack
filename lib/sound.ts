@@ -188,3 +188,29 @@ export function playWordleInvalid() {
   void playTone(207.65, 0, 0.16, 0.24, "sawtooth");
   void playNoiseBurst(0.02, 0.08, 0.14);
 }
+
+export function playConnectionsSolve() {
+  if (isMuted()) return;
+  void playTone(523.25, 0,    0.22, 0.30, "triangle"); // C5
+  void playTone(659.25, 0,    0.22, 0.26, "triangle"); // E5
+  void playTone(783.99, 0,    0.26, 0.28, "triangle"); // G5
+  void playTone(1046.50, 0.10, 0.26, 0.22, "triangle"); // C6 sparkle
+}
+
+export function playConnectionsMistake() {
+  if (isMuted()) return;
+  void playTone(155.56, 0,    0.22, 0.36, "sawtooth"); // D#3
+  void playTone(146.83, 0,    0.26, 0.30, "sawtooth"); // D3 clash
+  void playNoiseBurst(0.02, 0.10, 0.18);
+}
+
+export function playConnectionsPerfect() {
+  if (isMuted()) return;
+  void playTone(523.25, 0,    0.16, 0.30, "triangle"); // C5
+  void playTone(659.25, 0.10, 0.18, 0.30, "triangle"); // E5
+  void playTone(783.99, 0.20, 0.20, 0.30, "triangle"); // G5
+  void playTone(1046.50, 0.32, 0.24, 0.28, "triangle"); // C6
+  void playTone(1318.51, 0.46, 0.28, 0.24, "triangle"); // E6
+  void playTone(1567.98, 0.60, 0.36, 0.22, "triangle"); // G6
+  void playTone(2093.00, 0.76, 0.50, 0.18, "triangle"); // C7 sparkle
+}

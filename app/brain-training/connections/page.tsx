@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getDailyPuzzle, getTodayStr, getPuzzleNumber, type ConnectionsCategory, type DifficultyColor } from "@/lib/connections-puzzles";
+import { Heart } from "lucide-react";
+import { toast } from "sonner";
+import { getDailyPuzzle, getTodayStr, getPuzzleNumber, type DifficultyColor } from "@/lib/connections-puzzles";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { brainTrainingStore } from "@/lib/store";
 import { awardQuestProgress } from "@/lib/questsStore";
@@ -11,6 +13,7 @@ import { globalStore } from "@/lib/globalStore";
 import { PBCelebration } from "@/components/PBCelebration";
 import { connectionsShareCard } from "@/lib/share";
 import { FriendsCompare } from "@/components/FriendsCompare";
+import { playConnectionsSolve, playConnectionsMistake, playConnectionsPerfect } from "@/lib/sound";
 
 const MAX_MISTAKES = 4;
 const STORAGE_KEY = "slubstack_connections";
@@ -18,13 +21,11 @@ const XP_WIN = 60;
 const XP_LOSE = 15;
 
 const COLOR_STYLES: Record<DifficultyColor, { bg: string; text: string; label: string }> = {
-  yellow: { bg: "#f9e04b", text: "#1a1a1a", label: "Straightforward" },
-  green:  { bg: "#6aaa64", text: "#fff",    label: "Getting trickier" },
-  blue:   { bg: "#4a90d9", text: "#fff",    label: "Tricky" },
-  purple: { bg: "#9b59d0", text: "#fff",    label: "Very tricky" },
+  yellow: { bg: "#facc15", text: "#1a1a1a", label: "Straightforward" },
+  green:  { bg: "#10b981", text: "#fff",    label: "Getting trickier" },
+  blue:   { bg: "#0ea5e9", text: "#fff",    label: "Tricky" },
+  purple: { bg: "#a855f7", text: "#fff",    label: "Very tricky" },
 };
-
-const COLOR_ORDER: DifficultyColor[] = ["yellow", "green", "blue", "purple"];
 
 type GamePhase = "playing" | "won" | "lost";
 
@@ -90,14 +91,19 @@ export default function ConnectionsPage() {
   const [shuffled, setShuffled] = useState<string[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [solved, setSolved] = useState<DifficultyColor[]>([]);
+  const [solveOrder, setSolveOrder] = useState<DifficultyColor[]>([]);
   const [mistakes, setMistakes] = useState(0);
   const [phase, setPhase] = useState<GamePhase>("playing");
   const [shake, setShake] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [oneAway, setOneAway] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LBEntry[] | null>(null);
   const [xpAwarded, setXpAwarded] = useState(false);
   const [pbOpen, setPbOpen] = useState(false);
+  const [solvingWords, setSolvingWords] = useState<string[]>([]);
+  const [solvingColor, setSolvingColor] = useState<DifficultyColor | null>(null);
+  const [drainedDot, setDrainedDot] = useState<number | null>(null);
+  const perfectPlayedRef = useRef(false);
 
   // Init or restore
   useEffect(() => {
@@ -119,6 +125,15 @@ export default function ConnectionsPage() {
     if (shuffled.length === 0) return;
     saveGame({ date: todayStr, solved, mistakes, phase, shuffled });
   }, [solved, mistakes, phase, shuffled, todayStr]);
+
+  // Sync solveOrder with solved (handles restored games — track-only adds appended).
+  useEffect(() => {
+    setSolveOrder(prev => {
+      const stillValid = prev.filter(c => solved.includes(c));
+      const missing = solved.filter(c => !stillValid.includes(c));
+      return [...stillValid, ...missing];
+    });
+  }, [solved]);
 
   // Submit score + XP when game ends
   useEffect(() => {
@@ -157,19 +172,19 @@ export default function ConnectionsPage() {
   }, [phase]);
 
   const showToast = useCallback((msg: string, duration = 1800) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), duration);
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), duration);
   }, []);
 
   function toggleWord(word: string) {
-    if (phase !== "playing") return;
+    if (phase !== "playing" || solvingColor) return;
     setSelected(prev =>
       prev.includes(word) ? prev.filter(w => w !== word) : prev.length < 4 ? [...prev, word] : prev
     );
   }
 
-  function submitGuess() {
-    if (selected.length !== 4 || phase !== "playing") return;
+  const submitGuess = useCallback(() => {
+    if (selected.length !== 4 || phase !== "playing" || solvingColor) return;
 
     const colors = selected.map(w => categoryByWord[w].color);
     const allSame = colors.every(c => c === colors[0]);
@@ -177,17 +192,31 @@ export default function ConnectionsPage() {
     if (allSame) {
       const color = colors[0];
       const category = puzzle.categories.find(c => c.color === color)!;
-      const newSolved = [...solved, color];
-      setSolved(newSolved);
-      setShuffled(prev => prev.filter(w => !selected.includes(w)));
-      setSelected([]);
-      showToast(category.name, 2500);
+      const solving = [...selected];
 
-      if (newSolved.length === 4) {
-        setTimeout(() => setPhase("won"), 400);
-      }
+      setSolvingWords(solving);
+      setSolvingColor(color);
+      playConnectionsSolve();
+
+      setTimeout(() => {
+        const newSolved = [...solved, color];
+        setSolved(newSolved);
+        setSolveOrder(prev => [...prev, color]);
+        setShuffled(prev => prev.filter(w => !solving.includes(w)));
+        setSelected([]);
+        setSolvingWords([]);
+        setSolvingColor(null);
+        showToast(category.name, 2500);
+
+        if (newSolved.length === 4) {
+          if (mistakes === 0 && !perfectPlayedRef.current) {
+            perfectPlayedRef.current = true;
+            setTimeout(() => playConnectionsPerfect(), 200);
+          }
+          setTimeout(() => setPhase("won"), 400);
+        }
+      }, 650);
     } else {
-      // Check if one away
       const uniqueColors = [...new Set(colors)];
       if (uniqueColors.length === 2) {
         const counts = uniqueColors.map(c => colors.filter(x => x === c).length);
@@ -197,33 +226,93 @@ export default function ConnectionsPage() {
         }
       }
 
+      playConnectionsMistake();
       setShake(true);
       setTimeout(() => setShake(false), 600);
       const newMistakes = mistakes + 1;
+      const dotIdx = MAX_MISTAKES - newMistakes;
+      setDrainedDot(dotIdx);
+      setTimeout(() => setDrainedDot(null), 320);
       setMistakes(newMistakes);
       if (newMistakes >= MAX_MISTAKES) {
         setTimeout(() => setPhase("lost"), 600);
       }
     }
-  }
+  }, [selected, phase, solvingColor, categoryByWord, puzzle.categories, solved, mistakes, showToast]);
 
   function shuffleRemaining() {
     setShuffled(prev => shuffle(prev));
   }
 
-  function deselectAll() {
+  const deselectAll = useCallback(() => {
     setSelected([]);
-  }
+  }, []);
+
+  const remainingWordsKb = shuffled.filter(w => !solved.includes(categoryByWord[w].color));
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (phase !== "playing") return;
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+
+      if (e.key === "Enter") {
+        if (selected.length === 4) {
+          e.preventDefault();
+          submitGuess();
+        }
+        return;
+      }
+      if (e.key === "Escape") {
+        if (selected.length > 0) {
+          e.preventDefault();
+          deselectAll();
+        }
+        return;
+      }
+      if (["1", "2", "3", "4"].includes(e.key)) {
+        const rowIdx = parseInt(e.key, 10) - 1;
+        const start = rowIdx * 4;
+        const row = remainingWordsKb.slice(start, start + 4);
+        if (row.length === 0) return;
+        e.preventDefault();
+        const allSelected = row.every(w => selected.includes(w));
+        if (allSelected) {
+          setSelected(prev => prev.filter(w => !row.includes(w)));
+        } else {
+          setSelected(prev => {
+            const next = [...prev];
+            for (const w of row) {
+              if (next.length >= 4) break;
+              if (!next.includes(w)) next.push(w);
+            }
+            return next;
+          });
+        }
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [phase, selected, remainingWordsKb, submitGuess, deselectAll]);
 
   const remainingWords = shuffled.filter(w => !solved.includes(categoryByWord[w].color));
-  const solvedCategories = COLOR_ORDER
+  const solvedCategories = solveOrder
     .filter(c => solved.includes(c))
     .map(c => puzzle.categories.find(cat => cat.color === c)!);
 
-  const mistakeDots = Array.from({ length: MAX_MISTAKES }, (_, i) => i < (MAX_MISTAKES - mistakes));
+  const colourGrid: DifficultyColor[][] = solveOrder.map(c => [c, c, c, c]);
+  const shareText = connectionsShareCard({
+    dayNumber: puzzleNumber,
+    mistakes,
+    solved: phase === "won",
+    groupColours: colourGrid.length ? colourGrid : [[]],
+  });
 
-  const groupColours = solved as ("yellow" | "green" | "blue" | "purple")[];
-  const colourGrid = groupColours.map(() => groupColours);
+  const handleShare = () => {
+    navigator.clipboard.writeText(shareText)
+      .then(() => toast.success("Copied to clipboard"))
+      .catch(() => toast.error("Couldn't copy"));
+  };
 
   return (
     <div className="mx-auto max-w-md px-4 pb-24 pt-6 flex flex-col min-h-[calc(100dvh-52px)]">
@@ -233,12 +322,7 @@ export default function ConnectionsPage() {
         value={`${4 - mistakes}/4`}
         label="Solved!"
         gameLabel="Connections"
-        shareText={connectionsShareCard({
-          dayNumber: puzzleNumber,
-          mistakes,
-          solved: phase === "won",
-          groupColours: colourGrid.length ? colourGrid : [groupColours],
-        })}
+        shareText={shareText}
       />
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
@@ -248,13 +332,24 @@ export default function ConnectionsPage() {
         </div>
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-muted">Mistakes:</span>
-          {mistakeDots.map((remaining, i) => (
-            <div
-              key={i}
-              className="h-3 w-3 rounded-full transition-all duration-300"
-              style={{ background: remaining ? "var(--fg)" : "color-mix(in srgb, var(--fg) 15%, transparent)" }}
-            />
-          ))}
+          {Array.from({ length: MAX_MISTAKES }, (_, i) => {
+            const lost = i >= MAX_MISTAKES - mistakes;
+            const draining = i === drainedDot;
+            return (
+              <Heart
+                key={i}
+                size={16}
+                strokeWidth={2.4}
+                className="transition-all duration-300 ease-out"
+                fill={lost ? "transparent" : "#ef4444"}
+                style={{
+                  color: lost ? "color-mix(in srgb, var(--fg) 25%, transparent)" : "#ef4444",
+                  transform: draining ? "scale(0.4)" : "scale(1)",
+                  opacity: draining ? 0 : 1,
+                }}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -286,17 +381,28 @@ export default function ConnectionsPage() {
         >
           {remainingWords.map(word => {
             const isSelected = selected.includes(word);
+            const isSolving = solvingWords.includes(word);
+            const targetColor = isSolving && solvingColor ? solvingColor : null;
             return (
               <button
                 key={word}
                 onClick={() => toggleWord(word)}
-                className="rounded-xl py-3 px-1 text-center text-xs font-bold uppercase tracking-wide transition-all active:scale-95 select-none"
+                disabled={!!solvingColor}
+                className="rounded-xl py-3 px-1 text-center text-xs font-bold uppercase tracking-wide transition-all duration-300 ease-out active:scale-95 select-none"
                 style={{
-                  background: isSelected
-                    ? "var(--fg)"
-                    : "color-mix(in srgb, var(--fg) 8%, var(--surface))",
-                  color: isSelected ? "var(--bg)" : "var(--fg)",
+                  background: targetColor
+                    ? COLOR_STYLES[targetColor].bg
+                    : isSelected
+                      ? "var(--fg)"
+                      : "color-mix(in srgb, var(--fg) 8%, var(--surface))",
+                  color: targetColor
+                    ? COLOR_STYLES[targetColor].text
+                    : isSelected
+                      ? "var(--bg)"
+                      : "var(--fg)",
                   border: "1px solid color-mix(in srgb, var(--fg) 10%, transparent)",
+                  transform: isSolving ? "translateY(-4px) scale(1.04)" : isSelected ? "translateY(-2px)" : "none",
+                  boxShadow: isSolving ? "0 6px 18px rgba(0,0,0,0.18)" : undefined,
                 }}
               >
                 {word}
@@ -353,11 +459,23 @@ export default function ConnectionsPage() {
             </div>
 
             {/* Share grid */}
-            <div className="flex justify-center gap-1 mb-4">
-              {solved.map(c => (
-                <div key={c} className="h-5 w-5 rounded" style={{ background: COLOR_STYLES[c].bg }} />
+            <div className="flex flex-col items-center gap-1 mb-4">
+              {colourGrid.map((row, ri) => (
+                <div key={ri} className="flex gap-1">
+                  {row.map((c, ci) => (
+                    <div key={ci} className="h-5 w-5 rounded" style={{ background: COLOR_STYLES[c].bg }} />
+                  ))}
+                </div>
               ))}
             </div>
+
+            <button
+              onClick={handleShare}
+              className="w-full rounded-2xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] mb-4"
+              style={{ background: "var(--fg)" }}
+            >
+              Share result
+            </button>
 
             {/* Friends today */}
             <div className="my-4 text-left">
@@ -390,16 +508,16 @@ export default function ConnectionsPage() {
 
       {/* Toast */}
       <AnimatePresence>
-        {toast && (
+        {toastMsg && (
           <motion.div
-            key={toast}
+            key={toastMsg}
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             className="fixed left-1/2 top-20 z-50 -translate-x-1/2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-lg"
             style={{ background: "var(--fg)", color: "var(--bg)" }}
           >
-            {toast}
+            {toastMsg}
           </motion.div>
         )}
       </AnimatePresence>
