@@ -32,15 +32,25 @@ export function mathBlitzShareCard({
   difficulty,
   correct,
   pb,
+  history,
 }: {
   score: number;
   difficulty: "easy" | "medium" | "hard";
   correct: number;
   pb: boolean;
+  history?: ("correct" | "wrong")[];
 }): string {
   const tier = difficulty === "easy" ? "🟢" : difficulty === "medium" ? "🟡" : "🔴";
   const pbStamp = pb ? " 🏆 NEW BEST" : "";
-  return `Slubstack Math Blitz ${tier} ${difficulty.toUpperCase()}\nScore: ${score} · ${correct} correct${pbStamp}\n\nslubstack.com`;
+  const header = `Slubstack Math Blitz ${tier} ${difficulty.toUpperCase()}\nScore: ${score} · ${correct} correct${pbStamp}`;
+  if (!history || history.length === 0) {
+    return `${header}\n\nslubstack.com`;
+  }
+  const rows: string[] = [];
+  for (let i = 0; i < history.length; i += 10) {
+    rows.push(history.slice(i, i + 10).map((r) => (r === "correct" ? "🟩" : "🟥")).join(""));
+  }
+  return `${header}\n\n${rows.join("\n")}\n\nslubstack.com`;
 }
 
 export function connectionsShareCard({
@@ -65,14 +75,24 @@ export function actorBlitzShareCard({
   correct,
   total,
   pb,
+  history,
 }: {
   score: number;
   correct: number;
   total: number;
   pb: boolean;
+  history?: ("correct" | "wrong")[];
 }): string {
   const pbStamp = pb ? " 🏆 NEW BEST" : "";
-  return `Slubstack Actor Blitz 🎬\nScore: ${score} · ${correct}/${total} correct${pbStamp}\n\nslubstack.com`;
+  const header = `Slubstack Actor Blitz 🎬\nScore: ${score} · ${correct}/${total} correct${pbStamp}`;
+  if (!history || history.length === 0) {
+    return `${header}\n\nslubstack.com`;
+  }
+  const rows: string[] = [];
+  for (let i = 0; i < history.length; i += 10) {
+    rows.push(history.slice(i, i + 10).map((r) => (r === "correct" ? "🟩" : "🟥")).join(""));
+  }
+  return `${header}\n\n${rows.join("\n")}\n\nslubstack.com`;
 }
 
 export function lessonShareCard({

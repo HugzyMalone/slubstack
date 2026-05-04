@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { CheckCircle, XCircle, Clipboard, ClipboardCheck, ChevronDown } from "lucide-react";
+import { CheckCircle, XCircle, ClipboardCheck, ChevronDown, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import type { ActorData } from "@/app/trivia/actors/page";
 import { globalStore } from "@/lib/globalStore";
 import { triviaStore } from "@/lib/store";
 import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
-import { playCorrect, playWrong } from "@/lib/sound";
+import { playCorrect, playWrong, playActorFinish } from "@/lib/sound";
 import { PBCelebration } from "@/components/PBCelebration";
 import { actorBlitzShareCard } from "@/lib/share";
 
@@ -139,10 +140,12 @@ export function ActorBlitz({ actors }: Props) {
   const correctRef = useRef(correct);
   const totalRef = useRef(total);
   const bestStreakRef = useRef(bestStreak);
+  const historyRef = useRef<HistoryEntry[]>(history);
   useEffect(() => { scoreRef.current = score; }, [score]);
   useEffect(() => { correctRef.current = correct; }, [correct]);
   useEffect(() => { totalRef.current = total; }, [total]);
   useEffect(() => { bestStreakRef.current = bestStreak; }, [bestStreak]);
+  useEffect(() => { historyRef.current = history; }, [history]);
 
   useEffect(() => {
     try {
@@ -202,6 +205,7 @@ export function ActorBlitz({ actors }: Props) {
     if (gameState !== "playing") return;
     if (timeLeft <= 0) {
       setGameState("results");
+      playActorFinish();
       // Save personal best on game end
       const s = scoreRef.current;
       const c = correctRef.current;
@@ -292,15 +296,16 @@ export function ActorBlitz({ actors }: Props) {
   );
 
   const shareResult = useCallback(() => {
+    const s = scoreRef.current;
     const c = correctRef.current;
     const t = totalRef.current;
-    const bs = bestStreakRef.current;
-    const accuracy = t > 0 ? Math.round((c / t) * 100) : 0;
-    const text = `Actor Blitz — ${c}/${t} correct in ${TIME_LIMIT}s!\nAccuracy: ${accuracy}% | Best streak: ${bs}\nCan you beat me? slubstack.com/trivia/actors`;
+    const hist: ("correct" | "wrong")[] = historyRef.current.map((h) => (h.correct ? "correct" : "wrong"));
+    const text = actorBlitzShareCard({ score: s, correct: c, total: t, pb: false, history: hist });
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
+      toast.success("Copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
-    });
+    }).catch(() => toast.error("Couldn't copy"));
   }, []);
 
   // ── LOBBY ──────────────────────────────────────────────────────────────────
@@ -392,6 +397,7 @@ export function ActorBlitz({ actors }: Props) {
     const accuracy = t > 0 ? Math.round((c / t) * 100) : 0;
     const grade =
       accuracy >= 90 ? "Incredible!" : accuracy >= 75 ? "Great job!" : accuracy >= 55 ? "Not bad!" : "Keep practising!";
+    const historyFlags: ("correct" | "wrong")[] = history.map((h) => (h.correct ? "correct" : "wrong"));
 
     return (
       <div className="mx-auto max-w-md px-4 pb-8 pt-8">
@@ -400,7 +406,7 @@ export function ActorBlitz({ actors }: Props) {
           onClose={() => setPbOpen(false)}
           value={pbScore}
           gameLabel="Actor Blitz"
-          shareText={actorBlitzShareCard({ score: pbScore, correct: c, total: t, pb: true })}
+          shareText={actorBlitzShareCard({ score: pbScore, correct: c, total: t, pb: true, history: historyFlags })}
         />
         <div className="text-center mb-6">
           <div
@@ -428,17 +434,39 @@ export function ActorBlitz({ actors }: Props) {
           ))}
         </div>
 
-        <div className="flex gap-3 mb-5">
-          <button
-            onClick={shareResult}
-            className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-border bg-surface py-3 text-sm font-semibold transition-colors duration-100 active:scale-[0.97]"
-          >
-            {copied ? <ClipboardCheck size={14} className="text-emerald-500" /> : <Clipboard size={14} className="text-muted" />}
-            {copied ? "Copied!" : "Copy score"}
-          </button>
+        {historyFlags.length > 0 && (
+          <div className="rounded-2xl border border-border bg-surface px-5 py-4 mb-4">
+            <div className="text-xs font-semibold uppercase tracking-widest text-muted mb-3 text-center">
+              Run breakdown
+            </div>
+            <div className="flex flex-col items-center gap-1 mb-3">
+              {Array.from({ length: Math.ceil(historyFlags.length / 10) }).map((_, ri) => (
+                <div key={ri} className="flex gap-1">
+                  {historyFlags.slice(ri * 10, ri * 10 + 10).map((r, ci) => (
+                    <div
+                      key={ci}
+                      className="h-4 w-4 rounded-sm"
+                      style={{ background: r === "correct" ? "#10b981" : "#e11d48" }}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={shareResult}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98]"
+              style={{ background: "var(--fg)" }}
+            >
+              {copied ? <ClipboardCheck size={14} /> : <Share2 size={14} />}
+              {copied ? "Copied!" : "Share result"}
+            </button>
+          </div>
+        )}
+
+        <div className="mb-5">
           <button
             onClick={startGame}
-            className="flex-1 rounded-2xl py-3 text-sm font-bold text-white transition-colors duration-100 active:scale-[0.97]"
+            className="w-full rounded-2xl py-3 text-sm font-bold text-white transition-colors duration-100 active:scale-[0.97]"
             style={{ background: "var(--game)" }}
           >
             Play again

@@ -204,6 +204,34 @@ export function playConnectionsMistake() {
   void playNoiseBurst(0.02, 0.10, 0.18);
 }
 
+export function playMathCorrect() {
+  if (isMuted()) return;
+  void playTone(880.00, 0,    0.10, 0.26, "triangle"); // A5
+  void playTone(1318.51, 0.04, 0.12, 0.22, "triangle"); // E6 rising blip
+}
+
+export function playMathWrong() {
+  if (isMuted()) return;
+  void playTone(174.61, 0, 0.16, 0.34, "sawtooth"); // F3 low stab
+  void playTone(164.81, 0, 0.18, 0.28, "sawtooth"); // E3 clash
+}
+
+export function playMathFinish() {
+  if (isMuted()) return;
+  void playTone(523.25, 0,    0.14, 0.30, "triangle"); // C5
+  void playTone(659.25, 0.08, 0.16, 0.28, "triangle"); // E5
+  void playTone(783.99, 0.16, 0.18, 0.28, "triangle"); // G5
+  void playTone(1046.50, 0.26, 0.26, 0.26, "triangle"); // C6
+}
+
+export function playActorFinish() {
+  if (isMuted()) return;
+  void playTone(659.25, 0,    0.14, 0.28, "triangle"); // E5
+  void playTone(830.61, 0.08, 0.16, 0.26, "triangle"); // G#5
+  void playTone(987.77, 0.16, 0.20, 0.26, "triangle"); // B5
+  void playTone(1318.51, 0.28, 0.28, 0.24, "triangle"); // E6 sparkle
+}
+
 export function playConnectionsPerfect() {
   if (isMuted()) return;
   void playTone(523.25, 0,    0.16, 0.30, "triangle"); // C5

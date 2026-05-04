@@ -3,13 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Trophy, RotateCcw } from "lucide-react";
+import { Heart, Trophy, RotateCcw, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import { globalStore } from "@/lib/globalStore";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { brainTrainingStore } from "@/lib/store";
 import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
-import { playCorrect, playWrong } from "@/lib/sound";
+import { playMathCorrect, playMathWrong, playMathFinish } from "@/lib/sound";
 import { PBCelebration } from "@/components/PBCelebration";
 import { mathBlitzShareCard } from "@/lib/share";
 
@@ -21,6 +22,7 @@ interface GameResult {
   score: number; correct: number; wrong: number;
   bestStreak: number; isNewBest: boolean; reason: "time" | "lives";
   difficulty: Difficulty;
+  history: ("correct" | "wrong")[];
 }
 interface LBEntry { username: string; avatar: string | null; score: number; correct: number; }
 
@@ -159,7 +161,7 @@ export default function MathBlitzPage() {
   const [pbOpen, setPbOpen]           = useState(false);
 
   // Live game state in refs to avoid stale closures in intervals
-  const liveRef = useRef({ score: 0, lives: MAX_LIVES, streak: 0, bestStreak: 0, correct: 0, wrong: 0 });
+  const liveRef = useRef<{ score: number; lives: number; streak: number; bestStreak: number; correct: number; wrong: number; history: ("correct" | "wrong")[] }>({ score: 0, lives: MAX_LIVES, streak: 0, bestStreak: 0, correct: 0, wrong: 0, history: [] });
   // Display state derived from live ref
   const [disp, setDisp] = useState({ score: 0, lives: MAX_LIVES, streak: 0 });
 
@@ -185,11 +187,12 @@ export default function MathBlitzPage() {
 
   function endGame(reason: "time" | "lives") {
     gameActiveRef.current = false;
-    const { score, correct, wrong, bestStreak } = liveRef.current;
+    const { score, correct, wrong, bestStreak, history } = liveRef.current;
     const isNewBest = saveBest(diffRef.current, score);
     setBests(loadBests());
-    setResult({ score, correct, wrong, bestStreak, isNewBest, reason, difficulty: diffRef.current });
+    setResult({ score, correct, wrong, bestStreak, isNewBest, reason, difficulty: diffRef.current, history: [...history] });
     setPhase("result");
+    playMathFinish();
     if (isNewBest && score > 0) {
       globalStore.getState().recordBeat();
       setTimeout(() => setPbOpen(true), 600);
@@ -232,7 +235,7 @@ export default function MathBlitzPage() {
       } else {
         // "Go!" for 500ms then start
         timeouts.push(setTimeout(() => {
-          liveRef.current = { score: 0, lives: MAX_LIVES, streak: 0, bestStreak: 0, correct: 0, wrong: 0 };
+          liveRef.current = { score: 0, lives: MAX_LIVES, streak: 0, bestStreak: 0, correct: 0, wrong: 0, history: [] };
           setDisp({ score: 0, lives: MAX_LIVES, streak: 0 });
           setSecsLeft(GAME_SECS);
           gameActiveRef.current = true;
@@ -285,10 +288,11 @@ export default function MathBlitzPage() {
       g.score += pts;
       g.streak++;
       g.correct++;
+      g.history.push("correct");
       if (g.streak > g.bestStreak) g.bestStreak = g.streak;
       syncDisp();
       setFeedback("correct");
-      playCorrect();
+      playMathCorrect();
       setTimeout(() => {
         setFeedback(null);
         if (gameActiveRef.current) spawnQuestion();
@@ -298,9 +302,10 @@ export default function MathBlitzPage() {
       g.lives--;
       g.streak = 0;
       g.wrong++;
+      g.history.push("wrong");
       syncDisp();
       setFeedback("wrong");
-      playWrong();
+      playMathWrong();
       setTimeout(() => {
         setFeedback(null);
         if (g.lives <= 0) {
@@ -450,6 +455,7 @@ export default function MathBlitzPage() {
             difficulty: result.difficulty,
             correct: result.correct,
             pb: true,
+            history: result.history,
           })}
         />
         <div className="text-center mb-6">
@@ -485,9 +491,49 @@ export default function MathBlitzPage() {
         </div>
 
         {result.bestStreak > 0 && (
-          <div className="rounded-2xl border border-border bg-surface px-5 py-3.5 flex items-center justify-between mb-6">
+          <div className="rounded-2xl border border-border bg-surface px-5 py-3.5 flex items-center justify-between mb-4">
             <span className="text-sm text-muted">Best streak</span>
             <span className="text-sm font-bold tabular-nums">{result.bestStreak} in a row</span>
+          </div>
+        )}
+
+        {result.history.length > 0 && (
+          <div className="rounded-2xl border border-border bg-surface px-5 py-4 mb-4">
+            <div className="text-xs font-semibold uppercase tracking-widest text-muted mb-3 text-center">
+              Run breakdown
+            </div>
+            <div className="flex flex-col items-center gap-1 mb-4">
+              {Array.from({ length: Math.ceil(result.history.length / 10) }).map((_, ri) => (
+                <div key={ri} className="flex gap-1">
+                  {result.history.slice(ri * 10, ri * 10 + 10).map((r, ci) => (
+                    <div
+                      key={ci}
+                      className="h-4 w-4 rounded-sm"
+                      style={{ background: r === "correct" ? "#10b981" : "#e11d48" }}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => {
+                const text = mathBlitzShareCard({
+                  score: result.score,
+                  difficulty: result.difficulty,
+                  correct: result.correct,
+                  pb: result.isNewBest,
+                  history: result.history,
+                });
+                navigator.clipboard.writeText(text)
+                  .then(() => toast.success("Copied to clipboard"))
+                  .catch(() => toast.error("Couldn't copy"));
+              }}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98]"
+              style={{ background: "var(--fg)" }}
+            >
+              <Share2 size={14} />
+              Share result
+            </button>
           </div>
         )}
 
