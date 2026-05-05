@@ -8,8 +8,8 @@ const WORD_LEN = 5;
 const TILE = 52;
 const GAP = 4;
 const KEY_H = 48;
-const KEY_W = 32;
-const KEY_W_WIDE = 52;
+const KEY_W = 36;
+const KEY_W_WIDE = 50;
 
 const KEY_COLORS: Record<TileState, string> = {
   correct: "#6aaa64",
@@ -152,9 +152,9 @@ function WordleKeyboard({ onKey, keyStates }: {
   keyStates: Record<string, TileState>;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1 px-1">
+    <div className="flex flex-col items-center gap-1">
       {KB_ROWS.map((row, ri) => (
-        <div key={ri} className="flex gap-1">
+        <div key={ri} className="flex gap-[3px]">
           {row.map((key) => {
             const state = keyStates[key] ?? "empty";
             const isWide = key === "ENTER" || key === "⌫";
