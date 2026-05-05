@@ -47,7 +47,7 @@ For per-route details (Math Blitz, Wordle, Actor Blitz, etc.), read the page com
 - `components/TopBar.tsx` — mobile: `← Back` on non-home; chips hidden when logged out; tier-coloured level chip
 - `components/SessionRunner.tsx` — runs lesson sessions, tracks `pandaMood`
 - `components/cards/CardShell.tsx` — `fixed inset-0 z-40`, no-scroll lesson layout (covers sidebar intentionally)
-- `components/CloudSync.tsx` — pushes language store XP to Supabase. Sends `totalXp = mandarin + german + spanish + vibe-coding` (brain-training/trivia stay localStorage-only)
+- `components/CloudSync.tsx` — pushes XP to Supabase. Sends `totalXp = mandarin + german + spanish + vibe + brain + trivia` (all six stores). `user_stats.xp` is the canonical overall XP — TopBar chip and Profile headline both derive their level from the same six-store sum
 - `lib/store.ts` — Zustand context: `createGameStore(key)`, `GameStoreProvider`, `useGameStore`. Stores: `slubstack-v1` (mandarin), `slubstack-german-v1`, `slubstack-spanish-v1`, `slubstack-vibe-v1`, `slubstack-brain-v1`, `slubstack-trivia-v1`
 - `lib/content.ts` — `getLanguageContent(lang)`. Spanish/German/Vibe exclude `build`; Vibe also excludes `type`
 - `lib/session.ts` — `buildUnitSession`, `buildReviewSession`, `buildPracticeSession` (fallback when no SRS-due cards)

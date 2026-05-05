@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Flame, User, ChevronLeft, Snowflake, Target } from "lucide-react";
-import { useGameStore, mandarinStore, germanStore, spanishStore } from "@/lib/store";
+import { useStore } from "zustand";
+import { mandarinStore, germanStore, spanishStore, vibeCodingStore, brainTrainingStore, triviaStore } from "@/lib/store";
 import { useHydrated } from "@/lib/hooks";
 import { useGlobalStore, globalStore } from "@/lib/globalStore";
 import { levelFromXp } from "@/lib/xp";
@@ -29,7 +30,13 @@ function getTier(level: number) {
 
 export function TopBar() {
   const hydrated = useHydrated();
-  const xp = useGameStore((s) => s.xp);
+  const mandarinXp = useStore(mandarinStore, (s) => s.xp);
+  const germanXp = useStore(germanStore, (s) => s.xp);
+  const spanishXp = useStore(spanishStore, (s) => s.xp);
+  const vibeXp = useStore(vibeCodingStore, (s) => s.xp);
+  const brainXp = useStore(brainTrainingStore, (s) => s.xp);
+  const triviaXp = useStore(triviaStore, (s) => s.xp);
+  const xp = mandarinXp + germanXp + spanishXp + vibeXp + brainXp + triviaXp;
   const streak = useGlobalStore((s) => s.streak);
   const streakFreezes = useGlobalStore((s) => s.streakFreezes);
   const questDateKey = useQuestsStore((s) => s.dateKey);

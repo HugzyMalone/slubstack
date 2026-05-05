@@ -320,7 +320,7 @@ function ProfileTab({ user, avatar, username, status }: {
 
   if (!hydrated) return null;
 
-  const xp = mandarinXp + germanXp + spanishXp + vibeXp;
+  const xp = mandarinXp + germanXp + spanishXp + vibeXp + brainXp + triviaXp;
   const level = levelFromXp(xp);
   const { current, next, progress } = xpToNextLevel(xp);
   const tier = getTier(level);
