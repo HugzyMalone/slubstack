@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Trophy, RotateCcw, Share2 } from "lucide-react";
+import { Heart, Trophy, RotateCcw, Share2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { globalStore } from "@/lib/globalStore";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -13,11 +14,10 @@ import { pushLeagueXp } from "@/lib/leagues";
 import { playMathCorrect, playMathWrong, playMathFinish } from "@/lib/sound";
 import { PBCelebration } from "@/components/PBCelebration";
 import { mathBlitzShareCard } from "@/lib/share";
+import { makeQuestion, type Level, type Question } from "@/lib/math-blitz/engine";
 
 type Difficulty = "easy" | "medium" | "hard";
 type Phase = "select" | "countdown" | "playing" | "result";
-
-interface Question { display: string; answer: number; }
 interface GameResult {
   score: number; correct: number; wrong: number;
   bestStreak: number; isNewBest: boolean; reason: "time" | "lives";
@@ -64,30 +64,8 @@ const DIFF_CONFIG = {
   hard:   { label: "Hard",   color: "#e11d48", ops: ["+", "−", "×", "÷"], maxA: 50, maxB: 12, desc: "All operations · numbers to 50" },
 } satisfies Record<Difficulty, { label: string; color: string; ops: string[]; maxA: number; maxB: number; desc: string }>;
 
-function randInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function makeQuestion(d: Difficulty): Question {
-  const { ops, maxA, maxB } = DIFF_CONFIG[d];
-  const op = ops[Math.floor(Math.random() * ops.length)];
-  let a: number, b: number, ans: number;
-
-  switch (op) {
-    case "+":
-      a = randInt(1, maxA); b = randInt(1, maxB); ans = a + b; break;
-    case "−":
-      a = randInt(1, maxA); b = randInt(1, a); ans = a - b; break;
-    case "×":
-      a = randInt(2, Math.min(maxA, 12)); b = randInt(2, maxB); ans = a * b; break;
-    default: { // ÷
-      b = randInt(2, maxB);
-      ans = randInt(1, Math.min(maxB, 12));
-      a = b * ans;
-      break;
-    }
-  }
-  return { display: `${a} ${op} ${b}`, answer: ans };
+function levelFor(d: Difficulty): Level {
+  return d === "easy" ? 1 : d === "medium" ? 2 : 3;
 }
 
 function getMultiplier(streak: number): string | null {
@@ -147,6 +125,7 @@ function TimerRing({ secs, total }: { secs: number; total: number }) {
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function MathBlitzPage() {
+  const router = useRouter();
   const [phase, setPhase]       = useState<Phase>("select");
   const [question, setQuestion] = useState<Question | null>(null);
   const [answer, setAnswer]     = useState("");
@@ -177,7 +156,7 @@ export default function MathBlitzPage() {
   }
 
   function spawnQuestion() {
-    const q = makeQuestion(diffRef.current);
+    const q = makeQuestion(levelFor(diffRef.current), Math.random);
     setQuestion(q);
     setAnswer("");
     inFeedbackRef.current = false;
@@ -390,6 +369,14 @@ export default function MathBlitzPage() {
             );
           })}
         </div>
+
+        <button
+          onClick={() => router.push("/brain-training/math-blitz/live")}
+          className="mb-8 flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent-soft)] px-5 py-3 text-sm font-semibold text-[var(--accent)] transition-all duration-150 hover:border-[var(--accent)]/60 hover:shadow-md active:scale-[0.98]"
+        >
+          <Users size={16} />
+          <span>Play live →</span>
+        </button>
 
         <div className="rounded-2xl border border-border bg-surface px-5 py-4 space-y-2.5">
           <div className="text-xs font-semibold uppercase tracking-widest text-muted">How scoring works</div>

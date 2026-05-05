@@ -54,7 +54,7 @@ function isAvatarUrl(v: string | null | undefined): v is string {
   return !!v && (v.startsWith("http") || v.startsWith("data:") || v.startsWith("/"));
 }
 
-type LBFilter = "overall" | "mandarin" | "german" | "spanish" | "actor-blitz" | "math-blitz";
+type LBFilter = "overall" | "mandarin" | "german" | "spanish" | "actor-blitz" | "math-blitz" | "live-math";
 type Tab = "profile" | "leaderboard" | "settings";
 
 // ── AvatarDisplay ──────────────────────────────────────────────────────────
@@ -1182,6 +1182,7 @@ const LB_FILTERS: { id: LBFilter; label: string }[] = [
   { id: "spanish", label: "Spanish" },
   { id: "actor-blitz", label: "Actor Blitz" },
   { id: "math-blitz", label: "Math Blitz" },
+  { id: "live-math", label: "Live Math" },
 ];
 
 const RANK_COLORS = ["#f59e0b", "#94a3b8", "#cd7c54"];
@@ -1386,6 +1387,98 @@ function ActorBlitzLeaderboard() {
   );
 }
 
+type LiveMathEntry = {
+  userId: string;
+  username: string | null;
+  avatarUrl: string | null;
+  rating: number;
+  matches: number;
+  wins: number;
+  draws: number;
+  losses: number;
+};
+
+function LiveMathLeaderboard() {
+  const [level, setLevel] = useState<1 | 2 | 3>(2);
+  const [entries, setEntries] = useState<LiveMathEntry[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    setEntries(null);
+    fetch(`/api/live-math/leaderboard?level=${level}`)
+      .then((r) => r.json())
+      .then(({ entries }) => setEntries(entries ?? []))
+      .catch(() => setEntries([]))
+      .finally(() => setLoading(false));
+  }, [level]);
+
+  const LEVEL_COLORS: Record<1 | 2 | 3, string> = { 1: "#10b981", 2: "#f59e0b", 3: "#e11d48" };
+  const LEVEL_LABEL: Record<1 | 2 | 3, string> = { 1: "Level 1", 2: "Level 2", 3: "Level 3" };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Trophy size={14} className="text-muted" />
+          <span className="text-xs font-semibold uppercase tracking-widest text-muted">Live Math Rankings</span>
+        </div>
+        <div className="flex gap-1">
+          {([1, 2, 3] as const).map((lv) => (
+            <button key={lv} onClick={() => setLevel(lv)}
+              className="rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors"
+              style={{
+                background: level === lv ? LEVEL_COLORS[lv] : "var(--border)",
+                color: level === lv ? "#fff" : "var(--muted)",
+              }}>
+              {LEVEL_LABEL[lv]}
+            </button>
+          ))}
+        </div>
+      </div>
+      {loading || entries === null ? (
+        <LeaderboardSkeleton />
+      ) : entries.length === 0 ? (
+        <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-muted text-center">
+          No ratings yet for {LEVEL_LABEL[level]} — play a live match to appear here!
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {entries.map((entry, i) => {
+            const displayName = entry.username ?? `learner-${entry.userId.slice(0, 8)}`;
+            return (
+              <div key={entry.userId} className="flex items-center gap-3 rounded-2xl border px-4 py-3.5"
+                style={{
+                  borderColor: i === 0 ? `color-mix(in srgb, ${LEVEL_COLORS[level]} 30%, var(--border))` : "color-mix(in srgb, var(--fg) 8%, transparent)",
+                  background: i === 0 ? `color-mix(in srgb, ${LEVEL_COLORS[level]} 4%, var(--surface))` : "var(--surface)",
+                }}>
+                <div className="w-7 shrink-0 flex justify-center">
+                  {i < 3 ? (
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold text-white"
+                      style={{ background: RANK_COLORS[i] }}>{i + 1}</span>
+                  ) : (
+                    <span className="text-xs font-semibold text-muted tabular-nums">#{i + 1}</span>
+                  )}
+                </div>
+                <AvatarDisplay avatar={entry.avatarUrl} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-semibold">{displayName}</div>
+                  <div className="mt-0.5 text-xs text-muted tabular-nums">
+                    {entry.matches} matches · {entry.wins}W {entry.draws}D {entry.losses}L
+                  </div>
+                </div>
+                <div className="text-lg font-black tabular-nums" style={{ color: LEVEL_COLORS[level] }}>
+                  {entry.rating}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function LeaderboardTab({
   entries, loading, filter, onFilter,
 }: {
@@ -1418,6 +1511,7 @@ function LeaderboardTab({
       )}
       {filter === "actor-blitz" && <ActorBlitzLeaderboard />}
       {filter === "math-blitz" && <MathBlitzLeaderboard />}
+      {filter === "live-math" && <LiveMathLeaderboard />}
     </div>
   );
 }

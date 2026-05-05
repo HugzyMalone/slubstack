@@ -1,139 +1,6 @@
-create table if not exists public.profiles (
-  id uuid primary key references auth.users (id) on delete cascade,
-  username text not null unique,
-  email text,
-  avatar_url text,
-  status text,
-  native_language text not null default 'en' check (native_language in ('en', 'de')),
-  created_at timestamptz not null default timezone('utc', now())
-);
-
-create table if not exists public.user_stats (
-  user_id uuid primary key references public.profiles (id) on delete cascade,
-  xp integer not null default 0,
-  streak integer not null default 0,
-  words_learned integer not null default 0,
-  units_done integer not null default 0,
-  updated_at timestamptz not null default timezone('utc', now()),
-  state_json jsonb,
-  german_state_json jsonb,
-  spanish_state_json jsonb
-);
-
-create table if not exists public.math_blitz_scores (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references public.profiles (id) on delete cascade not null,
-  difficulty text not null check (difficulty in ('easy', 'medium', 'hard')),
-  score integer not null check (score >= 0),
-  correct integer not null default 0 check (correct >= 0),
-  created_at timestamptz not null default timezone('utc', now())
-);
-create index if not exists math_blitz_scores_difficulty_score_idx on public.math_blitz_scores (difficulty, score desc);
-
-alter table public.profiles enable row level security;
-alter table public.user_stats enable row level security;
-
-create policy "profiles are readable by everyone"
-on public.profiles
-for select
-to anon, authenticated
-using (true);
-
-create policy "users can insert their own profile"
-on public.profiles
-for insert
-to authenticated
-with check (auth.uid() = id);
-
-create policy "users can update their own profile"
-on public.profiles
-for update
-to authenticated
-using (auth.uid() = id)
-with check (auth.uid() = id);
-
-create policy "stats are readable by everyone"
-on public.user_stats
-for select
-to anon, authenticated
-using (true);
-
-create policy "users can insert their own stats"
-on public.user_stats
-for insert
-to authenticated
-with check (auth.uid() = user_id);
-
-create policy "users can update their own stats"
-on public.user_stats
-for update
-to authenticated
-using (auth.uid() = user_id)
-with check (auth.uid() = user_id);
-
-alter table public.math_blitz_scores enable row level security;
-
-create policy "math blitz scores are readable by everyone"
-on public.math_blitz_scores
-for select
-to anon, authenticated
-using (true);
-
-create policy "users can insert their own math blitz scores"
-on public.math_blitz_scores
-for insert
-to authenticated
-with check (auth.uid() = user_id);
-
-create table if not exists public.wordle_scores (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references public.profiles (id) on delete cascade not null,
-  date date not null,
-  attempts integer not null check (attempts between 1 and 6),
-  solved boolean not null default false,
-  created_at timestamptz not null default timezone('utc', now()),
-  unique(user_id, date)
-);
-create index if not exists wordle_scores_date_idx on public.wordle_scores (date, solved, attempts);
-
-alter table public.wordle_scores enable row level security;
-
-create policy "wordle scores readable by everyone"
-on public.wordle_scores
-for select
-to anon, authenticated
-using (true);
-
-create policy "users can upsert their own wordle score"
-on public.wordle_scores
-for insert
-to authenticated
-with check (auth.uid() = user_id);
-
-create table if not exists public.actor_blitz_scores (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references public.profiles (id) on delete cascade not null,
-  score integer not null check (score >= 0),
-  correct integer not null default 0 check (correct >= 0),
-  total integer not null default 0 check (total >= 0),
-  best_streak integer not null default 0 check (best_streak >= 0),
-  accuracy integer not null default 0 check (accuracy >= 0 and accuracy <= 100),
-  created_at timestamptz not null default timezone('utc', now())
-);
-create index if not exists actor_blitz_scores_score_idx on public.actor_blitz_scores (score desc);
-
-alter table public.actor_blitz_scores enable row level security;
-
-create policy "actor blitz scores readable by everyone"
-on public.actor_blitz_scores
-for select
-using (true);
-
-create policy "users can insert their own actor blitz score"
-on public.actor_blitz_scores
-for insert
-to authenticated
-with check (auth.uid() = user_id);
+-- Live Math Blitz — realtime head-to-head Math Blitz tables.
+-- Match record, per-slot player rows, and per-difficulty ELO ratings.
+-- All writes flow through the service-role admin client; reads are public.
 
 create table if not exists public.live_math_matches (
   id uuid default gen_random_uuid() primary key,
@@ -181,16 +48,20 @@ alter table public.live_math_matches enable row level security;
 alter table public.live_math_match_players enable row level security;
 alter table public.live_math_ratings enable row level security;
 
+drop policy if exists "live math matches readable by everyone" on public.live_math_matches;
 create policy "live math matches readable by everyone"
 on public.live_math_matches for select using (true);
 
+drop policy if exists "live math match players readable by everyone" on public.live_math_match_players;
 create policy "live math match players readable by everyone"
 on public.live_math_match_players for select using (true);
 
+drop policy if exists "live math ratings readable by everyone" on public.live_math_ratings;
 create policy "live math ratings readable by everyone"
 on public.live_math_ratings for select using (true);
 
 -- security definer: callable only via service-role admin client from API route
+drop function if exists public.find_or_create_waiting_live_math_match(smallint, uuid, text, text);
 create or replace function public.find_or_create_waiting_live_math_match(
   p_level smallint,
   p_user_id uuid,
@@ -235,6 +106,7 @@ begin
 end;
 $$;
 
+drop function if exists public.finalise_live_math_match(uuid, jsonb, jsonb, jsonb);
 create or replace function public.finalise_live_math_match(
   p_match_id uuid,
   p_bot_inserts jsonb,
@@ -313,3 +185,14 @@ begin
   return true;
 end;
 $$;
+
+-- Harden: pin search_path on the SECURITY DEFINER functions, and revoke EXECUTE from PUBLIC.
+-- (PUBLIC includes anon and authenticated; revoking from anon/authenticated alone is a no-op
+-- because the grant is implicit through PUBLIC.)
+alter function public.find_or_create_waiting_live_math_match(smallint, uuid, text, text)
+  set search_path = public, pg_temp;
+alter function public.finalise_live_math_match(uuid, jsonb, jsonb, jsonb)
+  set search_path = public, pg_temp;
+
+revoke execute on function public.find_or_create_waiting_live_math_match(smallint, uuid, text, text) from public;
+revoke execute on function public.finalise_live_math_match(uuid, jsonb, jsonb, jsonb) from public;
