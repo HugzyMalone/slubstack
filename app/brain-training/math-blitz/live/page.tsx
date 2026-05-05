@@ -777,7 +777,10 @@ export default function LiveMathBlitzPage() {
         : "var(--surface)";
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-bg overflow-hidden">
+    <div
+      className="fixed inset-x-0 top-0 z-40 flex flex-col bg-bg overflow-hidden"
+      style={{ height: "100dvh" }}
+    >
       <LiveScoreTicker players={tickerPlayers} />
 
       <div className="flex justify-center py-1 shrink-0">
@@ -806,11 +809,11 @@ export default function LiveMathBlitzPage() {
       </div>
 
       <div
-        className="shrink-0 px-4 pb-6 pt-2 space-y-2"
-        style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
+        className="shrink-0 px-4 pt-2 space-y-1.5"
+        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
         {PAD_ROWS.map((row, ri) => (
-          <div key={ri} className="grid grid-cols-3 gap-2">
+          <div key={ri} className="grid grid-cols-3 gap-1.5">
             {row.map((key) => {
               const isSpecial = key === "⌫" || key === "−";
               return (
@@ -824,7 +827,7 @@ export default function LiveMathBlitzPage() {
                   initial="rest"
                   whileTap="pressed"
                   transition={{ type: "spring", stiffness: 700, damping: 30, mass: 0.5 }}
-                  className="rounded-2xl py-4 text-xl font-bold select-none"
+                  className="rounded-2xl py-3 text-lg font-bold select-none"
                   style={{
                     background: isSpecial
                       ? "color-mix(in srgb, var(--fg) 9%, var(--surface))"
@@ -849,7 +852,7 @@ export default function LiveMathBlitzPage() {
           initial="rest"
           whileTap="pressed"
           transition={{ type: "spring", stiffness: 700, damping: 30, mass: 0.5 }}
-          className="w-full rounded-2xl py-4 text-base font-bold text-white disabled:opacity-40"
+          className="w-full rounded-2xl py-3 text-base font-bold text-white disabled:opacity-40"
           style={{ background: "var(--accent)" }}
         >
           Check ✓
