@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Slubstack — iPhone 16 review</title>
+<style>
+  :root {
+    --bg: #f8f6fd;
+    --fg: #2a1738;
+    --muted: #7a6a85;
+    --surface: #ffffff;
+    --border: #e8e4ee;
+    --accent: #a78bfa;
+    --good: #10b981;
+    --warn: #f59e0b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #100e1a;
+      --fg: #f0ecf6;
+      --muted: #a698b3;
+      --surface: #1a1626;
+      --border: #2a2438;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.5;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  header {
+    padding: calc(env(safe-area-inset-top) + 24px) 20px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  header p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  main { padding: 20px 16px 60px; max-width: 480px; margin: 0 auto; }
+  section {
+    margin: 0 0 32px;
+    padding: 0 0 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  section:last-child { border-bottom: none; }
+  h2 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .commit {
+    display: inline-block;
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+  }
+  .desc {
+    margin: 6px 0 16px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .pair { display: flex; flex-direction: column; gap: 12px; }
+  .frame {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .frame img { display: block; width: 100%; height: auto; }
+  .label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .label.before { color: var(--warn); }
+  .label.after { color: var(--good); }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: currentColor;
+  }
+  .single-after .label { color: var(--good); }
+  .nofix h2 { color: var(--muted); }
+  .nofix .label { color: var(--good); }
+  .meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>iPhone 16 review — 7 fixes shipped</h1>
+  <p>Before / after screenshots at 393 × 852 viewport. Open on your phone.</p>
+</header>
+
+<main>
+
+<section>
+  <h2>1. TopBar level chip <span class="commit">2340f8f</span></h2>
+  <p class="desc">Was showing Mandarin-only XP. Now reflects total across all six stores. Chip = Profile = leaderboard.</p>
+  <div class="pair">
+    <div class="frame single-after">
+      <img src="iphone16-hub-after-fix.png" alt="After: LV 7 chip in top right">
+      <div class="label"><span class="dot"></span>After — chip reads LV 7 (was LV 3)</div>
+    </div>
+  </div>
+  <p class="meta">Total XP 2660 → Level 7 ✓</p>
+</section>
+
+<section>
+  <h2>2. Hub greeting + sr-only h1 <span class="commit">7a3f163</span></h2>
+  <p class="desc">Greeting was 11px (below the 12px floor). Mobile had no h1 — added sr-only "Slubstack home" for screen readers.</p>
+  <div class="pair">
+    <div class="frame">
+      <img src="iphone16-hub-after-fix.png" alt="Before: 11px greeting">
+      <div class="label before"><span class="dot"></span>Before — 11px GOOD MORNING</div>
+    </div>
+    <div class="frame">
+      <img src="iphone16-hub-greeting-13px.png" alt="After: 13px greeting">
+      <div class="label after"><span class="dot"></span>After — 13px GOOD MORNING</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>3. Wordle keys 32 → 36px <span class="commit">5d551b9</span></h2>
+  <p class="desc">QWERTYUIOP keys were cramped. Reduced gap + side padding to free room. Letters now extend toward the screen edges.</p>
+  <div class="pair">
+    <div class="frame">
+      <img src="iphone16-wordle-initial.png" alt="Before: 32px keys">
+      <div class="label before"><span class="dot"></span>Before — 32 × 48 keys</div>
+    </div>
+    <div class="frame">
+      <img src="iphone16-wordle-after-keyfix.png" alt="After: 36px keys">
+      <div class="label after"><span class="dot"></span>After — 36 × 48 keys</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>4. Skill tree typography <span class="commit">517aa22</span></h2>
+  <p class="desc">Mobile h1 was smaller than desktop (20 vs 24). Unit / Active / Progress labels all below 12px floor. Affects Spanish, Mandarin, German, Vibe trees.</p>
+  <div class="pair">
+    <div class="frame">
+      <img src="iphone16-spanish-tree.png" alt="Before: 20px h1, 10px Unit labels">
+      <div class="label before"><span class="dot"></span>Before — h1 20px, labels 9–11px</div>
+    </div>
+    <div class="frame">
+      <img src="iphone16-spanish-after-typo-fix.png" alt="After: 24px h1, 12px Unit labels">
+      <div class="label after"><span class="dot"></span>After — h1 24px, labels 10–12px</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>5. Lesson tap targets <span class="commit">5da82c8</span></h2>
+  <p class="desc">Close × was 28×28 (16px under 44pt minimum). Audio button was 27×27. Affects 5 card components: CardShell, MultipleChoice, PluralDrill, CasePick, TypeAnswer.</p>
+  <div class="pair">
+    <div class="frame">
+      <img src="iphone16-lesson-cardshell.png" alt="Before: small close + audio buttons">
+      <div class="label before"><span class="dot"></span>Before — close 28, audio 27</div>
+    </div>
+    <div class="frame">
+      <img src="iphone16-lesson-after-tapfix-2.png" alt="After: larger close + audio buttons">
+      <div class="label after"><span class="dot"></span>After — close 44 ✓, audio 39</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>6. Connections tile + h1 <span class="commit">644577a</span></h2>
+  <p class="desc">Tiles were 42 tall (under 44pt). "WELLINGTONS" overflowed its 84px tile at 12px. H1 was 20px while sister games were 24–30. Conditional 11px font for words ≥9 chars.</p>
+  <div class="pair">
+    <div class="frame">
+      <img src="iphone16-connections.png" alt="Before: WELLINGTONS overflows">
+      <div class="label before"><span class="dot"></span>Before — h1 20, tile 42, WELLINGTONS clipped</div>
+    </div>
+    <div class="frame">
+      <img src="iphone16-connections-after.png" alt="After: WELLINGTONS fits">
+      <div class="label after"><span class="dot"></span>After — h1 24, tile 47, WELLINGTONS fits</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>7. TopBar quests button 28 → 36 <span class="commit">0852f6b</span></h2>
+  <p class="desc">Quests button (target icon between streak and level chips) was 28×28. Now matches the avatar at 36×36. Visible on every logged-in page.</p>
+  <p class="desc">Compare the small purple target-icon button next to LV chip in the Wordle "before" image (28×28) versus the Connections "after" image (36×36).</p>
+</section>
+
+<section class="nofix">
+  <h2>Reference — pages with no fixes needed</h2>
+  <p class="desc">These were already clean at iPhone 16 viewport.</p>
+  <div class="pair">
+    <div class="frame">
+      <img src="iphone16-mathblitz.png" alt="Math Blitz select screen">
+      <div class="label"><span class="dot"></span>Math Blitz — clean</div>
+    </div>
+    <div class="frame">
+      <img src="iphone16-actorblitz.png" alt="Actor Blitz lobby">
+      <div class="label"><span class="dot"></span>Actor Blitz — clean</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+</body>
+</html>
