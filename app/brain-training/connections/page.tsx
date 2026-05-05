@@ -327,7 +327,7 @@ export default function ConnectionsPage() {
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight">Connections</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Connections</h1>
           <p className="text-xs text-muted">#{puzzleNumber} · {todayStr}</p>
         </div>
         <div className="flex items-center gap-1.5">
@@ -388,7 +388,7 @@ export default function ConnectionsPage() {
                 key={word}
                 onClick={() => toggleWord(word)}
                 disabled={!!solvingColor}
-                className="rounded-xl py-3 px-1 text-center text-xs font-bold uppercase tracking-wide transition-all duration-300 ease-out active:scale-95 select-none"
+                className={`rounded-xl py-3.5 px-1 text-center font-bold uppercase tracking-wide transition-all duration-300 ease-out active:scale-95 select-none ${word.length >= 9 ? "text-[11px]" : "text-xs"}`}
                 style={{
                   background: targetColor
                     ? COLOR_STYLES[targetColor].bg
