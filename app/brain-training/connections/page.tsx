@@ -388,7 +388,7 @@ export default function ConnectionsPage() {
                 key={word}
                 onClick={() => toggleWord(word)}
                 disabled={!!solvingColor}
-                className={`rounded-xl py-3.5 px-1 text-center font-bold uppercase tracking-wide transition-all duration-300 ease-out active:scale-95 select-none ${word.length >= 9 ? "text-[11px]" : "text-xs"}`}
+                className={`rounded-xl py-3.5 px-1 text-center font-bold uppercase tracking-wide transition-all duration-300 ease-out active:scale-95 select-none ${word.length >= 9 ? "text-[10px] tracking-tight" : "text-xs"}`}
                 style={{
                   background: targetColor
                     ? COLOR_STYLES[targetColor].bg

@@ -50,9 +50,9 @@ export function SkillTree({ units, basePath, greeting, subGreeting, character = 
     <div className="w-full px-4 pb-24 pt-0 lg:max-w-[1200px] lg:mx-auto lg:px-8 lg:py-10 lg:pb-16">
       {/* ─── Mobile — vertical timeline (unchanged) ─── */}
       <div className="lg:hidden mx-auto max-w-xl">
-        <header className="flex items-center gap-4 px-2 py-1">
-          <HeroCharacter mood="idle" size={200} />
-          <div>
+        <header className="flex items-center gap-3 px-2 py-1">
+          <HeroCharacter mood="idle" size={140} />
+          <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-semibold tracking-tight">{greeting}</h1>
             <p className="text-sm text-muted">
               {subGreeting ?? (wordsInHead > 0

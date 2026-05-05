@@ -88,7 +88,7 @@ export interface ActorBest {
   accuracy: number;
 }
 
-const TIME_LIMIT = 15;
+const TIME_LIMIT = 30;
 const PB_KEY = "slubstack_actorblitz_best";
 const ACTOR_STATS_KEY = "slubstack_actorblitz_stats";
 

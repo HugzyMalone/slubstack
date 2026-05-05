@@ -45,7 +45,7 @@ const MODES = [
     iconBg: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)",
     title: "Actor Blitz",
     description: "Guess the movie star from their photo",
-    tag: "15 sec · Race the clock",
+    tag: "30 sec · Race the clock",
     accent: "#8b5cf6",
   },
 ];
