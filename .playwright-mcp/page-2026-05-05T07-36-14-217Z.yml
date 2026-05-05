@@ -1,0 +1,66 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - button "Back" [ref=e5]:
+          - img [ref=e6]
+          - text: Back
+        - generic [ref=e8]:
+          - generic "Streak" [ref=e9]:
+            - img [ref=e10]
+            - generic [ref=e12]: "4"
+          - button "Daily quests" [ref=e13]:
+            - img [ref=e14]
+          - generic "Silver · Level 7" [ref=e19]:
+            - generic [ref=e20]: LV
+            - generic [ref=e21]: "7"
+          - link "Profile" [ref=e22] [cursor=pointer]:
+            - /url: /stats
+            - img "avatar" [ref=e23]
+    - main [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - heading "Math Blitz" [level=1] [ref=e27]
+          - paragraph [ref=e28]: Answer as many as you can in 30 seconds. 3 wrong = game over.
+        - generic [ref=e29]:
+          - button "E Easy Add & subtract · numbers to 10" [ref=e30]:
+            - generic [ref=e32]:
+              - generic [ref=e33]: E
+              - generic [ref=e34]:
+                - generic [ref=e35]: Easy
+                - generic [ref=e36]: Add & subtract · numbers to 10
+          - button "M Medium All operations · numbers to 20" [ref=e37]:
+            - generic [ref=e39]:
+              - generic [ref=e40]: M
+              - generic [ref=e41]:
+                - generic [ref=e42]: Medium
+                - generic [ref=e43]: All operations · numbers to 20
+          - button "H Hard All operations · numbers to 50" [ref=e44]:
+            - generic [ref=e46]:
+              - generic [ref=e47]: H
+              - generic [ref=e48]:
+                - generic [ref=e49]: Hard
+                - generic [ref=e50]: All operations · numbers to 50
+        - generic [ref=e51]:
+          - generic [ref=e52]: How scoring works
+          - generic [ref=e53]:
+            - generic [ref=e54]:
+              - generic [ref=e55]: Correct answer
+              - generic [ref=e56]: +10 pts
+            - generic [ref=e57]:
+              - generic [ref=e58]: Answer in under 3s
+              - generic [ref=e59]: +5 bonus
+            - generic [ref=e60]:
+              - generic [ref=e61]: Answer in under 5s
+              - generic [ref=e62]: +3 bonus
+            - generic [ref=e63]:
+              - generic [ref=e64]: 3 in a row
+              - generic [ref=e65]: ×1.5
+            - generic [ref=e66]:
+              - generic [ref=e67]: 5 in a row
+              - generic [ref=e68]: ×2
+            - generic [ref=e69]:
+              - generic [ref=e70]: 10 in a row
+              - generic [ref=e71]: ×3
+  - region "Notifications alt+T"
+  - alert [ref=e72]

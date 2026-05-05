@@ -96,7 +96,7 @@ function Lane({ p, maxScore }: { p: TickerPlayer; maxScore: number }) {
   const displayedScore = useCountUp(p.score, 450);
   const pct = Math.min(88, (p.score / maxScore) * 88);
   return (
-    <div className="relative h-7">
+    <div className="relative h-6">
       <div
         className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2"
         style={{
@@ -130,7 +130,7 @@ export function LiveScoreTicker({ players }: Props) {
   return (
     <div className="px-3 pt-2">
       <div
-        className="relative overflow-hidden rounded-2xl border px-3 py-2.5"
+        className="relative overflow-hidden rounded-2xl border px-3 py-2"
         style={{ borderColor: "var(--border)", background: "var(--surface)" }}
       >
         <div
@@ -146,7 +146,7 @@ export function LiveScoreTicker({ players }: Props) {
           style={{ color: "var(--game)" }}
         />
 
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           {lanes.map((p) => (
             <Lane key={p.slot} p={p} maxScore={maxScore} />
           ))}

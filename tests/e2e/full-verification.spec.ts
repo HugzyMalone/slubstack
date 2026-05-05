@@ -4,7 +4,7 @@ test.describe('Home page', () => {
   test('renders hero, fact, and section cards', async ({ page }) => {
     await page.goto('/')
     await expect(page.locator('img[src*="panda"], img[src*="bear"]').first()).toBeVisible()
-    const cards = page.locator('main').locator('a[href="/languages"], a[href="/skills"], a[href="/brain-training"], a[href="/trivia"]')
+    const cards = page.locator('main').locator('a[href="/languages"], a[href="/skills"], a[href="/brain-training"], a[href="/trivia"]').filter({ visible: true })
     await expect(cards).toHaveCount(4)
     const factText = page.locator('p').filter({ hasText: /.{40,}/ }).first()
     await expect(factText).toBeVisible()
@@ -43,7 +43,7 @@ test.describe('Language pages', () => {
   for (const lang of ['spanish', 'mandarin', 'german']) {
     test(`${lang} skill tree loads`, async ({ page }) => {
       await page.goto(`/${lang}`)
-      const units = page.locator('button, a').filter({ hasText: /unit|lesson|greet|number|color|family|verb|day|place/i })
+      const units = page.locator('main').locator('a, button').filter({ hasText: /unit|lesson|greet|number|color|family|verb|day|place/i }).filter({ visible: true })
       await expect(units.first()).toBeVisible()
     })
   }
@@ -52,8 +52,8 @@ test.describe('Language pages', () => {
 test.describe('Brain Training hub', () => {
   test('hub page renders with Math Blitz and Wordle links', async ({ page }) => {
     await page.goto('/brain-training')
-    await expect(page.locator('a[href="/brain-training/math-blitz"]')).toBeVisible()
-    await expect(page.locator('a[href="/brain-training/wordle"]')).toBeVisible()
+    await expect(page.locator('a[href="/brain-training/math-blitz"]').filter({ visible: true })).toHaveCount(1)
+    await expect(page.locator('a[href="/brain-training/wordle"]').filter({ visible: true })).toHaveCount(1)
   })
 
   test('Math Blitz game renders difficulty selector', async ({ page }) => {
@@ -129,7 +129,7 @@ test.describe('Review hub', () => {
 test.describe('Vibe Coding', () => {
   test('skill tree loads with Prompting Basics as first unit', async ({ page }) => {
     await page.goto('/vibe-coding')
-    const firstUnit = page.locator('a, button').filter({ hasText: /prompting basics/i }).first()
+    const firstUnit = page.locator('main').locator('a, button').filter({ hasText: /prompting basics/i }).filter({ visible: true }).first()
     await expect(firstUnit).toBeVisible()
   })
 

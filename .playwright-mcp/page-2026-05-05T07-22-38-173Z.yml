@@ -1,0 +1,63 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - button "Back" [ref=e5]:
+          - img [ref=e6]
+          - text: Back
+        - generic [ref=e8]:
+          - generic "Streak" [ref=e9]:
+            - img [ref=e10]
+            - generic [ref=e12]: "4"
+          - button "Daily quests" [ref=e13]:
+            - img [ref=e14]
+          - generic "Silver · Level 7" [ref=e19]:
+            - generic [ref=e20]: LV
+            - generic [ref=e21]: "7"
+          - link "Profile" [ref=e22] [cursor=pointer]:
+            - /url: /stats
+            - img "avatar" [ref=e23]
+    - main [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - heading "WORDLE" [level=1] [ref=e27]
+          - generic [ref=e28]:
+            - link "Practice" [ref=e29] [cursor=pointer]:
+              - /url: /brain-training/wordle/practice
+              - img [ref=e30]
+              - text: Practice
+            - generic [ref=e33]: "#17"
+        - generic [ref=e164]:
+          - generic [ref=e165]:
+            - button "Q" [ref=e166] [cursor=pointer]
+            - button "W" [ref=e167] [cursor=pointer]
+            - button "E" [ref=e168] [cursor=pointer]
+            - button "R" [ref=e169] [cursor=pointer]
+            - button "T" [ref=e170] [cursor=pointer]
+            - button "Y" [ref=e171] [cursor=pointer]
+            - button "U" [ref=e172] [cursor=pointer]
+            - button "I" [ref=e173] [cursor=pointer]
+            - button "O" [ref=e174] [cursor=pointer]
+            - button "P" [ref=e175] [cursor=pointer]
+          - generic [ref=e176]:
+            - button "A" [ref=e177] [cursor=pointer]
+            - button "S" [ref=e178] [cursor=pointer]
+            - button "D" [ref=e179] [cursor=pointer]
+            - button "F" [ref=e180] [cursor=pointer]
+            - button "G" [ref=e181] [cursor=pointer]
+            - button "H" [ref=e182] [cursor=pointer]
+            - button "J" [ref=e183] [cursor=pointer]
+            - button "K" [ref=e184] [cursor=pointer]
+            - button "L" [ref=e185] [cursor=pointer]
+          - generic [ref=e186]:
+            - button "ENTER" [ref=e187] [cursor=pointer]
+            - button "Z" [ref=e188] [cursor=pointer]
+            - button "X" [ref=e189] [cursor=pointer]
+            - button "C" [ref=e190] [cursor=pointer]
+            - button "V" [ref=e191] [cursor=pointer]
+            - button "B" [ref=e192] [cursor=pointer]
+            - button "N" [ref=e193] [cursor=pointer]
+            - button "M" [ref=e194] [cursor=pointer]
+            - button "⌫" [ref=e195] [cursor=pointer]
+  - region "Notifications alt+T"
+  - alert [ref=e196]

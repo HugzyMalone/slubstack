@@ -64,6 +64,8 @@ create policy "live math ratings readable by everyone"
 on public.live_math_ratings for select using (true);
 
 -- security definer: callable only via service-role admin client from API route
+-- Returns the existing slot if user is already in a waiting match for this
+-- level (so repeated clicks / page reloads don't double-add them).
 drop function if exists public.find_or_create_waiting_live_math_match(smallint, uuid, text, text);
 create or replace function public.find_or_create_waiting_live_math_match(
   p_level smallint,
@@ -74,13 +76,29 @@ create or replace function public.find_or_create_waiting_live_math_match(
   match_id uuid,
   seed text,
   slot_index smallint
-) language plpgsql security definer as $$
+) language plpgsql security definer
+set search_path = public, pg_temp as $$
 declare
   v_match_id uuid;
   v_seed text;
   v_slot smallint;
 begin
   perform pg_advisory_xact_lock(p_level::bigint);
+
+  select m.id, m.seed, p.slot
+  into v_match_id, v_seed, v_slot
+  from public.live_math_matches m
+  join public.live_math_match_players p on p.match_id = m.id
+  where m.level = p_level
+    and m.status = 'waiting'
+    and p.user_id = p_user_id
+  order by m.created_at desc
+  limit 1;
+
+  if v_match_id is not null then
+    return query select v_match_id, v_seed, v_slot;
+    return;
+  end if;
 
   select m.id, m.seed, (
     select count(*) from public.live_math_match_players p where p.match_id = m.id

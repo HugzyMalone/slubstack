@@ -1,0 +1,46 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - button "Back" [ref=e5]:
+          - img [ref=e6]
+          - text: Back
+        - generic [ref=e8]:
+          - generic "Streak" [ref=e9]:
+            - img [ref=e10]
+            - generic [ref=e12]: "4"
+          - button "Daily quests" [ref=e13]:
+            - img [ref=e14]
+          - generic "Silver · Level 7" [ref=e19]:
+            - generic [ref=e20]: LV
+            - generic [ref=e21]: "7"
+          - link "Profile" [ref=e22] [cursor=pointer]:
+            - /url: /stats
+            - img "avatar" [ref=e23]
+    - main [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e27]:
+          - link "Exit lesson" [ref=e28] [cursor=pointer]:
+            - /url: /spanish
+            - img [ref=e29]
+          - generic [ref=e33]: 1/10
+          - generic "5 of 5 hearts" [ref=e34]:
+            - generic [ref=e35]:
+              - img [ref=e36]
+              - generic [ref=e38]: "5"
+        - img [ref=e42]
+        - generic [ref=e63]:
+          - generic [ref=e64]: Choose the meaning
+          - generic [ref=e65]:
+            - generic [ref=e66]: Arroz
+            - generic [ref=e67]: ah-ROHS
+            - button "Listen" [ref=e68]:
+              - img [ref=e69]
+          - generic [ref=e73]:
+            - button "rice" [ref=e74]
+            - button "apple" [ref=e75]
+            - button "fruit" [ref=e76]
+            - button "egg" [ref=e77]
+          - button "Check" [disabled] [ref=e81]
+  - region "Notifications alt+T"
+  - alert [ref=e82]

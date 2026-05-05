@@ -1,0 +1,75 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "slubstack" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e6]: slubstack
+        - generic [ref=e7]:
+          - generic "Streak" [ref=e8]:
+            - img [ref=e9]
+            - generic [ref=e11]: "4"
+          - button "Daily quests" [ref=e12]:
+            - img [ref=e13]
+          - generic "Silver · Level 7" [ref=e18]:
+            - generic [ref=e19]: LV
+            - generic [ref=e20]: "7"
+          - link "Profile" [ref=e21] [cursor=pointer]:
+            - /url: /stats
+            - img "avatar" [ref=e22]
+    - main [ref=e23]:
+      - generic [ref=e25]:
+        - heading "Slubstack home" [level=1] [ref=e26]
+        - paragraph [ref=e27]: Good morning
+        - img "Panda" [ref=e30]
+        - button "Show another fact" [ref=e32]:
+          - generic [ref=e33]:
+            - img [ref=e34]
+            - paragraph [ref=e37]: Learning a second language can delay the onset of Alzheimer's by up to 5 years.
+        - generic [ref=e38]:
+          - link "Lv.6 Languages Spanish · Mandarin · German" [ref=e40] [cursor=pointer]:
+            - /url: /languages
+            - generic [ref=e41]: Lv.6
+            - img [ref=e43]
+            - generic [ref=e46]:
+              - generic [ref=e47]: Languages
+              - generic [ref=e48]: Spanish · Mandarin · German
+          - link "Lv.3 Skills Vibe Coding & more" [ref=e50] [cursor=pointer]:
+            - /url: /skills
+            - generic [ref=e51]: Lv.3
+            - img [ref=e53]
+            - generic [ref=e58]:
+              - generic [ref=e59]: Skills
+              - generic [ref=e60]: Vibe Coding & more
+          - link "Brain Training Math Blitz & memory games" [ref=e62] [cursor=pointer]:
+            - /url: /brain-training
+            - img [ref=e64]
+            - generic [ref=e67]:
+              - generic [ref=e68]: Brain Training
+              - generic [ref=e69]: Math Blitz & memory games
+          - link "Trivia Actor Blitz & more" [ref=e71] [cursor=pointer]:
+            - /url: /trivia
+            - img [ref=e73]
+            - generic [ref=e75]:
+              - generic [ref=e76]: Trivia
+              - generic [ref=e77]: Actor Blitz & more
+    - navigation [ref=e78]:
+      - generic [ref=e79]:
+        - link "Home" [ref=e80] [cursor=pointer]:
+          - /url: /
+          - img [ref=e83]
+          - generic [ref=e86]: Home
+        - link "Review" [ref=e87] [cursor=pointer]:
+          - /url: /review
+          - img [ref=e90]
+          - generic [ref=e93]: Review
+        - link "League" [ref=e94] [cursor=pointer]:
+          - /url: /leaderboard/league
+          - img [ref=e97]
+          - generic [ref=e102]: League
+        - link "Profile" [ref=e103] [cursor=pointer]:
+          - /url: /stats
+          - img [ref=e106]
+          - generic [ref=e109]: Profile
+  - region "Notifications alt+T"
+  - alert [ref=e110]

@@ -531,14 +531,14 @@ export default function LiveMathBlitzPage() {
       setQueueSecs(Math.ceil(remaining / 1000));
       if (remaining <= 0) {
         clearInterval(iv);
-        // Slot 0 broadcasts 'go'; others wait for it.
+        // Slot 0 broadcasts 'go' for sync across clients; every client also
+        // transitions locally when their own timer expires, so we don't get
+        // stuck if slot 0 disconnected.
         if (alloc.slotIndex === 0) {
           const ch = channelRef.current;
-          if (ch) {
-            ch.send({ type: "broadcast", event: "go", payload: {} });
-          }
-          if (phaseRef.current === "queue") startCountdown();
+          if (ch) ch.send({ type: "broadcast", event: "go", payload: {} });
         }
+        if (phaseRef.current === "queue") startCountdown();
       }
     }, 200);
     return () => clearInterval(iv);
@@ -779,7 +779,7 @@ export default function LiveMathBlitzPage() {
   return (
     <div
       className="fixed inset-x-0 top-0 z-40 flex flex-col bg-bg overflow-hidden"
-      style={{ height: "100dvh" }}
+      style={{ height: "100svh" }}
     >
       <LiveScoreTicker players={tickerPlayers} />
 
@@ -793,7 +793,7 @@ export default function LiveMathBlitzPage() {
           initial={{ y: 12, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.15 }}
-          className="w-full rounded-3xl px-6 py-8 text-center transition-colors duration-150"
+          className="w-full rounded-3xl px-6 py-5 text-center transition-colors duration-150"
           style={{ background: feedbackBg, border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)" }}
         >
           <div className="text-4xl font-black tracking-tight select-none">

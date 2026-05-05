@@ -1,0 +1,55 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - button "Back" [ref=e5]:
+          - img [ref=e6]
+          - text: Back
+        - generic [ref=e8]:
+          - generic "Streak" [ref=e9]:
+            - img [ref=e10]
+            - generic [ref=e12]: "4"
+          - button "Daily quests" [ref=e13]:
+            - img [ref=e14]
+          - generic "Silver · Level 7" [ref=e19]:
+            - generic [ref=e20]: LV
+            - generic [ref=e21]: "7"
+          - link "Profile" [ref=e22] [cursor=pointer]:
+            - /url: /stats
+            - img "avatar" [ref=e23]
+    - main [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - heading "Connections" [level=1] [ref=e28]
+            - paragraph [ref=e29]: "#17 · 2026-05-05"
+          - generic [ref=e30]:
+            - generic [ref=e31]: "Mistakes:"
+            - img [ref=e32]
+            - img [ref=e34]
+            - img [ref=e36]
+            - img [ref=e38]
+        - paragraph [ref=e40]: Find four groups of four!
+        - generic [ref=e41]:
+          - button "CAP" [ref=e42]
+          - button "FUME" [ref=e43]
+          - button "SANDWICH" [ref=e44]
+          - button "SIMMER" [ref=e45]
+          - button "BRISTLE" [ref=e46]
+          - button "JACUZZI" [ref=e47]
+          - button "WELLINGTONS" [ref=e48]
+          - button "IRON" [ref=e49]
+          - button "SUSPENSION" [ref=e50]
+          - button "CARDIGAN" [ref=e51]
+          - button "BROKE" [ref=e52]
+          - button "SEETHE" [ref=e53]
+          - button "DRAWBRIDGE" [ref=e54]
+          - button "ARCH" [ref=e55]
+          - button "COVERED" [ref=e56]
+          - button "TIRE" [ref=e57]
+        - generic [ref=e58]:
+          - button "Shuffle" [ref=e59]
+          - button "Deselect all" [disabled] [ref=e60]
+          - button "Submit" [disabled] [ref=e61]
+  - region "Notifications alt+T"
+  - alert [ref=e62]

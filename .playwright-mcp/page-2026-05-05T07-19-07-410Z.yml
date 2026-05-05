@@ -1,0 +1,74 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "slubstack" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e6]: slubstack
+        - generic [ref=e7]:
+          - generic "Streak" [ref=e8]:
+            - img [ref=e9]
+            - generic [ref=e11]: "4"
+          - button "Daily quests" [ref=e12]:
+            - img [ref=e13]
+          - generic "Silver · Level 7" [ref=e18]:
+            - generic [ref=e19]: LV
+            - generic [ref=e20]: "7"
+          - link "Profile" [ref=e21] [cursor=pointer]:
+            - /url: /stats
+            - img "avatar" [ref=e22]
+    - main [ref=e23]:
+      - generic [ref=e25]:
+        - paragraph [ref=e26]: Good morning
+        - img "Panda" [ref=e29]
+        - button "Show another fact" [ref=e31]:
+          - generic [ref=e32]:
+            - img [ref=e33]
+            - paragraph [ref=e36]: Spanish is spoken natively by over 485 million people across 20+ countries.
+        - generic [ref=e37]:
+          - link "Lv.6 Languages Spanish · Mandarin · German" [ref=e39] [cursor=pointer]:
+            - /url: /languages
+            - generic [ref=e40]: Lv.6
+            - img [ref=e42]
+            - generic [ref=e45]:
+              - generic [ref=e46]: Languages
+              - generic [ref=e47]: Spanish · Mandarin · German
+          - link "Lv.3 Skills Vibe Coding & more" [ref=e49] [cursor=pointer]:
+            - /url: /skills
+            - generic [ref=e50]: Lv.3
+            - img [ref=e52]
+            - generic [ref=e57]:
+              - generic [ref=e58]: Skills
+              - generic [ref=e59]: Vibe Coding & more
+          - link "Brain Training Math Blitz & memory games" [ref=e61] [cursor=pointer]:
+            - /url: /brain-training
+            - img [ref=e63]
+            - generic [ref=e66]:
+              - generic [ref=e67]: Brain Training
+              - generic [ref=e68]: Math Blitz & memory games
+          - link "Trivia Actor Blitz & more" [ref=e70] [cursor=pointer]:
+            - /url: /trivia
+            - img [ref=e72]
+            - generic [ref=e74]:
+              - generic [ref=e75]: Trivia
+              - generic [ref=e76]: Actor Blitz & more
+    - navigation [ref=e77]:
+      - generic [ref=e78]:
+        - link "Home" [ref=e79] [cursor=pointer]:
+          - /url: /
+          - img [ref=e82]
+          - generic [ref=e85]: Home
+        - link "Review" [ref=e86] [cursor=pointer]:
+          - /url: /review
+          - img [ref=e89]
+          - generic [ref=e92]: Review
+        - link "League" [ref=e93] [cursor=pointer]:
+          - /url: /leaderboard/league
+          - img [ref=e96]
+          - generic [ref=e101]: League
+        - link "Profile" [ref=e102] [cursor=pointer]:
+          - /url: /stats
+          - img [ref=e105]
+          - generic [ref=e108]: Profile
+  - region "Notifications alt+T"
+  - alert [ref=e109]

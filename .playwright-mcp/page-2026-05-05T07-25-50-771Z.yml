@@ -1,0 +1,111 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - button "Back" [ref=e5]:
+          - img [ref=e6]
+          - text: Back
+        - generic [ref=e8]:
+          - generic "Streak" [ref=e9]:
+            - img [ref=e10]
+            - generic [ref=e12]: "4"
+          - button "Daily quests" [ref=e13]:
+            - img [ref=e14]
+          - generic "Silver · Level 7" [ref=e19]:
+            - generic [ref=e20]: LV
+            - generic [ref=e21]: "7"
+          - link "Profile" [ref=e22] [cursor=pointer]:
+            - /url: /stats
+            - img "avatar" [ref=e23]
+    - main [ref=e24]:
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - img "Panda" [ref=e29]
+          - generic [ref=e30]:
+            - heading "¡Hola!" [level=1] [ref=e31]
+            - paragraph [ref=e32]: Learn Spanish one word at a time.
+        - list [ref=e33]:
+          - listitem [ref=e35]:
+            - link "👋 Greetings Hello, goodbye & everyday phrases" [ref=e37] [cursor=pointer]:
+              - /url: /spanish/learn/es-greetings
+              - generic [ref=e38]: 👋
+              - generic [ref=e39]:
+                - generic [ref=e40]: Greetings
+                - generic [ref=e41]: Hello, goodbye & everyday phrases
+              - img [ref=e42]
+          - listitem [ref=e45]:
+            - link "🔢 Numbers Count from 1 to 15" [ref=e47] [cursor=pointer]:
+              - /url: /spanish/learn/es-numbers
+              - generic [ref=e48]: 🔢
+              - generic [ref=e49]:
+                - generic [ref=e50]: Numbers
+                - generic [ref=e51]: Count from 1 to 15
+              - img [ref=e52]
+          - listitem [ref=e55]:
+            - link "🎨 Colors Rojo, azul, verde y más" [ref=e57] [cursor=pointer]:
+              - /url: /spanish/learn/es-colors
+              - generic [ref=e58]: 🎨
+              - generic [ref=e59]:
+                - generic [ref=e60]: Colors
+                - generic [ref=e61]: Rojo, azul, verde y más
+              - img [ref=e62]
+          - listitem [ref=e65]:
+            - link "🍽️ Food & Drink Agua, pan, pollo y más Start" [ref=e67] [cursor=pointer]:
+              - /url: /spanish/learn/es-food
+              - generic [ref=e68]: 🍽️
+              - generic [ref=e69]:
+                - generic [ref=e70]: Food & Drink
+                - generic [ref=e71]: Agua, pan, pollo y más
+              - generic [ref=e72]: Start
+          - listitem [ref=e73]:
+            - img [ref=e75]
+            - button "⚡ Verbs Hablar, comer, ir y más" [ref=e78]:
+              - generic [ref=e79]: ⚡
+              - generic [ref=e80]:
+                - generic [ref=e81]: Verbs
+                - generic [ref=e82]: Hablar, comer, ir y más
+              - img [ref=e83]
+          - listitem [ref=e86]:
+            - img [ref=e88]
+            - button "👨‍👩‍👧 Family Madre, padre, hermanos" [ref=e91]:
+              - generic [ref=e92]: 👨‍👩‍👧
+              - generic [ref=e93]:
+                - generic [ref=e94]: Family
+                - generic [ref=e95]: Madre, padre, hermanos
+              - img [ref=e96]
+          - listitem [ref=e99]:
+            - img [ref=e101]
+            - button "📅 Days & Time Days of the week, today, now" [ref=e104]:
+              - generic [ref=e105]: 📅
+              - generic [ref=e106]:
+                - generic [ref=e107]: Days & Time
+                - generic [ref=e108]: Days of the week, today, now
+              - img [ref=e109]
+          - listitem [ref=e112]:
+            - img [ref=e114]
+            - button "🏙️ Places Casa, escuela, playa y más" [ref=e117]:
+              - generic [ref=e118]: 🏙️
+              - generic [ref=e119]:
+                - generic [ref=e120]: Places
+                - generic [ref=e121]: Casa, escuela, playa y más
+              - img [ref=e122]
+    - navigation [ref=e125]:
+      - generic [ref=e126]:
+        - link "Home" [ref=e127] [cursor=pointer]:
+          - /url: /
+          - img [ref=e130]
+          - generic [ref=e133]: Home
+        - link "Review" [ref=e134] [cursor=pointer]:
+          - /url: /review
+          - img [ref=e137]
+          - generic [ref=e140]: Review
+        - link "League" [ref=e141] [cursor=pointer]:
+          - /url: /leaderboard/league
+          - img [ref=e144]
+          - generic [ref=e149]: League
+        - link "Profile" [ref=e150] [cursor=pointer]:
+          - /url: /stats
+          - img [ref=e153]
+          - generic [ref=e156]: Profile
+  - region "Notifications alt+T"
+  - alert [ref=e157]

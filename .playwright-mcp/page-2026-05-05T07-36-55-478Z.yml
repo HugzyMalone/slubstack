@@ -1,0 +1,41 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - button "Back" [ref=e5]:
+          - img [ref=e6]
+          - text: Back
+        - generic [ref=e8]:
+          - generic "Streak" [ref=e9]:
+            - img [ref=e10]
+            - generic [ref=e12]: "4"
+          - button "Daily quests" [ref=e13]:
+            - img [ref=e14]
+          - generic "Silver · Level 7" [ref=e19]:
+            - generic [ref=e20]: LV
+            - generic [ref=e21]: "7"
+          - link "Profile" [ref=e22] [cursor=pointer]:
+            - /url: /stats
+            - img "avatar" [ref=e23]
+    - main [ref=e24]:
+      - generic [ref=e25]:
+        - img [ref=e27]
+        - heading "Actor Blitz" [level=1] [ref=e29]
+        - paragraph [ref=e30]: How many movie stars can you identify? Guess as many as you can before time runs out!
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - generic [ref=e33]: 15s
+            - generic [ref=e34]: time limit
+          - generic [ref=e35]:
+            - generic [ref=e36]:
+              - img [ref=e38]
+              - generic [ref=e41]: Real photos — some might look a little different
+            - generic [ref=e42]:
+              - img [ref=e44]
+              - generic [ref=e46]: Pick fast — time keeps ticking
+            - generic [ref=e47]:
+              - img [ref=e49]
+              - generic [ref=e53]: Share your score and challenge friends
+        - button "Let's Go →" [ref=e54]
+  - region "Notifications alt+T"
+  - alert [ref=e55]
