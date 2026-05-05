@@ -39,7 +39,7 @@ export function CardShell({
           <Link
             href={exitHref}
             aria-label="Exit lesson"
-            className="rounded-full p-1.5 text-muted hover:bg-border/50 hover:text-fg transition-colors"
+            className="rounded-full p-3 text-muted hover:bg-border/50 hover:text-fg transition-colors -ml-1"
           >
             <X size={20} strokeWidth={2.5} />
           </Link>

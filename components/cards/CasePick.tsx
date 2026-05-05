@@ -87,7 +87,7 @@ export function CasePick({ card, onResult, onFeedback }: Props) {
         <div className="mt-2 text-sm text-muted">{meaningOf(card, native)}</div>
         <button
           onClick={() => speak(sentence.replace("___", correctArticle), cardLang(card.id))}
-          className="absolute right-3 top-3 rounded-full p-1.5 text-muted hover:text-fg hover:bg-border/50 transition-colors"
+          className="absolute right-1 top-1 rounded-full p-3 text-muted hover:text-fg hover:bg-border/50 transition-colors"
           aria-label="Listen"
         >
           <Volume2 size={15} />

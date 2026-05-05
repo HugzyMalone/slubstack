@@ -93,7 +93,7 @@ export function PluralDrill({ card, onResult, onFeedback, strictTypos = true }: 
         <div className="mt-1 text-sm text-muted">{meaningOf(card, native)}</div>
         <button
           onClick={() => speak(noun, cardLang(card.id))}
-          className="absolute right-3 top-3 rounded-full p-1.5 text-muted hover:text-fg hover:bg-border/50 transition-colors"
+          className="absolute right-1 top-1 rounded-full p-3 text-muted hover:text-fg hover:bg-border/50 transition-colors"
           aria-label="Listen"
         >
           <Volume2 size={15} />

@@ -67,7 +67,7 @@ export function MultipleChoice({ card, distractors, onResult, onFeedback }: Prop
         <div className="mt-2 text-base text-muted">{card.pinyin}</div>
         <button
           onClick={() => speak(card.hanzi, cardLang(card.id))}
-          className="absolute right-3 top-3 rounded-full p-1.5 text-muted hover:text-fg hover:bg-border/50 transition-colors"
+          className="absolute right-1 top-1 rounded-full p-3 text-muted hover:text-fg hover:bg-border/50 transition-colors"
           aria-label="Listen"
         >
           <Volume2 size={15} />
