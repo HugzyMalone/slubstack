@@ -341,8 +341,9 @@ export default function HubPage() {
 
       {/* Mobile layout (no-scroll, 2x2 tiles) */}
       <div className="flex h-full flex-col lg:hidden">
+        <h1 className="sr-only">Slubstack home</h1>
         <motion.p
-          className="flex-shrink-0 pt-2.5 pb-0.5 text-center text-[11px] font-semibold tracking-widest text-muted uppercase"
+          className="flex-shrink-0 pt-2.5 pb-0.5 text-center text-[13px] font-semibold tracking-widest text-muted uppercase"
           initial={{ opacity: 0 }}
           animate={{ opacity: greeting ? 1 : 0 }}
           transition={{ duration: 0.6 }}
@@ -444,7 +445,7 @@ export default function HubPage() {
       <div className="hidden lg:grid lg:grid-cols-[minmax(320px,2fr)_3fr] lg:gap-10">
         <div className="flex flex-col gap-6">
           <div>
-            <p className="text-[11px] font-semibold tracking-widest text-muted uppercase">
+            <p className="text-[13px] font-semibold tracking-widest text-muted uppercase">
               {greeting || " "}
             </p>
             <h1 className="mt-1 text-3xl font-bold leading-tight tracking-tight">
