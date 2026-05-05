@@ -205,7 +205,7 @@ export function TopBar() {
             <button
               type="button"
               onClick={() => setQuestsOpen(true)}
-              className="relative flex h-7 w-7 items-center justify-center rounded-full transition-transform duration-100 active:scale-95"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full transition-transform duration-100 active:scale-95"
               style={{
                 background: "color-mix(in srgb, var(--accent) 14%, var(--surface))",
                 border: "1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)",
