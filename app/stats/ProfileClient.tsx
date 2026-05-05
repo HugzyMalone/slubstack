@@ -1182,7 +1182,7 @@ const LB_FILTERS: { id: LBFilter; label: string }[] = [
   { id: "spanish", label: "Spanish" },
   { id: "actor-blitz", label: "Actor Blitz" },
   { id: "math-blitz", label: "Math Blitz" },
-  { id: "live-math", label: "Live Math" },
+  { id: "live-math", label: "MathStack" },
 ];
 
 const RANK_COLORS = ["#f59e0b", "#94a3b8", "#cd7c54"];
@@ -1421,7 +1421,7 @@ function LiveMathLeaderboard() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Trophy size={14} className="text-muted" />
-          <span className="text-xs font-semibold uppercase tracking-widest text-muted">Live Math Rankings</span>
+          <span className="text-xs font-semibold uppercase tracking-widest text-muted">MathStack Rankings</span>
         </div>
         <div className="flex gap-1">
           {([1, 2, 3] as const).map((lv) => (

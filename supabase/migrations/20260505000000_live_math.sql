@@ -196,3 +196,9 @@ alter function public.finalise_live_math_match(uuid, jsonb, jsonb, jsonb)
 
 revoke execute on function public.find_or_create_waiting_live_math_match(smallint, uuid, text, text) from public;
 revoke execute on function public.finalise_live_math_match(uuid, jsonb, jsonb, jsonb) from public;
+
+-- Re-grant EXECUTE to service_role explicitly. REVOKE FROM PUBLIC also strips
+-- service_role's inherited path; the API routes use the service-role admin client
+-- and need to be able to call these RPCs.
+grant execute on function public.find_or_create_waiting_live_math_match(smallint, uuid, text, text) to service_role;
+grant execute on function public.finalise_live_math_match(uuid, jsonb, jsonb, jsonb) to service_role;

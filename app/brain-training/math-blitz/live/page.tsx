@@ -676,7 +676,7 @@ export default function LiveMathBlitzPage() {
           >
             <ArrowLeft size={14} /> Back
           </button>
-          <h1 className="text-2xl font-bold tracking-tight">Live Math Blitz</h1>
+          <h1 className="text-2xl font-bold tracking-tight">MathStack</h1>
           <p className="mt-1 text-sm text-muted">Pick a level to enter the queue.</p>
         </div>
         <div className="space-y-3">

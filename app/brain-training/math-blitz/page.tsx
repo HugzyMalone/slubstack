@@ -375,7 +375,7 @@ export default function MathBlitzPage() {
           className="mb-8 flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent-soft)] px-5 py-3 text-sm font-semibold text-[var(--accent)] transition-all duration-150 hover:border-[var(--accent)]/60 hover:shadow-md active:scale-[0.98]"
         >
           <Users size={16} />
-          <span>Play live →</span>
+          <span>Play MathStack →</span>
         </button>
 
         <div className="rounded-2xl border border-border bg-surface px-5 py-4 space-y-2.5">

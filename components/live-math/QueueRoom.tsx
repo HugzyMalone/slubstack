@@ -52,7 +52,7 @@ export function QueueRoom({ players, secondsRemaining, level }: Props) {
     <div className="fixed inset-0 z-40 flex flex-col bg-bg">
       <div className="flex flex-1 flex-col items-center justify-center px-5">
         <div className="mb-8 text-center">
-          <div className="text-xs font-semibold uppercase tracking-widest text-muted">Live Math Blitz</div>
+          <div className="text-xs font-semibold uppercase tracking-widest text-muted">MathStack</div>
           <div className="mt-1 text-3xl font-black tracking-tight">Level {level}</div>
           <p className="mt-2 text-sm text-muted">Looking for opponents…</p>
         </div>
