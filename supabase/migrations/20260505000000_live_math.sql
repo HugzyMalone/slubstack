@@ -2,6 +2,9 @@
 -- Match record, per-slot player rows, and per-difficulty ELO ratings.
 -- All writes flow through the service-role admin client; reads are public.
 
+-- pgcrypto provides gen_random_bytes(), used to seed each match.
+create extension if not exists pgcrypto;
+
 create table if not exists public.live_math_matches (
   id uuid default gen_random_uuid() primary key,
   level smallint not null check (level in (1, 2, 3)),
@@ -92,7 +95,7 @@ begin
   for update;
 
   if v_match_id is null then
-    v_seed := encode(gen_random_bytes(8), 'hex');
+    v_seed := encode(extensions.gen_random_bytes(8), 'hex');
     insert into public.live_math_matches (level, seed)
     values (p_level, v_seed)
     returning id into v_match_id;

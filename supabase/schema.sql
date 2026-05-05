@@ -221,7 +221,7 @@ begin
   for update;
 
   if v_match_id is null then
-    v_seed := encode(gen_random_bytes(8), 'hex');
+    v_seed := encode(extensions.gen_random_bytes(8), 'hex');
     insert into public.live_math_matches (level, seed)
     values (p_level, v_seed)
     returning id into v_match_id;
