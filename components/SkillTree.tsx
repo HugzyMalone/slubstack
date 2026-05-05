@@ -53,7 +53,7 @@ export function SkillTree({ units, basePath, greeting, subGreeting, character = 
         <header className="flex items-center gap-4 px-2 py-1">
           <HeroCharacter mood="idle" size={200} />
           <div>
-            <h1 className="text-xl font-semibold tracking-tight">{greeting}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">{greeting}</h1>
             <p className="text-sm text-muted">
               {subGreeting ?? (wordsInHead > 0
                 ? `${wordsInHead} words in your head — keep going.`
@@ -110,7 +110,7 @@ export function SkillTree({ units, basePath, greeting, subGreeting, character = 
             }}
           >
             <div className="flex items-baseline justify-between">
-              <span className="text-[11px] font-semibold tracking-widest text-muted uppercase">Progress</span>
+              <span className="text-[12px] font-semibold tracking-widest text-muted uppercase">Progress</span>
               <span className="text-xs text-muted">{completedCount} of {units.length}</span>
             </div>
             <div className="mt-3 h-2 overflow-hidden rounded-full" style={{ background: "var(--border)" }}>
@@ -223,11 +223,11 @@ function UnitCard({ unit, index, state, basePath }: { unit: Unit; index: number;
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold tracking-widest text-muted uppercase">Unit {index}</span>
+            <span className="text-[12px] font-semibold tracking-widest text-muted uppercase">Unit {index}</span>
             {state === "done" && <CheckCircle2 size={13} className="text-emerald-500" />}
             {state === "active" && (
               <span
-                className="rounded-full px-1.5 py-0.5 text-[9px] font-bold tracking-wide uppercase leading-none"
+                className="rounded-full px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase leading-none"
                 style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
               >
                 Active
