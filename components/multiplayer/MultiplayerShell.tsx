@@ -6,40 +6,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { ArrowLeft } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { brainTrainingStore } from "@/lib/store";
+import { brainTrainingStore, triviaStore } from "@/lib/store";
 import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
-import { playMathCorrect, playMathWrong, playMathFinish } from "@/lib/sound";
-import {
-  mulberry32,
-  makeQuestion,
-  type Level,
-  type Question,
-  type RNG,
-} from "@/lib/math-blitz/engine";
-import { simulateBotTimeline, type BotTickEvent } from "@/lib/math-blitz/bot";
-import { QueueRoom, type QueueSlot } from "@/components/multiplayer/QueueRoom";
-import { type TickerPlayer } from "@/components/multiplayer/LiveScoreTicker";
-import { Podium, type PodiumPlayer } from "@/components/multiplayer/Podium";
-import { PlayBoard } from "@/components/live-math/PlayBoard";
+import { simulateBotTimeline, type BotTickEvent } from "@/lib/multiplayer/bot";
+import { updateRatings, type EloPlayer } from "@/lib/multiplayer/elo";
+import type { GameAdapter, ScoreResult } from "@/lib/multiplayer/types";
+import { QueueRoom, type QueueSlot } from "./QueueRoom";
+import { LiveScoreTicker, type TickerPlayer } from "./LiveScoreTicker";
+import { Podium, type PodiumPlayer } from "./Podium";
 
 type Phase = "auth" | "select" | "queue" | "countdown" | "playing" | "submitting" | "result";
 
 const GAME_MS = 30_000;
-const GAME_SECS = 30;
 const QUEUE_GRACE_MS = 5_000;
-
-const LEVEL_META: Record<Level, { label: string; desc: string; color: string }> = {
-  1: { label: "Level 1", desc: "Add & subtract · numbers to 10", color: "#10b981" },
-  2: { label: "Level 2", desc: "All operations · numbers to 20", color: "#f59e0b" },
-  3: { label: "Level 3", desc: "All operations · numbers to 50", color: "#e11d48" },
-};
-
-function calcPoints(elapsedMs: number, streak: number): number {
-  const speed = elapsedMs < 3000 ? 5 : elapsedMs < 5000 ? 3 : 0;
-  const mult = streak >= 10 ? 3 : streak >= 5 ? 2 : streak >= 3 ? 1.5 : 1;
-  return Math.round((10 + speed) * mult);
-}
+const DEFAULT_RATING = 1200;
 
 type MatchPlayerResp = {
   slot: number;
@@ -57,16 +38,11 @@ type MatchPlayerResp = {
 type ResultResp = {
   matchId: string;
   status: "waiting" | "playing" | "finished" | "abandoned";
-  level: Level;
+  level: number;
   players: MatchPlayerResp[];
 };
 
-type QueueAlloc = {
-  matchId: string;
-  seed: string;
-  level: Level;
-  slotIndex: number;
-};
+type QueueAlloc = { matchId: string; seed: string; level: number; slotIndex: number };
 
 type PresenceMeta = {
   slotIndex: number;
@@ -77,11 +53,18 @@ type PresenceMeta = {
 
 type TickPayload = { slot: number; score: number };
 
-export default function LiveMathBlitzPage() {
+function denseRanks(scores: number[]): number[] {
+  const sorted = [...new Set(scores)].sort((a, b) => b - a);
+  const rankFor = new Map<number, number>();
+  sorted.forEach((s, i) => rankFor.set(s, i + 1));
+  return scores.map((s) => rankFor.get(s)!);
+}
+
+export function MultiplayerShell<Q, A>({ adapter }: { adapter: GameAdapter<Q, A> }) {
   const router = useRouter();
 
   const [phase, setPhase] = useState<Phase>("auth");
-  const [level, setLevel] = useState<Level>(1);
+  const [level, setLevel] = useState<number>(adapter.levels[0]?.id ?? 1);
   const [authChecked, setAuthChecked] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -93,25 +76,30 @@ export default function LiveMathBlitzPage() {
 
   const [countNum, setCountNum] = useState(3);
 
-  const [question, setQuestion] = useState<Question | null>(null);
-  const [answer, setAnswer] = useState("");
-  const [secsLeft, setSecsLeft] = useState(GAME_SECS);
-  const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
+  const [questions, setQuestions] = useState<Q[]>([]);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [feedback, setFeedback] = useState<ScoreResult | null>(null);
   const [opponentScores, setOpponentScores] = useState<Record<number, number>>({});
   const [botScores, setBotScores] = useState<Record<number, number>>({});
   const [finalResult, setFinalResult] = useState<ResultResp | null>(null);
+  const [remainingMs, setRemainingMs] = useState(GAME_MS);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
-  const rngRef = useRef<RNG | null>(null);
-  const liveRef = useRef({ score: 0, streak: 0, correct: 0, wrong: 0 });
+  const liveRef = useRef({ score: 0, correct: 0 });
   const [dispScore, setDispScore] = useState(0);
-  const qStartRef = useRef(0);
   const inFeedbackRef = useRef(false);
   const gameActiveRef = useRef(false);
   const submittedRef = useRef(false);
   const botTimelinesRef = useRef<Record<number, BotTickEvent[]>>({});
   const playStartRef = useRef(0);
   const allocRef = useRef<QueueAlloc | null>(null);
+  const presenceRef = useRef<Record<number, PresenceMeta>>({});
+  const phaseRef = useRef(phase);
+
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
+  useEffect(() => { presenceRef.current = presenceSlots; }, [presenceSlots]);
+
+  const store = adapter.storeKey === "trivia" ? triviaStore : brainTrainingStore;
 
   // ── Auth gate ─────────────────────────────────────────────────────────────
 
@@ -142,8 +130,6 @@ export default function LiveMathBlitzPage() {
     });
   }, []);
 
-  // ── Channel cleanup helper ────────────────────────────────────────────────
-
   const teardownChannel = useCallback(() => {
     const ch = channelRef.current;
     if (ch) {
@@ -169,54 +155,204 @@ export default function LiveMathBlitzPage() {
 
     const { score, correct } = liveRef.current;
 
-    if (correct > 0) {
-      brainTrainingStore.getState().addXp(correct * 5);
-      awardQuestProgress("xp", correct * 5);
-      awardQuestProgress("correct", correct);
-      pushLeagueXp(correct * 5);
+    const xpAward = adapter.xpFor(correct, score);
+    if (xpAward > 0) {
+      store.getState().addXp(xpAward);
+      awardQuestProgress("xp", xpAward);
+      if (correct > 0) awardQuestProgress("correct", correct);
+      pushLeagueXp(xpAward);
     }
-    playMathFinish();
 
     setPhase("submitting");
 
     try {
-      const res = await fetch(`/api/live-math/match/${a.matchId}/result`, {
+      // Snapshot opponents' final tick-broadcast scores plus our own.
+      const opponents = opponentScoresRef.current;
+      const presence = presenceRef.current;
+      const botTimelines = botTimelinesRef.current;
+
+      const allSlots: Array<{
+        slot: number;
+        userId: string | null;
+        displayName: string;
+        avatarUrl: string | null;
+        isBot: boolean;
+        score: number;
+        correct: number;
+      }> = [];
+
+      for (let s = 0; s < 4; s++) {
+        const meta = presence[s];
+        if (meta) {
+          const isMe = s === a.slotIndex;
+          const slotScore = isMe ? score : (opponents[s] ?? 0);
+          const slotCorrect = isMe ? correct : Math.max(0, Math.round(slotScore / 12));
+          allSlots.push({
+            slot: s,
+            userId: meta.userId,
+            displayName: meta.displayName,
+            avatarUrl: meta.avatarUrl,
+            isBot: false,
+            score: slotScore,
+            correct: slotCorrect,
+          });
+        } else {
+          const events = botTimelines[s] ?? [];
+          const botScore = events.reduce((sum, e) => sum + e.scoreDelta, 0);
+          const botCorrect = Math.max(0, Math.round(botScore / 12));
+          allSlots.push({
+            slot: s,
+            userId: null,
+            displayName: `Bot ${s + 1}`,
+            avatarUrl: null,
+            isBot: true,
+            score: botScore,
+            correct: botCorrect,
+          });
+        }
+      }
+
+      const ranks = denseRanks(allSlots.map((s) => s.score));
+      const slotsRanked = allSlots.map((s, i) => ({ ...s, rank: ranks[i] }));
+
+      const humansCount = slotsRanked.filter((s) => !s.isBot).length;
+
+      // Fetch existing ratings (public read) so we can compute ELO deltas.
+      const supabase = getSupabaseBrowserClient();
+      const humanIds = slotsRanked.filter((s) => !s.isBot).map((s) => s.userId!);
+      const ratingByUser = new Map<
+        string,
+        { rating: number; matches: number; wins: number; draws: number; losses: number }
+      >();
+      if (supabase && humanIds.length > 0) {
+        const { data: rows } = await supabase
+          .from("live_ratings")
+          .select("user_id, rating, matches, wins, draws, losses")
+          .eq("game_kind", adapter.kind)
+          .eq("level", a.level)
+          .in("user_id", humanIds);
+        for (const r of rows ?? []) {
+          ratingByUser.set(r.user_id, {
+            rating: r.rating,
+            matches: r.matches,
+            wins: r.wins,
+            draws: r.draws,
+            losses: r.losses,
+          });
+        }
+      }
+
+      const eloInput: EloPlayer[] = slotsRanked.map((s) => {
+        if (s.isBot) {
+          return { userId: `bot-${s.slot}`, rating: 0, matches: 0, score: s.score, isBot: true };
+        }
+        const existing = ratingByUser.get(s.userId!);
+        return {
+          userId: s.userId!,
+          rating: existing?.rating ?? DEFAULT_RATING,
+          matches: existing?.matches ?? 0,
+          score: s.score,
+          isBot: false,
+        };
+      });
+
+      const eloUpdates = updateRatings(eloInput);
+      const eloByUser = new Map(eloUpdates.map((u) => [u.userId, u]));
+
+      const humanSlots = slotsRanked.filter((s) => !s.isBot);
+      const humanRanks = humanSlots.map((s) => s.rank);
+      const minHumanRank = humanRanks.length ? Math.min(...humanRanks) : 0;
+      const maxHumanRank = humanRanks.length ? Math.max(...humanRanks) : 0;
+
+      const botInserts = slotsRanked
+        .filter((s) => s.isBot)
+        .map((s) => ({
+          slot: s.slot,
+          display_name: s.displayName,
+          score: s.score,
+          correct: s.correct,
+          rank: s.rank,
+        }));
+
+      const playerUpdates = slotsRanked
+        .filter((s) => !s.isBot)
+        .map((s) => {
+          const elo = eloByUser.get(s.userId!);
+          return {
+            slot: s.slot,
+            score: s.score,
+            correct: s.correct,
+            rank: s.rank,
+            elo_before: elo?.before ?? null,
+            elo_after: elo?.after ?? null,
+          };
+        });
+
+      const ratingUpserts: Array<{
+        user_id: string;
+        level: number;
+        rating: number;
+        matches: number;
+        wins: number;
+        draws: number;
+        losses: number;
+      }> = [];
+
+      if (humansCount >= 2) {
+        for (const s of humanSlots) {
+          const elo = eloByUser.get(s.userId!);
+          if (!elo) continue;
+          const existing = ratingByUser.get(s.userId!);
+          const baseMatches = existing?.matches ?? 0;
+          const baseWins = existing?.wins ?? 0;
+          const baseDraws = existing?.draws ?? 0;
+          const baseLosses = existing?.losses ?? 0;
+
+          const uniquelyHeld = humanRanks.filter((r) => r === s.rank).length === 1;
+          const isWin = uniquelyHeld && s.rank === minHumanRank;
+          const isLoss = uniquelyHeld && s.rank === maxHumanRank;
+          const isDraw = !isWin && !isLoss;
+
+          ratingUpserts.push({
+            user_id: s.userId!,
+            level: a.level,
+            rating: elo.after,
+            matches: baseMatches + 1,
+            wins: baseWins + (isWin ? 1 : 0),
+            draws: baseDraws + (isDraw ? 1 : 0),
+            losses: baseLosses + (isLoss ? 1 : 0),
+          });
+        }
+      }
+
+      const res = await fetch(`/api/live/match/${a.matchId}/result`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ score, correct }),
+        body: JSON.stringify({
+          game_kind: adapter.kind,
+          humans_count: humansCount,
+          bot_inserts: botInserts,
+          player_updates: playerUpdates,
+          rating_upserts: ratingUpserts,
+        }),
       });
       const data = (await res.json()) as ResultResp | { error: string };
       if ("error" in data) {
-        console.error("[LiveMath] result POST failed:", data.error);
+        console.error("[MultiplayerShell] result POST failed:", data.error);
         setPhase("select");
         return;
       }
-      if (data.status === "finished") {
-        setFinalResult(data);
-        setPhase("result");
-      } else {
-        // Other humans haven't reported. Poll once more after a short delay.
-        setTimeout(async () => {
-          const retry = await fetch(`/api/live-math/match/${a.matchId}/result`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ score, correct }),
-          });
-          const retryData = (await retry.json()) as ResultResp | { error: string };
-          if ("error" in retryData) {
-            console.error("[LiveMath] result retry failed:", retryData.error);
-            setPhase("select");
-            return;
-          }
-          setFinalResult(retryData);
-          setPhase("result");
-        }, 3500);
-      }
+      setFinalResult(data);
+      setPhase("result");
     } catch (err) {
-      console.error("[LiveMath] result POST error:", err);
+      console.error("[MultiplayerShell] result POST error:", err);
       setPhase("select");
     }
-  }, []);
+  }, [adapter, store]);
+
+  // mirror of opponentScores so submitResult can read latest without re-deps
+  const opponentScoresRef = useRef<Record<number, number>>({});
+  useEffect(() => { opponentScoresRef.current = opponentScores; }, [opponentScores]);
 
   // ── End game (time up) ────────────────────────────────────────────────────
 
@@ -228,22 +364,9 @@ export default function LiveMathBlitzPage() {
     void submitResult(a);
   }, [submitResult]);
 
-  // ── Spawn next question ───────────────────────────────────────────────────
+  // ── Countdown → playing ───────────────────────────────────────────────────
 
-  const spawnQuestion = useCallback(() => {
-    if (!rngRef.current || !allocRef.current) return;
-    const q = makeQuestion(allocRef.current.level, rngRef.current);
-    setQuestion(q);
-    setAnswer("");
-    inFeedbackRef.current = false;
-    qStartRef.current = Date.now();
-  }, []);
-
-  // ── Start countdown → playing ─────────────────────────────────────────────
-
-  const startCountdown = useCallback(() => {
-    setPhase("countdown");
-  }, []);
+  const startCountdown = useCallback(() => { setPhase("countdown"); }, []);
 
   useEffect(() => {
     if (phase !== "countdown") return;
@@ -257,30 +380,32 @@ export default function LiveMathBlitzPage() {
         timeouts.push(setTimeout(step, 600));
       } else {
         timeouts.push(setTimeout(() => {
-          // Reset live state, RNG, bot timelines.
-          liveRef.current = { score: 0, streak: 0, correct: 0, wrong: 0 };
+          liveRef.current = { score: 0, correct: 0 };
           setDispScore(0);
           setOpponentScores({});
           submittedRef.current = false;
 
           const a = allocRef.current;
           if (!a) return;
-          rngRef.current = mulberry32(a.seed);
 
-          // Determine bot slots: any slot not in presenceSlots
-          const occupied = new Set(Object.keys(presenceSlots).map(Number));
+          const qs = adapter.generateQuestions(a.level, a.seed);
+          setQuestions(qs);
+          setQuestionIndex(0);
+
+          const tuning = adapter.levels.find((l) => l.id === a.level)?.botTuning;
+          const occupied = new Set(Object.keys(presenceRef.current).map(Number));
           const botMap: Record<number, BotTickEvent[]> = {};
           const botInitial: Record<number, number> = {};
           for (let s = 0; s < 4; s++) {
             if (!occupied.has(s)) {
-              botMap[s] = simulateBotTimeline(a.seed, a.level, GAME_MS, s);
+              botMap[s] = tuning ? simulateBotTimeline(a.seed, tuning, GAME_MS, s) : [];
               botInitial[s] = 0;
             }
           }
           botTimelinesRef.current = botMap;
           setBotScores(botInitial);
 
-          setSecsLeft(GAME_SECS);
+          setRemainingMs(GAME_MS);
           gameActiveRef.current = true;
           playStartRef.current = Date.now();
           setPhase("playing");
@@ -289,24 +414,22 @@ export default function LiveMathBlitzPage() {
     };
     timeouts.push(setTimeout(step, 600));
     return () => timeouts.forEach(clearTimeout);
-  }, [phase, presenceSlots]);
+  }, [phase, adapter]);
 
-  // ── Playing phase: spawn first question, run timers ───────────────────────
+  // ── Playing phase: timers ─────────────────────────────────────────────────
 
   useEffect(() => {
     if (phase !== "playing") return;
-    spawnQuestion();
 
     const tickIv = setInterval(() => {
-      setSecsLeft((s) => {
-        if (s <= 1) {
-          clearInterval(tickIv);
-          if (gameActiveRef.current) endGame();
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
+      const elapsed = Date.now() - playStartRef.current;
+      const remaining = Math.max(0, GAME_MS - elapsed);
+      setRemainingMs(remaining);
+      if (remaining <= 0) {
+        clearInterval(tickIv);
+        if (gameActiveRef.current) endGame();
+      }
+    }, 250);
 
     const broadcastIv = setInterval(() => {
       const ch = channelRef.current;
@@ -341,54 +464,33 @@ export default function LiveMathBlitzPage() {
       clearInterval(broadcastIv);
       clearInterval(botIv);
     };
-  }, [phase, spawnQuestion, endGame]);
+  }, [phase, endGame]);
 
-  // ── Answer submission ─────────────────────────────────────────────────────
+  // ── Answer handler (delegated to adapter scoring) ─────────────────────────
 
-  function submitAnswer() {
-    if (!question || inFeedbackRef.current || phase !== "playing") return;
-    const parsed = parseInt(answer.trim(), 10);
-    if (isNaN(parsed)) return;
+  const handleAnswer = useCallback((answer: A) => {
+    if (inFeedbackRef.current || phaseRef.current !== "playing") return;
+    const q = questions[questionIndex];
+    if (!q) return;
 
     inFeedbackRef.current = true;
-    const elapsed = Date.now() - qStartRef.current;
-    const g = liveRef.current;
-    const isCorrect = parsed === question.answer;
+    const result = adapter.scoring(answer, q);
+    const live = liveRef.current;
+    live.score += result.points;
+    if (result.correct) live.correct++;
+    setDispScore(live.score);
+    setFeedback(result);
 
-    if (isCorrect) {
-      const pts = calcPoints(elapsed, g.streak);
-      g.score += pts;
-      g.streak++;
-      g.correct++;
-      setDispScore(g.score);
-      setFeedback("correct");
-      playMathCorrect();
-      setTimeout(() => {
-        setFeedback(null);
-        if (gameActiveRef.current) spawnQuestion();
-      }, 300);
-    } else {
-      g.streak = 0;
-      g.wrong++;
-      setFeedback("wrong");
-      playMathWrong();
-      setTimeout(() => {
-        setFeedback(null);
-        if (gameActiveRef.current) spawnQuestion();
-      }, 700);
-    }
-  }
-
-  function padPress(key: string) {
-    if (inFeedbackRef.current || phase !== "playing") return;
-    if (key === "⌫") setAnswer((a) => a.slice(0, -1));
-    else if (key === "−") setAnswer((a) => (a.startsWith("-") ? a.slice(1) : a.length ? "-" + a : "-"));
-    else setAnswer((a) => (a.length < 4 ? a + key : a));
-  }
+    setTimeout(() => {
+      setFeedback(null);
+      inFeedbackRef.current = false;
+      setQuestionIndex((i) => i + 1);
+    }, result.correct ? 300 : 700);
+  }, [adapter, questions, questionIndex]);
 
   // ── Enter queue ───────────────────────────────────────────────────────────
 
-  const enterQueue = useCallback(async (chosenLevel: Level) => {
+  const enterQueue = useCallback(async (chosenLevel: number) => {
     if (!profile || !userId) return;
     setLevel(chosenLevel);
     setPhase("queue");
@@ -397,18 +499,18 @@ export default function LiveMathBlitzPage() {
 
     let res: Response;
     try {
-      res = await fetch("/api/live-math/match", {
+      res = await fetch("/api/live/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ level: chosenLevel }),
+        body: JSON.stringify({ game_kind: adapter.kind, level: chosenLevel }),
       });
     } catch (err) {
-      console.error("[LiveMath] match POST failed:", err);
+      console.error("[MultiplayerShell] match POST failed:", err);
       setPhase("select");
       return;
     }
     if (!res.ok) {
-      console.error("[LiveMath] match POST status:", res.status);
+      console.error("[MultiplayerShell] match POST status:", res.status);
       setPhase("select");
       return;
     }
@@ -424,7 +526,7 @@ export default function LiveMathBlitzPage() {
 
     teardownChannel();
 
-    const channel = supabase.channel(`live-math:${data.matchId}`, {
+    const channel = supabase.channel(`live:${adapter.kind}:${data.matchId}`, {
       config: { presence: { key: String(data.slotIndex) } },
     });
 
@@ -471,11 +573,7 @@ export default function LiveMathBlitzPage() {
     } satisfies PresenceMeta);
 
     channelRef.current = channel;
-  }, [profile, userId, teardownChannel, startCountdown, submitResult]);
-
-  // phase ref so broadcast handler reads fresh value
-  const phaseRef = useRef(phase);
-  useEffect(() => { phaseRef.current = phase; }, [phase]);
+  }, [profile, userId, adapter.kind, teardownChannel, startCountdown, submitResult]);
 
   // ── Queue countdown ───────────────────────────────────────────────────────
 
@@ -489,9 +587,6 @@ export default function LiveMathBlitzPage() {
       setQueueSecs(Math.ceil(remaining / 1000));
       if (remaining <= 0) {
         clearInterval(iv);
-        // Slot 0 broadcasts 'go' for sync across clients; every client also
-        // transitions locally when their own timer expires, so we don't get
-        // stuck if slot 0 disconnected.
         if (alloc.slotIndex === 0) {
           const ch = channelRef.current;
           if (ch) ch.send({ type: "broadcast", event: "go", payload: {} });
@@ -502,7 +597,6 @@ export default function LiveMathBlitzPage() {
     return () => clearInterval(iv);
   }, [phase, alloc, startCountdown]);
 
-  // Auto-start when queue full
   useEffect(() => {
     if (phase !== "queue" || !alloc) return;
     if (Object.keys(presenceSlots).length >= 4 && alloc.slotIndex === 0) {
@@ -524,8 +618,8 @@ export default function LiveMathBlitzPage() {
     setPresenceSlots({});
     setOpponentScores({});
     setBotScores({});
-    setQuestion(null);
-    setAnswer("");
+    setQuestions([]);
+    setQuestionIndex(0);
     setPhase("select");
   }, [teardownChannel]);
 
@@ -539,29 +633,22 @@ export default function LiveMathBlitzPage() {
     setPresenceSlots({});
     setOpponentScores({});
     setBotScores({});
-    setQuestion(null);
-    setAnswer("");
+    setQuestions([]);
+    setQuestionIndex(0);
     void enterQueue(level);
   }, [teardownChannel, enterQueue, level]);
 
-  // ── Build queue room slot list ────────────────────────────────────────────
+  // ── Derived view models ───────────────────────────────────────────────────
 
   const queueSlots: QueueSlot[] = (() => {
     const out: QueueSlot[] = [null, null, null, null];
     for (const slotStr of Object.keys(presenceSlots)) {
       const slot = Number(slotStr);
       const meta = presenceSlots[slot];
-      out[slot] = {
-        slot,
-        displayName: meta.displayName,
-        avatarUrl: meta.avatarUrl,
-        isBot: false,
-      };
+      out[slot] = { slot, displayName: meta.displayName, avatarUrl: meta.avatarUrl, isBot: false };
     }
     return out;
   })();
-
-  // ── Build live ticker player list ─────────────────────────────────────────
 
   const tickerPlayers: TickerPlayer[] = (() => {
     if (!alloc) return [];
@@ -581,7 +668,7 @@ export default function LiveMathBlitzPage() {
       } else {
         out.push({
           slot: s,
-          displayName: `MathBot ${s + 1}`,
+          displayName: `Bot ${s + 1}`,
           avatarUrl: null,
           isBot: true,
           score: botScores[s] ?? 0,
@@ -595,15 +682,13 @@ export default function LiveMathBlitzPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   if (!authChecked) {
-    return (
-      <div className="mx-auto max-w-md px-4 pt-12 text-center text-sm text-muted">Loading…</div>
-    );
+    return <div className="mx-auto max-w-md px-4 pt-12 text-center text-sm text-muted">Loading…</div>;
   }
 
   if (phase === "auth" || !signedIn) {
     return (
       <div className="mx-auto max-w-md px-4 pt-10 pb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Live Math Blitz</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{adapter.displayName}</h1>
         <p className="mt-2 text-sm text-muted">
           Real-time head-to-head against three other players or bots. Sign in to play live.
         </p>
@@ -615,10 +700,10 @@ export default function LiveMathBlitzPage() {
           Sign in to play live
         </button>
         <button
-          onClick={() => router.push("/brain-training/math-blitz")}
+          onClick={() => router.push(adapter.routePath)}
           className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-3.5 text-sm font-medium"
         >
-          <ArrowLeft size={15} /> Back to Math Blitz
+          <ArrowLeft size={15} /> Back
         </button>
       </div>
     );
@@ -629,45 +714,39 @@ export default function LiveMathBlitzPage() {
       <div className="mx-auto max-w-md px-4 pt-6 pb-8">
         <div className="mb-6">
           <button
-            onClick={() => router.push("/brain-training/math-blitz")}
+            onClick={() => router.push(adapter.routePath)}
             className="mb-3 inline-flex items-center gap-1 text-sm text-muted hover:text-fg transition-colors"
           >
             <ArrowLeft size={14} /> Back
           </button>
-          <h1 className="text-2xl font-bold tracking-tight">MathStack</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{adapter.displayName}</h1>
           <p className="mt-1 text-sm text-muted">Pick a level to enter the queue.</p>
         </div>
         <div className="space-y-3">
-          {([1, 2, 3] as Level[]).map((lv) => {
-            const m = LEVEL_META[lv];
-            return (
-              <button
-                key={lv}
-                onClick={() => enterQueue(lv)}
-                className="w-full rounded-2xl border border-border bg-surface px-5 py-4 text-left transition-all duration-150 hover:border-[var(--accent)]/40 hover:shadow-md active:scale-[0.98]"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-base font-black text-white"
-                    style={{ background: m.color }}
-                  >
-                    {lv}
-                  </div>
-                  <div>
-                    <div className="text-base font-bold">{m.label}</div>
-                    <div className="mt-0.5 text-xs text-muted">{m.desc}</div>
-                  </div>
+          {adapter.levels.map((lv) => (
+            <button
+              key={lv.id}
+              onClick={() => enterQueue(lv.id)}
+              className="w-full rounded-2xl border border-border bg-surface px-5 py-4 text-left transition-all duration-150 hover:border-[var(--accent)]/40 hover:shadow-md active:scale-[0.98]"
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-base font-black text-white"
+                  style={{ background: "var(--accent)" }}
+                >
+                  {lv.id}
                 </div>
-              </button>
-            );
-          })}
+                <div className="text-base font-bold">{lv.label}</div>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     );
   }
 
   if (phase === "queue") {
-    return <QueueRoom players={queueSlots} secondsRemaining={queueSecs} level={level} />;
+    return <QueueRoom players={queueSlots} secondsRemaining={queueSecs} level={level} title={adapter.displayName} />;
   }
 
   if (phase === "countdown") {
@@ -726,16 +805,23 @@ export default function LiveMathBlitzPage() {
     );
   }
 
+  const currentQuestion = questions[questionIndex];
+  if (!currentQuestion) {
+    return <div className="fixed inset-0 z-40 flex items-center justify-center bg-bg text-sm text-muted">Loading…</div>;
+  }
+
+  const PlayBoard = adapter.PlayBoard;
   return (
-    <PlayBoard
-      tickerPlayers={tickerPlayers}
-      secsLeft={secsLeft}
-      totalSecs={GAME_SECS}
-      question={question}
-      answer={answer}
-      feedback={feedback}
-      onPadPressAction={padPress}
-      onSubmitAction={submitAnswer}
-    />
+    <div className="fixed inset-0 z-40 flex flex-col bg-bg">
+      <LiveScoreTicker players={tickerPlayers} />
+      <div className="flex-1 min-h-0">
+        <PlayBoard
+          question={currentQuestion}
+          remainingMs={remainingMs}
+          feedback={feedback}
+          onAnswer={handleAnswer}
+        />
+      </div>
+    </div>
   );
 }

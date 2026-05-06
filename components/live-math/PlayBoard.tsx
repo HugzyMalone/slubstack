@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import type { Question } from "@/lib/math-blitz/engine";
-import { LiveScoreTicker, type TickerPlayer } from "./LiveScoreTicker";
+import { LiveScoreTicker, type TickerPlayer } from "@/components/multiplayer/LiveScoreTicker";
 
 type Feedback = "correct" | "wrong" | null;
 
