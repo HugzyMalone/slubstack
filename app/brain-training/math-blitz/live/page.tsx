@@ -19,8 +19,9 @@ import {
 } from "@/lib/math-blitz/engine";
 import { simulateBotTimeline, type BotTickEvent } from "@/lib/math-blitz/bot";
 import { QueueRoom, type QueueSlot } from "@/components/live-math/QueueRoom";
-import { LiveScoreTicker, type TickerPlayer } from "@/components/live-math/LiveScoreTicker";
+import { type TickerPlayer } from "@/components/live-math/LiveScoreTicker";
 import { Podium, type PodiumPlayer } from "@/components/live-math/Podium";
+import { PlayBoard } from "@/components/live-math/PlayBoard";
 
 type Phase = "auth" | "select" | "queue" | "countdown" | "playing" | "submitting" | "result";
 
@@ -38,42 +39,6 @@ function calcPoints(elapsedMs: number, streak: number): number {
   const speed = elapsedMs < 3000 ? 5 : elapsedMs < 5000 ? 3 : 0;
   const mult = streak >= 10 ? 3 : streak >= 5 ? 2 : streak >= 3 ? 1.5 : 1;
   return Math.round((10 + speed) * mult);
-}
-
-function TimerRing({ secs, total }: { secs: number; total: number }) {
-  const R = 30;
-  const C = 2 * Math.PI * R;
-  const offset = C * (1 - secs / total);
-  const color = secs <= 5 ? "#e11d48" : secs <= 10 ? "#f59e0b" : "var(--accent)";
-  return (
-    <svg width="78" height="78" viewBox="0 0 78 78" className="select-none">
-      <circle cx="39" cy="39" r={R} fill="none" stroke="var(--border)" strokeWidth="6" />
-      <circle
-        cx="39"
-        cy="39"
-        r={R}
-        fill="none"
-        stroke={color}
-        strokeWidth="6"
-        strokeDasharray={C}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-        style={{
-          transform: "rotate(-90deg)",
-          transformOrigin: "39px 39px",
-          transition: "stroke-dashoffset 0.95s linear, stroke 0.4s",
-        }}
-      />
-      <text
-        x="39"
-        y="44"
-        textAnchor="middle"
-        style={{ fontSize: 18, fontWeight: 700, fill: color, fontVariantNumeric: "tabular-nums", transition: "fill 0.4s" }}
-      >
-        {secs}
-      </text>
-    </svg>
-  );
 }
 
 type MatchPlayerResp = {
@@ -111,13 +76,6 @@ type PresenceMeta = {
 };
 
 type TickPayload = { slot: number; score: number };
-
-const PAD_ROWS = [
-  ["7", "8", "9"],
-  ["4", "5", "6"],
-  ["1", "2", "3"],
-  ["−", "0", "⌫"],
-];
 
 export default function LiveMathBlitzPage() {
   const router = useRouter();
@@ -768,96 +726,16 @@ export default function LiveMathBlitzPage() {
     );
   }
 
-  // Playing
-  const feedbackBg =
-    feedback === "correct"
-      ? "color-mix(in srgb, #10b981 12%, var(--surface))"
-      : feedback === "wrong"
-        ? "color-mix(in srgb, #e11d48 12%, var(--surface))"
-        : "var(--surface)";
-
   return (
-    <div
-      className="fixed inset-x-0 top-0 z-40 flex flex-col bg-bg overflow-hidden"
-      style={{ height: "100svh" }}
-    >
-      <LiveScoreTicker players={tickerPlayers} />
-
-      <div className="flex justify-center py-1 shrink-0">
-        <TimerRing secs={secsLeft} total={GAME_SECS} />
-      </div>
-
-      <div className="flex flex-1 items-center justify-center px-6">
-        <motion.div
-          key={question?.display}
-          initial={{ y: 12, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.15 }}
-          className="w-full rounded-3xl px-6 py-5 text-center transition-colors duration-150"
-          style={{ background: feedbackBg, border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)" }}
-        >
-          <div className="text-4xl font-black tracking-tight select-none">
-            {question?.display} =
-          </div>
-          <div
-            className="mt-4 text-3xl font-black tabular-nums min-h-[2.5rem]"
-            style={{ color: "var(--accent)" }}
-          >
-            {answer || <span className="text-muted/30">?</span>}
-          </div>
-        </motion.div>
-      </div>
-
-      <div
-        className="shrink-0 px-4 pt-2 space-y-1.5"
-        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
-      >
-        {PAD_ROWS.map((row, ri) => (
-          <div key={ri} className="grid grid-cols-3 gap-1.5">
-            {row.map((key) => {
-              const isSpecial = key === "⌫" || key === "−";
-              return (
-                <motion.button
-                  key={key}
-                  onPointerDown={(e) => { e.preventDefault(); padPress(key); }}
-                  variants={{
-                    rest: { y: 0, scale: 1, boxShadow: "0 4px 0 color-mix(in srgb, var(--fg) 14%, transparent)" },
-                    pressed: { y: 4, scale: 0.97, boxShadow: "0 0px 0 color-mix(in srgb, var(--fg) 14%, transparent)" },
-                  }}
-                  initial="rest"
-                  whileTap="pressed"
-                  transition={{ type: "spring", stiffness: 700, damping: 30, mass: 0.5 }}
-                  className="rounded-2xl py-3 text-lg font-bold select-none"
-                  style={{
-                    background: isSpecial
-                      ? "color-mix(in srgb, var(--fg) 9%, var(--surface))"
-                      : "color-mix(in srgb, var(--fg) 4%, var(--surface))",
-                    border: "1px solid color-mix(in srgb, var(--fg) 12%, transparent)",
-                    color: key === "⌫" ? "var(--muted)" : "var(--fg)",
-                  }}
-                >
-                  {key}
-                </motion.button>
-              );
-            })}
-          </div>
-        ))}
-        <motion.button
-          onPointerDown={(e) => { e.preventDefault(); submitAnswer(); }}
-          disabled={!answer.trim() || inFeedbackRef.current}
-          variants={{
-            rest: { y: 0, scale: 1, boxShadow: "0 4px 0 color-mix(in srgb, var(--accent) 45%, #0006)" },
-            pressed: { y: 4, scale: 0.98, boxShadow: "0 0px 0 color-mix(in srgb, var(--accent) 45%, #0006)" },
-          }}
-          initial="rest"
-          whileTap="pressed"
-          transition={{ type: "spring", stiffness: 700, damping: 30, mass: 0.5 }}
-          className="w-full rounded-2xl py-3 text-base font-bold text-white disabled:opacity-40"
-          style={{ background: "var(--accent)" }}
-        >
-          Check ✓
-        </motion.button>
-      </div>
-    </div>
+    <PlayBoard
+      tickerPlayers={tickerPlayers}
+      secsLeft={secsLeft}
+      totalSecs={GAME_SECS}
+      question={question}
+      answer={answer}
+      feedback={feedback}
+      onPadPressAction={padPress}
+      onSubmitAction={submitAnswer}
+    />
   );
 }
