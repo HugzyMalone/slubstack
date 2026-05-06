@@ -25,7 +25,7 @@ export type PlayBoardProps<Q, A> = {
   question: Q;
   remainingMs: number;
   feedback: ScoreResult | null;
-  onAnswer: (answer: A) => void;
+  onAnswerAction: (answer: A) => void;
 };
 
 export type GameAdapter<Q, A> = {

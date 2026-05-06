@@ -819,7 +819,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: GameAdapter<Q, A>
           question={currentQuestion}
           remainingMs={remainingMs}
           feedback={feedback}
-          onAnswer={handleAnswer}
+          onAnswerAction={handleAnswer}
         />
       </div>
     </div>

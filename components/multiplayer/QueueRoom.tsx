@@ -48,7 +48,7 @@ function Avatar({ slot }: { slot: NonNullable<QueueSlot> }) {
   );
 }
 
-export function QueueRoom({ players, secondsRemaining, level, title = "MathStack" }: Props) {
+export function QueueRoom({ players, secondsRemaining, level, title = "Math Blitz" }: Props) {
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-bg">
       <div className="flex flex-1 flex-col items-center justify-center px-5">

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { isDue } from "@/lib/srs";
-import { loadMathOpStats, type MathOpStats } from "@/app/brain-training/math-blitz/page";
-import { loadActorStats, type ActorStatMap } from "@/components/trivia/ActorBlitz";
+import { loadMathOpStats, type MathOpStats } from "@/lib/math-blitz/op-stats";
+import { loadActorStats, type ActorStatMap } from "@/lib/games/actor-blitz/legacy-stats";
 import { getTodayStr } from "@/lib/wordle-words";
 
 // ── helpers ────────────────────────────────────────────────────────────────────

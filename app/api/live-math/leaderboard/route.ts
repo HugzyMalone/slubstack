@@ -12,8 +12,9 @@ export async function GET(request: NextRequest) {
   }
 
   const { data, error } = await supabase
-    .from("live_math_ratings")
+    .from("live_ratings")
     .select("user_id, rating, matches, wins, draws, losses, profiles!inner(username, avatar_url)")
+    .eq("game_kind", "math_blitz")
     .eq("level", level)
     .order("rating", { ascending: false })
     .limit(50);

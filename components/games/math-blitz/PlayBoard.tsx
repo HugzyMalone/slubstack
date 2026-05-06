@@ -1,21 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import type { PlayBoardProps } from "@/lib/multiplayer/types";
 import type { Question } from "@/lib/math-blitz/engine";
-import { LiveScoreTicker, type TickerPlayer } from "@/components/multiplayer/LiveScoreTicker";
-
-type Feedback = "correct" | "wrong" | null;
-
-type Props = {
-  tickerPlayers: TickerPlayer[];
-  secsLeft: number;
-  totalSecs: number;
-  question: Question | null;
-  answer: string;
-  feedback: Feedback;
-  onPadPressAction: (key: string) => void;
-  onSubmitAction: () => void;
-};
 
 const PAD_ROWS = [
   ["7", "8", "9"],
@@ -23,6 +11,8 @@ const PAD_ROWS = [
   ["1", "2", "3"],
   ["−", "0", "⌫"],
 ];
+
+const TOTAL_SECS = 30;
 
 function TimerRing({ secs, total }: { secs: number; total: number }) {
   const R = 30;
@@ -60,39 +50,50 @@ function TimerRing({ secs, total }: { secs: number; total: number }) {
   );
 }
 
-export function PlayBoard({
-  tickerPlayers,
-  secsLeft,
-  totalSecs,
-  question,
-  answer,
-  feedback,
-  onPadPressAction,
-  onSubmitAction,
-}: Props) {
+export function PlayBoard({ question, remainingMs, feedback, onAnswerAction }: PlayBoardProps<Question, number>) {
+  const [answer, setAnswer] = useState("");
+  const secsLeft = Math.ceil(remainingMs / 1000);
+
+  useEffect(() => {
+    setAnswer("");
+  }, [question]);
+
+  const fb: "correct" | "wrong" | null = feedback?.correct ? "correct" : feedback ? "wrong" : null;
+
   const feedbackBg =
-    feedback === "correct"
+    fb === "correct"
       ? "color-mix(in srgb, #10b981 12%, var(--surface))"
-      : feedback === "wrong"
+      : fb === "wrong"
         ? "color-mix(in srgb, #e11d48 12%, var(--surface))"
         : "var(--surface)";
 
-  const disabled = !answer.trim() || feedback !== null;
+  const inFeedback = fb !== null;
+  const submitDisabled = !answer.trim() || inFeedback;
+
+  function padPress(key: string) {
+    if (inFeedback) return;
+    if (key === "⌫") setAnswer((a) => a.slice(0, -1));
+    else if (key === "−") setAnswer((a) => (a.startsWith("-") ? a.slice(1) : a.length ? "-" + a : "-"));
+    else setAnswer((a) => (a.length < 4 ? a + key : a));
+  }
+
+  function submitAnswer() {
+    if (submitDisabled) return;
+    const parsed = parseInt(answer.trim(), 10);
+    if (isNaN(parsed)) return;
+    onAnswerAction(parsed);
+    setAnswer("");
+  }
 
   return (
-    <div
-      className="fixed inset-x-0 top-0 z-40 flex flex-col bg-bg overflow-hidden"
-      style={{ height: "100svh" }}
-    >
-      <LiveScoreTicker players={tickerPlayers} />
-
+    <div className="flex h-full flex-col overflow-hidden">
       <div className="flex justify-center py-1 shrink-0">
-        <TimerRing secs={secsLeft} total={totalSecs} />
+        <TimerRing secs={secsLeft} total={TOTAL_SECS} />
       </div>
 
       <div className="flex flex-1 items-center justify-center px-6">
         <motion.div
-          key={question?.display}
+          key={question.display}
           initial={{ y: 12, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.15 }}
@@ -100,7 +101,7 @@ export function PlayBoard({
           style={{ background: feedbackBg, border: "1px solid color-mix(in srgb, var(--fg) 8%, transparent)" }}
         >
           <div className="text-4xl font-black tracking-tight select-none">
-            {question?.display} =
+            {question.display} =
           </div>
           <div
             className="mt-4 text-3xl font-black tabular-nums min-h-[2.5rem]"
@@ -122,7 +123,7 @@ export function PlayBoard({
               return (
                 <motion.button
                   key={key}
-                  onPointerDown={(e) => { e.preventDefault(); onPadPressAction(key); }}
+                  onPointerDown={(e) => { e.preventDefault(); padPress(key); }}
                   variants={{
                     rest: { y: 0, scale: 1, boxShadow: "0 4px 0 color-mix(in srgb, var(--fg) 14%, transparent)" },
                     pressed: { y: 4, scale: 0.97, boxShadow: "0 0px 0 color-mix(in srgb, var(--fg) 14%, transparent)" },
@@ -146,8 +147,8 @@ export function PlayBoard({
           </div>
         ))}
         <motion.button
-          onPointerDown={(e) => { e.preventDefault(); onSubmitAction(); }}
-          disabled={disabled}
+          onPointerDown={(e) => { e.preventDefault(); submitAnswer(); }}
+          disabled={submitDisabled}
           variants={{
             rest: { y: 0, scale: 1, boxShadow: "0 4px 0 color-mix(in srgb, var(--accent) 45%, #0006)" },
             pressed: { y: 4, scale: 0.98, boxShadow: "0 0px 0 color-mix(in srgb, var(--accent) 45%, #0006)" },

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import type { ActorBest } from "@/components/trivia/ActorBlitz";
+import type { ActorBest } from "@/lib/games/actor-blitz/legacy-stats";
 
 export default function ActorBlitzStatsPage() {
   const [best, setBest] = useState<ActorBest | null>(null);
