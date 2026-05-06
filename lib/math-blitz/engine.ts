@@ -1,8 +1,9 @@
+export { type RNG, mulberry32, randInt } from "../multiplayer/rng";
+import { randInt, type RNG } from "../multiplayer/rng";
+
 export type Level = 1 | 2 | 3;
 
 export type Question = { display: string; answer: number };
-
-export type RNG = () => number;
 
 type LevelConfig = { ops: readonly string[]; maxA: number; maxB: number };
 
@@ -11,26 +12,6 @@ const LEVEL_CONFIG: Record<Level, LevelConfig> = {
   2: { ops: ["+", "−", "×", "÷"], maxA: 20, maxB: 10 },
   3: { ops: ["+", "−", "×", "÷"], maxA: 50, maxB: 12 },
 };
-
-export function mulberry32(seed: string): RNG {
-  let h = 2166136261 >>> 0;
-  for (let i = 0; i < seed.length; i++) {
-    h ^= seed.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  let state = h >>> 0;
-  return () => {
-    state = (state + 0x6d2b79f5) >>> 0;
-    let t = state;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-export function randInt(min: number, max: number, rng: RNG): number {
-  return Math.floor(rng() * (max - min + 1)) + min;
-}
 
 export function makeQuestion(level: Level, rng: RNG): Question {
   const { ops, maxA, maxB } = LEVEL_CONFIG[level];
