@@ -1,4 +1,6 @@
 import Link from "next/link";
+import type { ComponentType } from "react";
+import { Flag, Image as ImageIcon, Disc, Sparkles, ArrowUpDown, CalendarClock } from "lucide-react";
 
 function FilmIcon() {
   return (
@@ -38,7 +40,17 @@ function MusicIcon() {
   );
 }
 
-const MODES = [
+type Mode = {
+  href: string;
+  Icon: ComponentType;
+  iconBg: string;
+  title: string;
+  description: string;
+  tag: string;
+  accent: string;
+};
+
+const MODES: Mode[] = [
   {
     href: "/trivia/actors",
     Icon: FilmIcon,
@@ -47,6 +59,60 @@ const MODES = [
     description: "Guess the movie star from their photo",
     tag: "Multiplayer · 30 sec",
     accent: "#8b5cf6",
+  },
+  {
+    href: "/trivia/flags",
+    Icon: () => <Flag size={22} />,
+    iconBg: "linear-gradient(135deg, #ef4444 0%, #f97316 100%)",
+    title: "Flag Blitz",
+    description: "Name the country from its flag",
+    tag: "Multiplayer · 30 sec",
+    accent: "#ef4444",
+  },
+  {
+    href: "/trivia/higher-lower",
+    Icon: () => <ArrowUpDown size={22} />,
+    iconBg: "linear-gradient(135deg, #16a34a 0%, #15803d 100%)",
+    title: "Higher or Lower",
+    description: "Guess which is bigger, taller, older",
+    tag: "Multiplayer · 30 sec",
+    accent: "#16a34a",
+  },
+  {
+    href: "/trivia/year-guesser",
+    Icon: () => <CalendarClock size={22} />,
+    iconBg: "linear-gradient(135deg, #0891b2 0%, #0e7490 100%)",
+    title: "Year Guesser",
+    description: "Pin the date — closer is better",
+    tag: "Multiplayer · 30 sec",
+    accent: "#0891b2",
+  },
+  {
+    href: "/trivia/posters",
+    Icon: () => <ImageIcon size={22} />,
+    iconBg: "linear-gradient(135deg, #db2777 0%, #be185d 100%)",
+    title: "Poster Blitz",
+    description: "Identify the film from its poster",
+    tag: "Multiplayer · 30 sec",
+    accent: "#db2777",
+  },
+  {
+    href: "/trivia/albums",
+    Icon: () => <Disc size={22} />,
+    iconBg: "linear-gradient(135deg, #9333ea 0%, #6d28d9 100%)",
+    title: "Album Blitz",
+    description: "Name the artist from the album cover",
+    tag: "Multiplayer · 30 sec",
+    accent: "#9333ea",
+  },
+  {
+    href: "/trivia/logos",
+    Icon: () => <Sparkles size={22} />,
+    iconBg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+    title: "Logo Blitz",
+    description: "Identify the brand from its logo",
+    tag: "Multiplayer · 30 sec",
+    accent: "#f59e0b",
   },
 ];
 

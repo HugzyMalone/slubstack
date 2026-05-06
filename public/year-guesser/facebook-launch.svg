@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 140" preserveAspectRatio="xMidYMid slice">
+<rect width="200" height="140" fill="hsl(135 55% 35%)"/>
+<text x="100" y="32" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="900" letter-spacing="2" fill="hsl(135 70% 88%)" opacity="0.8">EVENT</text>
+<text text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="700" fill="hsl(135 70% 88%)"><tspan x="100" y="62">Facebook is launched</tspan><tspan x="100" y="78">at Harvard</tspan></text>
+</svg>
