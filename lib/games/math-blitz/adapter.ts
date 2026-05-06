@@ -21,7 +21,7 @@ export const mathBlitzAdapter: GameAdapter<Question, number> = {
     const rng = mulberry32(`${seed}::q`);
     return Array.from({ length: ROUND_QUESTIONS }, () => makeQuestion(level as Level, rng));
   },
-  scoring: binary<Question, number>((a, q) => a === q.answer, 1),
+  scoring: binary<Question, number>((a, q) => a === q.answer, 12),
   onFeedback: (r) => (r.correct ? playMathCorrect() : playMathWrong()),
   onGameEnd: playMathFinish,
   xpFor: (correct) => correct * 5,
