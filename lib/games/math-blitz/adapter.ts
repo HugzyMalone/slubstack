@@ -2,6 +2,7 @@ import type { GameAdapter } from "@/lib/multiplayer/types";
 import { binary } from "@/lib/multiplayer/scoring";
 import { makeQuestion, mulberry32, type Level, type Question } from "@/lib/math-blitz/engine";
 import { PlayBoard } from "@/components/games/math-blitz/PlayBoard";
+import { playMathCorrect, playMathFinish, playMathWrong } from "@/lib/sound";
 
 const ROUND_QUESTIONS = 60;
 
@@ -21,5 +22,7 @@ export const mathBlitzAdapter: GameAdapter<Question, number> = {
     return Array.from({ length: ROUND_QUESTIONS }, () => makeQuestion(level as Level, rng));
   },
   scoring: binary<Question, number>((a, q) => a === q.answer, 1),
+  onFeedback: (r) => (r.correct ? playMathCorrect() : playMathWrong()),
+  onGameEnd: playMathFinish,
   xpFor: (correct) => correct * 5,
 };

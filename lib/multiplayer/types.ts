@@ -36,6 +36,8 @@ export type GameAdapter<Q, A> = {
   PlayBoard: ComponentType<PlayBoardProps<Q, A>>;
   generateQuestions: (level: number, seed: string) => Q[];
   scoring: ScoringRule<Q, A>;
+  onFeedback?: (result: ScoreResult) => void;
+  onGameEnd?: () => void;
   xpFor: (correct: number, points: number) => number;
   storeKey: "brainTraining" | "trivia";
 };

@@ -359,10 +359,11 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: GameAdapter<Q, A>
   const endGame = useCallback(() => {
     if (!gameActiveRef.current) return;
     gameActiveRef.current = false;
+    adapter.onGameEnd?.();
     const a = allocRef.current;
     if (!a) return;
     void submitResult(a);
-  }, [submitResult]);
+  }, [adapter, submitResult]);
 
   // ── Countdown → playing ───────────────────────────────────────────────────
 
@@ -475,6 +476,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: GameAdapter<Q, A>
 
     inFeedbackRef.current = true;
     const result = adapter.scoring(answer, q);
+    adapter.onFeedback?.(result);
     const live = liveRef.current;
     live.score += result.points;
     if (result.correct) live.correct++;
