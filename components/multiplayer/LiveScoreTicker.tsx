@@ -39,8 +39,13 @@ function useCountUp(target: number, durationMs = 450): number {
   return value;
 }
 
-function HorseAvatar({ p, bumpKey }: { p: TickerPlayer; bumpKey: number }) {
+function HorseAvatar({ p, bumpKey, compact }: { p: TickerPlayer; bumpKey: number; compact: boolean }) {
   const ring = p.isMe ? "var(--accent)" : "var(--border)";
+  const sizeClass = compact ? "h-6 w-6" : "h-7 w-7";
+  const botIconSize = compact ? 12 : 14;
+  const fallbackTextClass = compact
+    ? "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold"
+    : "flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold";
   const inner = (() => {
     if (p.avatarUrl) {
       return (
@@ -48,7 +53,7 @@ function HorseAvatar({ p, bumpKey }: { p: TickerPlayer; bumpKey: number }) {
         <img
           src={p.avatarUrl}
           alt={p.displayName}
-          className="h-7 w-7 rounded-full object-cover"
+          className={`${sizeClass} rounded-full object-cover`}
           style={{ boxShadow: `0 0 0 2px ${ring}` }}
         />
       );
@@ -56,19 +61,19 @@ function HorseAvatar({ p, bumpKey }: { p: TickerPlayer; bumpKey: number }) {
     if (p.isBot) {
       return (
         <div
-          className="flex h-7 w-7 items-center justify-center rounded-full"
+          className={`flex ${sizeClass} items-center justify-center rounded-full`}
           style={{
             background: "color-mix(in srgb, var(--game) 18%, var(--surface))",
             boxShadow: `0 0 0 2px ${ring}`,
           }}
         >
-          <Bot size={14} style={{ color: "var(--game)" }} />
+          <Bot size={botIconSize} style={{ color: "var(--game)" }} />
         </div>
       );
     }
     return (
       <div
-        className="flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold"
+        className={fallbackTextClass}
         style={{
           background: "color-mix(in srgb, var(--accent) 18%, var(--surface))",
           color: "var(--accent)",
@@ -92,11 +97,15 @@ function HorseAvatar({ p, bumpKey }: { p: TickerPlayer; bumpKey: number }) {
   );
 }
 
-function Lane({ p, maxScore }: { p: TickerPlayer; maxScore: number }) {
+function Lane({ p, maxScore, compact }: { p: TickerPlayer; maxScore: number; compact: boolean }) {
   const displayedScore = useCountUp(p.score, 450);
   const pct = Math.min(88, (p.score / maxScore) * 88);
+  const laneHeightClass = compact ? "relative h-5" : "relative h-6";
+  const scoreClass = compact
+    ? "text-[11px] font-black tabular-nums whitespace-nowrap"
+    : "text-xs font-black tabular-nums whitespace-nowrap";
   return (
-    <div className="relative h-6">
+    <div className={laneHeightClass}>
       <div
         className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2"
         style={{
@@ -111,9 +120,9 @@ function Lane({ p, maxScore }: { p: TickerPlayer; maxScore: number }) {
           transition: "left 450ms cubic-bezier(0.22, 1, 0.36, 1)",
         }}
       >
-        <HorseAvatar p={p} bumpKey={p.score} />
+        <HorseAvatar p={p} bumpKey={p.score} compact={compact} />
         <span
-          className="text-xs font-black tabular-nums whitespace-nowrap"
+          className={scoreClass}
           style={{ color: p.isMe ? "var(--accent)" : "var(--fg)" }}
         >
           {displayedScore}
@@ -126,6 +135,7 @@ function Lane({ p, maxScore }: { p: TickerPlayer; maxScore: number }) {
 export function LiveScoreTicker({ players }: Props) {
   const lanes = [...players].sort((a, b) => a.slot - b.slot);
   const maxScore = Math.max(1, ...players.map((p) => p.score));
+  const compact = players.length > 4;
 
   return (
     <div className="px-3 pt-2">
@@ -148,7 +158,7 @@ export function LiveScoreTicker({ players }: Props) {
 
         <div className="space-y-1">
           {lanes.map((p) => (
-            <Lane key={p.slot} p={p} maxScore={maxScore} />
+            <Lane key={p.slot} p={p} maxScore={maxScore} compact={compact} />
           ))}
         </div>
       </div>
