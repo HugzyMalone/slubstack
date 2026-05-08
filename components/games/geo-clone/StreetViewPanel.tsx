@@ -33,7 +33,7 @@ export function StreetViewPanel({ location }: StreetViewPanelProps) {
     );
   }
 
-  const src = `https://www.google.com/maps/embed/v1/streetview?key=${apiKey}&location=${location.lat},${location.lng}&heading=${location.heading}&pitch=0&fov=90`;
+  const src = `https://www.google.com/maps/embed/v1/streetview?key=${apiKey}&location=${location.lat},${location.lng}&heading=${location.heading}&pitch=0&fov=80`;
 
   return (
     <div ref={containerRef} className="h-full w-full touch-none">
@@ -43,6 +43,7 @@ export function StreetViewPanel({ location }: StreetViewPanelProps) {
         className="h-full w-full border-0"
         loading="eager"
         referrerPolicy="no-referrer-when-downgrade"
+        allow="accelerometer; gyroscope"
         allowFullScreen
         title="Street View"
       />
