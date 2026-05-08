@@ -32,7 +32,7 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
     setSheetOpen(false);
   }, [roundIndex]);
 
-  function confirm() {
+  function handleConfirm() {
     if (locked || !pendingGuess) return;
     onLockGuess(pendingGuess);
   }
@@ -77,7 +77,6 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
         </div>
       </div>
 
-      {/* Desktop overlay (lg+) */}
       <div className="pointer-events-none absolute bottom-4 right-4 z-20 hidden lg:block">
         <motion.div
           animate={{ width: overlayOpen ? 360 : 56, height: overlayOpen ? 320 : 56 }}
@@ -95,6 +94,7 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
               >
                 <span className="text-[11px] font-black uppercase tracking-widest text-muted">Your guess</span>
                 <button
+                  type="button"
                   onClick={() => setOverlayOpen(false)}
                   className="flex h-6 w-6 items-center justify-center rounded-md text-muted hover:text-fg"
                   aria-label="Collapse map"
@@ -107,7 +107,7 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
               </div>
               <div className="p-2">
                 <button
-                  onClick={confirm}
+                  type="button" onClick={handleConfirm}
                   disabled={locked || !pendingGuess}
                   className="flex h-10 w-full items-center justify-center gap-2 rounded-xl font-black tracking-wider disabled:opacity-50"
                   style={{
@@ -123,6 +123,7 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
             </div>
           ) : (
             <button
+              type="button"
               onClick={() => setOverlayOpen(true)}
               className="flex h-full w-full items-center justify-center text-fg"
               style={{ background: "var(--surface)" }}
@@ -134,7 +135,6 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
         </motion.div>
       </div>
 
-      {/* Mobile bottom sheet (<lg) */}
       <div className="absolute inset-x-0 bottom-0 z-20 lg:hidden">
         <AnimatePresence initial={false}>
           {sheetOpen && (
@@ -157,6 +157,7 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
                 <div className="flex items-center justify-between px-4 pb-2">
                   <span className="text-[11px] font-black uppercase tracking-widest text-muted">Your guess</span>
                   <button
+                    type="button"
                     onClick={() => setSheetOpen(false)}
                     className="flex h-7 w-7 items-center justify-center rounded-md text-muted"
                     aria-label="Close map"
@@ -179,6 +180,7 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
           {locked ? (
             <div className="flex flex-col items-center gap-1">
               <button
+                type="button"
                 disabled
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl font-black tracking-wider opacity-70"
                 style={{
@@ -194,7 +196,7 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
           ) : pendingGuess ? (
             <div className="flex flex-col gap-1.5">
               <button
-                onClick={confirm}
+                type="button" onClick={handleConfirm}
                 className="h-12 w-full rounded-2xl font-black tracking-wider"
                 style={{ background: "var(--accent)", color: "var(--bg)" }}
               >
@@ -202,6 +204,7 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
               </button>
               {!sheetOpen && (
                 <button
+                  type="button"
                   onClick={() => setSheetOpen(true)}
                   className="text-[11px] font-semibold text-muted underline-offset-2 hover:underline"
                 >
@@ -211,6 +214,7 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
             </div>
           ) : (
             <button
+              type="button"
               onClick={() => setSheetOpen(true)}
               className="h-12 w-full rounded-2xl font-black tracking-wider"
               style={{
