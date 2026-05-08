@@ -7,9 +7,7 @@ const VALID_KINDS: ReadonlySet<GameKind> = new Set([
   "math_blitz",
   "actor_blitz",
   "flag_blitz",
-  "posters",
   "albums",
-  "logos",
   "higher_lower",
   "year_guesser",
 ]);

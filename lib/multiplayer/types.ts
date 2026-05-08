@@ -9,11 +9,10 @@ export type GameKind =
   | "math_blitz"
   | "actor_blitz"
   | "flag_blitz"
-  | "posters"
   | "albums"
-  | "logos"
   | "higher_lower"
-  | "year_guesser";
+  | "year_guesser"
+  | "batman_shakespeare";
 
 export type LevelConfig = {
   id: number;
