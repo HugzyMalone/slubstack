@@ -136,12 +136,10 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
   const submittedRef = useRef(false);
   const roundIndexRef = useRef(0);
   const playStartRef = useRef(0);
-  const roundGuessesRef = useRef<Record<number, GuessLockedPayload<A>>>({});
 
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { presenceRef.current = presenceSlots; }, [presenceSlots]);
   useEffect(() => { roundIndexRef.current = roundIndex; }, [roundIndex]);
-  useEffect(() => { roundGuessesRef.current = roundGuesses; }, [roundGuesses]);
 
   const store = adapter.storeKey === "trivia" ? triviaStore : brainTrainingStore;
 
@@ -242,7 +240,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
       const ranks = denseRanks(allSlots.map((s) => s.score));
       const slotsRanked = allSlots.map((s, i) => ({ ...s, rank: ranks[i] }));
 
-      const humansCount = slotsRanked.length;
+      const humansCount = slotsRanked.filter((s) => !s.isBot).length;
 
       const supabase = getSupabaseBrowserClient();
       const humanIds = slotsRanked.map((s) => s.userId!).filter(Boolean);
