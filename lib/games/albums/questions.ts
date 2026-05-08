@@ -13,8 +13,6 @@ const ALBUMS: AlbumEntry[] = [
   { id: "dark-side-of-the-moon", title: "The Dark Side of the Moon", artist: "Pink Floyd", imageSrc: "https://upload.wikimedia.org/wikipedia/en/thumb/a/ab/The_Dark_Side_of_the_Moon_cover.svg/1920px-The_Dark_Side_of_the_Moon_cover.svg.png", decoys: ["Led Zeppelin", "The Who", "Deep Purple", "Yes", "Genesis", "King Crimson"] },
   { id: "abbey-road", title: "Abbey Road", artist: "The Beatles", imageSrc: "https://upload.wikimedia.org/wikipedia/commons/a/a4/The_Beatles_Abbey_Road_album_cover.jpg", decoys: ["The Rolling Stones", "The Kinks", "The Who", "The Beach Boys", "Cream", "The Doors"] },
   { id: "rumours", title: "Rumours", artist: "Fleetwood Mac", imageSrc: "https://upload.wikimedia.org/wikipedia/en/f/fb/FMacRumours.PNG", decoys: ["The Eagles", "Steely Dan", "Carole King", "Linda Ronstadt", "Joni Mitchell", "James Taylor"] },
-  { id: "nevermind", title: "Nevermind", artist: "Nirvana", imageSrc: "https://upload.wikimedia.org/wikipedia/en/b/b7/NirvanaNevermindalbumcover.jpg", decoys: ["Pearl Jam", "Soundgarden", "Alice in Chains", "Stone Temple Pilots", "Smashing Pumpkins", "Foo Fighters"] },
-  { id: "ready-to-die", title: "Ready to Die", artist: "The Notorious B.I.G.", imageSrc: "https://upload.wikimedia.org/wikipedia/en/9/97/Ready_To_Die.jpg", decoys: ["Nas", "Jay-Z", "Tupac", "Mobb Deep", "Wu-Tang Clan", "Method Man"] },
   { id: "lemonade", title: "Lemonade", artist: "Beyoncé", imageSrc: "https://upload.wikimedia.org/wikipedia/en/5/53/Beyonce_-_Lemonade_%28Official_Album_Cover%29.png", decoys: ["Rihanna", "Alicia Keys", "Solange", "SZA", "Janelle Monáe", "Mariah Carey"] },
 ];
 
