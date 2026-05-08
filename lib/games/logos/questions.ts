@@ -10,24 +10,18 @@ type LogoEntry = {
 const LOGOS: LogoEntry[] = [
   { id: "apple", brand: "Apple", decoys: ["Microsoft", "Samsung", "Google", "IBM", "Sony", "Dell"] },
   { id: "google", brand: "Google", decoys: ["Microsoft", "Apple", "Yahoo", "Bing", "Meta", "Amazon"] },
-  { id: "microsoft", brand: "Microsoft", decoys: ["Apple", "IBM", "Google", "Oracle", "Adobe", "Intel"] },
-  { id: "amazon", brand: "Amazon", decoys: ["eBay", "Alibaba", "Walmart", "Target", "Shopify", "Etsy"] },
   { id: "meta", brand: "Meta", decoys: ["Twitter", "Snapchat", "Pinterest", "TikTok", "LinkedIn", "Reddit"] },
   { id: "netflix", brand: "Netflix", decoys: ["Hulu", "Disney+", "HBO Max", "Prime Video", "Apple TV+", "Paramount+"] },
   { id: "spotify", brand: "Spotify", decoys: ["Apple Music", "SoundCloud", "Tidal", "Deezer", "Pandora", "YouTube Music"] },
   { id: "nike", brand: "Nike", decoys: ["Adidas", "Puma", "Reebok", "Under Armour", "New Balance", "Asics"] },
   { id: "adidas", brand: "Adidas", decoys: ["Nike", "Puma", "Reebok", "Fila", "Champion", "Lacoste"] },
   { id: "coca-cola", brand: "Coca-Cola", decoys: ["Pepsi", "Dr Pepper", "Fanta", "Sprite", "Mountain Dew", "7 Up"] },
-  { id: "pepsi", brand: "Pepsi", decoys: ["Coca-Cola", "Mountain Dew", "Dr Pepper", "Fanta", "Sprite", "7 Up"] },
   { id: "mcdonalds", brand: "McDonald's", decoys: ["Burger King", "Wendy's", "KFC", "Taco Bell", "Subway", "Five Guys"] },
   { id: "starbucks", brand: "Starbucks", decoys: ["Costa Coffee", "Dunkin'", "Pret a Manger", "Caffè Nero", "Tim Hortons", "Peet's Coffee"] },
   { id: "ferrari", brand: "Ferrari", decoys: ["Lamborghini", "Maserati", "Porsche", "Aston Martin", "McLaren", "Bugatti"] },
   { id: "lamborghini", brand: "Lamborghini", decoys: ["Ferrari", "Maserati", "Porsche", "Bugatti", "McLaren", "Pagani"] },
   { id: "bmw", brand: "BMW", decoys: ["Mercedes-Benz", "Audi", "Volkswagen", "Porsche", "Lexus", "Volvo"] },
   { id: "tesla", brand: "Tesla", decoys: ["Rivian", "Lucid", "Polestar", "BMW", "Mercedes-Benz", "Toyota"] },
-  { id: "louis-vuitton", brand: "Louis Vuitton", decoys: ["Gucci", "Chanel", "Hermès", "Prada", "Dior", "Burberry"] },
-  { id: "gucci", brand: "Gucci", decoys: ["Louis Vuitton", "Prada", "Versace", "Fendi", "Balenciaga", "Dolce & Gabbana"] },
-  { id: "chanel", brand: "Chanel", decoys: ["Dior", "Yves Saint Laurent", "Gucci", "Prada", "Hermès", "Louis Vuitton"] },
 ];
 
 function imageFor(id: string): string {

@@ -19,6 +19,7 @@ export type PodiumPlayer = {
 type Props = {
   players: PodiumPlayer[];
   currentUserId: string | null;
+  gameDisplayName: string;
   onPlayAgainAction: () => void;
   onBackAction: () => void;
 };
@@ -119,7 +120,7 @@ function EloRow({ before, after }: { before: number; after: number }) {
   );
 }
 
-export function Podium({ players, currentUserId, onPlayAgainAction, onBackAction }: Props) {
+export function Podium({ players, currentUserId, gameDisplayName, onPlayAgainAction, onBackAction }: Props) {
   const sorted = [...players].sort((a, b) => a.rank - b.rank);
   const allRanks = sorted.map((p) => p.rank);
 
@@ -199,7 +200,7 @@ export function Podium({ players, currentUserId, onPlayAgainAction, onBackAction
             className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-3.5 text-sm font-medium transition-colors hover:bg-border/30"
           >
             <ArrowLeft size={15} />
-            Back to Math Blitz
+            Back to {gameDisplayName}
           </button>
         </div>
       </div>

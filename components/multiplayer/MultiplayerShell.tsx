@@ -801,6 +801,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: GameAdapter<Q, A>
       <Podium
         players={podiumPlayers}
         currentUserId={userId}
+        gameDisplayName={adapter.displayName}
         onPlayAgainAction={playAgain}
         onBackAction={resetToSelect}
       />

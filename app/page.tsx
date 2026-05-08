@@ -3,11 +3,8 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { useStore } from "zustand";
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
-import { mandarinStore, germanStore, spanishStore, vibeCodingStore, brainTrainingStore, triviaStore } from "@/lib/store";
-import { levelFromXp } from "@/lib/xp";
 
 function SparkleIcon() {
   return (
@@ -280,20 +277,6 @@ export default function HubPage() {
   const [greeting, setGreeting] = useState("");
   const prefersReducedMotion = useReducedMotion();
 
-  // Live levels from stores
-  const mandarinXp = useStore(mandarinStore, s => s.xp);
-  const germanXp = useStore(germanStore, s => s.xp);
-  const spanishXp = useStore(spanishStore, s => s.xp);
-  const vibeXp = useStore(vibeCodingStore, s => s.xp);
-  const brainXp = useStore(brainTrainingStore, s => s.xp);
-  const triviaXp = useStore(triviaStore, s => s.xp);
-  const sectionLevels = [
-    levelFromXp(mandarinXp + germanXp + spanishXp),
-    levelFromXp(vibeXp),
-    levelFromXp(brainXp),
-    levelFromXp(triviaXp),
-  ];
-
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem(HERO_SESSION_KEY);
@@ -396,48 +379,33 @@ export default function HubPage() {
         </motion.div>
 
         <div className="flex-1 min-h-0 grid grid-cols-2 gap-2.5 pb-[max(calc(env(safe-area-inset-bottom,0px)+72px),88px)]">
-          {SECTIONS.map(({ href, icon, iconBg, cardTint, title, subtitle }, i) => {
-            const level = sectionLevels[i];
-            return (
-              <motion.div
-                key={href}
-                className="h-full"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 + i * 0.07, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+          {SECTIONS.map(({ href, icon, iconBg, cardTint, title, subtitle }, i) => (
+            <motion.div
+              key={href}
+              className="h-full"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 + i * 0.07, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              <Link
+                href={href}
+                className="relative flex h-full flex-col items-center justify-center gap-2.5 rounded-2xl p-3 transition-transform duration-150 active:scale-[0.97]"
+                style={{
+                  background: `color-mix(in srgb, ${cardTint} 10%, var(--surface))`,
+                  border: `1px solid color-mix(in srgb, ${cardTint} 22%, transparent)`,
+                  boxShadow: `0 4px 20px color-mix(in srgb, ${cardTint} 10%, transparent)`,
+                }}
               >
-                <Link
-                  href={href}
-                  className="relative flex h-full flex-col items-center justify-center gap-2.5 rounded-2xl p-3 transition-transform duration-150 active:scale-[0.97]"
-                  style={{
-                    background: `color-mix(in srgb, ${cardTint} 10%, var(--surface))`,
-                    border: `1px solid color-mix(in srgb, ${cardTint} 22%, transparent)`,
-                    boxShadow: `0 4px 20px color-mix(in srgb, ${cardTint} 10%, transparent)`,
-                  }}
-                >
-                  {level > 0 && (
-                    <span
-                      className="absolute top-2 right-2 rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none"
-                      style={{
-                        background: `color-mix(in srgb, ${cardTint} 20%, var(--surface))`,
-                        color: cardTint,
-                        border: `1px solid color-mix(in srgb, ${cardTint} 30%, transparent)`,
-                      }}
-                    >
-                      Lv.{level}
-                    </span>
-                  )}
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white" style={{ background: iconBg }}>
-                    {icon}
-                  </div>
-                  <div className="text-center">
-                    <div className="text-[14px] font-bold leading-tight">{title}</div>
-                    <div className="mt-0.5 text-[11px] leading-tight text-muted">{subtitle}</div>
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white" style={{ background: iconBg }}>
+                  {icon}
+                </div>
+                <div className="text-center">
+                  <div className="text-[14px] font-bold leading-tight">{title}</div>
+                  <div className="mt-0.5 text-[11px] leading-tight text-muted">{subtitle}</div>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
         </div>
       </div>
 
@@ -500,58 +468,41 @@ export default function HubPage() {
         <div>
           <h2 className="text-xs font-semibold tracking-widest text-muted uppercase mb-4">Continue</h2>
           <div className="grid grid-cols-2 gap-4">
-            {SECTIONS.map(({ href, icon, iconBg, cardTint, title, subtitle }, i) => {
-              const level = sectionLevels[i];
-              return (
-                <motion.div
-                  key={href}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.12 + i * 0.06, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+            {SECTIONS.map(({ href, icon, iconBg, cardTint, title, subtitle }, i) => (
+              <motion.div
+                key={href}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.12 + i * 0.06, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+              >
+                <Link
+                  href={href}
+                  className="group relative flex flex-col gap-4 rounded-2xl p-6 transition-all duration-150 hover:-translate-y-0.5"
+                  style={{
+                    background: `color-mix(in srgb, ${cardTint} 8%, var(--surface))`,
+                    border: `1px solid color-mix(in srgb, ${cardTint} 22%, transparent)`,
+                    minHeight: 170,
+                  }}
                 >
-                  <Link
-                    href={href}
-                    className="group relative flex flex-col gap-4 rounded-2xl p-6 transition-all duration-150 hover:-translate-y-0.5"
-                    style={{
-                      background: `color-mix(in srgb, ${cardTint} 8%, var(--surface))`,
-                      border: `1px solid color-mix(in srgb, ${cardTint} 22%, transparent)`,
-                      minHeight: 170,
-                    }}
+                  <div
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm"
+                    style={{ background: iconBg }}
                   >
-                    <div className="flex items-start justify-between">
-                      <div
-                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm"
-                        style={{ background: iconBg }}
-                      >
-                        {icon}
-                      </div>
-                      {level > 0 && (
-                        <span
-                          className="rounded-full px-2 py-0.5 text-[11px] font-bold leading-none"
-                          style={{
-                            background: `color-mix(in srgb, ${cardTint} 18%, var(--surface))`,
-                            color: cardTint,
-                            border: `1px solid color-mix(in srgb, ${cardTint} 28%, transparent)`,
-                          }}
-                        >
-                          Lv. {level}
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <div className="text-[17px] font-bold leading-tight">{title}</div>
-                      <div className="mt-1 text-[13px] leading-snug text-muted">{subtitle}</div>
-                    </div>
-                    <div
-                      className="absolute right-5 bottom-5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-[13px] font-semibold"
-                      style={{ color: cardTint }}
-                    >
-                      Open →
-                    </div>
-                  </Link>
-                </motion.div>
-              );
-            })}
+                    {icon}
+                  </div>
+                  <div>
+                    <div className="text-[17px] font-bold leading-tight">{title}</div>
+                    <div className="mt-1 text-[13px] leading-snug text-muted">{subtitle}</div>
+                  </div>
+                  <div
+                    className="absolute right-5 bottom-5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-[13px] font-semibold"
+                    style={{ color: cardTint }}
+                  >
+                    Open →
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>

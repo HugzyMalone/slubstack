@@ -2,7 +2,8 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { QuestCard } from "@/components/QuestCard";
 import { spring } from "@/lib/motion";
 
@@ -12,6 +13,12 @@ type Props = {
 };
 
 export function QuestDrawer({ open, onClose }: Props) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -19,7 +26,9 @@ export function QuestDrawer({ open, onClose }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -27,7 +36,7 @@ export function QuestDrawer({ open, onClose }: Props) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[55] flex items-end justify-center sm:items-center"
+          className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center"
           style={{
             background: "color-mix(in srgb, var(--fg) 36%, transparent)",
             backdropFilter: "blur(6px)",
@@ -63,6 +72,7 @@ export function QuestDrawer({ open, onClose }: Props) {
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }

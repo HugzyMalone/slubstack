@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice">
-  <rect width="200" height="200" fill="hsl(59 65% 45%)"/>
-  <text x="100" y="80" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="800" fill="hsl(59 65% 95%)" letter-spacing="2">ALBUM</text>
-  <text x="100" y="120" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="hsl(59 65% 95%)">Homework</text>
-</svg>

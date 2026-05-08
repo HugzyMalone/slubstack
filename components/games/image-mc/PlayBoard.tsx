@@ -68,9 +68,8 @@ export function PlayBoard({
         <img
           src={question.imageSrc}
           alt={question.imageAlt}
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-contain"
           style={{
-            objectPosition: "50% 25%",
             opacity: imageLoaded ? 1 : 0,
             transition: "opacity 0.15s ease",
           }}
