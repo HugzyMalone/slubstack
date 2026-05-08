@@ -10,6 +10,7 @@ const VALID_KINDS: ReadonlySet<GameKind> = new Set([
   "albums",
   "higher_lower",
   "year_guesser",
+  "batman_shakespeare",
 ]);
 
 export async function POST(request: NextRequest) {
