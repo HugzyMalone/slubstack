@@ -63,4 +63,5 @@ export const geoCloneAdapter: RoundAdapter<Location, Guess> = {
     return { points: pointsFromDistance(distanceMeters), distanceMeters };
   },
   xpFor: (totalPoints) => Math.round(totalPoints / 1000),
+  storeKey: "trivia",
 };
