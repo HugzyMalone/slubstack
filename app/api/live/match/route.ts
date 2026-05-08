@@ -12,7 +12,20 @@ const VALID_KINDS: ReadonlySet<GameKind> = new Set([
   "logos",
   "higher_lower",
   "year_guesser",
+  "geo_clone",
 ]);
+
+const MAX_PLAYERS: Record<GameKind, number> = {
+  math_blitz: 4,
+  actor_blitz: 4,
+  flag_blitz: 4,
+  posters: 4,
+  albums: 4,
+  logos: 4,
+  higher_lower: 4,
+  year_guesser: 4,
+  geo_clone: 8,
+};
 
 export async function POST(request: NextRequest) {
   const supabase = await getSupabaseServerClient();
@@ -56,6 +69,7 @@ export async function POST(request: NextRequest) {
     p_user_id: user.id,
     p_display_name: displayName,
     p_avatar_url: avatarUrl,
+    p_max_players: MAX_PLAYERS[game_kind as GameKind],
   });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

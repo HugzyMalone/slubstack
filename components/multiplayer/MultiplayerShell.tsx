@@ -11,7 +11,7 @@ import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
 import { simulateBotTimeline, type BotTickEvent } from "@/lib/multiplayer/bot";
 import { updateRatings, type EloPlayer } from "@/lib/multiplayer/elo";
-import type { GameAdapter, ScoreResult } from "@/lib/multiplayer/types";
+import type { SprintAdapter, ScoreResult } from "@/lib/multiplayer/types";
 import { QueueRoom, type QueueSlot } from "./QueueRoom";
 import { LiveScoreTicker, type TickerPlayer } from "./LiveScoreTicker";
 import { Podium, type PodiumPlayer } from "./Podium";
@@ -60,7 +60,7 @@ function denseRanks(scores: number[]): number[] {
   return scores.map((s) => rankFor.get(s)!);
 }
 
-export function MultiplayerShell<Q, A>({ adapter }: { adapter: GameAdapter<Q, A> }) {
+export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, A> }) {
   const router = useRouter();
 
   const [phase, setPhase] = useState<Phase>("auth");
@@ -228,7 +228,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: GameAdapter<Q, A>
         const { data: rows } = await supabase
           .from("live_ratings")
           .select("user_id, rating, matches, wins, draws, losses")
-          .eq("game_kind", adapter.kind)
+          .eq("game_kind", adapter.gameKind)
           .eq("level", a.level)
           .in("user_id", humanIds);
         for (const r of rows ?? []) {
@@ -329,7 +329,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: GameAdapter<Q, A>
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          game_kind: adapter.kind,
+          game_kind: adapter.gameKind,
           humans_count: humansCount,
           bot_inserts: botInserts,
           player_updates: playerUpdates,
@@ -504,7 +504,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: GameAdapter<Q, A>
       res = await fetch("/api/live/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ game_kind: adapter.kind, level: chosenLevel }),
+        body: JSON.stringify({ game_kind: adapter.gameKind, level: chosenLevel }),
       });
     } catch (err) {
       console.error("[MultiplayerShell] match POST failed:", err);
@@ -528,7 +528,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: GameAdapter<Q, A>
 
     teardownChannel();
 
-    const channel = supabase.channel(`live:${adapter.kind}:${data.matchId}`, {
+    const channel = supabase.channel(`live:${adapter.gameKind}:${data.matchId}`, {
       config: { presence: { key: String(data.slotIndex) } },
     });
 
@@ -575,7 +575,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: GameAdapter<Q, A>
     } satisfies PresenceMeta);
 
     channelRef.current = channel;
-  }, [profile, userId, adapter.kind, teardownChannel, startCountdown, submitResult]);
+  }, [profile, userId, adapter.gameKind, teardownChannel, startCountdown, submitResult]);
 
   // ── Queue countdown ───────────────────────────────────────────────────────
 

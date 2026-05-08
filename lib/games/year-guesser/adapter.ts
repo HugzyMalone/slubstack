@@ -1,10 +1,11 @@
-import type { GameAdapter } from "@/lib/multiplayer/types";
+import type { SprintAdapter } from "@/lib/multiplayer/types";
 import { closeness } from "@/lib/multiplayer/scoring";
 import { PlayBoard, type YearQuestion } from "@/components/games/year-guesser/PlayBoard";
 import { generateYearQuestions } from "./questions";
 
-export const yearGuesserAdapter: GameAdapter<YearQuestion, number> = {
-  kind: "year_guesser",
+export const yearGuesserAdapter: SprintAdapter<YearQuestion, number> = {
+  kind: "sprint",
+  gameKind: "year_guesser",
   displayName: "Year Guesser",
   routePath: "/trivia",
   storeKey: "trivia",
@@ -16,6 +17,6 @@ export const yearGuesserAdapter: GameAdapter<YearQuestion, number> = {
   scoring: closeness(
     (q) => (q as YearQuestion).actualYear,
     { maxPoints: 100, perUnit: 5, correctWithin: 0 },
-  ) as GameAdapter<YearQuestion, number>["scoring"],
+  ) as SprintAdapter<YearQuestion, number>["scoring"],
   xpFor: (_correct, points) => Math.round(points / 10),
 };

@@ -1,4 +1,4 @@
-import type { GameAdapter, ScoringRule } from "@/lib/multiplayer/types";
+import type { SprintAdapter, ScoringRule } from "@/lib/multiplayer/types";
 import { PlayBoard, type ImageMCQuestion } from "@/components/games/image-mc/PlayBoard";
 import { generateFlagBlitzQuestions } from "./questions";
 
@@ -7,8 +7,9 @@ const scoring: ScoringRule<ImageMCQuestion, number> = (answer, question) => {
   return { correct, points: correct ? 1 : 0 };
 };
 
-export const flagBlitzAdapter: GameAdapter<ImageMCQuestion, number> = {
-  kind: "flag_blitz",
+export const flagBlitzAdapter: SprintAdapter<ImageMCQuestion, number> = {
+  kind: "sprint",
+  gameKind: "flag_blitz",
   displayName: "Flag Blitz",
   routePath: "/trivia",
   storeKey: "trivia",
