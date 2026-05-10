@@ -67,9 +67,7 @@ export function BottomNav() {
     pathname?.startsWith("/brain-training/connections") ||
     pathname?.startsWith("/trivia/actors") ||
     pathname?.startsWith("/trivia/flags") ||
-    pathname?.startsWith("/trivia/posters") ||
     pathname?.startsWith("/trivia/albums") ||
-    pathname?.startsWith("/trivia/logos") ||
     pathname?.startsWith("/trivia/higher-lower") ||
     pathname?.startsWith("/trivia/year-guesser")
   ) {

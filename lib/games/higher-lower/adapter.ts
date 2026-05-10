@@ -2,9 +2,11 @@ import type { SprintAdapter, ScoringRule } from "@/lib/multiplayer/types";
 import { PlayBoard, type HoLQuestion } from "@/components/games/higher-lower/PlayBoard";
 import { generateHoLQuestions } from "./questions";
 
+const POINTS_PER_CORRECT = 8;
+
 const scoring: ScoringRule<HoLQuestion, 0 | 1> = (answer, question) => {
   const correct = answer === question.answerIndex;
-  return { correct, points: correct ? 1 : 0 };
+  return { correct, points: correct ? POINTS_PER_CORRECT : 0 };
 };
 
 export const higherLowerAdapter: SprintAdapter<HoLQuestion, 0 | 1> = {

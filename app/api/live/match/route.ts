@@ -7,24 +7,22 @@ const VALID_KINDS: ReadonlySet<GameKind> = new Set([
   "math_blitz",
   "actor_blitz",
   "flag_blitz",
-  "posters",
   "albums",
-  "logos",
   "higher_lower",
   "year_guesser",
   "geo_clone",
+  "batman_shakespeare",
 ]);
 
 const MAX_PLAYERS: Record<GameKind, number> = {
   math_blitz: 4,
   actor_blitz: 4,
   flag_blitz: 4,
-  posters: 4,
   albums: 4,
-  logos: 4,
   higher_lower: 4,
   year_guesser: 4,
   geo_clone: 8,
+  batman_shakespeare: 4,
 };
 
 export async function POST(request: NextRequest) {

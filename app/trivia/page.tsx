@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ComponentType } from "react";
-import { Flag, Image as ImageIcon, Disc, Sparkles, ArrowUpDown, CalendarClock, Globe } from "lucide-react";
+import { Flag, Disc, ArrowUpDown, CalendarClock, Drama, Globe } from "lucide-react";
 
 function FilmIcon() {
   return (
@@ -88,15 +88,6 @@ const MODES: Mode[] = [
     accent: "#0891b2",
   },
   {
-    href: "/trivia/posters",
-    Icon: () => <ImageIcon size={22} />,
-    iconBg: "linear-gradient(135deg, #db2777 0%, #be185d 100%)",
-    title: "Poster Blitz",
-    description: "Identify the film from its poster",
-    tag: "Multiplayer · 30 sec",
-    accent: "#db2777",
-  },
-  {
     href: "/trivia/albums",
     Icon: () => <Disc size={22} />,
     iconBg: "linear-gradient(135deg, #9333ea 0%, #6d28d9 100%)",
@@ -106,13 +97,13 @@ const MODES: Mode[] = [
     accent: "#9333ea",
   },
   {
-    href: "/trivia/logos",
-    Icon: () => <Sparkles size={22} />,
-    iconBg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-    title: "Logo Blitz",
-    description: "Identify the brand from its logo",
+    href: "/trivia/batman-or-shakespeare",
+    Icon: () => <Drama size={22} />,
+    iconBg: "linear-gradient(135deg, #1f2937 0%, #4c1d95 100%)",
+    title: "Batman or Shakespeare?",
+    description: "Guess who said the quote",
     tag: "Multiplayer · 30 sec",
-    accent: "#f59e0b",
+    accent: "#7c3aed",
   },
   {
     href: "/trivia/geo-clone",
