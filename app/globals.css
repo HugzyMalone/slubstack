@@ -74,10 +74,10 @@
   --color-danger: var(--danger);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-jakarta);
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
   --font-hanzi: var(--font-noto-sc);
-  --font-display: var(--font-fraunces);
+  --font-display: var(--font-jakarta);
   --radius: var(--radius);
   --radius-pill: var(--radius-pill);
   --radius-chunk: var(--radius-chunk);
@@ -111,16 +111,16 @@
   box-shadow: 0 1px 0 rgb(42 23 56 / 0.18);
 }
 
-/* Display font helper */
+/* Display font helper — kept as a class for callsites; same family, used for hero / heading weight */
 .font-display {
-  font-family: var(--font-fraunces), ui-serif, Georgia, serif;
-  font-optical-sizing: auto;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 html, body {
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;

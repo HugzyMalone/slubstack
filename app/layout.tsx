@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { Noto_Sans_SC } from "next/font/google";
-import { Fraunces } from "next/font/google";
 import "./globals.css";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
@@ -12,22 +11,17 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { Toaster } from "sonner";
 import { GameStoreProvider, mandarinStore } from "@/lib/store";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
 const notoSC = Noto_Sans_SC({
   variable: "--font-noto-sc",
   subsets: ["latin"],
   weight: ["400", "500", "700"],
-  display: "swap",
-});
-
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  weight: ["600", "700", "800", "900"],
   display: "swap",
 });
 
@@ -64,7 +58,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${notoSC.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${jakarta.variable} ${notoSC.variable} h-full antialiased`}
     >
       <body className="flex min-h-dvh flex-col">
         <GameStoreProvider store={mandarinStore}>
