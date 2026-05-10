@@ -10,7 +10,13 @@ export function mulberry32(seed: number): () => number {
 }
 
 export function seedToInt(seed: string): number {
-  return parseInt(seed.slice(0, 8), 16) >>> 0;
+  const hex = seed.replace(/-/g, "");
+  let acc = 0;
+  for (let i = 0; i < hex.length; i += 8) {
+    const chunk = parseInt(hex.slice(i, i + 8), 16);
+    if (Number.isFinite(chunk)) acc = (acc ^ chunk) >>> 0;
+  }
+  return acc || 1;
 }
 
 export function pickN<T>(items: readonly T[], rng: () => number, count: number): T[] {

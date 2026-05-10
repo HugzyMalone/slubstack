@@ -98,7 +98,12 @@ export const globalStore = createStore<GlobalState & GlobalActions>()(
         }
       },
     }),
-    { name: "slubstack-global-v1", storage: createJSONStorage(() => localStorage), version: 3 }
+    {
+      name: "slubstack-global-v1",
+      storage: createJSONStorage(() => localStorage),
+      version: 3,
+      migrate: (persisted) => persisted as GlobalState & GlobalActions,
+    }
   )
 );
 

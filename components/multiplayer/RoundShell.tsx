@@ -128,6 +128,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
   const [finalResult, setFinalResult] = useState<ResultResp | null>(null);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const joiningRef = useRef(false);
   const myScoreRef = useRef(0);
   const phaseRef = useRef(phase);
   const allocRef = useRef<QueueAlloc | null>(null);
@@ -180,6 +181,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
       if (supabase) supabase.removeChannel(ch);
       channelRef.current = null;
     }
+    joiningRef.current = false;
   }, []);
 
   useEffect(() => {
@@ -362,6 +364,8 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
 
   const enterQueue = useCallback(async () => {
     if (!profile || !userId) return;
+    if (joiningRef.current) return;
+    joiningRef.current = true;
     setPhase("queue");
     setPresenceSlots({});
     setQueueSecs(QUEUE_GRACE_MS / 1000);
@@ -375,11 +379,13 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
       });
     } catch (err) {
       console.error("[RoundShell] match POST failed:", err);
+      joiningRef.current = false;
       setPhase("alloc");
       return;
     }
     if (!res.ok) {
       console.error("[RoundShell] match POST status:", res.status);
+      joiningRef.current = false;
       setPhase("alloc");
       return;
     }
@@ -391,7 +397,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
     setLocations(locs);
 
     const supabase = getSupabaseBrowserClient();
-    if (!supabase) { setPhase("auth"); return; }
+    if (!supabase) { joiningRef.current = false; setPhase("auth"); return; }
 
     teardownChannel();
 
@@ -622,7 +628,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
   const resetToHome = useCallback(() => {
     teardownChannel();
     submittedRef.current = false;
-    router.push("/trivia");
+    router.push("/");
   }, [teardownChannel, router]);
 
   const playAgain = useCallback(() => {
@@ -686,7 +692,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
           Three rounds of explore-and-guess against up to seven other players. Sign in to play live.
         </p>
         <button
-          onClick={() => router.push("/auth")}
+          onClick={() => router.push("/stats")}
           className="mt-6 w-full rounded-2xl py-4 text-sm font-bold text-white transition-all active:scale-[0.98]"
           style={{ background: "var(--accent)" }}
         >
@@ -762,6 +768,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
         currentUserId={userId}
         onPlayAgainAction={playAgain}
         onBackAction={resetToHome}
+        backLabel="Back to menu"
       />
     );
   }

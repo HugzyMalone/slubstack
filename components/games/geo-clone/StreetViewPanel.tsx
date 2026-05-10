@@ -36,16 +36,30 @@ export function StreetViewPanel({ location }: StreetViewPanelProps) {
   const src = `https://www.google.com/maps/embed/v1/streetview?key=${apiKey}&location=${location.lat},${location.lng}&heading=${location.heading}&pitch=0&fov=80`;
 
   return (
-    <div ref={containerRef} className="h-full w-full touch-none">
+    <div ref={containerRef} className="relative h-full w-full touch-none overflow-hidden">
       <iframe
         key={`${location.lat},${location.lng}`}
         src={src}
-        className="h-full w-full border-0"
+        className="absolute border-0"
+        style={{
+          top: -56,
+          left: -40,
+          width: "calc(100% + 80px)",
+          height: "calc(100% + 168px)",
+        }}
         loading="eager"
         referrerPolicy="no-referrer-when-downgrade"
         allow="accelerometer; gyroscope"
         allowFullScreen
         title="Street View"
+      />
+      <div
+        aria-hidden
+        className="absolute bottom-0 left-0 right-0 z-10"
+        style={{
+          height: 56,
+          background: "var(--bg)",
+        }}
       />
     </div>
   );

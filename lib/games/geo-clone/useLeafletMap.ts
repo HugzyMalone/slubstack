@@ -22,6 +22,7 @@ export function useLeafletMap(
   useEffect(() => {
     let cancelled = false;
     let instance: LeafletNS.Map | null = null;
+    let resizeObs: ResizeObserver | null = null;
     const [lat, lng] = centerKey.split(",").map(Number) as [number, number];
 
     (async () => {
@@ -40,18 +41,30 @@ export function useLeafletMap(
       }
 
       instance = L.map(containerRef.current, { center: [lat, lng], zoom, worldCopyJump });
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
         maxZoom: 18,
         subdomains: "abcd",
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
       }).addTo(instance);
 
+      const target = containerRef.current;
+      if (target && typeof ResizeObserver !== "undefined") {
+        resizeObs = new ResizeObserver(() => {
+          instance?.invalidateSize();
+        });
+        resizeObs.observe(target);
+      }
+
       setMap(instance);
     })();
 
     return () => {
       cancelled = true;
+      if (resizeObs) {
+        resizeObs.disconnect();
+        resizeObs = null;
+      }
       if (instance) {
         instance.remove();
         instance = null;

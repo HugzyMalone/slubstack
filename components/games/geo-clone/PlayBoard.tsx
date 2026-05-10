@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronUp, ChevronDown, Lock } from "lucide-react";
+import { ChevronUp, ChevronDown, Lock, Maximize2, Minimize2 } from "lucide-react";
 import type { Location, Guess } from "@/lib/games/geo-clone/adapter";
 import { StreetViewPanel } from "./StreetViewPanel";
 import { GuessMap } from "./GuessMap";
@@ -26,6 +26,7 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
   const [pendingGuess, setPendingGuess] = useState<Guess | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [overlayOpen, setOverlayOpen] = useState(true);
+  const [panelLarge, setPanelLarge] = useState(false);
 
   useEffect(() => {
     setPendingGuess(null);
@@ -50,16 +51,22 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
       </div>
 
       <div
-        className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-4 pb-2"
-        style={{ paddingTop: "max(env(safe-area-inset-top), 0.5rem)" }}
+        className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-2 px-3 pb-3"
+        style={{
+          paddingTop: "max(env(safe-area-inset-top), 0.75rem)",
+          background: "linear-gradient(to bottom, color-mix(in srgb, var(--bg) 92%, transparent) 0%, color-mix(in srgb, var(--bg) 80%, transparent) 60%, transparent 100%)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+          maskImage: "linear-gradient(to bottom, black 0%, black 70%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 70%, transparent 100%)",
+        }}
       >
         <div
           className="rounded-full px-3 py-1.5 text-xs font-black tracking-wider"
           style={{
-            background: "color-mix(in srgb, var(--bg) 75%, transparent)",
+            background: "color-mix(in srgb, var(--bg) 88%, transparent)",
             color: "var(--muted)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
+            border: "1px solid color-mix(in srgb, var(--fg) 10%, transparent)",
           }}
         >
           ROUND {roundIndex + 1} / 3
@@ -67,19 +74,22 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
         <div
           className="rounded-full px-3 py-1.5 text-xs font-black tabular-nums tracking-wider"
           style={{
-            background: "color-mix(in srgb, var(--bg) 75%, transparent)",
+            background: "color-mix(in srgb, var(--bg) 88%, transparent)",
             color: timeLeftMs <= 10_000 ? "#ef4444" : "var(--fg)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
+            border: "1px solid color-mix(in srgb, var(--fg) 10%, transparent)",
           }}
         >
           {formatTime(timeLeftMs)}
         </div>
       </div>
 
+
       <div className="pointer-events-none absolute bottom-4 right-4 z-20 hidden lg:block">
         <motion.div
-          animate={{ width: overlayOpen ? 360 : 56, height: overlayOpen ? 320 : 56 }}
+          animate={{
+            width: overlayOpen ? (panelLarge ? "min(78vw, 1100px)" : 360) : 56,
+            height: overlayOpen ? (panelLarge ? "min(82vh, 800px)" : 320) : 56,
+          }}
           transition={{ type: "spring", stiffness: 400, damping: 35 }}
           className="pointer-events-auto overflow-hidden rounded-2xl border shadow-xl"
           style={{
@@ -93,14 +103,24 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
                 style={{ borderColor: "color-mix(in srgb, var(--fg) 8%, transparent)" }}
               >
                 <span className="text-[11px] font-black uppercase tracking-widest text-muted">Your guess</span>
-                <button
-                  type="button"
-                  onClick={() => setOverlayOpen(false)}
-                  className="flex h-6 w-6 items-center justify-center rounded-md text-muted hover:text-fg"
-                  aria-label="Collapse map"
-                >
-                  <ChevronDown size={14} />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setPanelLarge((v) => !v)}
+                    className="flex h-6 w-6 items-center justify-center rounded-md text-muted hover:text-fg"
+                    aria-label={panelLarge ? "Shrink map" : "Enlarge map"}
+                  >
+                    {panelLarge ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOverlayOpen(false)}
+                    className="flex h-6 w-6 items-center justify-center rounded-md text-muted hover:text-fg"
+                    aria-label="Collapse map"
+                  >
+                    <ChevronDown size={14} />
+                  </button>
+                </div>
               </div>
               <div className="relative flex-1">
                 <GuessMap onGuess={setPendingGuess} guess={pendingGuess} disabled={locked} />
