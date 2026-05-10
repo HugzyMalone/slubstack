@@ -14,6 +14,7 @@ const VALID_KINDS: ReadonlySet<GameKind> = new Set([
   "logos",
   "higher_lower",
   "year_guesser",
+  "geo_clone",
 ]);
 
 type PlayerRow = {

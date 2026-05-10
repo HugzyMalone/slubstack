@@ -1,4 +1,4 @@
-import type { GameAdapter } from "@/lib/multiplayer/types";
+import type { SprintAdapter } from "@/lib/multiplayer/types";
 import { binary } from "@/lib/multiplayer/scoring";
 import { makeQuestion, mulberry32, type Level, type Question } from "@/lib/math-blitz/engine";
 import { PlayBoard } from "@/components/games/math-blitz/PlayBoard";
@@ -6,8 +6,9 @@ import { playMathCorrect, playMathFinish, playMathWrong } from "@/lib/sound";
 
 const ROUND_QUESTIONS = 60;
 
-export const mathBlitzAdapter: GameAdapter<Question, number> = {
-  kind: "math_blitz",
+export const mathBlitzAdapter: SprintAdapter<Question, number> = {
+  kind: "sprint",
+  gameKind: "math_blitz",
   displayName: "Math Blitz",
   routePath: "/brain-training",
   storeKey: "brainTraining",

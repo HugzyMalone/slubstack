@@ -1,4 +1,4 @@
-import type { GameAdapter, ScoringRule } from "@/lib/multiplayer/types";
+import type { SprintAdapter, ScoringRule } from "@/lib/multiplayer/types";
 import { PlayBoard, type HoLQuestion } from "@/components/games/higher-lower/PlayBoard";
 import { generateHoLQuestions } from "./questions";
 
@@ -7,8 +7,9 @@ const scoring: ScoringRule<HoLQuestion, 0 | 1> = (answer, question) => {
   return { correct, points: correct ? 1 : 0 };
 };
 
-export const higherLowerAdapter: GameAdapter<HoLQuestion, 0 | 1> = {
-  kind: "higher_lower",
+export const higherLowerAdapter: SprintAdapter<HoLQuestion, 0 | 1> = {
+  kind: "sprint",
+  gameKind: "higher_lower",
   displayName: "Higher or Lower",
   routePath: "/trivia",
   storeKey: "trivia",

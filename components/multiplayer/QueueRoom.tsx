@@ -17,30 +17,33 @@ type Props = {
   title?: string;
 };
 
-function Avatar({ slot }: { slot: NonNullable<QueueSlot> }) {
+function Avatar({ slot, compact }: { slot: NonNullable<QueueSlot>; compact: boolean }) {
+  const sizeClass = compact ? "h-10 w-10" : "h-14 w-14";
+  const iconSize = compact ? 18 : 24;
+  const fallbackText = compact ? "text-base font-bold" : "text-lg font-bold";
   if (slot.avatarUrl) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={slot.avatarUrl}
         alt={slot.displayName}
-        className="h-14 w-14 rounded-full object-cover"
+        className={`${sizeClass} rounded-full object-cover`}
       />
     );
   }
   if (slot.isBot) {
     return (
       <div
-        className="flex h-14 w-14 items-center justify-center rounded-full"
+        className={`flex ${sizeClass} items-center justify-center rounded-full`}
         style={{ background: "color-mix(in srgb, var(--game) 18%, var(--surface))" }}
       >
-        <Bot size={24} style={{ color: "var(--game)" }} />
+        <Bot size={iconSize} style={{ color: "var(--game)" }} />
       </div>
     );
   }
   return (
     <div
-      className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold"
+      className={`flex ${sizeClass} items-center justify-center rounded-full ${fallbackText}`}
       style={{ background: "color-mix(in srgb, var(--accent) 18%, var(--surface))", color: "var(--accent)" }}
     >
       {slot.displayName[0]?.toUpperCase() ?? "?"}
@@ -49,6 +52,21 @@ function Avatar({ slot }: { slot: NonNullable<QueueSlot> }) {
 }
 
 export function QueueRoom({ players, secondsRemaining, level, title = "Math Blitz" }: Props) {
+  const compact = players.length > 4;
+  const gridClass = compact
+    ? "grid w-full max-w-md grid-cols-4 gap-2 lg:max-w-2xl lg:grid-cols-4"
+    : "grid w-full max-w-md grid-cols-2 gap-3 lg:max-w-2xl lg:grid-cols-4";
+  const cardClass = compact
+    ? "flex flex-col items-center gap-1.5 rounded-2xl border bg-surface px-2 py-3"
+    : "flex flex-col items-center gap-2 rounded-2xl border bg-surface px-4 py-5";
+  const innerGapClass = compact ? "flex flex-col items-center gap-1.5" : "flex flex-col items-center gap-2";
+  const nameClass = compact
+    ? "max-w-[5rem] truncate text-xs font-semibold"
+    : "max-w-[8rem] truncate text-sm font-semibold";
+  const emptyAvatarClass = compact
+    ? "flex h-10 w-10 items-center justify-center rounded-full border-2 border-dashed"
+    : "flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed";
+  const emptyIconSize = compact ? 16 : 20;
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-bg">
       <div className="flex flex-1 flex-col items-center justify-center px-5">
@@ -58,11 +76,11 @@ export function QueueRoom({ players, secondsRemaining, level, title = "Math Blit
           <p className="mt-2 text-sm text-muted">Looking for opponents…</p>
         </div>
 
-        <div className="grid w-full max-w-md grid-cols-2 gap-3 lg:max-w-2xl lg:grid-cols-4">
+        <div className={gridClass}>
           {players.map((p, i) => (
             <div
               key={i}
-              className="flex flex-col items-center gap-2 rounded-2xl border bg-surface px-4 py-5"
+              className={cardClass}
               style={{
                 borderColor: p ? "color-mix(in srgb, var(--accent) 30%, var(--border))" : "var(--border)",
                 opacity: p ? 1 : 0.5,
@@ -75,10 +93,10 @@ export function QueueRoom({ players, secondsRemaining, level, title = "Math Blit
                     initial={{ scale: 0.6, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ type: "spring", stiffness: 380, damping: 24 }}
-                    className="flex flex-col items-center gap-2"
+                    className={innerGapClass}
                   >
-                    <Avatar slot={p} />
-                    <div className="max-w-[8rem] truncate text-sm font-semibold">{p.displayName}</div>
+                    <Avatar slot={p} compact={compact} />
+                    <div className={nameClass}>{p.displayName}</div>
                     {p.isBot && (
                       <div
                         className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider"
@@ -93,13 +111,13 @@ export function QueueRoom({ players, secondsRemaining, level, title = "Math Blit
                     key="empty"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="flex flex-col items-center gap-2"
+                    className={innerGapClass}
                   >
                     <div
-                      className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-dashed"
+                      className={emptyAvatarClass}
                       style={{ borderColor: "var(--border)" }}
                     >
-                      <User size={20} style={{ color: "var(--muted)" }} />
+                      <User size={emptyIconSize} style={{ color: "var(--muted)" }} />
                     </div>
                     <div className="text-xs text-muted">Waiting…</div>
                   </motion.div>

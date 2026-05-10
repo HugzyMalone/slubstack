@@ -21,6 +21,7 @@ type Props = {
   currentUserId: string | null;
   onPlayAgainAction: () => void;
   onBackAction: () => void;
+  backLabel?: string;
 };
 
 function useCountUp(target: number | null, durationMs = 1200): number | null {
@@ -119,7 +120,7 @@ function EloRow({ before, after }: { before: number; after: number }) {
   );
 }
 
-export function Podium({ players, currentUserId, onPlayAgainAction, onBackAction }: Props) {
+export function Podium({ players, currentUserId, onPlayAgainAction, onBackAction, backLabel = "Back to menu" }: Props) {
   const sorted = [...players].sort((a, b) => a.rank - b.rank);
   const allRanks = sorted.map((p) => p.rank);
 
@@ -199,7 +200,7 @@ export function Podium({ players, currentUserId, onPlayAgainAction, onBackAction
             className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-3.5 text-sm font-medium transition-colors hover:bg-border/30"
           >
             <ArrowLeft size={15} />
-            Back to Math Blitz
+            {backLabel}
           </button>
         </div>
       </div>

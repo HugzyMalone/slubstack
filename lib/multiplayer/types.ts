@@ -13,7 +13,8 @@ export type GameKind =
   | "albums"
   | "logos"
   | "higher_lower"
-  | "year_guesser";
+  | "year_guesser"
+  | "geo_clone";
 
 export type LevelConfig = {
   id: number;
@@ -28,8 +29,9 @@ export type PlayBoardProps<Q, A> = {
   onAnswerAction: (answer: A) => void;
 };
 
-export type GameAdapter<Q, A> = {
-  kind: GameKind;
+export type SprintAdapter<Q, A> = {
+  kind: "sprint";
+  gameKind: GameKind;
   displayName: string;
   routePath: string;
   levels: LevelConfig[];
@@ -41,3 +43,18 @@ export type GameAdapter<Q, A> = {
   xpFor: (correct: number, points: number) => number;
   storeKey: "brainTraining" | "trivia";
 };
+
+export type RoundAdapter<Q, A> = {
+  kind: "round";
+  gameKind: GameKind;
+  displayName: string;
+  roundCount: number;
+  roundDurationMs: number;
+  revealDurationMs: number;
+  generateLocations: (seed: string, count: number) => Q[];
+  scoreFromGuess: (guess: A, target: Q) => { points: number; distanceMeters: number };
+  xpFor: (totalPoints: number) => number;
+  storeKey?: "brainTraining" | "trivia";
+};
+
+export type GameAdapter<Q, A> = SprintAdapter<Q, A> | RoundAdapter<Q, A>;

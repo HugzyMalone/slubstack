@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ComponentType } from "react";
-import { Flag, Image as ImageIcon, Disc, Sparkles, ArrowUpDown, CalendarClock } from "lucide-react";
+import { Flag, Image as ImageIcon, Disc, Sparkles, ArrowUpDown, CalendarClock, Globe } from "lucide-react";
 
 function FilmIcon() {
   return (
@@ -113,6 +113,15 @@ const MODES: Mode[] = [
     description: "Identify the brand from its logo",
     tag: "Multiplayer · 30 sec",
     accent: "#f59e0b",
+  },
+  {
+    href: "/trivia/geo-clone",
+    Icon: () => <Globe size={22} />,
+    iconBg: "linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)",
+    title: "GeoClone",
+    description: "Drop into Street View, guess where you are",
+    tag: "Multiplayer · 3 rounds",
+    accent: "#0ea5e9",
   },
 ];
 

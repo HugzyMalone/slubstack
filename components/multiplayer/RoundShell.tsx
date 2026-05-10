@@ -9,18 +9,25 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { brainTrainingStore, triviaStore } from "@/lib/store";
 import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
-import { simulateBotTimeline, type BotTickEvent } from "@/lib/multiplayer/bot";
 import { updateRatings, type EloPlayer } from "@/lib/multiplayer/elo";
-import type { SprintAdapter, ScoreResult } from "@/lib/multiplayer/types";
+import type { RoundAdapter } from "@/lib/multiplayer/types";
 import { QueueRoom, type QueueSlot } from "./QueueRoom";
 import { LiveScoreTicker, type TickerPlayer } from "./LiveScoreTicker";
 import { Podium, type PodiumPlayer } from "./Podium";
 
-type Phase = "auth" | "select" | "queue" | "countdown" | "playing" | "submitting" | "result";
+type Phase =
+  | "auth"
+  | "alloc"
+  | "queue"
+  | "countdown"
+  | "playing"
+  | "reveal"
+  | "submitting"
+  | "result";
 
-const GAME_MS = 30_000;
 const QUEUE_GRACE_MS = 5_000;
 const DEFAULT_RATING = 1200;
+const MAX_PLAYERS = 8;
 
 type MatchPlayerResp = {
   slot: number;
@@ -53,6 +60,39 @@ type PresenceMeta = {
 
 type TickPayload = { slot: number; score: number };
 
+type GuessLockedPayload<A> = {
+  roundIndex: number;
+  slot: number;
+  points: number;
+  distanceMeters: number;
+  guess: A;
+};
+
+export type RevealGuess<A> = {
+  slot: number;
+  displayName: string;
+  guess: A | null;
+  points: number;
+  distanceMeters: number | null;
+};
+
+type RoundShellProps<Q, A> = {
+  adapter: RoundAdapter<Q, A>;
+  level: number;
+  PlayBoard: React.ComponentType<{
+    location: Q;
+    roundIndex: number;
+    timeLeftMs: number;
+    locked: boolean;
+    onLockGuess: (guess: A) => void;
+  }>;
+  RevealBoard: React.ComponentType<{
+    actual: Q;
+    guesses: Array<RevealGuess<A>>;
+    roundIndex: number;
+  }>;
+};
+
 function denseRanks(scores: number[]): number[] {
   const sorted = [...new Set(scores)].sort((a, b) => b - a);
   const rankFor = new Map<number, number>();
@@ -60,11 +100,10 @@ function denseRanks(scores: number[]): number[] {
   return scores.map((s) => rankFor.get(s)!);
 }
 
-export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, A> }) {
+export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: RoundShellProps<Q, A>) {
   const router = useRouter();
 
   const [phase, setPhase] = useState<Phase>("auth");
-  const [level, setLevel] = useState<number>(adapter.levels[0]?.id ?? 1);
   const [authChecked, setAuthChecked] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -76,28 +115,32 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
 
   const [countNum, setCountNum] = useState(3);
 
-  const [questions, setQuestions] = useState<Q[]>([]);
-  const [questionIndex, setQuestionIndex] = useState(0);
-  const [feedback, setFeedback] = useState<ScoreResult | null>(null);
+  const [locations, setLocations] = useState<Q[]>([]);
+  const [roundIndex, setRoundIndex] = useState(0);
+  const [timeLeftMs, setTimeLeftMs] = useState(adapter.roundDurationMs);
+  const [revealMs, setRevealMs] = useState(adapter.revealDurationMs);
+  const [locked, setLocked] = useState(false);
+
+  const [slotScores, setSlotScores] = useState<Record<number, number>>({});
   const [opponentScores, setOpponentScores] = useState<Record<number, number>>({});
-  const [botScores, setBotScores] = useState<Record<number, number>>({});
+  const [roundGuesses, setRoundGuesses] = useState<Record<number, GuessLockedPayload<A>>>({});
+
   const [finalResult, setFinalResult] = useState<ResultResp | null>(null);
-  const [remainingMs, setRemainingMs] = useState(GAME_MS);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
-  const liveRef = useRef({ score: 0, correct: 0 });
-  const [dispScore, setDispScore] = useState(0);
-  const inFeedbackRef = useRef(false);
-  const gameActiveRef = useRef(false);
-  const submittedRef = useRef(false);
-  const botTimelinesRef = useRef<Record<number, BotTickEvent[]>>({});
-  const playStartRef = useRef(0);
+  const joiningRef = useRef(false);
+  const myScoreRef = useRef(0);
+  const phaseRef = useRef(phase);
   const allocRef = useRef<QueueAlloc | null>(null);
   const presenceRef = useRef<Record<number, PresenceMeta>>({});
-  const phaseRef = useRef(phase);
+  const lockedRef = useRef(false);
+  const submittedRef = useRef(false);
+  const roundIndexRef = useRef(0);
+  const playStartRef = useRef(0);
 
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { presenceRef.current = presenceSlots; }, [presenceSlots]);
+  useEffect(() => { roundIndexRef.current = roundIndex; }, [roundIndex]);
 
   const store = adapter.storeKey === "trivia" ? triviaStore : brainTrainingStore;
 
@@ -121,7 +164,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
           displayName: cachedName ?? meta.username ?? `learner-${data.session.user.id.slice(0, 8)}`,
           avatarUrl: cachedAvatar ?? meta.avatar_url ?? null,
         });
-        setPhase("select");
+        setPhase("alloc");
       } else {
         setSignedIn(false);
         setPhase("auth");
@@ -138,38 +181,35 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
       if (supabase) supabase.removeChannel(ch);
       channelRef.current = null;
     }
+    joiningRef.current = false;
   }, []);
 
   useEffect(() => {
-    return () => {
-      teardownChannel();
-      gameActiveRef.current = false;
-    };
+    return () => { teardownChannel(); };
   }, [teardownChannel]);
 
   // ── Submit final score ────────────────────────────────────────────────────
+
+  const opponentScoresRef = useRef<Record<number, number>>({});
+  useEffect(() => { opponentScoresRef.current = opponentScores; }, [opponentScores]);
 
   const submitResult = useCallback(async (a: QueueAlloc) => {
     if (submittedRef.current) return;
     submittedRef.current = true;
 
-    const { score, correct } = liveRef.current;
-
-    const xpAward = adapter.xpFor(correct, score);
+    const score = myScoreRef.current;
+    const xpAward = adapter.xpFor(score);
     if (xpAward > 0) {
       store.getState().addXp(xpAward);
       awardQuestProgress("xp", xpAward);
-      if (correct > 0) awardQuestProgress("correct", correct);
       pushLeagueXp(xpAward);
     }
 
     setPhase("submitting");
 
     try {
-      // Snapshot opponents' final tick-broadcast scores plus our own.
       const opponents = opponentScoresRef.current;
       const presence = presenceRef.current;
-      const botTimelines = botTimelinesRef.current;
 
       const allSlots: Array<{
         slot: number;
@@ -181,45 +221,31 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
         correct: number;
       }> = [];
 
-      for (let s = 0; s < 4; s++) {
+      for (let s = 0; s < MAX_PLAYERS; s++) {
         const meta = presence[s];
-        if (meta) {
-          const isMe = s === a.slotIndex;
-          const slotScore = isMe ? score : (opponents[s] ?? 0);
-          const slotCorrect = isMe ? correct : Math.max(0, Math.round(slotScore / 12));
-          allSlots.push({
-            slot: s,
-            userId: meta.userId,
-            displayName: meta.displayName,
-            avatarUrl: meta.avatarUrl,
-            isBot: false,
-            score: slotScore,
-            correct: slotCorrect,
-          });
-        } else {
-          const events = botTimelines[s] ?? [];
-          const botScore = events.reduce((sum, e) => sum + e.scoreDelta, 0);
-          const botCorrect = Math.max(0, Math.round(botScore / 12));
-          allSlots.push({
-            slot: s,
-            userId: null,
-            displayName: `Bot ${s + 1}`,
-            avatarUrl: null,
-            isBot: true,
-            score: botScore,
-            correct: botCorrect,
-          });
-        }
+        if (!meta) continue;
+        const isMe = s === a.slotIndex;
+        const slotScore = isMe ? score : (opponents[s] ?? 0);
+        allSlots.push({
+          slot: s,
+          userId: meta.userId,
+          displayName: meta.displayName,
+          avatarUrl: meta.avatarUrl,
+          isBot: false,
+          score: slotScore,
+          correct: 0,
+        });
       }
+
+      if (allSlots.length === 0) { submittedRef.current = false; setPhase("alloc"); return; }
 
       const ranks = denseRanks(allSlots.map((s) => s.score));
       const slotsRanked = allSlots.map((s, i) => ({ ...s, rank: ranks[i] }));
 
       const humansCount = slotsRanked.filter((s) => !s.isBot).length;
 
-      // Fetch existing ratings (public read) so we can compute ELO deltas.
       const supabase = getSupabaseBrowserClient();
-      const humanIds = slotsRanked.filter((s) => !s.isBot).map((s) => s.userId!);
+      const humanIds = slotsRanked.map((s) => s.userId!).filter(Boolean);
       const ratingByUser = new Map<
         string,
         { rating: number; matches: number; wins: number; draws: number; losses: number }
@@ -243,9 +269,6 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
       }
 
       const eloInput: EloPlayer[] = slotsRanked.map((s) => {
-        if (s.isBot) {
-          return { userId: `bot-${s.slot}`, rating: 0, matches: 0, score: s.score, isBot: true };
-        }
         const existing = ratingByUser.get(s.userId!);
         return {
           userId: s.userId!,
@@ -259,34 +282,21 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
       const eloUpdates = updateRatings(eloInput);
       const eloByUser = new Map(eloUpdates.map((u) => [u.userId, u]));
 
-      const humanSlots = slotsRanked.filter((s) => !s.isBot);
-      const humanRanks = humanSlots.map((s) => s.rank);
+      const humanRanks = slotsRanked.map((s) => s.rank);
       const minHumanRank = humanRanks.length ? Math.min(...humanRanks) : 0;
       const maxHumanRank = humanRanks.length ? Math.max(...humanRanks) : 0;
 
-      const botInserts = slotsRanked
-        .filter((s) => s.isBot)
-        .map((s) => ({
+      const playerUpdates = slotsRanked.map((s) => {
+        const elo = eloByUser.get(s.userId!);
+        return {
           slot: s.slot,
-          display_name: s.displayName,
           score: s.score,
           correct: s.correct,
           rank: s.rank,
-        }));
-
-      const playerUpdates = slotsRanked
-        .filter((s) => !s.isBot)
-        .map((s) => {
-          const elo = eloByUser.get(s.userId!);
-          return {
-            slot: s.slot,
-            score: s.score,
-            correct: s.correct,
-            rank: s.rank,
-            elo_before: elo?.before ?? null,
-            elo_after: elo?.after ?? null,
-          };
-        });
+          elo_before: elo?.before ?? null,
+          elo_after: elo?.after ?? null,
+        };
+      });
 
       const ratingUpserts: Array<{
         user_id: string;
@@ -299,7 +309,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
       }> = [];
 
       if (humansCount >= 2) {
-        for (const s of humanSlots) {
+        for (const s of slotsRanked) {
           const elo = eloByUser.get(s.userId!);
           if (!elo) continue;
           const existing = ratingByUser.get(s.userId!);
@@ -331,170 +341,31 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
         body: JSON.stringify({
           game_kind: adapter.gameKind,
           humans_count: humansCount,
-          bot_inserts: botInserts,
+          bot_inserts: [],
           player_updates: playerUpdates,
           rating_upserts: ratingUpserts,
         }),
       });
       const data = (await res.json()) as ResultResp | { error: string };
       if ("error" in data) {
-        console.error("[MultiplayerShell] result POST failed:", data.error);
-        setPhase("select");
+        console.error("[RoundShell] result POST failed:", data.error);
+        setPhase("alloc");
         return;
       }
       setFinalResult(data);
       setPhase("result");
     } catch (err) {
-      console.error("[MultiplayerShell] result POST error:", err);
-      setPhase("select");
+      console.error("[RoundShell] result POST error:", err);
+      setPhase("alloc");
     }
   }, [adapter, store]);
 
-  // mirror of opponentScores so submitResult can read latest without re-deps
-  const opponentScoresRef = useRef<Record<number, number>>({});
-  useEffect(() => { opponentScoresRef.current = opponentScores; }, [opponentScores]);
+  // ── Match alloc + channel ────────────────────────────────────────────────
 
-  // ── End game (time up) ────────────────────────────────────────────────────
-
-  const endGame = useCallback(() => {
-    if (!gameActiveRef.current) return;
-    gameActiveRef.current = false;
-    adapter.onGameEnd?.();
-    const a = allocRef.current;
-    if (!a) return;
-    void submitResult(a);
-  }, [adapter, submitResult]);
-
-  // ── Countdown → playing ───────────────────────────────────────────────────
-
-  const startCountdown = useCallback(() => { setPhase("countdown"); }, []);
-
-  useEffect(() => {
-    if (phase !== "countdown") return;
-    setCountNum(3);
-    let n = 3;
-    const timeouts: ReturnType<typeof setTimeout>[] = [];
-    const step = () => {
-      n--;
-      setCountNum(n);
-      if (n > 0) {
-        timeouts.push(setTimeout(step, 600));
-      } else {
-        timeouts.push(setTimeout(() => {
-          liveRef.current = { score: 0, correct: 0 };
-          setDispScore(0);
-          setOpponentScores({});
-          submittedRef.current = false;
-
-          const a = allocRef.current;
-          if (!a) return;
-
-          const qs = adapter.generateQuestions(a.level, a.seed);
-          setQuestions(qs);
-          setQuestionIndex(0);
-
-          const tuning = adapter.levels.find((l) => l.id === a.level)?.botTuning;
-          const occupied = new Set(Object.keys(presenceRef.current).map(Number));
-          const botMap: Record<number, BotTickEvent[]> = {};
-          const botInitial: Record<number, number> = {};
-          for (let s = 0; s < 4; s++) {
-            if (!occupied.has(s)) {
-              botMap[s] = tuning ? simulateBotTimeline(a.seed, tuning, GAME_MS, s) : [];
-              botInitial[s] = 0;
-            }
-          }
-          botTimelinesRef.current = botMap;
-          setBotScores(botInitial);
-
-          setRemainingMs(GAME_MS);
-          gameActiveRef.current = true;
-          playStartRef.current = Date.now();
-          setPhase("playing");
-        }, 600));
-      }
-    };
-    timeouts.push(setTimeout(step, 600));
-    return () => timeouts.forEach(clearTimeout);
-  }, [phase, adapter]);
-
-  // ── Playing phase: timers ─────────────────────────────────────────────────
-
-  useEffect(() => {
-    if (phase !== "playing") return;
-
-    const tickIv = setInterval(() => {
-      const elapsed = Date.now() - playStartRef.current;
-      const remaining = Math.max(0, GAME_MS - elapsed);
-      setRemainingMs(remaining);
-      if (remaining <= 0) {
-        clearInterval(tickIv);
-        if (gameActiveRef.current) endGame();
-      }
-    }, 250);
-
-    const broadcastIv = setInterval(() => {
-      const ch = channelRef.current;
-      const a = allocRef.current;
-      if (!ch || !a) return;
-      ch.send({
-        type: "broadcast",
-        event: "tick",
-        payload: { slot: a.slotIndex, score: liveRef.current.score } satisfies TickPayload,
-      });
-    }, 750);
-
-    const botIv = setInterval(() => {
-      const elapsed = Date.now() - playStartRef.current;
-      const timelines = botTimelinesRef.current;
-      const next: Record<number, number> = {};
-      for (const slotStr of Object.keys(timelines)) {
-        const slot = Number(slotStr);
-        const events = timelines[slot];
-        let acc = 0;
-        for (const e of events) {
-          if (e.atMs <= elapsed) acc += e.scoreDelta;
-          else break;
-        }
-        next[slot] = acc;
-      }
-      setBotScores(next);
-    }, 200);
-
-    return () => {
-      clearInterval(tickIv);
-      clearInterval(broadcastIv);
-      clearInterval(botIv);
-    };
-  }, [phase, endGame]);
-
-  // ── Answer handler (delegated to adapter scoring) ─────────────────────────
-
-  const handleAnswer = useCallback((answer: A) => {
-    if (inFeedbackRef.current || phaseRef.current !== "playing") return;
-    const q = questions[questionIndex];
-    if (!q) return;
-
-    inFeedbackRef.current = true;
-    const result = adapter.scoring(answer, q);
-    adapter.onFeedback?.(result);
-    const live = liveRef.current;
-    live.score += result.points;
-    if (result.correct) live.correct++;
-    setDispScore(live.score);
-    setFeedback(result);
-
-    setTimeout(() => {
-      setFeedback(null);
-      inFeedbackRef.current = false;
-      setQuestionIndex((i) => i + 1);
-    }, result.correct ? 300 : 700);
-  }, [adapter, questions, questionIndex]);
-
-  // ── Enter queue ───────────────────────────────────────────────────────────
-
-  const enterQueue = useCallback(async (chosenLevel: number) => {
+  const enterQueue = useCallback(async () => {
     if (!profile || !userId) return;
-    setLevel(chosenLevel);
+    if (joiningRef.current) return;
+    joiningRef.current = true;
     setPhase("queue");
     setPresenceSlots({});
     setQueueSecs(QUEUE_GRACE_MS / 1000);
@@ -504,27 +375,29 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
       res = await fetch("/api/live/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ game_kind: adapter.gameKind, level: chosenLevel }),
+        body: JSON.stringify({ game_kind: adapter.gameKind, level }),
       });
     } catch (err) {
-      console.error("[MultiplayerShell] match POST failed:", err);
-      setPhase("select");
+      console.error("[RoundShell] match POST failed:", err);
+      joiningRef.current = false;
+      setPhase("alloc");
       return;
     }
     if (!res.ok) {
-      console.error("[MultiplayerShell] match POST status:", res.status);
-      setPhase("select");
+      console.error("[RoundShell] match POST status:", res.status);
+      joiningRef.current = false;
+      setPhase("alloc");
       return;
     }
     const data = (await res.json()) as QueueAlloc;
     setAlloc(data);
     allocRef.current = data;
 
+    const locs = adapter.generateLocations(data.seed, adapter.roundCount);
+    setLocations(locs);
+
     const supabase = getSupabaseBrowserClient();
-    if (!supabase) {
-      setPhase("select");
-      return;
-    }
+    if (!supabase) { joiningRef.current = false; setPhase("auth"); return; }
 
     teardownChannel();
 
@@ -550,8 +423,16 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
       setOpponentScores((prev) => ({ ...prev, [p.slot]: p.score }));
     });
 
+    channel.on("broadcast", { event: "guess-locked" }, ({ payload }) => {
+      const p = payload as GuessLockedPayload<A>;
+      if (typeof p?.slot !== "number" || typeof p?.roundIndex !== "number") return;
+      if (p.slot === data.slotIndex) return;
+      if (p.roundIndex !== roundIndexRef.current) return;
+      setRoundGuesses((prev) => ({ ...prev, [p.slot]: p }));
+    });
+
     channel.on("broadcast", { event: "go" }, () => {
-      if (phaseRef.current === "queue") startCountdown();
+      if (phaseRef.current === "queue") setPhase("countdown");
     });
 
     channel.on(
@@ -560,7 +441,6 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
       ({ new: row }) => {
         const r = row as { status?: string };
         if (r.status === "finished" && !submittedRef.current && allocRef.current) {
-          gameActiveRef.current = false;
           void submitResult(allocRef.current);
         }
       },
@@ -575,7 +455,13 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
     } satisfies PresenceMeta);
 
     channelRef.current = channel;
-  }, [profile, userId, adapter.gameKind, teardownChannel, startCountdown, submitResult]);
+  }, [profile, userId, adapter, level, teardownChannel, submitResult]);
+
+  // Auto-enter queue once alloc-ready
+  useEffect(() => {
+    if (phase !== "alloc" || !signedIn || !profile || !userId) return;
+    void enterQueue();
+  }, [phase, signedIn, profile, userId, enterQueue]);
 
   // ── Queue countdown ───────────────────────────────────────────────────────
 
@@ -593,57 +479,178 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
           const ch = channelRef.current;
           if (ch) ch.send({ type: "broadcast", event: "go", payload: {} });
         }
-        if (phaseRef.current === "queue") startCountdown();
+        if (phaseRef.current === "queue") setPhase("countdown");
       }
     }, 200);
     return () => clearInterval(iv);
-  }, [phase, alloc, startCountdown]);
+  }, [phase, alloc]);
 
   useEffect(() => {
     if (phase !== "queue" || !alloc) return;
-    if (Object.keys(presenceSlots).length >= 4 && alloc.slotIndex === 0) {
+    if (Object.keys(presenceSlots).length >= MAX_PLAYERS && alloc.slotIndex === 0) {
       const ch = channelRef.current;
       if (ch) ch.send({ type: "broadcast", event: "go", payload: {} });
-      startCountdown();
+      setPhase("countdown");
     }
-  }, [phase, alloc, presenceSlots, startCountdown]);
+  }, [phase, alloc, presenceSlots]);
 
-  // ── Reset / Play again ────────────────────────────────────────────────────
+  // ── Countdown ─────────────────────────────────────────────────────────────
 
-  const resetToSelect = useCallback(() => {
+  useEffect(() => {
+    if (phase !== "countdown") return;
+    setCountNum(3);
+    let n = 3;
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+    const step = () => {
+      n--;
+      setCountNum(n);
+      if (n > 0) {
+        timeouts.push(setTimeout(step, 600));
+      } else {
+        timeouts.push(setTimeout(() => {
+          myScoreRef.current = 0;
+          setSlotScores({});
+          setOpponentScores({});
+          setRoundIndex(0);
+          setLocked(false);
+          lockedRef.current = false;
+          setRoundGuesses({});
+          submittedRef.current = false;
+          setTimeLeftMs(adapter.roundDurationMs);
+          playStartRef.current = Date.now();
+          setPhase("playing");
+        }, 600));
+      }
+    };
+    timeouts.push(setTimeout(step, 600));
+    return () => timeouts.forEach(clearTimeout);
+  }, [phase, adapter.roundDurationMs]);
+
+  // ── Playing phase: round timer + tick broadcast ───────────────────────────
+
+  useEffect(() => {
+    if (phase !== "playing") return;
+
+    const tickIv = setInterval(() => {
+      const elapsed = Date.now() - playStartRef.current;
+      const remaining = Math.max(0, adapter.roundDurationMs - elapsed);
+      setTimeLeftMs(remaining);
+      if (remaining <= 0) {
+        clearInterval(tickIv);
+        setRevealMs(adapter.revealDurationMs);
+        setPhase("reveal");
+      }
+    }, 200);
+
+    const broadcastIv = setInterval(() => {
+      const ch = channelRef.current;
+      const a = allocRef.current;
+      if (!ch || !a) return;
+      ch.send({
+        type: "broadcast",
+        event: "tick",
+        payload: { slot: a.slotIndex, score: myScoreRef.current } satisfies TickPayload,
+      });
+    }, 750);
+
+    return () => {
+      clearInterval(tickIv);
+      clearInterval(broadcastIv);
+    };
+  }, [phase, adapter.roundDurationMs, adapter.revealDurationMs]);
+
+  // ── Reveal phase: timer → next round or result ────────────────────────────
+
+  useEffect(() => {
+    if (phase !== "reveal") return;
+    const start = Date.now();
+    const iv = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const remaining = Math.max(0, adapter.revealDurationMs - elapsed);
+      setRevealMs(remaining);
+      if (remaining <= 0) {
+        clearInterval(iv);
+        const next = roundIndexRef.current + 1;
+        if (next >= adapter.roundCount) {
+          const a = allocRef.current;
+          if (a) void submitResult(a);
+        } else {
+          setRoundIndex(next);
+          setLocked(false);
+          lockedRef.current = false;
+          setRoundGuesses({});
+          setTimeLeftMs(adapter.roundDurationMs);
+          playStartRef.current = Date.now();
+          setPhase("playing");
+        }
+      }
+    }, 200);
+    return () => clearInterval(iv);
+  }, [phase, adapter.revealDurationMs, adapter.roundDurationMs, adapter.roundCount, submitResult]);
+
+  // ── Lock guess handler ───────────────────────────────────────────────────
+
+  const handleLockGuess = useCallback((guess: A) => {
+    if (lockedRef.current || phaseRef.current !== "playing") return;
+    const a = allocRef.current;
+    if (!a) return;
+    const target = locations[roundIndexRef.current];
+    if (!target) return;
+
+    const { points, distanceMeters } = adapter.scoreFromGuess(guess, target);
+    myScoreRef.current += points;
+    setSlotScores((prev) => ({ ...prev, [a.slotIndex]: (prev[a.slotIndex] ?? 0) + points }));
+    setLocked(true);
+    lockedRef.current = true;
+
+    const payload: GuessLockedPayload<A> = {
+      roundIndex: roundIndexRef.current,
+      slot: a.slotIndex,
+      points,
+      distanceMeters,
+      guess,
+    };
+    setRoundGuesses((prev) => ({ ...prev, [a.slotIndex]: payload }));
+
+    const ch = channelRef.current;
+    if (ch) {
+      ch.send({ type: "broadcast", event: "guess-locked", payload });
+      ch.send({
+        type: "broadcast",
+        event: "tick",
+        payload: { slot: a.slotIndex, score: myScoreRef.current } satisfies TickPayload,
+      });
+    }
+  }, [adapter, locations]);
+
+  // ── Reset / play again ────────────────────────────────────────────────────
+
+  const resetToHome = useCallback(() => {
     teardownChannel();
-    gameActiveRef.current = false;
     submittedRef.current = false;
-    setAlloc(null);
-    allocRef.current = null;
-    setFinalResult(null);
-    setPresenceSlots({});
-    setOpponentScores({});
-    setBotScores({});
-    setQuestions([]);
-    setQuestionIndex(0);
-    setPhase("select");
-  }, [teardownChannel]);
+    router.push("/");
+  }, [teardownChannel, router]);
 
   const playAgain = useCallback(() => {
     teardownChannel();
-    gameActiveRef.current = false;
     submittedRef.current = false;
     setAlloc(null);
     allocRef.current = null;
     setFinalResult(null);
     setPresenceSlots({});
     setOpponentScores({});
-    setBotScores({});
-    setQuestions([]);
-    setQuestionIndex(0);
-    void enterQueue(level);
-  }, [teardownChannel, enterQueue, level]);
+    setSlotScores({});
+    setRoundGuesses({});
+    setLocations([]);
+    setRoundIndex(0);
+    myScoreRef.current = 0;
+    setPhase("alloc");
+  }, [teardownChannel]);
 
   // ── Derived view models ───────────────────────────────────────────────────
 
   const queueSlots: QueueSlot[] = (() => {
-    const out: QueueSlot[] = [null, null, null, null];
+    const out: QueueSlot[] = Array(MAX_PLAYERS).fill(null);
     for (const slotStr of Object.keys(presenceSlots)) {
       const slot = Number(slotStr);
       const meta = presenceSlots[slot];
@@ -655,28 +662,18 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
   const tickerPlayers: TickerPlayer[] = (() => {
     if (!alloc) return [];
     const out: TickerPlayer[] = [];
-    for (let s = 0; s < 4; s++) {
+    for (let s = 0; s < MAX_PLAYERS; s++) {
       const presence = presenceSlots[s];
+      if (!presence) continue;
       const isMe = s === alloc.slotIndex;
-      if (presence) {
-        out.push({
-          slot: s,
-          displayName: presence.displayName,
-          avatarUrl: presence.avatarUrl,
-          isBot: false,
-          score: isMe ? dispScore : (opponentScores[s] ?? 0),
-          isMe,
-        });
-      } else {
-        out.push({
-          slot: s,
-          displayName: `Bot ${s + 1}`,
-          avatarUrl: null,
-          isBot: true,
-          score: botScores[s] ?? 0,
-          isMe: false,
-        });
-      }
+      out.push({
+        slot: s,
+        displayName: presence.displayName,
+        avatarUrl: presence.avatarUrl,
+        isBot: false,
+        score: isMe ? (slotScores[s] ?? 0) : (opponentScores[s] ?? 0),
+        isMe,
+      });
     }
     return out;
   })();
@@ -692,17 +689,17 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
       <div className="mx-auto max-w-md px-4 pt-10 pb-8">
         <h1 className="text-2xl font-bold tracking-tight">{adapter.displayName}</h1>
         <p className="mt-2 text-sm text-muted">
-          Real-time head-to-head against three other players or bots. Sign in to play live.
+          Three rounds of explore-and-guess against up to seven other players. Sign in to play live.
         </p>
         <button
-          onClick={() => router.push("/auth")}
+          onClick={() => router.push("/stats")}
           className="mt-6 w-full rounded-2xl py-4 text-sm font-bold text-white transition-all active:scale-[0.98]"
           style={{ background: "var(--accent)" }}
         >
           Sign in to play live
         </button>
         <button
-          onClick={() => router.push(adapter.routePath)}
+          onClick={() => router.push("/trivia")}
           className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-3.5 text-sm font-medium"
         >
           <ArrowLeft size={15} /> Back
@@ -711,40 +708,8 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
     );
   }
 
-  if (phase === "select") {
-    return (
-      <div className="mx-auto max-w-md px-4 pt-6 pb-8">
-        <div className="mb-6">
-          <button
-            onClick={() => router.push(adapter.routePath)}
-            className="mb-3 inline-flex items-center gap-1 text-sm text-muted hover:text-fg transition-colors"
-          >
-            <ArrowLeft size={14} /> Back
-          </button>
-          <h1 className="text-2xl font-bold tracking-tight">{adapter.displayName}</h1>
-          <p className="mt-1 text-sm text-muted">Pick a level to enter the queue.</p>
-        </div>
-        <div className="space-y-3">
-          {adapter.levels.map((lv) => (
-            <button
-              key={lv.id}
-              onClick={() => enterQueue(lv.id)}
-              className="w-full rounded-2xl border border-border bg-surface px-5 py-4 text-left transition-all duration-150 hover:border-[var(--accent)]/40 hover:shadow-md active:scale-[0.98]"
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-base font-black text-white"
-                  style={{ background: "var(--accent)" }}
-                >
-                  {lv.id}
-                </div>
-                <div className="text-base font-bold">{lv.label}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
+  if (phase === "alloc") {
+    return <div className="fixed inset-0 z-40 flex items-center justify-center bg-bg text-sm text-muted">Allocating match…</div>;
   }
 
   if (phase === "queue") {
@@ -802,26 +767,57 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
         players={podiumPlayers}
         currentUserId={userId}
         onPlayAgainAction={playAgain}
-        onBackAction={resetToSelect}
+        onBackAction={resetToHome}
+        backLabel="Back to menu"
       />
     );
   }
 
-  const currentQuestion = questions[questionIndex];
-  if (!currentQuestion) {
+  const currentLocation = locations[roundIndex];
+  if (!currentLocation) {
     return <div className="fixed inset-0 z-40 flex items-center justify-center bg-bg text-sm text-muted">Loading…</div>;
   }
 
-  const PlayBoard = adapter.PlayBoard;
+  if (phase === "reveal") {
+    const guesses: Array<RevealGuess<A>> = (() => {
+      const out: Array<RevealGuess<A>> = [];
+      for (const slotStr of Object.keys(presenceSlots)) {
+        const slot = Number(slotStr);
+        const meta = presenceSlots[slot];
+        const g = roundGuesses[slot];
+        out.push({
+          slot,
+          displayName: meta.displayName,
+          guess: g?.guess ?? null,
+          points: g?.points ?? 0,
+          distanceMeters: g?.distanceMeters ?? null,
+        });
+      }
+      return out;
+    })();
+    return (
+      <div className="fixed inset-0 z-40 flex flex-col bg-bg">
+        <LiveScoreTicker players={tickerPlayers} />
+        <div className="flex-1 min-h-0">
+          <RevealBoard actual={currentLocation} guesses={guesses} roundIndex={roundIndex} />
+        </div>
+        <div className="px-3 pb-3 pt-1 text-center text-xs text-muted">
+          Next round in {Math.ceil(revealMs / 1000)}s
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-bg">
       <LiveScoreTicker players={tickerPlayers} />
       <div className="flex-1 min-h-0">
         <PlayBoard
-          question={currentQuestion}
-          remainingMs={remainingMs}
-          feedback={feedback}
-          onAnswerAction={handleAnswer}
+          location={currentLocation}
+          roundIndex={roundIndex}
+          timeLeftMs={timeLeftMs}
+          locked={locked}
+          onLockGuess={handleLockGuess}
         />
       </div>
     </div>
