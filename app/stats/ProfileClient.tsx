@@ -98,7 +98,7 @@ function AvatarDisplay({
 
 
 function AuthPage() {
-  const [mode, setMode] = useState<"signin" | "create">("signin");
+  const [mode, setMode] = useState<"signin" | "create">("create");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -178,7 +178,7 @@ function AuthPage() {
         style={{ boxShadow: "0 8px 40px color-mix(in srgb, var(--fg) 8%, transparent)" }}
       >
         <div className="flex gap-1 border-b border-border p-1.5 lg:p-2">
-          {(["signin", "create"] as const).map((m) => (
+          {(["create", "signin"] as const).map((m) => (
             <button
               key={m}
               onClick={() => { setMode(m); setMsg(null); }}
@@ -256,8 +256,11 @@ function AuthPage() {
                 className="w-full rounded-xl py-3 text-sm font-bold text-white shadow-md transition-all active:scale-[0.98] disabled:opacity-50 lg:py-4 lg:text-[15px]"
                 style={{ background: "var(--accent)", boxShadow: "0 4px 14px color-mix(in srgb, var(--accent) 30%, transparent)" }}
               >
-                {loading ? "Sending…" : "Send magic link"}
+                {loading ? "Sending…" : "Create account"}
               </button>
+              <p className="text-center text-[11px] leading-relaxed text-muted lg:text-xs">
+                We&apos;ll email you a one-time link to verify your address — no password needed.
+              </p>
             </form>
           )}
 
@@ -277,9 +280,13 @@ function AuthPage() {
         </div>
       </div>
 
-      <p className="mt-6 hidden text-xs text-muted lg:block">
-        Your data is encrypted and never shared.
-      </p>
+      <div className="mt-5 flex flex-col items-center gap-1.5 text-center text-[11px] text-muted lg:mt-7 lg:text-xs">
+        <div className="flex items-center gap-1.5">
+          <Lock size={11} />
+          Encrypted end-to-end · No spam, ever
+        </div>
+        <div>By continuing you agree to our terms.</div>
+      </div>
     </div>
   );
 }
