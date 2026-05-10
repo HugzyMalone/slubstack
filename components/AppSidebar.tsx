@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserCircle2 } from "lucide-react";
+import { UserCircle2, Blocks, Globe } from "lucide-react";
 import { useStore } from "zustand";
 import { cn } from "@/lib/utils";
 import { mandarinStore, germanStore, spanishStore, vibeCodingStore } from "@/lib/store";
@@ -123,14 +123,66 @@ export function AppSidebar() {
     | { kind: "mascot"; mascot: MascotKind }
   );
 
-  const navItems: NavItem[] = [
-    {
-      href: "/",
-      label: "Home",
-      kind: "icon",
-      Icon: HomeIcon,
-      match: (p: string) => p === "/",
-    },
+  const renderNavLink = (
+    item: NavItem,
+    currentPath: string | null,
+    progressByHref: Record<string, { done: number; total: number }>,
+  ) => {
+    const active = item.match(currentPath ?? "");
+    const progress = item.href in progressByHref ? progressByHref[item.href] : null;
+    return (
+      <Link
+        key={item.label}
+        href={item.href}
+        className={cn(
+          "group relative flex items-center gap-3 rounded-2xl px-3 py-2 text-[14px] font-semibold transition-all duration-150",
+          active ? "text-[var(--accent)]" : "text-fg/75 hover:text-fg",
+        )}
+        style={
+          active
+            ? {
+                background: "linear-gradient(135deg, var(--accent-soft) 0%, var(--game-soft) 100%)",
+                boxShadow: "var(--shadow-bouncy)",
+                border: "1.5px solid color-mix(in srgb, var(--accent) 24%, transparent)",
+              }
+            : { background: "transparent", border: "1.5px solid transparent" }
+        }
+      >
+        {item.kind === "mascot" ? (
+          <Mascot kind={item.mascot} active={active} />
+        ) : (
+          <span
+            className={cn(
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-150",
+              active ? "text-[var(--accent)]" : "text-muted group-hover:text-fg",
+            )}
+            style={{
+              background: active ? "var(--surface)" : "color-mix(in srgb, var(--fg) 4%, transparent)",
+              border: active
+                ? "1.5px solid color-mix(in srgb, var(--accent) 28%, transparent)"
+                : "1.5px solid transparent",
+            }}
+          >
+            <item.Icon />
+          </span>
+        )}
+
+        {item.label}
+
+        {progress && <ProgressPip done={progress.done} total={progress.total} />}
+      </Link>
+    );
+  };
+
+  const homeItem: NavItem = {
+    href: "/",
+    label: "Home",
+    kind: "icon",
+    Icon: HomeIcon,
+    match: (p: string) => p === "/",
+  };
+
+  const learningItems: NavItem[] = [
     {
       href: "/spanish",
       label: "Spanish",
@@ -166,12 +218,29 @@ export function AppSidebar() {
       Icon: BrainIcon,
       match: (p: string) => p.startsWith("/brain-training"),
     },
+  ];
+
+  const gamesItems: NavItem[] = [
     {
       href: "/trivia",
       label: "Trivia",
       kind: "icon",
       Icon: FilmIcon,
-      match: (p: string) => p.startsWith("/trivia"),
+      match: (p: string) => p.startsWith("/trivia") && !p.startsWith("/trivia/geo-clone"),
+    },
+    {
+      href: "/trivia/geo-clone",
+      label: "GeoClone",
+      kind: "icon",
+      Icon: () => <Globe size={22} strokeWidth={2} />,
+      match: (p: string) => p.startsWith("/trivia/geo-clone"),
+    },
+    {
+      href: "/games/block-yard",
+      label: "BlockYard",
+      kind: "icon",
+      Icon: () => <Blocks size={22} strokeWidth={2} />,
+      match: (p: string) => p.startsWith("/games/block-yard"),
     },
   ];
 
@@ -198,60 +267,14 @@ export function AppSidebar() {
         </span>
       </Link>
 
-      <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
-        {navItems.map((item) => {
-          const active = item.match(pathname ?? "");
-          const progress = item.href in langProgress ? langProgress[item.href] : null;
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={cn(
-                "group relative flex items-center gap-3 rounded-2xl px-3 py-2 text-[14px] font-semibold transition-all duration-150",
-                active
-                  ? "text-[var(--accent)]"
-                  : "text-fg/75 hover:text-fg"
-              )}
-              style={
-                active
-                  ? {
-                      background: "linear-gradient(135deg, var(--accent-soft) 0%, var(--game-soft) 100%)",
-                      boxShadow: "var(--shadow-bouncy)",
-                      border: "1.5px solid color-mix(in srgb, var(--accent) 24%, transparent)",
-                    }
-                  : {
-                      background: "transparent",
-                      border: "1.5px solid transparent",
-                    }
-              }
-            >
-              {item.kind === "mascot" ? (
-                <Mascot kind={item.mascot} active={active} />
-              ) : (
-                <span
-                  className={cn(
-                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-150",
-                    active ? "text-[var(--accent)]" : "text-muted group-hover:text-fg"
-                  )}
-                  style={{
-                    background: active
-                      ? "var(--surface)"
-                      : "color-mix(in srgb, var(--fg) 4%, transparent)",
-                    border: active
-                      ? "1.5px solid color-mix(in srgb, var(--accent) 28%, transparent)"
-                      : "1.5px solid transparent",
-                  }}
-                >
-                  <item.Icon />
-                </span>
-              )}
+      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
+        {renderNavLink(homeItem, pathname, langProgress)}
 
-              {item.label}
+        <p className="mt-4 mb-1 px-3 text-[10px] font-extrabold tracking-[0.2em] text-muted uppercase">Learning</p>
+        {learningItems.map((item) => renderNavLink(item, pathname, langProgress))}
 
-              {progress && <ProgressPip done={progress.done} total={progress.total} />}
-            </Link>
-          );
-        })}
+        <p className="mt-4 mb-1 px-3 text-[10px] font-extrabold tracking-[0.2em] text-muted uppercase">Games</p>
+        {gamesItems.map((item) => renderNavLink(item, pathname, langProgress))}
       </nav>
 
       <div className="border-t border-border px-3 py-4">
