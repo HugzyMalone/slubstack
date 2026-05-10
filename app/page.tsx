@@ -3,9 +3,15 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { BookOpen, Gamepad2, ArrowRight } from "lucide-react";
+import { BookOpen, Gamepad2, ArrowRight, Trophy } from "lucide-react";
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
+
+type LeagueData = {
+  cohort: { id: string; tierId: number; weekStart: string } | null;
+  tiers: { id: number; name: string; rank: number }[];
+  members: { rank: number; userId: string; username: string; avatar: string | null; weeklyXp: number; isYou: boolean }[];
+};
 
 function SparkleIcon() {
   return (
@@ -358,7 +364,7 @@ export default function HubPage() {
       </div>
 
       {/* Desktop dashboard (lg+) */}
-      <div className="hidden lg:grid lg:grid-cols-[minmax(320px,2fr)_3fr] lg:gap-10">
+      <div className="hidden lg:grid lg:grid-cols-[minmax(280px,1fr)_minmax(0,1.7fr)] lg:gap-8">
         <div className="flex flex-col gap-6">
           <div>
             <p className="text-[13px] font-semibold tracking-widest text-muted uppercase">
@@ -374,7 +380,7 @@ export default function HubPage() {
 
           <motion.div
             className="relative flex items-center justify-center"
-            style={{ height: 280 }}
+            style={{ height: 320 }}
             animate={prefersReducedMotion ? {} : { y: [0, -7, 0] }}
             transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
           >
@@ -382,71 +388,146 @@ export default function HubPage() {
               ? <Bear mood={hero.mood} fill />
               : <Panda mood={hero.mood} fill />}
           </motion.div>
-
-          <button onClick={cycleFact} className="w-full text-left group" aria-label="Show another fact">
-            <div
-              className="flex items-start gap-3 rounded-2xl px-5 py-4 transition-all duration-150 group-hover:border-[color:var(--border-hi)]"
-              style={{
-                background: "color-mix(in srgb, var(--accent) 8%, var(--surface))",
-                border: "1px solid color-mix(in srgb, var(--accent) 18%, transparent)",
-              }}
-            >
-              <SparkleIcon />
-              <div className="flex-1">
-                <div className="text-[10px] font-semibold tracking-widest text-muted uppercase mb-1">Did you know?</div>
-                <AnimatePresence mode="wait">
-                  <motion.p
-                    key={factIdx}
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.22, ease: "easeOut" }}
-                    className="text-[13px] leading-relaxed"
-                    style={{ color: "var(--fg)" }}
-                  >
-                    {FACTS[factIdx]}
-                  </motion.p>
-                </AnimatePresence>
-                <div className="mt-2 text-[11px] text-muted opacity-70">Click for another fact</div>
-              </div>
-            </div>
-          </button>
         </div>
 
         <div className="flex flex-col gap-5">
-          {HOME_BUTTONS.map(({ href, title, subtitle, icon, tint, bg }, i) => (
-            <motion.div
-              key={href}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.12 + i * 0.08, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-            >
-              <Link
-                href={href}
-                className="group flex items-center gap-6 rounded-3xl p-7 transition-all duration-150 hover:-translate-y-0.5"
-                style={{
-                  background: `color-mix(in srgb, ${tint} 10%, var(--surface))`,
-                  border: `1.5px solid color-mix(in srgb, ${tint} 26%, transparent)`,
-                  boxShadow: `0 8px 28px color-mix(in srgb, ${tint} 14%, transparent)`,
-                  minHeight: 132,
-                }}
+          <div className="grid grid-cols-2 gap-4">
+            {HOME_BUTTONS.map(({ href, title, subtitle, icon, tint, bg }, i) => (
+              <motion.div
+                key={href}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + i * 0.06, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
-                <div
-                  className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl text-white shadow-md"
-                  style={{ background: bg }}
+                <Link
+                  href={href}
+                  className="group flex h-full items-center gap-3 rounded-2xl p-4 transition-all duration-150 hover:-translate-y-0.5"
+                  style={{
+                    background: `color-mix(in srgb, ${tint} 9%, var(--surface))`,
+                    border: `1.5px solid color-mix(in srgb, ${tint} 24%, transparent)`,
+                    boxShadow: `0 6px 20px color-mix(in srgb, ${tint} 12%, transparent)`,
+                  }}
                 >
-                  {icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-2xl font-extrabold tracking-tight">{title}</div>
-                  <div className="mt-1 text-sm leading-snug text-muted">{subtitle}</div>
-                </div>
-                <ArrowRight size={22} style={{ color: tint }} className="shrink-0 transition-transform duration-150 group-hover:translate-x-1" />
-              </Link>
-            </motion.div>
-          ))}
+                  <div
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
+                    style={{ background: bg }}
+                  >
+                    {icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-base font-extrabold tracking-tight">{title}</div>
+                    <div className="mt-0.5 truncate text-[11.5px] leading-snug text-muted">{subtitle}</div>
+                  </div>
+                  <ArrowRight size={16} style={{ color: tint }} className="shrink-0 transition-transform duration-150 group-hover:translate-x-1" />
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+
+          <LeagueWidget />
+
+          <FactsFeed factIdx={factIdx} cycleFact={cycleFact} />
         </div>
       </div>
+    </div>
+  );
+}
+
+function LeagueWidget() {
+  const [data, setData] = useState<LeagueData | null>(null);
+  const [errored, setErrored] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/leagues/current")
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d: LeagueData) => { if (!cancelled) setData(d); })
+      .catch(() => { if (!cancelled) setErrored(true); });
+    return () => { cancelled = true; };
+  }, []);
+
+  if (errored || !data || !data.cohort) return null;
+
+  const tier = data.tiers.find((t) => t.id === data.cohort!.tierId);
+  const me = data.members.find((m) => m.isYou);
+  const top = data.members.slice(0, 3);
+  const tierColor = tier?.name === "Gold" ? "#f59e0b"
+    : tier?.name === "Silver" ? "#94a3b8"
+    : tier?.name === "Bronze" ? "#cd7c54"
+    : tier?.name === "Platinum" ? "#b0bec5"
+    : tier?.name === "Diamond" ? "#60d5fa"
+    : tier?.name === "Emerald" ? "#10b981"
+    : tier?.name === "Obsidian" ? "#8b5cf6"
+    : "var(--accent)";
+
+  return (
+    <Link
+      href="/leaderboard/league"
+      className="group rounded-2xl p-5 transition-all duration-150 hover:-translate-y-0.5"
+      style={{
+        background: "color-mix(in srgb, var(--accent) 6%, var(--surface))",
+        border: "1.5px solid color-mix(in srgb, var(--accent) 22%, transparent)",
+        boxShadow: "0 6px 20px color-mix(in srgb, var(--accent) 8%, transparent)",
+      }}
+    >
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Trophy size={16} style={{ color: tierColor }} />
+          <span className="text-[10px] font-extrabold tracking-[0.18em] text-muted uppercase">Your league</span>
+        </div>
+        {me && (
+          <span className="text-[12px] font-bold tabular-nums text-muted">
+            #{me.rank} · {me.weeklyXp} XP
+          </span>
+        )}
+      </div>
+      <div className="mb-3 flex items-baseline gap-2">
+        <span className="text-2xl font-extrabold tracking-tight" style={{ color: tierColor }}>
+          {tier?.name ?? "Bronze"}
+        </span>
+        <span className="text-[12px] text-muted">this week</span>
+      </div>
+      <div className="space-y-1.5">
+        {top.map((m) => (
+          <div key={m.userId} className="flex items-center gap-2.5 text-[12.5px]">
+            <span className="w-5 tabular-nums" style={{ color: m.rank === 1 ? "#f59e0b" : m.rank === 2 ? "#94a3b8" : "#b45309" }}>#{m.rank}</span>
+            <span className={`flex-1 truncate ${m.isYou ? "font-bold" : "font-medium"}`}>{m.username}{m.isYou ? " (you)" : ""}</span>
+            <span className="font-bold tabular-nums text-muted">{m.weeklyXp}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex items-center gap-1 text-[11px] font-semibold opacity-0 transition-opacity duration-150 group-hover:opacity-100" style={{ color: "var(--accent)" }}>
+        View full standings <ArrowRight size={12} />
+      </div>
+    </Link>
+  );
+}
+
+function FactsFeed({ factIdx, cycleFact }: { factIdx: number; cycleFact: () => void }) {
+  const visibleFacts = Array.from({ length: 6 }, (_, i) => FACTS[(factIdx + i) % FACTS.length]);
+  return (
+    <div
+      className="rounded-2xl p-5"
+      style={{
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+      }}
+    >
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <SparkleIcon />
+          <span className="text-[10px] font-extrabold tracking-[0.18em] text-muted uppercase">Did you know?</span>
+        </div>
+        <button onClick={cycleFact} className="text-[11px] font-semibold text-muted hover:text-fg">Shuffle</button>
+      </div>
+      <ul className="space-y-2.5">
+        {visibleFacts.map((fact, i) => (
+          <li key={`${factIdx}-${i}`} className="flex gap-2.5 text-[12.5px] leading-relaxed">
+            <span className="mt-1.5 inline-block h-1 w-1 shrink-0 rounded-full" style={{ background: "var(--accent)" }} />
+            <span className="text-fg/85">{fact}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

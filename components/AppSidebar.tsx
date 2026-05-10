@@ -2,39 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserCircle2, Blocks, Globe } from "lucide-react";
+import { UserCircle2, Brain, Sparkles, Globe, Film } from "lucide-react";
 import { useStore } from "zustand";
 import { cn } from "@/lib/utils";
 import { mandarinStore, germanStore, spanishStore, vibeCodingStore } from "@/lib/store";
 import { BullMascot } from "@/components/BullMascot";
 
-function WandIcon() {
+function GrassBlock() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 4V2" />
-      <path d="M15 16v-2" />
-      <path d="M8 9h2" />
-      <path d="M20 9h2" />
-      <path d="M17.8 11.8L19 13" />
-      <path d="M15 9h.01" />
-      <path d="M17.8 6.2L19 5" />
-      <path d="M3 21l9-9" />
-      <path d="M12.2 6.2L11 5" />
-    </svg>
-  );
-}
-
-function FilmIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="2" width="20" height="20" rx="2.5" />
-      <line x1="7" y1="2" x2="7" y2="22" />
-      <line x1="17" y1="2" x2="17" y2="22" />
-      <line x1="2" y1="12" x2="22" y2="12" />
-      <line x1="2" y1="7" x2="7" y2="7" />
-      <line x1="2" y1="17" x2="7" y2="17" />
-      <line x1="17" y1="17" x2="22" y2="17" />
-      <line x1="17" y1="7" x2="22" y2="7" />
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+      <polygon points="12,2 22,7 12,12 2,7" fill="#6cc24a"/>
+      <polygon points="12,3.5 20,7 12,10.5 4,7" fill="#7fd35a" opacity="0.55"/>
+      <polygon points="22,7 22,18 12,23 12,12" fill="#8b5a3c"/>
+      <polygon points="22,7 22,9 12,14 12,12" fill="#5cb85c"/>
+      <polygon points="2,7 2,18 12,23 12,12" fill="#6f4626"/>
+      <polygon points="2,7 2,9 12,14 12,12" fill="#4a8b3c"/>
     </svg>
   );
 }
@@ -44,15 +26,6 @@ function HomeIcon() {
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 10.5L12 3l9 7.5" />
       <path d="M5 9V20a1 1 0 001 1h3.5v-5h5v5H18a1 1 0 001-1V9" />
-    </svg>
-  );
-}
-
-function BrainIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0-2 5 3 3 0 0 0 2 5v1a3 3 0 0 0 6 0V4a0 0 0 0 1 0 0 3 3 0 0 0-3 0z" />
-      <path d="M15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 2 5 3 3 0 0 1-2 5v1a3 3 0 0 1-6 0V4a0 0 0 0 0 0 0 3 3 0 0 1 3 0z" />
     </svg>
   );
 }
@@ -121,6 +94,8 @@ export function AppSidebar() {
   } & (
     | { kind: "icon"; Icon: () => React.JSX.Element }
     | { kind: "mascot"; mascot: MascotKind }
+    | { kind: "flag"; flag: string }
+    | { kind: "badge"; node: React.ReactNode; bg: string }
   );
 
   const renderNavLink = (
@@ -150,6 +125,32 @@ export function AppSidebar() {
       >
         {item.kind === "mascot" ? (
           <Mascot kind={item.mascot} active={active} />
+        ) : item.kind === "flag" ? (
+          <span
+            className={cn(
+              "ml-1 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md transition-all duration-150",
+              active ? "ring-2 ring-[color-mix(in_srgb,var(--accent)_36%,transparent)]" : "",
+            )}
+            style={{
+              boxShadow: active ? "var(--shadow-bouncy)" : "0 1px 2px rgba(0,0,0,0.06)",
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={item.flag} alt="" className="h-full w-full object-cover" />
+          </span>
+        ) : item.kind === "badge" ? (
+          <span
+            className={cn(
+              "flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl text-white transition-all duration-150",
+              active ? "ring-2 ring-[color-mix(in_srgb,var(--accent)_36%,transparent)]" : "",
+            )}
+            style={{
+              background: item.bg,
+              boxShadow: active ? "var(--shadow-bouncy)" : "0 2px 6px rgba(0,0,0,0.08)",
+            }}
+          >
+            {item.node}
+          </span>
         ) : (
           <span
             className={cn(
@@ -186,36 +187,38 @@ export function AppSidebar() {
     {
       href: "/spanish",
       label: "Spanish",
-      kind: "mascot",
-      mascot: "bull",
+      kind: "flag",
+      flag: "/flags/es.svg",
       match: (p: string) => p.startsWith("/spanish"),
     },
     {
       href: "/mandarin",
       label: "Mandarin",
-      kind: "mascot",
-      mascot: "panda",
+      kind: "flag",
+      flag: "/flags/cn.svg",
       match: (p: string) => p.startsWith("/mandarin"),
     },
     {
       href: "/german",
       label: "German",
-      kind: "mascot",
-      mascot: "bear",
+      kind: "flag",
+      flag: "/flags/de.svg",
       match: (p: string) => p.startsWith("/german"),
     },
     {
       href: "/vibe-coding",
       label: "Skills",
-      kind: "icon",
-      Icon: WandIcon,
+      kind: "badge",
+      node: <Sparkles size={18} strokeWidth={2.4} />,
+      bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
       match: (p: string) => p.startsWith("/vibe-coding") || p.startsWith("/skills"),
     },
     {
       href: "/brain-training",
       label: "Brain",
-      kind: "icon",
-      Icon: BrainIcon,
+      kind: "badge",
+      node: <Brain size={18} strokeWidth={2.4} />,
+      bg: "linear-gradient(135deg, #f472b6 0%, #ec4899 100%)",
       match: (p: string) => p.startsWith("/brain-training"),
     },
   ];
@@ -224,22 +227,25 @@ export function AppSidebar() {
     {
       href: "/trivia",
       label: "Trivia",
-      kind: "icon",
-      Icon: FilmIcon,
+      kind: "badge",
+      node: <Film size={18} strokeWidth={2.4} />,
+      bg: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)",
       match: (p: string) => p.startsWith("/trivia") && !p.startsWith("/trivia/geo-clone"),
     },
     {
       href: "/trivia/geo-clone",
       label: "GeoClone",
-      kind: "icon",
-      Icon: () => <Globe size={22} strokeWidth={2} />,
+      kind: "badge",
+      node: <Globe size={18} strokeWidth={2.4} />,
+      bg: "linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)",
       match: (p: string) => p.startsWith("/trivia/geo-clone"),
     },
     {
       href: "/games/block-yard",
       label: "BlockYard",
-      kind: "icon",
-      Icon: () => <Blocks size={22} strokeWidth={2} />,
+      kind: "badge",
+      node: <GrassBlock />,
+      bg: "transparent",
       match: (p: string) => p.startsWith("/games/block-yard"),
     },
   ];
@@ -249,21 +255,22 @@ export function AppSidebar() {
       {/* Brand */}
       <Link
         href="/"
-        className="flex items-center gap-2 px-5 py-5 border-b border-border"
+        className="flex items-center gap-1 px-2 py-1 border-b border-border"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/slubstack-logo.png" alt="" className="h-8 w-8 rounded-lg object-contain" />
+        <img src="/slubstack-logo.png" alt="" className="h-24 w-24 -my-2 -mx-1 object-contain" />
         <span
-          className="font-display text-[22px] font-extrabold"
+          className="font-display flex flex-col items-center text-[30px] font-extrabold leading-[0.95]"
           style={{
-            letterSpacing: "-0.03em",
+            letterSpacing: "-0.04em",
             background: "linear-gradient(120deg, var(--accent) 0%, var(--game) 100%)",
             WebkitBackgroundClip: "text",
             backgroundClip: "text",
             color: "transparent",
           }}
         >
-          slubstack
+          <span>slub</span>
+          <span>stack</span>
         </span>
       </Link>
 
