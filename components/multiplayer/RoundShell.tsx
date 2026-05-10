@@ -766,6 +766,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
       <Podium
         players={podiumPlayers}
         currentUserId={userId}
+        gameDisplayName={adapter.displayName}
         onPlayAgainAction={playAgain}
         onBackAction={resetToHome}
         backLabel="Back to menu"
