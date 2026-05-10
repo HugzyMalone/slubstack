@@ -19,6 +19,7 @@ const LANG_LABEL: Record<Language, string> = {
   german: "German",
   spanish: "Spanish",
   "vibe-coding": "Vibe Coding",
+  github: "GitHub",
 };
 
 function LevelBar({ gained, language }: { gained: number; language: Language }) {

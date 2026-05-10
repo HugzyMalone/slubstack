@@ -9,6 +9,7 @@ import {
   germanStore,
   spanishStore,
   vibeCodingStore,
+  githubStore,
   brainTrainingStore,
   triviaStore,
 } from "@/lib/store";
@@ -18,6 +19,7 @@ export function TotalXpSync() {
   const germanXp = useStore(germanStore, (s) => s.xp);
   const spanishXp = useStore(spanishStore, (s) => s.xp);
   const vibeXp = useStore(vibeCodingStore, (s) => s.xp);
+  const githubXp = useStore(githubStore, (s) => s.xp);
   const brainXp = useStore(brainTrainingStore, (s) => s.xp);
   const triviaXp = useStore(triviaStore, (s) => s.xp);
 
@@ -26,7 +28,7 @@ export function TotalXpSync() {
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
 
-    const totalXp = mandarinXp + germanXp + spanishXp + vibeXp + brainXp + triviaXp;
+    const totalXp = mandarinXp + germanXp + spanishXp + vibeXp + githubXp + brainXp + triviaXp;
 
     const timeout = window.setTimeout(async () => {
       const { data } = await supabase.auth.getSession();
@@ -40,7 +42,7 @@ export function TotalXpSync() {
     }, 800);
 
     return () => window.clearTimeout(timeout);
-  }, [mandarinXp, germanXp, spanishXp, vibeXp, brainXp, triviaXp]);
+  }, [mandarinXp, germanXp, spanishXp, vibeXp, githubXp, brainXp, triviaXp]);
 
   return null;
 }

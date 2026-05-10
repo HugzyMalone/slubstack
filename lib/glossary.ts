@@ -12,6 +12,7 @@ const VOCAB: Record<Language, Card[]> = {
   german: germanVocab as Card[],
   spanish: spanishVocab as Card[],
   "vibe-coding": [],
+  github: [],
 };
 
 const GERMAN_GLOSSARY = germanGlossary as Record<string, string>;
@@ -21,6 +22,7 @@ const STEMS: Record<Language, string[]> = {
   spanish: ["es", "s", "as", "ar", "er", "ir"],
   mandarin: [],
   "vibe-coding": [],
+  github: [],
 };
 
 function stripArticle(s: string): string {

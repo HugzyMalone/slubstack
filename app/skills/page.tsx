@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useStore } from "zustand";
-import { vibeCodingStore } from "@/lib/store";
+import { vibeCodingStore, githubStore } from "@/lib/store";
 import { levelFromXp } from "@/lib/xp";
 import { useHydrated } from "@/lib/hooks";
 
@@ -23,14 +23,24 @@ const SKILLS = [
     iconBg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
     units: "6 units · 88 cards",
   },
+  {
+    href: "/github",
+    code: "🐙",
+    title: "GitHub",
+    description: "Git, branches, PRs & how Slubstack ships",
+    iconBg: "linear-gradient(135deg, #24292e 0%, #57606a 100%)",
+    units: "8 units · 106 cards",
+  },
 ];
 
 export default function SkillsPage() {
   const hydrated = useHydrated();
   const vibeXp = useStore(vibeCodingStore, (s) => s.xp);
+  const githubXp = useStore(githubStore, (s) => s.xp);
 
   const xpMap: Record<string, number> = {
     "/vibe-coding": vibeXp,
+    "/github": githubXp,
   };
 
   return (

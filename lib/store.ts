@@ -135,6 +135,7 @@ export const mandarinStore = createGameStore("slubstack-v1");
 export const germanStore = createGameStore("slubstack-german-v1");
 export const spanishStore = createGameStore("slubstack-spanish-v1");
 export const vibeCodingStore = createGameStore("slubstack-vibe-v1");
+export const githubStore = createGameStore("slubstack-github-v1");
 export const brainTrainingStore = createGameStore("slubstack-brain-v1");
 export const triviaStore = createGameStore("slubstack-trivia-v1");
 

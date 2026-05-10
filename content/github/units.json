@@ -1,0 +1,74 @@
+[
+  {
+    "id": "gh-basics",
+    "index": 0,
+    "title": "Git Basics",
+    "subtitle": "init, add, commit & the staging area",
+    "emoji": "🌱",
+    "category": "gh-basics",
+    "cardIds": ["gh-001","gh-002","gh-003","gh-004","gh-005","gh-006","gh-007","gh-008","gh-009","gh-010","gh-011","gh-012","gh-013","gh-014"]
+  },
+  {
+    "id": "gh-branches",
+    "index": 1,
+    "title": "Branches & Merging",
+    "subtitle": "branch, switch, merge, rebase & conflicts",
+    "emoji": "🌿",
+    "category": "gh-branches",
+    "cardIds": ["gh-015","gh-016","gh-017","gh-018","gh-019","gh-020","gh-021","gh-022","gh-023","gh-024","gh-025","gh-026","gh-027","gh-028"]
+  },
+  {
+    "id": "gh-remotes",
+    "index": 2,
+    "title": "Remotes & Sync",
+    "subtitle": "push, pull, fetch & tracking branches",
+    "emoji": "🛰️",
+    "category": "gh-remotes",
+    "cardIds": ["gh-029","gh-030","gh-031","gh-032","gh-033","gh-034","gh-035","gh-036","gh-037","gh-038","gh-039","gh-040"]
+  },
+  {
+    "id": "gh-prs",
+    "index": 3,
+    "title": "Pull Requests & Reviews",
+    "subtitle": "draft PRs, reviewers & merge strategies",
+    "emoji": "🔀",
+    "category": "gh-prs",
+    "cardIds": ["gh-041","gh-042","gh-043","gh-044","gh-045","gh-046","gh-047","gh-048","gh-049","gh-050","gh-051","gh-052","gh-053","gh-054"]
+  },
+  {
+    "id": "gh-platform",
+    "index": 4,
+    "title": "GitHub.com Features",
+    "subtitle": "Issues, Projects, Releases & Pages",
+    "emoji": "🐙",
+    "category": "gh-platform",
+    "cardIds": ["gh-055","gh-056","gh-057","gh-058","gh-059","gh-060","gh-061","gh-062","gh-063","gh-064","gh-065","gh-066","gh-067","gh-068"]
+  },
+  {
+    "id": "gh-cli-actions",
+    "index": 5,
+    "title": "gh CLI & Actions",
+    "subtitle": "Command line & CI workflows",
+    "emoji": "⚙️",
+    "category": "gh-cli-actions",
+    "cardIds": ["gh-069","gh-070","gh-071","gh-072","gh-073","gh-074","gh-075","gh-076","gh-077","gh-078","gh-079","gh-080"]
+  },
+  {
+    "id": "gh-slubstack",
+    "index": 6,
+    "title": "Slubstack Workflow",
+    "subtitle": "How this repo ships to prod",
+    "emoji": "🚀",
+    "category": "gh-slubstack",
+    "cardIds": ["gh-081","gh-082","gh-083","gh-084","gh-085","gh-086","gh-087","gh-088","gh-089","gh-090","gh-091","gh-092","gh-093"]
+  },
+  {
+    "id": "gh-brain",
+    "index": 7,
+    "title": "Brain & GitHub",
+    "subtitle": "How your Obsidian vault syncs",
+    "emoji": "🧠",
+    "category": "gh-brain",
+    "cardIds": ["gh-094","gh-095","gh-096","gh-097","gh-098","gh-099","gh-100","gh-101","gh-102","gh-103","gh-104","gh-105","gh-106"]
+  }
+]

@@ -3,11 +3,9 @@
 import { useEffect, useRef } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { germanStore, spanishStore, vibeCodingStore } from "@/lib/store";
+import { germanStore, spanishStore, vibeCodingStore, githubStore } from "@/lib/store";
 import type { RemoteState } from "@/lib/store";
 
-// Pulls german, spanish, and vibe-coding states on login from any page.
-// Mandarin is handled by the root <CloudSync /> which also owns the push for all languages.
 export function BootstrapSync() {
   const hasPulled = useRef(false);
 
@@ -20,8 +18,12 @@ export function BootstrapSync() {
       hasPulled.current = true;
 
       await Promise.all(
-        (["german", "spanish", "vibe-coding"] as const).map(async (lang) => {
-          const store = lang === "german" ? germanStore : lang === "spanish" ? spanishStore : vibeCodingStore;
+        (["german", "spanish", "vibe-coding", "github"] as const).map(async (lang) => {
+          const store =
+            lang === "german" ? germanStore :
+            lang === "spanish" ? spanishStore :
+            lang === "vibe-coding" ? vibeCodingStore :
+            githubStore;
           try {
             const res = await fetch(`/api/stats/sync?lang=${lang}`);
             const { state } = (await res.json()) as { state: RemoteState | null };

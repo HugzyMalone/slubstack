@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { UserCircle2, Brain, Sparkles, Globe, Film } from "lucide-react";
 import { useStore } from "zustand";
 import { cn } from "@/lib/utils";
-import { mandarinStore, germanStore, spanishStore, vibeCodingStore } from "@/lib/store";
+import { mandarinStore, germanStore, spanishStore, vibeCodingStore, githubStore } from "@/lib/store";
 import { BullMascot } from "@/components/BullMascot";
 
 function GrassBlock() {
@@ -79,12 +79,13 @@ export function AppSidebar() {
   const germanDone = useStore(germanStore, (s) => s.completedUnits.length);
   const spanishDone = useStore(spanishStore, (s) => s.completedUnits.length);
   const vibeDone = useStore(vibeCodingStore, (s) => s.completedUnits.length);
+  const githubDone = useStore(githubStore, (s) => s.completedUnits.length);
 
   const langProgress: Record<string, { done: number; total: number }> = {
-    "/spanish":      { done: spanishDone,  total: 8 },
-    "/mandarin":     { done: mandarinDone, total: 8 },
-    "/german":       { done: germanDone,   total: 7 },
-    "/vibe-coding":  { done: vibeDone,     total: 6 },
+    "/spanish":  { done: spanishDone,           total: 8 },
+    "/mandarin": { done: mandarinDone,          total: 8 },
+    "/german":   { done: germanDone,            total: 7 },
+    "/skills":   { done: vibeDone + githubDone, total: 14 },
   };
 
   type NavItem = {
@@ -206,12 +207,12 @@ export function AppSidebar() {
       match: (p: string) => p.startsWith("/german"),
     },
     {
-      href: "/vibe-coding",
+      href: "/skills",
       label: "Skills",
       kind: "badge",
       node: <Sparkles size={18} strokeWidth={2.4} />,
       bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-      match: (p: string) => p.startsWith("/vibe-coding") || p.startsWith("/skills"),
+      match: (p: string) => p.startsWith("/skills") || p.startsWith("/vibe-coding") || p.startsWith("/github"),
     },
     {
       href: "/brain-training",

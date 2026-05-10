@@ -65,7 +65,8 @@ const LANG_CONFIGS = [
 ] as const;
 
 const SKILL_CONFIGS = [
-  { key: "slubstack-vibe-v1", label: "Vibe Coding", flag: "🪄", href: "/vibe-coding/review", color: "#f59e0b", itemLabel: "cards" },
+  { key: "slubstack-vibe-v1",   label: "Vibe Coding", flag: "🪄", href: "/vibe-coding/review", color: "#f59e0b", itemLabel: "cards" },
+  { key: "slubstack-github-v1", label: "GitHub",      flag: "🐙", href: "/github/review",      color: "#24292e", itemLabel: "cards" },
 ] as const;
 
 // ── icons ──────────────────────────────────────────────────────────────────────
@@ -245,7 +246,7 @@ export default function ReviewHubPage() {
   const [langStats, setLangStats] = useState<LangStats[]>([
     { due: 0, seen: 0 }, { due: 0, seen: 0 }, { due: 0, seen: 0 },
   ]);
-  const [skillStats, setSkillStats] = useState<LangStats[]>([{ due: 0, seen: 0 }]);
+  const [skillStats, setSkillStats] = useState<LangStats[]>([{ due: 0, seen: 0 }, { due: 0, seen: 0 }]);
   const [mathStats, setMathStats] = useState<MathOpStats>({});
   const [actorStats, setActorStats] = useState<ActorStatMap>({});
   const [wordleState, setWordleState] = useState<{ phase: WordlePhase; attempts: number }>({ phase: "none", attempts: 0 });
@@ -285,7 +286,7 @@ export default function ReviewHubPage() {
   const actorMeta = actor.total === 0 ? "Play to track accuracy" : `${actor.total} actor${actor.total === 1 ? "" : "s"} · ${actorAcc ?? "—"}% accuracy`;
   const langDue = langStats.reduce((a, s) => a + s.due, 0);
   const langSubtitle = langDue > 0 ? `${langDue} card${langDue === 1 ? "" : "s"} due` : "Mandarin · German · Spanish";
-  const skillSubtitle = skillDue > 0 ? `${skillDue} card${skillDue === 1 ? "" : "s"} due` : "Vibe Coding";
+  const skillSubtitle = skillDue > 0 ? `${skillDue} card${skillDue === 1 ? "" : "s"} due` : "Vibe Coding · GitHub";
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 pb-28 pt-4 space-y-3 lg:max-w-[1100px] lg:px-8 lg:pt-10 lg:pb-16 lg:space-y-4">

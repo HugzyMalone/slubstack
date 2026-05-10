@@ -31,9 +31,10 @@ type Props = {
   greeting: string;
   subGreeting?: string;
   character?: "panda" | "bear";
+  linear?: boolean;
 };
 
-export function SkillTree({ units, basePath, greeting, subGreeting, character = "panda" }: Props) {
+export function SkillTree({ units, basePath, greeting, subGreeting, character = "panda", linear = true }: Props) {
   const hydrated = useHydrated();
   const completedUnits = useGameStore((s) => s.completedUnits);
   const seenCardIds = useGameStore((s) => s.seenCardIds);
@@ -67,10 +68,11 @@ export function SkillTree({ units, basePath, greeting, subGreeting, character = 
           {units.map((unit, i) => {
             const state: "locked" | "active" | "done" =
               !hydrated
-                ? i === 0 ? "active" : "locked"
+                ? i === 0 ? "active" : (linear ? "locked" : "active")
                 : completedUnits.includes(unit.id) ? "done"
-                  : i === unlockedIndex ? "active"
-                  : "locked";
+                  : linear
+                    ? i === unlockedIndex ? "active" : "locked"
+                    : "active";
             return (
               <motion.li
                 key={unit.id}
@@ -135,10 +137,11 @@ export function SkillTree({ units, basePath, greeting, subGreeting, character = 
             {units.map((unit, i) => {
               const state: "locked" | "active" | "done" =
                 !hydrated
-                  ? i === 0 ? "active" : "locked"
+                  ? i === 0 ? "active" : (linear ? "locked" : "active")
                   : completedUnits.includes(unit.id) ? "done"
-                    : i === unlockedIndex ? "active"
-                    : "locked";
+                    : linear
+                      ? i === unlockedIndex ? "active" : "locked"
+                      : "active";
               return (
                 <motion.div
                   key={unit.id}

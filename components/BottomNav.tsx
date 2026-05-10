@@ -48,10 +48,12 @@ export function BottomNav() {
     pathname?.startsWith("/german/learn/") ||
     pathname?.startsWith("/spanish/learn/") ||
     pathname?.startsWith("/vibe-coding/learn/") ||
+    pathname?.startsWith("/github/learn/") ||
     pathname?.startsWith("/mandarin/review") ||
     pathname?.startsWith("/german/review") ||
     pathname?.startsWith("/spanish/review") ||
     pathname?.startsWith("/vibe-coding/review") ||
+    pathname?.startsWith("/github/review") ||
     pathname?.startsWith("/brain-training/wordle") ||
     pathname?.startsWith("/brain-training/math-blitz") ||
     pathname?.startsWith("/brain-training/connections") ||
