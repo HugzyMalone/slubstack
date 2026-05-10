@@ -1,4 +1,4 @@
-import type { GameAdapter, ScoringRule } from "@/lib/multiplayer/types";
+import type { SprintAdapter, ScoringRule } from "@/lib/multiplayer/types";
 import { PlayBoard, type BatShakeQuestion, type BatShakeSource } from "@/components/games/batman-shakespeare/PlayBoard";
 import { generateBatmanShakespeareQuestions } from "./questions";
 
@@ -9,8 +9,9 @@ const scoring: ScoringRule<BatShakeQuestion, BatShakeSource> = (answer, question
   return { correct, points: correct ? POINTS_PER_CORRECT : 0 };
 };
 
-export const batmanShakespeareAdapter: GameAdapter<BatShakeQuestion, BatShakeSource> = {
-  kind: "batman_shakespeare",
+export const batmanShakespeareAdapter: SprintAdapter<BatShakeQuestion, BatShakeSource> = {
+  kind: "sprint",
+  gameKind: "batman_shakespeare",
   displayName: "Batman or Shakespeare?",
   routePath: "/trivia",
   storeKey: "trivia",
