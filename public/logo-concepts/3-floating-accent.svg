@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80" width="64" height="80">
+  <defs>
+    <!-- Muted base for bottom + middle cubes -->
+    <linearGradient id="lc3-base-top" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d4d4d8"/><stop offset="1" stop-color="#a1a1aa"/>
+    </linearGradient>
+    <linearGradient id="lc3-base-right" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#71717a"/><stop offset="1" stop-color="#52525b"/>
+    </linearGradient>
+    <linearGradient id="lc3-base-left" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#52525b"/><stop offset="1" stop-color="#3f3f46"/>
+    </linearGradient>
+    <!-- Accent gradient for top cube -->
+    <linearGradient id="lc3-accent-top" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c084fc"/><stop offset="1" stop-color="#f472b6"/>
+    </linearGradient>
+    <linearGradient id="lc3-accent-right" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a855f7"/><stop offset="1" stop-color="#db2777"/>
+    </linearGradient>
+    <linearGradient id="lc3-accent-left" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7e22ce"/><stop offset="1" stop-color="#9d174d"/>
+    </linearGradient>
+  </defs>
+  <!-- Bottom cube -->
+  <g transform="translate(32 64)">
+    <polygon points="0,0 -22,-12 0,-24 22,-12" fill="url(#lc3-base-top)"/>
+    <polygon points="0,0 22,-12 22,4 0,16" fill="url(#lc3-base-right)"/>
+    <polygon points="0,0 -22,-12 -22,4 0,16" fill="url(#lc3-base-left)"/>
+  </g>
+  <!-- Middle cube -->
+  <g transform="translate(32 44)">
+    <polygon points="0,0 -22,-12 0,-24 22,-12" fill="url(#lc3-base-top)"/>
+    <polygon points="0,0 22,-12 22,4 0,16" fill="url(#lc3-base-right)"/>
+    <polygon points="0,0 -22,-12 -22,4 0,16" fill="url(#lc3-base-left)"/>
+  </g>
+  <!-- Top cube — floating slightly with a soft drop shadow -->
+  <ellipse cx="32" cy="36" rx="18" ry="3" fill="rgba(0,0,0,0.18)"/>
+  <g transform="translate(32 22)">
+    <polygon points="0,0 -22,-12 0,-24 22,-12" fill="url(#lc3-accent-top)"/>
+    <polygon points="0,0 22,-12 22,4 0,16" fill="url(#lc3-accent-right)"/>
+    <polygon points="0,0 -22,-12 -22,4 0,16" fill="url(#lc3-accent-left)"/>
+  </g>
+</svg>

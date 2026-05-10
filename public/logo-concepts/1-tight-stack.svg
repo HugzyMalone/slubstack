@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80" width="64" height="80">
+  <defs>
+    <linearGradient id="lc1-top" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="lc1-right" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#5b21b6"/>
+    </linearGradient>
+    <linearGradient id="lc1-left" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6d28d9"/><stop offset="1" stop-color="#4c1d95"/>
+    </linearGradient>
+  </defs>
+  <!-- Bottom cube -->
+  <g transform="translate(32 64)">
+    <polygon points="0,0 -22,-12 0,-24 22,-12" fill="url(#lc1-top)"/>
+    <polygon points="0,0 22,-12 22,4 0,16" fill="url(#lc1-right)"/>
+    <polygon points="0,0 -22,-12 -22,4 0,16" fill="url(#lc1-left)"/>
+  </g>
+  <!-- Middle cube -->
+  <g transform="translate(32 44)">
+    <polygon points="0,0 -22,-12 0,-24 22,-12" fill="url(#lc1-top)"/>
+    <polygon points="0,0 22,-12 22,4 0,16" fill="url(#lc1-right)"/>
+    <polygon points="0,0 -22,-12 -22,4 0,16" fill="url(#lc1-left)"/>
+  </g>
+  <!-- Top cube -->
+  <g transform="translate(32 24)">
+    <polygon points="0,0 -22,-12 0,-24 22,-12" fill="url(#lc1-top)"/>
+    <polygon points="0,0 22,-12 22,4 0,16" fill="url(#lc1-right)"/>
+    <polygon points="0,0 -22,-12 -22,4 0,16" fill="url(#lc1-left)"/>
+  </g>
+</svg>
