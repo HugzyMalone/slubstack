@@ -15,16 +15,6 @@ function HomeIcon() {
   );
 }
 
-function CardsIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 4h6a4 4 0 014 4v13a3 3 0 00-3-3H2V4z" />
-      <path d="M22 4h-6a4 4 0 00-4 4v13a3 3 0 013-3h7V4z" />
-    </svg>
-  );
-}
-
 function PersonIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
@@ -81,16 +71,6 @@ export function BottomNav() {
       Icon: HomeIcon,
       match: (p: string) =>
         p === "/" || p === "/mandarin" || p === "/german" || p === "/spanish" || p === "/trivia",
-    },
-    {
-      href: "/review",
-      label: "Review",
-      Icon: CardsIcon,
-      match: (p: string) =>
-        p.startsWith("/mandarin/review") ||
-        p.startsWith("/german/review") ||
-        p.startsWith("/spanish/review") ||
-        p.startsWith("/review"),
     },
     {
       href: "/leaderboard/league",

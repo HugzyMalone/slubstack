@@ -3,11 +3,9 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { useStore } from "zustand";
+import { BookOpen, Gamepad2, ArrowRight } from "lucide-react";
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
-import { mandarinStore, germanStore, spanishStore, vibeCodingStore, brainTrainingStore, triviaStore } from "@/lib/store";
-import { levelFromXp } from "@/lib/xp";
 
 function SparkleIcon() {
   return (
@@ -24,128 +22,31 @@ function SparkleIcon() {
   );
 }
 
-function GlobeIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <path d="M2 12h20" />
-      <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
-    </svg>
-  );
-}
+type HomeButton = {
+  href: string;
+  title: string;
+  subtitle: string;
+  icon: React.ReactNode;
+  tint: string;
+  bg: string;
+};
 
-function BrainIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" />
-      <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" />
-    </svg>
-  );
-}
-
-function FilmIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="2" width="20" height="20" rx="2.5" />
-      <line x1="7" y1="2" x2="7" y2="22" />
-      <line x1="17" y1="2" x2="17" y2="22" />
-      <line x1="2" y1="12" x2="22" y2="12" />
-      <line x1="2" y1="7" x2="7" y2="7" />
-      <line x1="2" y1="17" x2="7" y2="17" />
-      <line x1="17" y1="17" x2="22" y2="17" />
-      <line x1="17" y1="7" x2="22" y2="7" />
-    </svg>
-  );
-}
-
-function WandIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M15 4V2" />
-      <path d="M15 16v-2" />
-      <path d="M8 9h2" />
-      <path d="M20 9h2" />
-      <path d="M17.8 11.8L19 13" />
-      <path d="M15 9h.01" />
-      <path d="M17.8 6.2L19 5" />
-      <path d="M3 21l9-9" />
-      <path d="M12.2 6.2L11 5" />
-    </svg>
-  );
-}
-
-function GlobeGamesIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <path d="M2 12h20" />
-      <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
-    </svg>
-  );
-}
-
-function BlocksIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="8" height="8" rx="1.5" />
-      <rect x="13" y="3" width="8" height="8" rx="1.5" />
-      <rect x="3" y="13" width="8" height="8" rx="1.5" />
-      <rect x="13" y="13" width="8" height="8" rx="1.5" />
-    </svg>
-  );
-}
-
-const LEARNING_SECTIONS = [
+const HOME_BUTTONS: HomeButton[] = [
   {
-    href: "/languages",
-    icon: <GlobeIcon />,
-    iconBg: "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)",
-    cardTint: "#6366f1",
-    title: "Languages",
-    subtitle: "Spanish · Mandarin · German",
+    href: "/learning",
+    title: "Learning",
+    subtitle: "Languages, Skills, Brain Training",
+    icon: <BookOpen size={32} strokeWidth={2} />,
+    tint: "#6366f1",
+    bg: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
   },
   {
-    href: "/skills",
-    icon: <WandIcon />,
-    iconBg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-    cardTint: "#f59e0b",
-    title: "Skills",
-    subtitle: "Vibe Coding & more",
-  },
-  {
-    href: "/brain-training",
-    icon: <BrainIcon />,
-    iconBg: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)",
-    cardTint: "#0ea5e9",
-    title: "Brain Training",
-    subtitle: "Math Blitz & memory games",
-  },
-];
-
-const GAMES_SECTIONS = [
-  {
-    href: "/trivia",
-    icon: <FilmIcon />,
-    iconBg: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)",
-    cardTint: "#a855f7",
-    title: "Trivia",
-    subtitle: "Actor Blitz & more",
-  },
-  {
-    href: "/trivia/geo-clone",
-    icon: <GlobeGamesIcon />,
-    iconBg: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)",
-    cardTint: "#22c55e",
-    title: "GeoClone",
-    subtitle: "Live geo-guessing, 8 players",
-  },
-  {
-    href: "/games/block-yard",
-    icon: <BlocksIcon />,
-    iconBg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-    cardTint: "#f59e0b",
-    title: "BlockYard",
-    subtitle: "Coming soon",
+    href: "/games",
+    title: "Games",
+    subtitle: "Trivia, GeoClone, BlockYard",
+    icon: <Gamepad2 size={32} strokeWidth={2} />,
+    tint: "#a855f7",
+    bg: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
   },
 ];
 
@@ -320,24 +221,6 @@ export default function HubPage() {
   const [greeting, setGreeting] = useState("");
   const prefersReducedMotion = useReducedMotion();
 
-  // Live levels from stores
-  const mandarinXp = useStore(mandarinStore, s => s.xp);
-  const germanXp = useStore(germanStore, s => s.xp);
-  const spanishXp = useStore(spanishStore, s => s.xp);
-  const vibeXp = useStore(vibeCodingStore, s => s.xp);
-  const brainXp = useStore(brainTrainingStore, s => s.xp);
-  const triviaXp = useStore(triviaStore, s => s.xp);
-  const learningLevels: Record<string, number> = {
-    "/languages": levelFromXp(mandarinXp + germanXp + spanishXp),
-    "/skills": levelFromXp(vibeXp),
-    "/brain-training": levelFromXp(brainXp),
-  };
-  const gamesLevels: Record<string, number> = {
-    "/trivia": levelFromXp(triviaXp),
-    "/trivia/geo-clone": levelFromXp(triviaXp),
-    "/games/block-yard": 0,
-  };
-
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem(HERO_SESSION_KEY);
@@ -439,102 +322,38 @@ export default function HubPage() {
           </button>
         </motion.div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto pb-[max(calc(env(safe-area-inset-bottom,0px)+72px),88px)]">
-          <p className="mb-2 mt-1 text-[10px] font-extrabold tracking-[0.2em] text-muted uppercase">Learning</p>
-          <div className="grid grid-cols-2 gap-2.5">
-            {LEARNING_SECTIONS.map(({ href, icon, iconBg, cardTint, title, subtitle }, i) => {
-              const level = learningLevels[href] ?? 0;
-              const isLast = i === LEARNING_SECTIONS.length - 1 && LEARNING_SECTIONS.length % 2 === 1;
-              return (
-                <motion.div
-                  key={href}
-                  className={isLast ? "col-span-2" : ""}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 + i * 0.05, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+        <div className="flex flex-1 min-h-0 flex-col gap-3 pb-[max(calc(env(safe-area-inset-bottom,0px)+72px),88px)]">
+          {HOME_BUTTONS.map(({ href, title, subtitle, icon, tint, bg }, i) => (
+            <motion.div
+              key={href}
+              className="flex-1"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 + i * 0.08, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              <Link
+                href={href}
+                className="group flex h-full items-center gap-4 rounded-3xl p-5 transition-transform duration-150 active:scale-[0.98]"
+                style={{
+                  background: `color-mix(in srgb, ${tint} 12%, var(--surface))`,
+                  border: `1.5px solid color-mix(in srgb, ${tint} 28%, transparent)`,
+                  boxShadow: `0 6px 24px color-mix(in srgb, ${tint} 14%, transparent)`,
+                }}
+              >
+                <div
+                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm"
+                  style={{ background: bg }}
                 >
-                  <Link
-                    href={href}
-                    className="relative flex h-full flex-col items-center justify-center gap-2.5 rounded-2xl p-3 transition-transform duration-150 active:scale-[0.97]"
-                    style={{
-                      background: `color-mix(in srgb, ${cardTint} 10%, var(--surface))`,
-                      border: `1px solid color-mix(in srgb, ${cardTint} 22%, transparent)`,
-                      boxShadow: `0 4px 20px color-mix(in srgb, ${cardTint} 10%, transparent)`,
-                      minHeight: 96,
-                    }}
-                  >
-                    {level > 0 && (
-                      <span
-                        className="absolute top-2 right-2 rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none"
-                        style={{
-                          background: `color-mix(in srgb, ${cardTint} 20%, var(--surface))`,
-                          color: cardTint,
-                          border: `1px solid color-mix(in srgb, ${cardTint} 30%, transparent)`,
-                        }}
-                      >
-                        Lv.{level}
-                      </span>
-                    )}
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white" style={{ background: iconBg }}>
-                      {icon}
-                    </div>
-                    <div className="text-center">
-                      <div className="text-[14px] font-bold leading-tight">{title}</div>
-                      <div className="mt-0.5 text-[11px] leading-tight text-muted">{subtitle}</div>
-                    </div>
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          <p className="mb-2 mt-5 text-[10px] font-extrabold tracking-[0.2em] text-muted uppercase">Games</p>
-          <div className="grid grid-cols-2 gap-2.5">
-            {GAMES_SECTIONS.map(({ href, icon, iconBg, cardTint, title, subtitle }, i) => {
-              const level = gamesLevels[href] ?? 0;
-              const isLast = i === GAMES_SECTIONS.length - 1 && GAMES_SECTIONS.length % 2 === 1;
-              return (
-                <motion.div
-                  key={href}
-                  className={isLast ? "col-span-2" : ""}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + i * 0.05, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-                >
-                  <Link
-                    href={href}
-                    className="relative flex h-full flex-col items-center justify-center gap-2.5 rounded-2xl p-3 transition-transform duration-150 active:scale-[0.97]"
-                    style={{
-                      background: `color-mix(in srgb, ${cardTint} 10%, var(--surface))`,
-                      border: `1px solid color-mix(in srgb, ${cardTint} 22%, transparent)`,
-                      boxShadow: `0 4px 20px color-mix(in srgb, ${cardTint} 10%, transparent)`,
-                      minHeight: 96,
-                    }}
-                  >
-                    {level > 0 && (
-                      <span
-                        className="absolute top-2 right-2 rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none"
-                        style={{
-                          background: `color-mix(in srgb, ${cardTint} 20%, var(--surface))`,
-                          color: cardTint,
-                          border: `1px solid color-mix(in srgb, ${cardTint} 30%, transparent)`,
-                        }}
-                      >
-                        Lv.{level}
-                      </span>
-                    )}
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white" style={{ background: iconBg }}>
-                      {icon}
-                    </div>
-                    <div className="text-center">
-                      <div className="text-[14px] font-bold leading-tight">{title}</div>
-                      <div className="mt-0.5 text-[11px] leading-tight text-muted">{subtitle}</div>
-                    </div>
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </div>
+                  {icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[18px] font-extrabold leading-tight">{title}</div>
+                  <div className="mt-0.5 text-[12px] leading-snug text-muted">{subtitle}</div>
+                </div>
+                <ArrowRight size={18} style={{ color: tint }} className="shrink-0" />
+              </Link>
+            </motion.div>
+          ))}
         </div>
       </div>
 
@@ -594,122 +413,38 @@ export default function HubPage() {
           </button>
         </div>
 
-        <div className="space-y-8">
-          <div>
-            <h2 className="mb-4 text-xs font-semibold tracking-widest text-muted uppercase">Learning</h2>
-            <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
-              {LEARNING_SECTIONS.map(({ href, icon, iconBg, cardTint, title, subtitle }, i) => {
-                const level = learningLevels[href] ?? 0;
-                return (
-                  <motion.div
-                    key={href}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.12 + i * 0.06, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  >
-                    <Link
-                      href={href}
-                      className="group relative flex flex-col gap-4 rounded-2xl p-6 transition-all duration-150 hover:-translate-y-0.5"
-                      style={{
-                        background: `color-mix(in srgb, ${cardTint} 8%, var(--surface))`,
-                        border: `1px solid color-mix(in srgb, ${cardTint} 22%, transparent)`,
-                        minHeight: 170,
-                      }}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div
-                          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm"
-                          style={{ background: iconBg }}
-                        >
-                          {icon}
-                        </div>
-                        {level > 0 && (
-                          <span
-                            className="rounded-full px-2 py-0.5 text-[11px] font-bold leading-none"
-                            style={{
-                              background: `color-mix(in srgb, ${cardTint} 18%, var(--surface))`,
-                              color: cardTint,
-                              border: `1px solid color-mix(in srgb, ${cardTint} 28%, transparent)`,
-                            }}
-                          >
-                            Lv. {level}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <div className="text-[17px] font-bold leading-tight">{title}</div>
-                        <div className="mt-1 text-[13px] leading-snug text-muted">{subtitle}</div>
-                      </div>
-                      <div
-                        className="absolute right-5 bottom-5 text-[13px] font-semibold opacity-0 transition-opacity duration-150 group-hover:opacity-100"
-                        style={{ color: cardTint }}
-                      >
-                        Open →
-                      </div>
-                    </Link>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div>
-            <h2 className="mb-4 text-xs font-semibold tracking-widest text-muted uppercase">Games</h2>
-            <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
-              {GAMES_SECTIONS.map(({ href, icon, iconBg, cardTint, title, subtitle }, i) => {
-                const level = gamesLevels[href] ?? 0;
-                return (
-                  <motion.div
-                    key={href}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.25 + i * 0.06, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-                  >
-                    <Link
-                      href={href}
-                      className="group relative flex flex-col gap-4 rounded-2xl p-6 transition-all duration-150 hover:-translate-y-0.5"
-                      style={{
-                        background: `color-mix(in srgb, ${cardTint} 8%, var(--surface))`,
-                        border: `1px solid color-mix(in srgb, ${cardTint} 22%, transparent)`,
-                        minHeight: 170,
-                      }}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div
-                          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm"
-                          style={{ background: iconBg }}
-                        >
-                          {icon}
-                        </div>
-                        {level > 0 && (
-                          <span
-                            className="rounded-full px-2 py-0.5 text-[11px] font-bold leading-none"
-                            style={{
-                              background: `color-mix(in srgb, ${cardTint} 18%, var(--surface))`,
-                              color: cardTint,
-                              border: `1px solid color-mix(in srgb, ${cardTint} 28%, transparent)`,
-                            }}
-                          >
-                            Lv. {level}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <div className="text-[17px] font-bold leading-tight">{title}</div>
-                        <div className="mt-1 text-[13px] leading-snug text-muted">{subtitle}</div>
-                      </div>
-                      <div
-                        className="absolute right-5 bottom-5 text-[13px] font-semibold opacity-0 transition-opacity duration-150 group-hover:opacity-100"
-                        style={{ color: cardTint }}
-                      >
-                        Open →
-                      </div>
-                    </Link>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
+        <div className="flex flex-col gap-5">
+          {HOME_BUTTONS.map(({ href, title, subtitle, icon, tint, bg }, i) => (
+            <motion.div
+              key={href}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.12 + i * 0.08, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              <Link
+                href={href}
+                className="group flex items-center gap-6 rounded-3xl p-7 transition-all duration-150 hover:-translate-y-0.5"
+                style={{
+                  background: `color-mix(in srgb, ${tint} 10%, var(--surface))`,
+                  border: `1.5px solid color-mix(in srgb, ${tint} 26%, transparent)`,
+                  boxShadow: `0 8px 28px color-mix(in srgb, ${tint} 14%, transparent)`,
+                  minHeight: 132,
+                }}
+              >
+                <div
+                  className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl text-white shadow-md"
+                  style={{ background: bg }}
+                >
+                  {icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-2xl font-extrabold tracking-tight">{title}</div>
+                  <div className="mt-1 text-sm leading-snug text-muted">{subtitle}</div>
+                </div>
+                <ArrowRight size={22} style={{ color: tint }} className="shrink-0 transition-transform duration-150 group-hover:translate-x-1" />
+              </Link>
+            </motion.div>
+          ))}
         </div>
       </div>
     </div>
