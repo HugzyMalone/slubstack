@@ -1,8 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 const CONCEPTS = [
-  { id: "1-tight-stack", name: "Tight stack" },
-  { id: "2-staggered", name: "Staggered" },
-  { id: "3-floating-accent", name: "Floating accent" },
+  { id: "1-tight-stack", name: "1 — Tight stack" },
+  { id: "2-staggered", name: "2 — Staggered" },
+  { id: "3-floating-accent", name: "3 — Floating accent" },
+  { id: "4-wireframe", name: "4 — Wireframe outlines" },
+  { id: "5-stair-step", name: "5 — Stair-step ascending" },
+  { id: "6-single-bold", name: "6 — Single bold cube" },
+  { id: "7-pixel-dissolve", name: "7 — Pixel dissolve" },
 ];
 
 const SIZES = [
