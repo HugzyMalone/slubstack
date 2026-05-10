@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronUp, ChevronDown, Lock, Maximize2, Minimize2 } from "lucide-react";
+import { ChevronUp, ChevronDown, Lock } from "lucide-react";
 import type { Location, Guess } from "@/lib/games/geo-clone/adapter";
 import { StreetViewPanel } from "./StreetViewPanel";
 import { GuessMap } from "./GuessMap";
@@ -27,11 +27,29 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
   const [sheetOpen, setSheetOpen] = useState(false);
   const [overlayOpen, setOverlayOpen] = useState(true);
   const [panelLarge, setPanelLarge] = useState(false);
+  const expandTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setPendingGuess(null);
     setSheetOpen(false);
   }, [roundIndex]);
+
+  useEffect(() => () => {
+    if (expandTimerRef.current) clearTimeout(expandTimerRef.current);
+  }, []);
+
+  function handlePanelEnter() {
+    if (expandTimerRef.current) clearTimeout(expandTimerRef.current);
+    expandTimerRef.current = setTimeout(() => setPanelLarge(true), 1000);
+  }
+
+  function handlePanelLeave() {
+    if (expandTimerRef.current) {
+      clearTimeout(expandTimerRef.current);
+      expandTimerRef.current = null;
+    }
+    setPanelLarge(false);
+  }
 
   function handleConfirm() {
     if (locked || !pendingGuess) return;
@@ -86,6 +104,8 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
 
       <div className="pointer-events-none absolute bottom-4 right-4 z-20 hidden lg:block">
         <motion.div
+          onMouseEnter={overlayOpen ? handlePanelEnter : undefined}
+          onMouseLeave={overlayOpen ? handlePanelLeave : undefined}
           animate={{
             width: overlayOpen ? (panelLarge ? "min(78vw, 1100px)" : 360) : 56,
             height: overlayOpen ? (panelLarge ? "min(82vh, 800px)" : 320) : 56,
@@ -104,14 +124,6 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
               >
                 <span className="text-[11px] font-black uppercase tracking-widest text-muted">Your guess</span>
                 <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setPanelLarge((v) => !v)}
-                    className="flex h-6 w-6 items-center justify-center rounded-md text-muted hover:text-fg"
-                    aria-label={panelLarge ? "Shrink map" : "Enlarge map"}
-                  >
-                    {panelLarge ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
-                  </button>
                   <button
                     type="button"
                     onClick={() => setOverlayOpen(false)}
