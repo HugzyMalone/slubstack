@@ -14,6 +14,8 @@ export function Wordmark({ size = "md", className = "" }: { size?: Size; classNa
       className={`font-display flex flex-col items-center font-extrabold ${font} ${gap} ${className}`}
       style={{
         letterSpacing: "-0.04em",
+        fontKerning: "none",
+        fontFeatureSettings: '"kern" 0',
         background: "linear-gradient(120deg, var(--accent) 0%, var(--game) 100%)",
         WebkitBackgroundClip: "text",
         backgroundClip: "text",
