@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserCircle2, Brain, Sparkles, Globe, Film } from "lucide-react";
+import { Wordmark } from "@/components/Wordmark";
 import { useStore } from "zustand";
 import { cn } from "@/lib/utils";
 import { mandarinStore, germanStore, spanishStore, vibeCodingStore, githubStore } from "@/lib/store";
@@ -260,19 +261,7 @@ export function AppSidebar() {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/slubstack-logo.png" alt="" className="h-24 w-24 -my-2 -mx-1 object-contain" />
-        <span
-          className="font-display flex flex-col items-center text-[30px] font-extrabold leading-[0.95]"
-          style={{
-            letterSpacing: "-0.04em",
-            background: "linear-gradient(120deg, var(--accent) 0%, var(--game) 100%)",
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-            color: "transparent",
-          }}
-        >
-          <span>slub</span>
-          <span>stack</span>
-        </span>
+        <Wordmark size="md" />
       </Link>
 
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">

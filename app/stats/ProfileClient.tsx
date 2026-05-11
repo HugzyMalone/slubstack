@@ -6,6 +6,7 @@ import {
   User, Settings, BarChart3, Users, Volume2, Vibrate, Target,
   MailCheck,
 } from "lucide-react";
+import { Wordmark } from "@/components/Wordmark";
 import { isMuted as isSoundMuted, setMuted as setSoundMuted } from "@/lib/sound";
 import { isHapticMuted, setHapticMuted } from "@/lib/haptics";
 import { useStore } from "zustand";
@@ -194,19 +195,7 @@ function AuthPage() {
       <div className="mb-5 flex items-center justify-center gap-1 select-none lg:mb-8">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/slubstack-logo.png" alt="" className="h-28 w-28 object-contain lg:h-36 lg:w-36" />
-        <span
-          className="font-display flex flex-col items-center font-extrabold leading-[0.95] text-[36px] lg:text-[44px]"
-          style={{
-            letterSpacing: "-0.04em",
-            background: "linear-gradient(120deg, var(--accent) 0%, var(--game) 100%)",
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-            color: "transparent",
-          }}
-        >
-          <span>slub</span>
-          <span>stack</span>
-        </span>
+        <Wordmark size="lg" className="lg:!text-[44px]" />
       </div>
       <p className="mb-5 hidden text-center text-sm text-muted lg:block">Learn languages. Track progress. Compete.</p>
 
