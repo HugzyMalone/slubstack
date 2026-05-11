@@ -195,7 +195,7 @@ function AuthPage() {
       <div className="mb-5 flex items-center justify-center gap-1 select-none lg:mb-8">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/slubstack-logo.png" alt="" className="h-28 w-28 object-contain lg:h-36 lg:w-36" />
-        <Wordmark size="lg" className="lg:!text-[44px]" />
+        <Wordmark size="lg" className="lg:!h-[84px]" />
       </div>
       <p className="mb-5 hidden text-center text-sm text-muted lg:block">Learn languages. Track progress. Compete.</p>
 

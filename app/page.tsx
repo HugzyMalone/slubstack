@@ -364,8 +364,8 @@ export default function HubPage() {
         </div>
       </div>
 
-      {/* Desktop wordmark — top right */}
-      <div className="pointer-events-none absolute right-8 top-6 z-10 hidden lg:block">
+      {/* Desktop top bar — wordmark right-aligned */}
+      <div className="hidden lg:mb-4 lg:flex lg:justify-end">
         <Wordmark size="lg" />
       </div>
 
