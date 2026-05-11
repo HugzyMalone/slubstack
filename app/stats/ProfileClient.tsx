@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import {
   Flame, Zap, Trophy, Lock, Mail, Eye, EyeOff, Camera,
   User, Settings, BarChart3, Users, Volume2, Vibrate, Target,
-  MailCheck, Shield, Trash2, Sparkles,
+  MailCheck,
 } from "lucide-react";
 import { isMuted as isSoundMuted, setMuted as setSoundMuted } from "@/lib/sound";
 import { isHapticMuted, setHapticMuted } from "@/lib/haptics";
@@ -210,21 +210,6 @@ function AuthPage() {
       </div>
       <p className="mb-5 hidden text-center text-sm text-muted lg:block">Learn languages. Track progress. Compete.</p>
 
-      <div className="mb-4 grid w-full max-w-sm grid-cols-1 gap-1.5 px-1 text-[12px] text-muted lg:mb-5 lg:max-w-md lg:grid-cols-3 lg:gap-2 lg:text-center lg:text-[12.5px]">
-        <div className="flex items-center gap-2 lg:justify-center">
-          <Sparkles size={13} className="shrink-0 text-[var(--accent)]" />
-          <span>Free forever — no card</span>
-        </div>
-        <div className="flex items-center gap-2 lg:justify-center">
-          <Shield size={13} className="shrink-0 text-[var(--accent)]" />
-          <span>We never share your data</span>
-        </div>
-        <div className="flex items-center gap-2 lg:justify-center">
-          <Trash2 size={13} className="shrink-0 text-[var(--accent)]" />
-          <span>Delete your account anytime</span>
-        </div>
-      </div>
-
       <div
         className="w-full max-w-sm rounded-3xl border border-border bg-surface lg:max-w-md"
         style={{ boxShadow: "0 8px 40px color-mix(in srgb, var(--fg) 8%, transparent)" }}
@@ -305,22 +290,12 @@ function AuthPage() {
             type="button"
             onClick={handleGoogle}
             disabled={loading}
-            className="relative mb-3 flex w-full items-center justify-center gap-2.5 rounded-xl border-2 bg-bg py-3 text-sm font-bold transition-all hover:-translate-y-px hover:shadow-md disabled:opacity-50 lg:mb-4 lg:py-4 lg:text-[15px]"
+            className="mb-3 flex w-full items-center justify-center gap-2.5 rounded-xl border-2 bg-bg py-3 text-sm font-bold transition-all hover:-translate-y-px hover:shadow-md disabled:opacity-50 lg:mb-4 lg:py-4 lg:text-[15px]"
             style={{
               borderColor: "color-mix(in srgb, var(--accent) 36%, transparent)",
               boxShadow: "0 4px 16px color-mix(in srgb, var(--accent) 12%, transparent)",
             }}
           >
-            <span
-              className="absolute -top-2 right-3 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider lg:text-[10px]"
-              style={{
-                background: "var(--accent)",
-                color: "var(--bg)",
-                letterSpacing: "0.08em",
-              }}
-            >
-              Recommended
-            </span>
             <svg className="lg:h-5 lg:w-5" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.2s2.7-6.2 6-6.2c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.7 3.3 14.6 2.3 12 2.3 6.9 2.3 2.8 6.4 2.8 11.5S6.9 20.7 12 20.7c6.9 0 9.5-4.8 9.5-7.3 0-.5-.05-.9-.12-1.3H12z"/>
             </svg>
@@ -381,9 +356,6 @@ function AuthPage() {
               >
                 {loading ? "Sending…" : "Create account"}
               </button>
-              <p className="text-center text-[11px] leading-relaxed text-muted lg:text-xs">
-                We&apos;ll email you a one-time link to verify your address — no password needed.
-              </p>
             </form>
           )}
 
@@ -410,7 +382,6 @@ function AuthPage() {
           <Lock size={11} />
           Encrypted end-to-end · No spam, ever
         </div>
-        <div>By continuing you agree to our terms.</div>
       </div>
     </div>
   );
