@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import {
   Flame, Zap, Trophy, Lock, Mail, Eye, EyeOff, Camera,
   User, Settings, BarChart3, Users, Volume2, Vibrate, Target,
+  MailCheck, Shield, Trash2, Sparkles,
 } from "lucide-react";
 import { isMuted as isSoundMuted, setMuted as setSoundMuted } from "@/lib/sound";
 import { isHapticMuted, setHapticMuted } from "@/lib/haptics";
@@ -105,6 +106,8 @@ function AuthPage() {
   const [stay, setStay] = useState(true);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [linkSent, setLinkSent] = useState(false);
+  const [sentEmail, setSentEmail] = useState("");
 
   if (!isSupabaseConfigured()) {
     return (
@@ -158,10 +161,31 @@ function AuthPage() {
       options: { emailRedirectTo: redirectTo },
     });
     setLoading(false);
+    if (error) {
+      setMsg({ text: error.message, ok: false });
+    } else {
+      setSentEmail(email);
+      setLinkSent(true);
+    }
+  }
+
+  async function handleResend() {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase || !sentEmail) return;
+    setLoading(true); setMsg(null);
+    const redirectTo =
+      typeof window === "undefined"
+        ? undefined
+        : `${window.location.origin}/auth/callback?next=/onboarding`;
+    const { error } = await supabase.auth.signInWithOtp({
+      email: sentEmail,
+      options: { emailRedirectTo: redirectTo },
+    });
+    setLoading(false);
     setMsg(
       error
         ? { text: error.message, ok: false }
-        : { text: "Check your inbox — a sign-in link is on its way.", ok: true },
+        : { text: "Resent — check your inbox in a moment.", ok: true },
     );
   }
 
@@ -186,10 +210,82 @@ function AuthPage() {
       </div>
       <p className="mb-5 hidden text-center text-sm text-muted lg:block">Learn languages. Track progress. Compete.</p>
 
+      <div className="mb-4 grid w-full max-w-sm grid-cols-1 gap-1.5 px-1 text-[12px] text-muted lg:mb-5 lg:max-w-md lg:grid-cols-3 lg:gap-2 lg:text-center lg:text-[12.5px]">
+        <div className="flex items-center gap-2 lg:justify-center">
+          <Sparkles size={13} className="shrink-0 text-[var(--accent)]" />
+          <span>Free forever — no card</span>
+        </div>
+        <div className="flex items-center gap-2 lg:justify-center">
+          <Shield size={13} className="shrink-0 text-[var(--accent)]" />
+          <span>We never share your data</span>
+        </div>
+        <div className="flex items-center gap-2 lg:justify-center">
+          <Trash2 size={13} className="shrink-0 text-[var(--accent)]" />
+          <span>Delete your account anytime</span>
+        </div>
+      </div>
+
       <div
         className="w-full max-w-sm rounded-3xl border border-border bg-surface lg:max-w-md"
         style={{ boxShadow: "0 8px 40px color-mix(in srgb, var(--fg) 8%, transparent)" }}
       >
+        {linkSent ? (
+          <div className="flex flex-col items-center px-6 pb-6 pt-8 text-center lg:px-10 lg:pb-10 lg:pt-12">
+            <div
+              className="mb-4 flex h-16 w-16 items-center justify-center rounded-full lg:h-20 lg:w-20"
+              style={{
+                background: "color-mix(in srgb, var(--accent) 14%, transparent)",
+                color: "var(--accent)",
+              }}
+            >
+              <MailCheck size={32} strokeWidth={2.2} />
+            </div>
+            <h2 className="text-xl font-bold tracking-tight lg:text-2xl">Check your inbox</h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted lg:text-[15px]">
+              We sent a sign-in link to
+            </p>
+            <p className="mt-0.5 break-all text-sm font-semibold text-fg lg:text-[15px]">{sentEmail}</p>
+            <p className="mt-4 rounded-xl px-3 py-2 text-[12px] leading-relaxed lg:text-[13px]"
+              style={{
+                background: "color-mix(in srgb, var(--accent) 8%, transparent)",
+                color: "var(--muted)",
+              }}
+            >
+              Can&apos;t see it? Check your <span className="font-semibold text-fg">spam folder</span> — first-time links sometimes land there.
+            </p>
+            <div className="mt-5 flex w-full flex-col gap-2">
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={loading}
+                className="w-full rounded-xl border border-border bg-bg py-2.5 text-sm font-semibold transition-colors hover:bg-surface disabled:opacity-50 lg:py-3"
+              >
+                {loading ? "Resending…" : "Resend link"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setLinkSent(false); setMsg(null); setEmail(""); }}
+                className="text-[12px] font-semibold text-muted hover:text-fg lg:text-[13px]"
+              >
+                Use a different email
+              </button>
+            </div>
+            {msg && (
+              <div
+                className="mt-3 w-full rounded-xl px-3 py-2 text-xs lg:text-sm"
+                style={{
+                  background: msg.ok
+                    ? "color-mix(in srgb, #10b981 10%, transparent)"
+                    : "color-mix(in srgb, #e11d48 10%, transparent)",
+                  color: msg.ok ? "#059669" : "#e11d48",
+                }}
+              >
+                {msg.text}
+              </div>
+            )}
+          </div>
+        ) : (
+        <>
         <div className="flex gap-1 border-b border-border p-1.5 lg:p-2">
           {(["create", "signin"] as const).map((m) => (
             <button
@@ -209,8 +305,22 @@ function AuthPage() {
             type="button"
             onClick={handleGoogle}
             disabled={loading}
-            className="mb-3 flex w-full items-center justify-center gap-2.5 rounded-xl border border-border bg-bg py-2.5 text-sm font-semibold transition-colors hover:bg-surface disabled:opacity-50 lg:mb-4 lg:py-3.5 lg:text-[15px]"
+            className="relative mb-3 flex w-full items-center justify-center gap-2.5 rounded-xl border-2 bg-bg py-3 text-sm font-bold transition-all hover:-translate-y-px hover:shadow-md disabled:opacity-50 lg:mb-4 lg:py-4 lg:text-[15px]"
+            style={{
+              borderColor: "color-mix(in srgb, var(--accent) 36%, transparent)",
+              boxShadow: "0 4px 16px color-mix(in srgb, var(--accent) 12%, transparent)",
+            }}
           >
+            <span
+              className="absolute -top-2 right-3 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider lg:text-[10px]"
+              style={{
+                background: "var(--accent)",
+                color: "var(--bg)",
+                letterSpacing: "0.08em",
+              }}
+            >
+              Recommended
+            </span>
             <svg className="lg:h-5 lg:w-5" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.2s2.7-6.2 6-6.2c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.7 3.3 14.6 2.3 12 2.3 6.9 2.3 2.8 6.4 2.8 11.5S6.9 20.7 12 20.7c6.9 0 9.5-4.8 9.5-7.3 0-.5-.05-.9-.12-1.3H12z"/>
             </svg>
@@ -219,7 +329,7 @@ function AuthPage() {
 
           <div className="mb-3 flex items-center gap-3 lg:mb-4">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted">or</span>
+            <span className="text-[11px] uppercase tracking-widest text-muted">or use email</span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
@@ -291,6 +401,8 @@ function AuthPage() {
             </div>
           )}
         </div>
+        </>
+        )}
       </div>
 
       <div className="mt-5 flex flex-col items-center gap-1.5 text-center text-[11px] text-muted lg:mt-7 lg:text-xs">
