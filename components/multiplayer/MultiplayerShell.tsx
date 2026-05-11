@@ -114,14 +114,30 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
       if (data.session?.user) {
         setSignedIn(true);
         setUserId(data.session.user.id);
+        const userId = data.session.user.id;
         const meta = data.session.user.user_metadata as { username?: string; avatar_url?: string };
         const cachedName = typeof window !== "undefined" ? localStorage.getItem("slubstack_username") : null;
         const cachedAvatar = typeof window !== "undefined" ? localStorage.getItem("slubstack_avatar") : null;
         setProfile({
-          displayName: cachedName ?? meta.username ?? `learner-${data.session.user.id.slice(0, 8)}`,
+          displayName: cachedName ?? meta.username ?? `learner-${userId.slice(0, 8)}`,
           avatarUrl: cachedAvatar ?? meta.avatar_url ?? null,
         });
         setPhase("select");
+        fetch("/api/profile", { cache: "no-store" })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            const username = d?.profile?.username as string | undefined;
+            const avatar = d?.profile?.avatar as string | null | undefined;
+            if (username) {
+              setProfile((prev) => ({
+                displayName: username,
+                avatarUrl: avatar ?? prev?.avatarUrl ?? null,
+              }));
+              localStorage.setItem("slubstack_username", username);
+              if (avatar) localStorage.setItem("slubstack_avatar", avatar);
+            }
+          })
+          .catch(() => {});
       } else {
         setSignedIn(false);
         setPhase("auth");

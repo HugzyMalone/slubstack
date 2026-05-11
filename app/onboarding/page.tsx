@@ -70,6 +70,7 @@ export default function OnboardingPage() {
       }
     }
 
+    localStorage.setItem("slubstack_username", username);
     localStorage.setItem("slubstack_avatar", avatar);
     markStaySignedIn();
     router.replace("/");
