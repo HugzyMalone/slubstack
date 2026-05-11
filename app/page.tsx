@@ -255,7 +255,7 @@ export default function HubPage() {
     };
   }, []);
 
-  const cycleFact = () => setFactIdx(prev => (prev + 1) % FACTS.length);
+  const cycleFact = () => setFactIdx(prev => (prev + 6) % FACTS.length);
 
   return (
     <div

@@ -82,6 +82,7 @@ type RoundShellProps<Q, A> = {
   PlayBoard: React.ComponentType<{
     location: Q;
     roundIndex: number;
+    roundCount: number;
     timeLeftMs: number;
     locked: boolean;
     onLockGuess: (guess: A) => void;
@@ -816,6 +817,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
         <PlayBoard
           location={currentLocation}
           roundIndex={roundIndex}
+          roundCount={adapter.roundCount}
           timeLeftMs={timeLeftMs}
           locked={locked}
           onLockGuess={handleLockGuess}

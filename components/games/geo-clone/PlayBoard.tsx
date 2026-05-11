@@ -10,6 +10,7 @@ import { GuessMap } from "./GuessMap";
 type PlayBoardProps = {
   location: Location;
   roundIndex: number;
+  roundCount: number;
   timeLeftMs: number;
   locked: boolean;
   onLockGuess: (guess: Guess) => void;
@@ -22,7 +23,7 @@ function formatTime(ms: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGuess }: PlayBoardProps) {
+export function PlayBoard({ location, roundIndex, roundCount, timeLeftMs, locked, onLockGuess }: PlayBoardProps) {
   const [pendingGuess, setPendingGuess] = useState<Guess | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [overlayOpen, setOverlayOpen] = useState(true);
@@ -87,7 +88,7 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
             border: "1px solid color-mix(in srgb, var(--fg) 10%, transparent)",
           }}
         >
-          ROUND {roundIndex + 1} / 3
+          ROUND {roundIndex + 1} / {roundCount}
         </div>
         <div
           className="rounded-full px-3 py-1.5 text-xs font-black tabular-nums tracking-wider"
@@ -100,6 +101,33 @@ export function PlayBoard({ location, roundIndex, timeLeftMs, locked, onLockGues
           {formatTime(timeLeftMs)}
         </div>
       </div>
+
+      <AnimatePresence>
+        {timeLeftMs > 0 && timeLeftMs <= 5_000 && (
+          <motion.div
+            key={Math.ceil(timeLeftMs / 1000)}
+            initial={{ scale: 0.3, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 2.2, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 380, damping: 22 }}
+            className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center"
+          >
+            <div
+              className="font-black tabular-nums"
+              style={{
+                fontSize: "min(36vw, 280px)",
+                lineHeight: 1,
+                color: "#ef4444",
+                textShadow:
+                  "0 8px 40px rgba(0,0,0,0.55), 0 0 80px rgba(239,68,68,0.55)",
+                WebkitTextStroke: "4px rgba(0,0,0,0.35)",
+              }}
+            >
+              {Math.ceil(timeLeftMs / 1000)}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
 
       <div className="pointer-events-none absolute bottom-4 right-4 z-20 hidden lg:block">

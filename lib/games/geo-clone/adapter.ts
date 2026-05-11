@@ -134,8 +134,8 @@ export const geoCloneAdapter: RoundAdapter<Location, Guess> = {
   kind: "round",
   gameKind: "geo_clone",
   displayName: "GeoClone",
-  roundCount: 3,
-  roundDurationMs: 30_000,
+  roundCount: 5,
+  roundDurationMs: 45_000,
   revealDurationMs: 5_000,
   generateLocations: (seed, count) => {
     const rng = mulberry32(seedToInt(seed));
