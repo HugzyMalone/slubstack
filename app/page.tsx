@@ -6,7 +6,6 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { BookOpen, Gamepad2, ArrowRight, Trophy } from "lucide-react";
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
-import { Wordmark } from "@/components/Wordmark";
 
 type LeagueData = {
   cohort: { id: string; tierId: number; weekStart: string } | null;
@@ -362,11 +361,6 @@ export default function HubPage() {
             </motion.div>
           ))}
         </div>
-      </div>
-
-      {/* Desktop top bar — wordmark right-aligned */}
-      <div className="hidden lg:mb-4 lg:flex lg:justify-end">
-        <Wordmark size="lg" />
       </div>
 
       {/* Desktop dashboard (lg+) */}
