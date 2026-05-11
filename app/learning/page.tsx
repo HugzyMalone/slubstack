@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Globe, Wand2, Brain, ArrowRight } from "lucide-react";
+import { Globe, Wand2, ArrowRight } from "lucide-react";
 
 const LEARNING = [
   {
     href: "/languages",
     title: "Languages",
-    subtitle: "Spanish · Mandarin · German",
+    subtitle: "German · Mandarin · Spanish",
     icon: <Globe size={26} />,
     tint: "#6366f1",
     bg: "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)",
@@ -21,14 +21,6 @@ const LEARNING = [
     tint: "#f59e0b",
     bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
   },
-  {
-    href: "/brain-training",
-    title: "Brain Training",
-    subtitle: "Math Blitz, Wordle, Connections",
-    icon: <Brain size={26} />,
-    tint: "#0ea5e9",
-    bg: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)",
-  },
 ];
 
 export default function LearningPage() {
@@ -38,7 +30,7 @@ export default function LearningPage() {
         <p className="text-[12px] font-semibold tracking-widest text-muted uppercase">Slubstack</p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight lg:text-4xl">Learning</h1>
         <p className="mt-2 text-sm leading-relaxed text-muted lg:text-base">
-          Languages, skills and brain training. Pick a path.
+          Languages and skills. Pick a path.
         </p>
       </div>
 

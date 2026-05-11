@@ -2,18 +2,9 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Blocks, Globe, Film, ArrowRight } from "lucide-react";
+import { Blocks, Brain, Globe, Film, ArrowRight } from "lucide-react";
 
 const GAMES = [
-  {
-    href: "/trivia",
-    title: "Trivia",
-    subtitle: "Actors, flags, albums, year guesser & more",
-    icon: <Film size={26} />,
-    tint: "#a855f7",
-    bg: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)",
-    available: true,
-  },
   {
     href: "/trivia/geo-clone",
     title: "GeoClone",
@@ -31,6 +22,24 @@ const GAMES = [
     tint: "#f59e0b",
     bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
     available: false,
+  },
+  {
+    href: "/brain-training",
+    title: "Brain Training",
+    subtitle: "Math Blitz, Wordle, Connections",
+    icon: <Brain size={26} />,
+    tint: "#ec4899",
+    bg: "linear-gradient(135deg, #f472b6 0%, #ec4899 100%)",
+    available: true,
+  },
+  {
+    href: "/trivia",
+    title: "Trivia",
+    subtitle: "Actors, flags, albums, year guesser & more",
+    icon: <Film size={26} />,
+    tint: "#a855f7",
+    bg: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)",
+    available: true,
   },
 ];
 

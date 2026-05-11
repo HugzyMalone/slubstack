@@ -186,11 +186,11 @@ export function AppSidebar() {
 
   const learningItems: NavItem[] = [
     {
-      href: "/spanish",
-      label: "Spanish",
+      href: "/german",
+      label: "German",
       kind: "flag",
-      flag: "/flags/es.svg",
-      match: (p: string) => p.startsWith("/spanish"),
+      flag: "/flags/de.svg",
+      match: (p: string) => p.startsWith("/german"),
     },
     {
       href: "/mandarin",
@@ -200,11 +200,11 @@ export function AppSidebar() {
       match: (p: string) => p.startsWith("/mandarin"),
     },
     {
-      href: "/german",
-      label: "German",
+      href: "/spanish",
+      label: "Spanish",
       kind: "flag",
-      flag: "/flags/de.svg",
-      match: (p: string) => p.startsWith("/german"),
+      flag: "/flags/es.svg",
+      match: (p: string) => p.startsWith("/spanish"),
     },
     {
       href: "/skills",
@@ -214,25 +214,9 @@ export function AppSidebar() {
       bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
       match: (p: string) => p.startsWith("/skills") || p.startsWith("/vibe-coding") || p.startsWith("/github"),
     },
-    {
-      href: "/brain-training",
-      label: "Brain",
-      kind: "badge",
-      node: <Brain size={18} strokeWidth={2.4} />,
-      bg: "linear-gradient(135deg, #f472b6 0%, #ec4899 100%)",
-      match: (p: string) => p.startsWith("/brain-training"),
-    },
   ];
 
   const gamesItems: NavItem[] = [
-    {
-      href: "/trivia",
-      label: "Trivia",
-      kind: "badge",
-      node: <Film size={18} strokeWidth={2.4} />,
-      bg: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)",
-      match: (p: string) => p.startsWith("/trivia") && !p.startsWith("/trivia/geo-clone"),
-    },
     {
       href: "/trivia/geo-clone",
       label: "GeoClone",
@@ -248,6 +232,22 @@ export function AppSidebar() {
       node: <GrassBlock />,
       bg: "transparent",
       match: (p: string) => p.startsWith("/games/block-yard"),
+    },
+    {
+      href: "/brain-training",
+      label: "Brain",
+      kind: "badge",
+      node: <Brain size={18} strokeWidth={2.4} />,
+      bg: "linear-gradient(135deg, #f472b6 0%, #ec4899 100%)",
+      match: (p: string) => p.startsWith("/brain-training"),
+    },
+    {
+      href: "/trivia",
+      label: "Trivia",
+      kind: "badge",
+      node: <Film size={18} strokeWidth={2.4} />,
+      bg: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)",
+      match: (p: string) => p.startsWith("/trivia") && !p.startsWith("/trivia/geo-clone"),
     },
   ];
 

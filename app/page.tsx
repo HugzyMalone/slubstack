@@ -41,7 +41,7 @@ const HOME_BUTTONS: HomeButton[] = [
   {
     href: "/learning",
     title: "Learning",
-    subtitle: "Languages, Skills, Brain Training",
+    subtitle: "Languages and Skills",
     icon: <BookOpen size={32} strokeWidth={2} />,
     tint: "#6366f1",
     bg: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
@@ -49,7 +49,7 @@ const HOME_BUTTONS: HomeButton[] = [
   {
     href: "/games",
     title: "Games",
-    subtitle: "Trivia, GeoClone, BlockYard",
+    subtitle: "GeoClone, BlockYard, Brain Training, Trivia",
     icon: <Gamepad2 size={32} strokeWidth={2} />,
     tint: "#a855f7",
     bg: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
