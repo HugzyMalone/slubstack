@@ -167,11 +167,24 @@ function AuthPage() {
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden px-4 lg:static lg:min-h-dvh lg:overflow-visible lg:px-6 lg:py-10">
-      <div className="mb-5 text-center select-none lg:mb-8">
-        <img src="/slubstack-logo.png" alt="Slubstack" className="mx-auto h-12 w-auto lg:h-20" />
-        <h1 className="hidden lg:mt-4 lg:block lg:text-3xl lg:font-bold lg:tracking-tight">slubstack</h1>
-        <p className="hidden lg:mt-1.5 lg:block lg:text-sm lg:text-muted">Learn languages. Track progress. Compete.</p>
+      <div className="mb-5 flex items-center justify-center gap-1 select-none lg:mb-8">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/slubstack-logo.png" alt="" className="h-28 w-28 object-contain lg:h-36 lg:w-36" />
+        <span
+          className="font-display flex flex-col items-center font-extrabold leading-[0.95] text-[36px] lg:text-[44px]"
+          style={{
+            letterSpacing: "-0.04em",
+            background: "linear-gradient(120deg, var(--accent) 0%, var(--game) 100%)",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+          }}
+        >
+          <span>slub</span>
+          <span>stack</span>
+        </span>
       </div>
+      <p className="mb-5 hidden text-center text-sm text-muted lg:block">Learn languages. Track progress. Compete.</p>
 
       <div
         className="w-full max-w-sm rounded-3xl border border-border bg-surface lg:max-w-md"
