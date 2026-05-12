@@ -5,12 +5,25 @@ import { mulberry32, pickN, seedToInt } from "./seedRng";
 export type Location = { lat: number; lng: number; name: string; country: string; heading: number };
 export type Guess = { lat: number; lng: number };
 
-export const LOCATIONS: readonly Location[] = [
+export type GeoCloneCategory = "global" | "london";
+
+export type CategoryMeta = {
+  id: GeoCloneCategory;
+  label: string;
+  blurb: string;
+  level: number;
+};
+
+export const GEO_CLONE_CATEGORIES: readonly CategoryMeta[] = [
+  { id: "global", label: "Global", blurb: "Anywhere on Earth", level: 1 },
+  { id: "london", label: "London", blurb: "Streets across the capital", level: 2 },
+];
+
+const GLOBAL_LOCATIONS: readonly Location[] = [
   { lat: 48.8860, lng: 2.3303, name: "Montmartre", country: "Paris, France", heading: 200 },
   { lat: 40.7209, lng: -74.0007, name: "SoHo", country: "New York, USA", heading: 90 },
   { lat: 35.6938, lng: 139.7034, name: "Shimokitazawa", country: "Tokyo, Japan", heading: 270 },
   { lat: -33.8731, lng: 151.2070, name: "Newtown", country: "Sydney, Australia", heading: 90 },
-  { lat: 51.5321, lng: -0.1010, name: "Islington", country: "London, UK", heading: 0 },
   { lat: 41.8892, lng: 12.4761, name: "Trastevere", country: "Rome, Italy", heading: 90 },
   { lat: 37.8080, lng: -122.4177, name: "Fishermans Wharf", country: "San Francisco, USA", heading: 270 },
   { lat: 55.7558, lng: 37.6173, name: "Tverskaya Street", country: "Moscow, Russia", heading: 180 },
@@ -128,23 +141,107 @@ export const LOCATIONS: readonly Location[] = [
   { lat: -36.8505, lng: 174.7395, name: "Ponsonby", country: "Auckland, New Zealand", heading: 90 },
   { lat: 31.9494, lng: 35.9320, name: "Rainbow Street", country: "Amman, Jordan", heading: 0 },
   { lat: 33.8979, lng: 35.5246, name: "Mar Mikhael", country: "Beirut, Lebanon", heading: 90 },
+  // ── 2026-05-12 additions: iconic main-street panos for higher pool reliability ──
+  { lat: 40.7580, lng: -73.9855, name: "Times Square", country: "New York, USA", heading: 0 },
+  { lat: 36.1147, lng: -115.1728, name: "The Strip", country: "Las Vegas, USA", heading: 0 },
+  { lat: 41.9018, lng: 12.4576, name: "St Peter's Square", country: "Vatican City", heading: 270 },
+  { lat: 48.8698, lng: 2.3079, name: "Champs-Elysees", country: "Paris, France", heading: 90 },
+  { lat: 35.6595, lng: 139.7005, name: "Shibuya Crossing", country: "Tokyo, Japan", heading: 0 },
+  { lat: 34.1015, lng: -118.3416, name: "Hollywood Boulevard", country: "Los Angeles, USA", heading: 90 },
+  { lat: 40.7061, lng: -73.9969, name: "Brooklyn Bridge", country: "New York, USA", heading: 180 },
+  { lat: 46.8126, lng: -71.2057, name: "Vieux-Quebec", country: "Quebec City, Canada", heading: 0 },
+  { lat: 32.7857, lng: -79.9377, name: "King Street", country: "Charleston, USA", heading: 0 },
+  { lat: 32.0813, lng: -81.0917, name: "River Street", country: "Savannah, USA", heading: 90 },
+  { lat: 21.2754, lng: -157.8262, name: "Waikiki", country: "Honolulu, USA", heading: 90 },
+  { lat: 44.8413, lng: -0.5705, name: "Place de la Bourse", country: "Bordeaux, France", heading: 180 },
+  { lat: 43.2950, lng: 5.3720, name: "Vieux Port", country: "Marseille, France", heading: 90 },
+  { lat: 43.6953, lng: 7.2657, name: "Promenade des Anglais", country: "Nice, France", heading: 0 },
+  { lat: 40.6262, lng: 14.3758, name: "Piazza Tasso", country: "Sorrento, Italy", heading: 0 },
+  { lat: 40.8493, lng: 14.2581, name: "Spaccanapoli", country: "Naples, Italy", heading: 90 },
+  { lat: 42.6411, lng: 18.1102, name: "Stradun", country: "Dubrovnik, Croatia", heading: 90 },
+  { lat: 43.5081, lng: 16.4402, name: "Riva", country: "Split, Croatia", heading: 0 },
+  { lat: 25.0809, lng: 55.1413, name: "Marina Walk", country: "Dubai, UAE", heading: 0 },
+  { lat: 18.9437, lng: 72.8235, name: "Marine Drive", country: "Mumbai, India", heading: 180 },
+  { lat: 26.9239, lng: 75.8267, name: "Hawa Mahal", country: "Jaipur, India", heading: 0 },
+  { lat: 22.1934, lng: 113.5395, name: "Senado Square", country: "Macau", heading: 0 },
+  { lat: 13.7587, lng: 100.4982, name: "Khao San Road", country: "Bangkok, Thailand", heading: 90 },
+  { lat: 5.4151, lng: 100.3286, name: "George Town", country: "Penang, Malaysia", heading: 0 },
+  { lat: 41.0058, lng: 28.9784, name: "Sultanahmet Square", country: "Istanbul, Turkey", heading: 90 },
+  { lat: 40.4153, lng: -3.7074, name: "Plaza Mayor", country: "Madrid, Spain", heading: 0 },
+  { lat: 41.3819, lng: 2.1718, name: "La Rambla", country: "Barcelona, Spain", heading: 180 },
+  { lat: 18.4651, lng: -66.1185, name: "Old San Juan", country: "San Juan, Puerto Rico", heading: 0 },
+  { lat: 10.4234, lng: -75.5485, name: "Walled City", country: "Cartagena, Colombia", heading: 0 },
+  { lat: 20.2114, lng: -87.4654, name: "Tulum Pueblo", country: "Tulum, Mexico", heading: 90 },
 ];
 
-export const geoCloneAdapter: RoundAdapter<Location, Guess> = {
-  kind: "round",
-  gameKind: "geo_clone",
-  displayName: "GeoClone",
-  roundCount: 5,
-  roundDurationMs: 60_000,
-  revealDurationMs: 5_000,
-  generateLocations: (seed, count) => {
-    const rng = mulberry32(seedToInt(seed));
-    return pickN(LOCATIONS, rng, count);
-  },
-  scoreFromGuess: (guess, target) => {
-    const distanceMeters = haversineDistanceMeters(guess, target);
-    return { points: pointsFromDistance(distanceMeters), distanceMeters };
-  },
-  xpFor: (totalPoints) => Math.round(totalPoints / 1000),
-  storeKey: "trivia",
+const LONDON_LOCATIONS: readonly Location[] = [
+  { lat: 51.5055, lng: -0.0754, name: "Tower Bridge", country: "London, UK", heading: 270 },
+  { lat: 51.5080, lng: -0.1281, name: "Trafalgar Square", country: "London, UK", heading: 180 },
+  { lat: 51.5101, lng: -0.1340, name: "Piccadilly Circus", country: "London, UK", heading: 0 },
+  { lat: 51.5113, lng: -0.1281, name: "Leicester Square", country: "London, UK", heading: 90 },
+  { lat: 51.5118, lng: -0.1226, name: "Covent Garden", country: "London, UK", heading: 0 },
+  { lat: 51.5151, lng: -0.1418, name: "Oxford Circus", country: "London, UK", heading: 90 },
+  { lat: 51.5132, lng: -0.1394, name: "Carnaby Street", country: "London, UK", heading: 0 },
+  { lat: 51.5113, lng: -0.1308, name: "Chinatown", country: "London, UK", heading: 0 },
+  { lat: 51.5060, lng: -0.1158, name: "South Bank", country: "London, UK", heading: 90 },
+  { lat: 51.5054, lng: -0.0905, name: "Borough Market", country: "London, UK", heading: 0 },
+  { lat: 51.5076, lng: -0.0994, name: "Tate Modern", country: "London, UK", heading: 90 },
+  { lat: 51.5235, lng: -0.0780, name: "Shoreditch High Street", country: "London, UK", heading: 180 },
+  { lat: 51.5208, lng: -0.0719, name: "Brick Lane", country: "London, UK", heading: 0 },
+  { lat: 51.5252, lng: -0.0876, name: "Old Street", country: "London, UK", heading: 90 },
+  { lat: 51.5273, lng: -0.0805, name: "Hoxton Square", country: "London, UK", heading: 0 },
+  { lat: 51.5292, lng: -0.0700, name: "Columbia Road", country: "London, UK", heading: 90 },
+  { lat: 51.5414, lng: -0.1469, name: "Camden Lock", country: "London, UK", heading: 0 },
+  { lat: 51.5392, lng: -0.1620, name: "Primrose Hill", country: "London, UK", heading: 90 },
+  { lat: 51.5363, lng: -0.1255, name: "Granary Square", country: "London, UK", heading: 0 },
+  { lat: 51.5313, lng: -0.1267, name: "St Pancras", country: "London, UK", heading: 90 },
+  { lat: 51.5359, lng: -0.1059, name: "Upper Street", country: "London, UK", heading: 0 },
+  { lat: 51.5266, lng: -0.1099, name: "Exmouth Market", country: "London, UK", heading: 90 },
+  { lat: 51.5138, lng: -0.0984, name: "St Paul's", country: "London, UK", heading: 270 },
+  { lat: 51.5135, lng: -0.0883, name: "Bank Junction", country: "London, UK", heading: 0 },
+  { lat: 51.5179, lng: -0.0815, name: "Liverpool Street", country: "London, UK", heading: 180 },
+  { lat: 51.5106, lng: -0.1192, name: "The Strand", country: "London, UK", heading: 90 },
+  { lat: 51.5074, lng: -0.1224, name: "Embankment", country: "London, UK", heading: 0 },
+  { lat: 51.5007, lng: -0.1245, name: "Westminster Bridge", country: "London, UK", heading: 90 },
+  { lat: 51.5000, lng: -0.1276, name: "Parliament Square", country: "London, UK", heading: 0 },
+  { lat: 51.5014, lng: -0.1419, name: "Buckingham Palace", country: "London, UK", heading: 270 },
+  { lat: 51.5030, lng: -0.1525, name: "Hyde Park Corner", country: "London, UK", heading: 0 },
+  { lat: 51.4994, lng: -0.1632, name: "Knightsbridge", country: "London, UK", heading: 0 },
+  { lat: 51.4923, lng: -0.1561, name: "Sloane Square", country: "London, UK", heading: 90 },
+  { lat: 51.4869, lng: -0.1675, name: "King's Road", country: "London, UK", heading: 0 },
+  { lat: 51.4816, lng: -0.1438, name: "Battersea Power Station", country: "London, UK", heading: 0 },
+  { lat: 51.5054, lng: -0.0234, name: "Canary Wharf", country: "London, UK", heading: 0 },
+  { lat: 51.4825, lng: -0.0094, name: "Cutty Sark", country: "London, UK", heading: 90 },
+  { lat: 51.5160, lng: -0.2058, name: "Portobello Road", country: "London, UK", heading: 0 },
+  { lat: 51.5562, lng: -0.1789, name: "Hampstead High Street", country: "London, UK", heading: 90 },
+  { lat: 51.4628, lng: -0.1148, name: "Brixton", country: "London, UK", heading: 0 },
+  { lat: 51.5321, lng: -0.1010, name: "Islington", country: "London, UK", heading: 0 },
+];
+
+export const LOCATION_POOLS: Record<GeoCloneCategory, readonly Location[]> = {
+  global: GLOBAL_LOCATIONS,
+  london: LONDON_LOCATIONS,
 };
+
+export function makeGeoCloneAdapter(category: GeoCloneCategory): RoundAdapter<Location, Guess> {
+  const pool = LOCATION_POOLS[category];
+  const meta = GEO_CLONE_CATEGORIES.find((c) => c.id === category)!;
+  return {
+    kind: "round",
+    gameKind: "geo_clone",
+    displayName: category === "global" ? "GeoClone" : `GeoClone · ${meta.label}`,
+    roundCount: 5,
+    roundDurationMs: 60_000,
+    revealDurationMs: 5_000,
+    generateLocations: (seed, count) => {
+      const rng = mulberry32(seedToInt(seed));
+      return pickN(pool, rng, count);
+    },
+    scoreFromGuess: (guess, target) => {
+      const distanceMeters = haversineDistanceMeters(guess, target);
+      return { points: pointsFromDistance(distanceMeters), distanceMeters };
+    },
+    xpFor: (totalPoints) => Math.round(totalPoints / 1000),
+    storeKey: "trivia",
+  };
+}

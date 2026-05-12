@@ -111,7 +111,7 @@ const MODES: Mode[] = [
     iconBg: "linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)",
     title: "GeoClone",
     description: "Drop into Street View, guess where you are",
-    tag: "Multiplayer · 3 rounds",
+    tag: "Multiplayer · 5 rounds · Global + London",
     accent: "#0ea5e9",
   },
 ];
