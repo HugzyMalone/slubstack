@@ -9,6 +9,7 @@ export default function SpanishPage() {
       basePath="/spanish"
       greeting="¡Hola!"
       subGreeting="Learn Spanish one word at a time."
+      linear={false}
     />
   );
 }

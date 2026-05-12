@@ -10,6 +10,7 @@ export default function GermanPage() {
       greeting="Guten Tag!"
       subGreeting="Learn German one word at a time."
       character="bear"
+      linear={false}
     />
   );
 }

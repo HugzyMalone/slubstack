@@ -8,6 +8,7 @@ export default function MandarinPage() {
       units={units}
       basePath="/mandarin"
       greeting="你好!"
+      linear={false}
     />
   );
 }
