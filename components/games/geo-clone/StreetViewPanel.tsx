@@ -15,6 +15,7 @@ type PanoStatus = "loading" | "ok" | "unavailable";
 export function StreetViewPanel({ location }: StreetViewPanelProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [panoStatus, setPanoStatus] = useState<PanoStatus>("loading");
+  const [panoId, setPanoId] = useState<string | null>(null);
 
   // Block iOS rubber-band only when the touch originates inside the pano container,
   // so the GuessMap's touch panning still works.
@@ -32,12 +33,17 @@ export function StreetViewPanel({ location }: StreetViewPanelProps) {
   useEffect(() => {
     if (!apiKey) return;
     setPanoStatus("loading");
+    setPanoId(null);
     const ctrl = new AbortController();
-    const url = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${location.lat},${location.lng}&key=${apiKey}`;
+    // source=outdoor rejects indoor/user-contributed Photo Spheres so the iframe
+    // can't snap to them. radius=80 gives some flex around the listed coord but
+    // not enough to drift onto a parallel street.
+    const url = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${location.lat},${location.lng}&source=outdoor&radius=80&key=${apiKey}`;
     fetch(url, { signal: ctrl.signal })
       .then((r) => r.json())
-      .then((data: { status?: string }) => {
-        if (data.status === "OK") {
+      .then((data: { status?: string; pano_id?: string }) => {
+        if (data.status === "OK" && data.pano_id) {
+          setPanoId(data.pano_id);
           setPanoStatus("ok");
         } else {
           console.warn(`[GeoClone] Street View unavailable for ${location.name} (${location.lat},${location.lng}): ${data.status ?? "no status"}`);
@@ -46,7 +52,7 @@ export function StreetViewPanel({ location }: StreetViewPanelProps) {
       })
       .catch((err) => {
         if (err.name === "AbortError") return;
-        // Network failure — assume the iframe will handle itself, keep loading.
+        // Network failure — fall back to location-based iframe so the round still plays.
         setPanoStatus("ok");
       });
     return () => ctrl.abort();
@@ -60,13 +66,17 @@ export function StreetViewPanel({ location }: StreetViewPanelProps) {
     );
   }
 
-  const src = `https://www.google.com/maps/embed/v1/streetview?key=${apiKey}&location=${location.lat},${location.lng}&heading=${location.heading}&pitch=0&fov=80`;
+  // Prefer pano= over location= so we render the exact pano the metadata
+  // pre-flight verified (and snap is not re-done by the Embed API).
+  const src = panoId
+    ? `https://www.google.com/maps/embed/v1/streetview?key=${apiKey}&pano=${panoId}&heading=${location.heading}&pitch=0&fov=80`
+    : `https://www.google.com/maps/embed/v1/streetview?key=${apiKey}&location=${location.lat},${location.lng}&heading=${location.heading}&pitch=0&fov=80`;
 
   return (
     <div ref={containerRef} className="relative h-full w-full touch-none overflow-hidden">
       {panoStatus !== "unavailable" && (
         <iframe
-          key={`${location.lat},${location.lng}`}
+          key={panoId ?? `${location.lat},${location.lng}`}
           src={src}
           className="absolute border-0"
           style={{
