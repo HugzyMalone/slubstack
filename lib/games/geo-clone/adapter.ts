@@ -232,7 +232,7 @@ export function makeGeoCloneAdapter(category: GeoCloneCategory): RoundAdapter<Lo
     displayName: category === "global" ? "GeoClone" : `GeoClone · ${meta.label}`,
     roundCount: 5,
     roundDurationMs: 60_000,
-    revealDurationMs: 5_000,
+    revealDurationMs: 9_000,
     generateLocations: (seed, count) => {
       const rng = mulberry32(seedToInt(seed));
       return pickN(pool, rng, count);

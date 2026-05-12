@@ -45,9 +45,15 @@ export function StreetViewPanel({ location }: StreetViewPanelProps) {
         if (data.status === "OK" && data.pano_id) {
           setPanoId(data.pano_id);
           setPanoStatus("ok");
-        } else {
-          console.warn(`[GeoClone] Street View unavailable for ${location.name} (${location.lat},${location.lng}): ${data.status ?? "no status"}`);
+        } else if (data.status === "ZERO_RESULTS" || data.status === "NOT_FOUND") {
+          // Google confirmed there is no usable pano here — show the fallback.
+          console.warn(`[GeoClone] No Street View imagery for ${location.name} (${location.lat},${location.lng}): ${data.status}`);
           setPanoStatus("unavailable");
+        } else {
+          // Metadata API itself errored (REQUEST_DENIED, OVER_QUERY_LIMIT, project
+          // misconfigured, etc). Trust the Embed API instead of nuking the round.
+          console.warn(`[GeoClone] Metadata pre-flight inconclusive for ${location.name}: ${data.status ?? "no status"} — falling through to iframe`);
+          setPanoStatus("ok");
         }
       })
       .catch((err) => {

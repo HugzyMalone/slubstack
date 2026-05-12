@@ -67,26 +67,44 @@ export function RevealBoard({ actual, guesses, roundIndex }: RevealBoardProps) {
         }}
       >
         <div className={stack ? "flex flex-col gap-1" : "grid grid-cols-2 gap-1.5 sm:grid-cols-4"}>
-          {sorted.map((g) => (
-            <div
-              key={g.slot}
-              className="flex items-center justify-between gap-2 rounded-xl px-3 py-1.5"
-              style={{ background: "color-mix(in srgb, var(--fg) 4%, var(--bg))" }}
-            >
-              <span className="truncate text-xs font-semibold">{g.displayName}</span>
-              <div className="flex shrink-0 items-center gap-2">
-                <span className="text-[10px] tabular-nums text-muted">
-                  {formatDistance(g.distanceMeters)}
-                </span>
-                <span
-                  className="text-sm font-black tabular-nums"
-                  style={{ color: "var(--accent)" }}
-                >
-                  {g.points}
-                </span>
-              </div>
-            </div>
-          ))}
+          {sorted.map((g, idx) => {
+            const rankColour =
+              idx === 0 ? "#f5b300" : idx === 1 ? "#c0c5cd" : idx === 2 ? "#cd7c54" : null;
+            return (
+              <motion.div
+                key={g.slot}
+                initial={{ y: 12, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 320, damping: 26, delay: 0.25 + idx * 0.07 }}
+                className="flex items-center justify-between gap-2 rounded-xl px-3 py-1.5"
+                style={{ background: "color-mix(in srgb, var(--fg) 4%, var(--bg))" }}
+              >
+                <div className="flex min-w-0 items-center gap-2">
+                  <span
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black tabular-nums"
+                    style={{
+                      background: rankColour ?? "color-mix(in srgb, var(--fg) 12%, transparent)",
+                      color: rankColour ? "#1a1300" : "var(--muted)",
+                    }}
+                  >
+                    {idx + 1}
+                  </span>
+                  <span className="truncate text-xs font-semibold">{g.displayName}</span>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="text-[10px] tabular-nums text-muted">
+                    {formatDistance(g.distanceMeters)}
+                  </span>
+                  <span
+                    className="text-sm font-black tabular-nums"
+                    style={{ color: "var(--accent)" }}
+                  >
+                    {g.points}
+                  </span>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </motion.div>
     </div>

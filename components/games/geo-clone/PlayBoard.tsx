@@ -102,25 +102,23 @@ export function PlayBoard({ location, roundIndex, roundCount, timeLeftMs, locked
         </div>
       </div>
 
-      <AnimatePresence>
+      <AnimatePresence mode="popLayout">
         {timeLeftMs > 0 && timeLeftMs <= 5_000 && (
           <motion.div
             key={Math.ceil(timeLeftMs / 1000)}
-            initial={{ scale: 0.3, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 2.2, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 380, damping: 22 }}
-            className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="pointer-events-none absolute left-1/2 z-30 -translate-x-1/2"
+            style={{ top: "calc(max(env(safe-area-inset-top), 0.75rem) + 2.5rem)" }}
           >
             <div
-              className="font-black tabular-nums"
+              className="flex h-12 w-12 items-center justify-center rounded-full text-2xl font-black tabular-nums"
               style={{
-                fontSize: "min(36vw, 280px)",
-                lineHeight: 1,
-                color: "#ef4444",
-                textShadow:
-                  "0 8px 40px rgba(0,0,0,0.55), 0 0 80px rgba(239,68,68,0.55)",
-                WebkitTextStroke: "4px rgba(0,0,0,0.35)",
+                background: "rgba(239,68,68,0.92)",
+                color: "#fff",
+                boxShadow: "0 6px 24px rgba(239,68,68,0.55), 0 0 0 2px rgba(255,255,255,0.18) inset",
               }}
             >
               {Math.ceil(timeLeftMs / 1000)}
