@@ -15,6 +15,8 @@ export type GameKind =
   | "geo_clone"
   | "batman_shakespeare";
 
+export type LadderKind = GameKind | "trivia";
+
 export type LevelConfig = {
   id: number;
   label: string;
@@ -31,6 +33,7 @@ export type PlayBoardProps<Q, A> = {
 export type SprintAdapter<Q, A> = {
   kind: "sprint";
   gameKind: GameKind;
+  ratingKind?: LadderKind;
   displayName: string;
   routePath: string;
   levels: LevelConfig[];
@@ -46,6 +49,7 @@ export type SprintAdapter<Q, A> = {
 export type RoundAdapter<Q, A> = {
   kind: "round";
   gameKind: GameKind;
+  ratingKind?: LadderKind;
   displayName: string;
   roundCount: number;
   roundDurationMs: number;

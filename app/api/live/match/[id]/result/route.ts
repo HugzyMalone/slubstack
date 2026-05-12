@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
-import type { GameKind } from "@/lib/multiplayer/types";
+import type { GameKind, LadderKind } from "@/lib/multiplayer/types";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -14,6 +14,11 @@ const VALID_KINDS: ReadonlySet<GameKind> = new Set([
   "year_guesser",
   "geo_clone",
   "batman_shakespeare",
+]);
+
+const VALID_LADDERS: ReadonlySet<LadderKind> = new Set([
+  ...VALID_KINDS,
+  "trivia",
 ]);
 
 type PlayerRow = {
@@ -75,6 +80,7 @@ export async function POST(request: Request, { params }: Params) {
 
   let body: {
     game_kind?: unknown;
+    rating_kind?: unknown;
     humans_count?: unknown;
     bot_inserts?: unknown;
     player_updates?: unknown;
@@ -86,9 +92,18 @@ export async function POST(request: Request, { params }: Params) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { game_kind, humans_count, bot_inserts, player_updates, rating_upserts } = body;
+  const { game_kind, rating_kind, humans_count, bot_inserts, player_updates, rating_upserts } = body;
   if (typeof game_kind !== "string" || !VALID_KINDS.has(game_kind as GameKind)) {
     return NextResponse.json({ error: "Invalid game_kind" }, { status: 400 });
+  }
+  const ratingKind: LadderKind | null =
+    rating_kind === undefined || rating_kind === null
+      ? null
+      : typeof rating_kind === "string" && VALID_LADDERS.has(rating_kind as LadderKind)
+        ? (rating_kind as LadderKind)
+        : null;
+  if (rating_kind !== undefined && rating_kind !== null && ratingKind === null) {
+    return NextResponse.json({ error: "Invalid rating_kind" }, { status: 400 });
   }
   if (typeof humans_count !== "number" || !Number.isInteger(humans_count) || humans_count < 0) {
     return NextResponse.json({ error: "Invalid humans_count" }, { status: 400 });
@@ -123,14 +138,18 @@ export async function POST(request: Request, { params }: Params) {
     return NextResponse.json(buildResponse(match));
   }
 
-  const { error: rpcError } = await admin.rpc("finalise_live_match", {
+  const rpcParams: Record<string, unknown> = {
     p_game_kind: game_kind,
     p_match_id: matchId,
     p_humans_count: humans_count,
     p_bot_inserts: bot_inserts,
     p_player_updates: player_updates,
     p_rating_upserts: rating_upserts,
-  });
+  };
+  if (ratingKind !== null && ratingKind !== game_kind) {
+    rpcParams.p_rating_kind = ratingKind;
+  }
+  const { error: rpcError } = await admin.rpc("finalise_live_match", rpcParams);
 
   if (rpcError) return NextResponse.json({ error: rpcError.message }, { status: 500 });
 

@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useStore } from "zustand";
 import {
   BookOpen, Gamepad2, ArrowRight, Trophy, Flame, Sparkles, Library,
-  Globe, Boxes, Brain as BrainIcon, Clapperboard,
+  Globe, Brain as BrainIcon, Clapperboard,
 } from "lucide-react";
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
@@ -35,6 +35,19 @@ function SparkleIcon() {
       style={{ color: "var(--accent)" }}
     >
       <path d="M12 1 L14.3 9.7 L23 12 L14.3 14.3 L12 23 L9.7 14.3 L1 12 L9.7 9.7 Z" />
+    </svg>
+  );
+}
+
+function GrassBlock({ size = 44 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.18))" }}>
+      <polygon points="12,2 22,7 12,12 2,7" fill="#6cc24a" />
+      <polygon points="12,3.5 20,7 12,10.5 4,7" fill="#7fd35a" opacity="0.55" />
+      <polygon points="22,7 22,18 12,23 12,12" fill="#8b5a3c" />
+      <polygon points="22,7 22,9 12,14 12,12" fill="#5cb85c" />
+      <polygon points="2,7 2,18 12,23 12,12" fill="#6f4626" />
+      <polygon points="2,7 2,9 12,14 12,12" fill="#4a8b3c" />
     </svg>
   );
 }
@@ -83,6 +96,7 @@ type GameButton = {
   icon: React.ReactNode;
   tint: string;
   bg: string;
+  iconStyle?: "tile" | "raw";
 };
 
 const GAME_BUTTONS: GameButton[] = [
@@ -98,7 +112,8 @@ const GAME_BUTTONS: GameButton[] = [
     href: "/games/block-yard",
     title: "BlockYard",
     tagline: "Stack, fit, beat the clock",
-    icon: <Boxes size={22} strokeWidth={2} />,
+    icon: <GrassBlock size={44} />,
+    iconStyle: "raw",
     tint: "#10b981",
     bg: "linear-gradient(135deg, #10b981 0%, #84cc16 100%)",
   },
@@ -462,7 +477,7 @@ export default function HubPage() {
 
           <motion.div
             className="relative flex items-center justify-center"
-            style={{ height: 320 }}
+            style={{ height: 280 }}
             animate={prefersReducedMotion ? {} : { y: [0, -7, 0] }}
             transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
           >
@@ -470,6 +485,8 @@ export default function HubPage() {
               ? <Bear mood={hero.mood} fill />
               : <Panda mood={hero.mood} fill />}
           </motion.div>
+
+          <FactsFeed factIdx={factIdx} cycleFact={cycleFact} />
         </div>
 
         <div className="flex flex-col gap-5">
@@ -504,7 +521,7 @@ export default function HubPage() {
           </motion.div>
 
           <div className="grid grid-cols-2 gap-3">
-            {GAME_BUTTONS.map(({ href, title, tagline, icon, tint, bg }, i) => (
+            {GAME_BUTTONS.map(({ href, title, tagline, icon, tint, bg, iconStyle }, i) => (
               <motion.div
                 key={href}
                 initial={{ opacity: 0, y: 12 }}
@@ -520,12 +537,18 @@ export default function HubPage() {
                     boxShadow: `0 6px 18px color-mix(in srgb, ${tint} 11%, transparent)`,
                   }}
                 >
-                  <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
-                    style={{ background: bg }}
-                  >
-                    {icon}
-                  </div>
+                  {iconStyle === "raw" ? (
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center">
+                      {icon}
+                    </div>
+                  ) : (
+                    <div
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
+                      style={{ background: bg }}
+                    >
+                      {icon}
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="text-[14px] font-extrabold tracking-tight">{title}</div>
                     <div className="mt-0.5 truncate text-[11px] leading-snug text-muted">{tagline}</div>
@@ -538,7 +561,10 @@ export default function HubPage() {
 
           <LeagueWidget />
 
-          <FactsFeed factIdx={factIdx} cycleFact={cycleFact} />
+          <div className="grid grid-cols-2 gap-3">
+            <EloLeaderboardWidget kind="geo_clone" title="GeoClone ELO" tint="#3b82f6" />
+            <EloLeaderboardWidget kind="trivia" title="Trivia ELO" tint="#a855f7" />
+          </div>
         </div>
       </div>
     </div>
@@ -700,6 +726,64 @@ function LeagueWidget() {
         View full standings <ArrowRight size={12} />
       </div>
     </Link>
+  );
+}
+
+type EloEntry = {
+  rank: number;
+  userId: string;
+  username: string;
+  avatarUrl: string | null;
+  rating: number;
+  matches: number;
+};
+
+function EloLeaderboardWidget({ kind, title, tint }: { kind: "geo_clone" | "trivia"; title: string; tint: string }) {
+  const [entries, setEntries] = useState<EloEntry[] | null>(null);
+  const [errored, setErrored] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/live/leaderboard?kind=${kind}&level=1&limit=5`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d: { entries: EloEntry[] }) => { if (!cancelled) setEntries(d.entries ?? []); })
+      .catch(() => { if (!cancelled) setErrored(true); });
+    return () => { cancelled = true; };
+  }, [kind]);
+
+  if (errored) return null;
+
+  return (
+    <div
+      className="rounded-2xl p-4"
+      style={{
+        background: `color-mix(in srgb, ${tint} 5%, var(--surface))`,
+        border: `1.5px solid color-mix(in srgb, ${tint} 22%, transparent)`,
+      }}
+    >
+      <div className="mb-2.5 flex items-center gap-2">
+        <Trophy size={14} style={{ color: tint }} />
+        <span className="text-[10px] font-extrabold tracking-[0.18em] text-muted uppercase">{title}</span>
+      </div>
+      {entries === null ? (
+        <div className="flex h-[120px] items-center justify-center text-[11px] text-muted">Loading…</div>
+      ) : entries.length === 0 ? (
+        <div className="flex h-[120px] flex-col items-center justify-center gap-1 text-center">
+          <div className="text-[12px] font-bold">No rated matches yet</div>
+          <div className="text-[10.5px] leading-snug text-muted">Play a live human match to claim a slot.</div>
+        </div>
+      ) : (
+        <ul className="space-y-1.5">
+          {entries.map((e) => (
+            <li key={e.userId} className="flex items-center gap-2 text-[12px]">
+              <span className="w-4 shrink-0 text-right tabular-nums" style={{ color: e.rank === 1 ? "#f59e0b" : e.rank === 2 ? "#94a3b8" : e.rank === 3 ? "#b45309" : "var(--muted)" }}>{e.rank}</span>
+              <span className="flex-1 truncate font-medium">{e.username}</span>
+              <span className="font-bold tabular-nums" style={{ color: tint }}>{e.rating}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

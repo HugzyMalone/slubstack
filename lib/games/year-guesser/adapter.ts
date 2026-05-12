@@ -12,6 +12,7 @@ const scoring: ScoringRule<YearQuestion, number> = (answer, question) => {
 export const yearGuesserAdapter: SprintAdapter<YearQuestion, number> = {
   kind: "sprint",
   gameKind: "year_guesser",
+  ratingKind: "trivia",
   displayName: "Year Guesser",
   routePath: "/trivia",
   storeKey: "trivia",

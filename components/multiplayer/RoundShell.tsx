@@ -267,11 +267,12 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
         string,
         { rating: number; matches: number; wins: number; draws: number; losses: number }
       >();
+      const ratingLadder = adapter.ratingKind ?? adapter.gameKind;
       if (supabase && humanIds.length > 0) {
         const { data: rows } = await supabase
           .from("live_ratings")
           .select("user_id, rating, matches, wins, draws, losses")
-          .eq("game_kind", adapter.gameKind)
+          .eq("game_kind", ratingLadder)
           .eq("level", a.level)
           .in("user_id", humanIds);
         for (const r of rows ?? []) {
@@ -357,6 +358,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           game_kind: adapter.gameKind,
+          rating_kind: ratingLadder,
           humans_count: humansCount,
           bot_inserts: [],
           player_updates: playerUpdates,

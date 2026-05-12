@@ -12,6 +12,7 @@ const scoring: ScoringRule<ImageMCQuestion, number> = (answer, question) => {
 export const actorBlitzAdapter: SprintAdapter<ImageMCQuestion, number> = {
   kind: "sprint",
   gameKind: "actor_blitz",
+  ratingKind: "trivia",
   displayName: "Actor Blitz",
   routePath: "/trivia",
   storeKey: "trivia",
