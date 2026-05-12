@@ -110,5 +110,59 @@
     "category": "zh-grammar",
     "primaryInteraction": "multiple-choice",
     "cardIds": ["gr-01","gr-02","gr-03","gr-04","gr-05","gr-06","gr-07","gr-08","gr-09","gr-10","gr-11","gr-12","gr-13","gr-14","gr-15"]
+  },
+  {
+    "id": "colors",
+    "index": 12,
+    "title": "Colours",
+    "subtitle": "红, 蓝, 绿, 浅, 深",
+    "emoji": "🎨",
+    "category": "colors",
+    "cardIds": ["color-01","color-02","color-03","color-04","color-05","color-06","color-07","color-08","color-09","color-10","color-11","color-12","color-13","color-14","color-15","color-16"]
+  },
+  {
+    "id": "body",
+    "index": 13,
+    "title": "Body & Health",
+    "subtitle": "头, 手, 累, 医生, 药",
+    "emoji": "🧑‍⚕️",
+    "category": "body",
+    "cardIds": ["body-01","body-02","body-03","body-04","body-05","body-06","body-07","body-08","body-09","body-10","body-11","body-12","body-13","body-14","body-15","body-16","body-17","body-18"]
+  },
+  {
+    "id": "weather",
+    "index": 14,
+    "title": "Weather & Seasons",
+    "subtitle": "热, 冷, 下雨, 春夏秋冬",
+    "emoji": "☀️",
+    "category": "weather",
+    "cardIds": ["wea-01","wea-02","wea-03","wea-04","wea-05","wea-06","wea-07","wea-08","wea-09","wea-10","wea-11","wea-12","wea-13","wea-14","wea-15"]
+  },
+  {
+    "id": "travel",
+    "index": 15,
+    "title": "Travel & Transport",
+    "subtitle": "火车, 飞机, 票, 机场",
+    "emoji": "✈️",
+    "category": "travel",
+    "cardIds": ["trv-01","trv-02","trv-03","trv-04","trv-05","trv-06","trv-07","trv-08","trv-09","trv-10","trv-11","trv-12","trv-13","trv-14"]
+  },
+  {
+    "id": "shopping",
+    "index": 16,
+    "title": "Shopping & Money",
+    "subtitle": "多少钱, 买, 贵, 便宜",
+    "emoji": "🛍️",
+    "category": "shopping",
+    "cardIds": ["shop-01","shop-02","shop-03","shop-04","shop-05","shop-06","shop-07","shop-08","shop-09","shop-10","shop-11","shop-12"]
+  },
+  {
+    "id": "smalltalk",
+    "index": 17,
+    "title": "Smalltalk & Daily",
+    "subtitle": "加油, 真的吗, 差不多",
+    "emoji": "💬",
+    "category": "smalltalk",
+    "cardIds": ["st-01","st-02","st-03","st-04","st-05","st-06","st-07","st-08","st-09","st-10","st-11","st-12","st-13","st-14"]
   }
 ]

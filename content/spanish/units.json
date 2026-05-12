@@ -6,7 +6,7 @@
     "subtitle": "Hello, goodbye & everyday phrases",
     "emoji": "👋",
     "category": "es-greetings",
-    "cardIds": ["es-greet-01","es-greet-02","es-greet-03","es-greet-04","es-greet-05","es-greet-06","es-greet-07","es-greet-08","es-greet-09","es-greet-10","es-greet-11","es-greet-12","es-greet-13","es-greet-14","es-greet-15","es-greet-16"]
+    "cardIds": ["es-greet-01","es-greet-02","es-greet-03","es-greet-04","es-greet-05","es-greet-06","es-greet-07","es-greet-08","es-greet-09","es-greet-10","es-greet-11","es-greet-12","es-greet-13","es-greet-14","es-greet-15","es-greet-16","es-greet-17","es-greet-18","es-greet-19","es-greet-20"]
   },
   {
     "id": "es-numbers",
@@ -15,7 +15,7 @@
     "subtitle": "Count from 1 to 15",
     "emoji": "🔢",
     "category": "es-numbers",
-    "cardIds": ["es-num-01","es-num-02","es-num-03","es-num-04","es-num-05","es-num-06","es-num-07","es-num-08","es-num-09","es-num-10","es-num-11","es-num-12","es-num-13","es-num-14","es-num-15"]
+    "cardIds": ["es-num-01","es-num-02","es-num-03","es-num-04","es-num-05","es-num-06","es-num-07","es-num-08","es-num-09","es-num-10","es-num-11","es-num-12","es-num-13","es-num-14","es-num-15","es-num-16","es-num-17","es-num-18","es-num-19","es-num-20","es-num-21","es-num-22","es-num-23","es-num-24","es-num-25"]
   },
   {
     "id": "es-colors",
@@ -24,7 +24,7 @@
     "subtitle": "Rojo, azul, verde y más",
     "emoji": "🎨",
     "category": "es-colors",
-    "cardIds": ["es-color-01","es-color-02","es-color-03","es-color-04","es-color-05","es-color-06","es-color-07","es-color-08","es-color-09","es-color-10","es-color-11","es-color-12"]
+    "cardIds": ["es-color-01","es-color-02","es-color-03","es-color-04","es-color-05","es-color-06","es-color-07","es-color-08","es-color-09","es-color-10","es-color-11","es-color-12","es-color-13","es-color-14","es-color-15","es-color-16"]
   },
   {
     "id": "es-food",
@@ -33,7 +33,7 @@
     "subtitle": "Agua, pan, pollo y más",
     "emoji": "🍽️",
     "category": "es-food",
-    "cardIds": ["es-food-01","es-food-02","es-food-03","es-food-04","es-food-05","es-food-06","es-food-07","es-food-08","es-food-09","es-food-10","es-food-11","es-food-12","es-food-13","es-food-14","es-food-15","es-food-16"]
+    "cardIds": ["es-food-01","es-food-02","es-food-03","es-food-04","es-food-05","es-food-06","es-food-07","es-food-08","es-food-09","es-food-10","es-food-11","es-food-12","es-food-13","es-food-14","es-food-15","es-food-16","es-food-17","es-food-18","es-food-19","es-food-20","es-food-21","es-food-22"]
   },
   {
     "id": "es-verbs",
@@ -42,7 +42,7 @@
     "subtitle": "Hablar, comer, ir y más",
     "emoji": "⚡",
     "category": "es-verbs",
-    "cardIds": ["es-verb-01","es-verb-02","es-verb-03","es-verb-04","es-verb-05","es-verb-06","es-verb-07","es-verb-08","es-verb-09","es-verb-10","es-verb-11","es-verb-12","es-verb-13","es-verb-14","es-verb-15","es-verb-16"]
+    "cardIds": ["es-verb-01","es-verb-02","es-verb-03","es-verb-04","es-verb-05","es-verb-06","es-verb-07","es-verb-08","es-verb-09","es-verb-10","es-verb-11","es-verb-12","es-verb-13","es-verb-14","es-verb-15","es-verb-16","es-verb-17","es-verb-18","es-verb-19","es-verb-20","es-verb-21","es-verb-22"]
   },
   {
     "id": "es-family",
@@ -51,7 +51,7 @@
     "subtitle": "Madre, padre, hermanos",
     "emoji": "👨‍👩‍👧",
     "category": "es-family",
-    "cardIds": ["es-fam-01","es-fam-02","es-fam-03","es-fam-04","es-fam-05","es-fam-06","es-fam-07","es-fam-08","es-fam-09","es-fam-10","es-fam-11","es-fam-12","es-fam-13","es-fam-14"]
+    "cardIds": ["es-fam-01","es-fam-02","es-fam-03","es-fam-04","es-fam-05","es-fam-06","es-fam-07","es-fam-08","es-fam-09","es-fam-10","es-fam-11","es-fam-12","es-fam-13","es-fam-14","es-fam-15","es-fam-16","es-fam-17","es-fam-18"]
   },
   {
     "id": "es-time",
@@ -60,7 +60,7 @@
     "subtitle": "Days of the week, today, now",
     "emoji": "📅",
     "category": "es-time",
-    "cardIds": ["es-time-01","es-time-02","es-time-03","es-time-04","es-time-05","es-time-06","es-time-07","es-time-08","es-time-09","es-time-10","es-time-11","es-time-12","es-time-13","es-time-14","es-time-15"]
+    "cardIds": ["es-time-01","es-time-02","es-time-03","es-time-04","es-time-05","es-time-06","es-time-07","es-time-08","es-time-09","es-time-10","es-time-11","es-time-12","es-time-13","es-time-14","es-time-15","es-time-16","es-time-17","es-time-18","es-time-19","es-time-20","es-time-21","es-time-22"]
   },
   {
     "id": "es-places",
@@ -69,6 +69,96 @@
     "subtitle": "Casa, escuela, playa y más",
     "emoji": "🏙️",
     "category": "es-places",
-    "cardIds": ["es-place-01","es-place-02","es-place-03","es-place-04","es-place-05","es-place-06","es-place-07","es-place-08","es-place-09","es-place-10","es-place-11","es-place-12"]
+    "cardIds": ["es-place-01","es-place-02","es-place-03","es-place-04","es-place-05","es-place-06","es-place-07","es-place-08","es-place-09","es-place-10","es-place-11","es-place-12","es-place-13","es-place-14","es-place-15","es-place-16","es-place-17","es-place-18"]
+  },
+  {
+    "id": "es-gender",
+    "index": 8,
+    "title": "Gender & Articles",
+    "subtitle": "el/la/los/las, un/una",
+    "emoji": "🔤",
+    "category": "es-gender",
+    "cardIds": ["es-gen-01","es-gen-02","es-gen-03","es-gen-04","es-gen-05","es-gen-06","es-gen-07","es-gen-08","es-gen-09","es-gen-10","es-gen-11","es-gen-12"]
+  },
+  {
+    "id": "es-plurals",
+    "index": 9,
+    "title": "Plurals",
+    "subtitle": "-s, -es, agreement",
+    "emoji": "🔢",
+    "category": "es-plurals",
+    "cardIds": ["es-plur-01","es-plur-02","es-plur-03","es-plur-04","es-plur-05","es-plur-06","es-plur-07","es-plur-08","es-plur-09","es-plur-10"]
+  },
+  {
+    "id": "es-ser-estar",
+    "index": 10,
+    "title": "Ser vs Estar",
+    "subtitle": "soy vs estoy — when each",
+    "emoji": "⚖️",
+    "category": "es-ser-estar",
+    "cardIds": ["es-se-01","es-se-02","es-se-03","es-se-04","es-se-05","es-se-06","es-se-07","es-se-08","es-se-09","es-se-10","es-se-11","es-se-12","es-se-13","es-se-14","es-se-15","es-se-16"]
+  },
+  {
+    "id": "es-conjugation",
+    "index": 11,
+    "title": "Present Conjugation",
+    "subtitle": "-ar / -er / -ir patterns",
+    "emoji": "🧮",
+    "category": "es-conjugation",
+    "cardIds": ["es-conj-01","es-conj-02","es-conj-03","es-conj-04","es-conj-05","es-conj-06","es-conj-07","es-conj-08","es-conj-09","es-conj-10","es-conj-11","es-conj-12","es-conj-13","es-conj-14","es-conj-15","es-conj-16"]
+  },
+  {
+    "id": "es-reflexive",
+    "index": 12,
+    "title": "Reflexive Verbs",
+    "subtitle": "levantarse, ducharse, llamarse",
+    "emoji": "🔁",
+    "category": "es-reflexive",
+    "cardIds": ["es-refl-01","es-refl-02","es-refl-03","es-refl-04","es-refl-05","es-refl-06","es-refl-07","es-refl-08","es-refl-09","es-refl-10","es-refl-11","es-refl-12"]
+  },
+  {
+    "id": "es-preterite",
+    "index": 13,
+    "title": "Preterite",
+    "subtitle": "Past tense — hablé, comí, fui",
+    "emoji": "⏪",
+    "category": "es-preterite",
+    "cardIds": ["es-pret-01","es-pret-02","es-pret-03","es-pret-04","es-pret-05","es-pret-06","es-pret-07","es-pret-08","es-pret-09","es-pret-10","es-pret-11","es-pret-12","es-pret-13","es-pret-14"]
+  },
+  {
+    "id": "es-adjectives",
+    "index": 14,
+    "title": "Adjective Agreement",
+    "subtitle": "bueno/buena, grande, feliz",
+    "emoji": "🎯",
+    "category": "es-adjectives",
+    "cardIds": ["es-adj-01","es-adj-02","es-adj-03","es-adj-04","es-adj-05","es-adj-06","es-adj-07","es-adj-08","es-adj-09","es-adj-10","es-adj-11","es-adj-12"]
+  },
+  {
+    "id": "es-prepositions",
+    "index": 15,
+    "title": "Prepositions",
+    "subtitle": "por/para, a, de, en, con",
+    "emoji": "🧭",
+    "category": "es-prepositions",
+    "cardIds": ["es-prep-01","es-prep-02","es-prep-03","es-prep-04","es-prep-05","es-prep-06","es-prep-07","es-prep-08","es-prep-09","es-prep-10","es-prep-11","es-prep-12"]
+  },
+  {
+    "id": "es-body",
+    "index": 16,
+    "title": "Body & Health",
+    "subtitle": "cabeza, mano, dolor, médico",
+    "emoji": "🧑‍⚕️",
+    "category": "es-body",
+    "cardIds": ["es-body-01","es-body-02","es-body-03","es-body-04","es-body-05","es-body-06","es-body-07","es-body-08","es-body-09","es-body-10","es-body-11","es-body-12","es-body-13","es-body-14","es-body-15","es-body-16"]
+  },
+  {
+    "id": "es-weather-travel",
+    "index": 17,
+    "title": "Weather & Travel",
+    "subtitle": "tiempo, lluvia, viaje, billete",
+    "emoji": "✈️",
+    "category": "es-weather-travel",
+    "cardIds": ["es-wt-01","es-wt-02","es-wt-03","es-wt-04","es-wt-05","es-wt-06","es-wt-07","es-wt-08","es-wt-09","es-wt-10","es-wt-11","es-wt-12","es-wt-13","es-wt-14"]
   }
 ]
