@@ -3,9 +3,20 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { BookOpen, Gamepad2, ArrowRight, Trophy } from "lucide-react";
+import { useStore } from "zustand";
+import {
+  BookOpen, Gamepad2, ArrowRight, Trophy, Flame, Sparkles, Library,
+  Globe, Boxes, Brain as BrainIcon, Clapperboard,
+} from "lucide-react";
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
+import {
+  mandarinStore, germanStore, spanishStore, vibeCodingStore,
+  brainTrainingStore, triviaStore,
+} from "@/lib/store";
+import { globalStore } from "@/lib/globalStore";
+import { levelFromXp } from "@/lib/xp";
+import { todayKey } from "@/lib/utils";
 
 type LeagueData = {
   cohort: { id: string; tierId: number; weekStart: string } | null;
@@ -51,6 +62,59 @@ const HOME_BUTTONS: HomeButton[] = [
     title: "Games",
     subtitle: "GeoClone, BlockYard, Brain Training, Trivia",
     icon: <Gamepad2 size={32} strokeWidth={2} />,
+    tint: "#a855f7",
+    bg: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
+  },
+];
+
+const LEARNING_BUTTON: HomeButton = {
+  href: "/learning",
+  title: "Learning",
+  subtitle: "Mandarin · Spanish · German · Skills",
+  icon: <BookOpen size={28} strokeWidth={2} />,
+  tint: "#6366f1",
+  bg: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+};
+
+type GameButton = {
+  href: string;
+  title: string;
+  tagline: string;
+  icon: React.ReactNode;
+  tint: string;
+  bg: string;
+};
+
+const GAME_BUTTONS: GameButton[] = [
+  {
+    href: "/trivia/geo-clone",
+    title: "GeoClone",
+    tagline: "Guess the city from Street View",
+    icon: <Globe size={22} strokeWidth={2} />,
+    tint: "#3b82f6",
+    bg: "linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)",
+  },
+  {
+    href: "/games/block-yard",
+    title: "BlockYard",
+    tagline: "Stack, fit, beat the clock",
+    icon: <Boxes size={22} strokeWidth={2} />,
+    tint: "#10b981",
+    bg: "linear-gradient(135deg, #10b981 0%, #84cc16 100%)",
+  },
+  {
+    href: "/brain-training",
+    title: "Brain Training",
+    tagline: "Math Blitz, Wordle, Connections",
+    icon: <BrainIcon size={22} strokeWidth={2} />,
+    tint: "#ec4899",
+    bg: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
+  },
+  {
+    href: "/trivia",
+    title: "Trivia",
+    tagline: "Actors, flags, albums, years",
+    icon: <Clapperboard size={22} strokeWidth={2} />,
     tint: "#a855f7",
     bg: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
   },
@@ -227,15 +291,33 @@ export default function HubPage() {
   const [greeting, setGreeting] = useState("");
   const prefersReducedMotion = useReducedMotion();
 
+  const streak = useStore(globalStore, (s) => s.streak);
+  const lastActiveDate = useStore(globalStore, (s) => s.lastActiveDate);
+
   useEffect(() => {
+    const today = todayKey();
+    const activeToday = lastActiveDate === today;
+
+    if (streak >= 7) { setHero({ char: "bear", mood: "celebrating" }); return; }
+    if (streak >= 3) { setHero({ char: "bear", mood: "happy" }); return; }
+    if (streak === 0 && lastActiveDate && !activeToday) {
+      setHero({ char: "bear", mood: "sad" }); return;
+    }
+
     try {
       const saved = sessionStorage.getItem(HERO_SESSION_KEY);
       if (saved) { setHero(JSON.parse(saved)); return; }
     } catch {}
-    const picked = HERO_OPTIONS[Math.floor(Math.random() * HERO_OPTIONS.length)];
+    const neutralOpts: HeroOption[] = [
+      { char: "bear", mood: "idle" },
+      { char: "bear", mood: "happy" },
+      { char: "panda", mood: "idle" },
+      { char: "panda", mood: "happy" },
+    ];
+    const picked = neutralOpts[Math.floor(Math.random() * neutralOpts.length)];
     try { sessionStorage.setItem(HERO_SESSION_KEY, JSON.stringify(picked)); } catch {}
     setHero(picked);
-  }, []);
+  }, [streak, lastActiveDate]);
 
   useEffect(() => {
     setFactIdx(Math.floor(Date.now() / (1000 * 60 * 60)) % FACTS.length);
@@ -391,34 +473,64 @@ export default function HubPage() {
         </div>
 
         <div className="flex flex-col gap-5">
-          <div className="grid grid-cols-2 gap-4">
-            {HOME_BUTTONS.map(({ href, title, subtitle, icon, tint, bg }, i) => (
+          <StatsBand />
+
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            <Link
+              href={LEARNING_BUTTON.href}
+              className="group flex items-center gap-4 rounded-2xl p-5 transition-all duration-150 hover:-translate-y-0.5"
+              style={{
+                background: `color-mix(in srgb, ${LEARNING_BUTTON.tint} 10%, var(--surface))`,
+                border: `1.5px solid color-mix(in srgb, ${LEARNING_BUTTON.tint} 26%, transparent)`,
+                boxShadow: `0 8px 24px color-mix(in srgb, ${LEARNING_BUTTON.tint} 14%, transparent)`,
+              }}
+            >
+              <div
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm"
+                style={{ background: LEARNING_BUTTON.bg }}
+              >
+                {LEARNING_BUTTON.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-lg font-extrabold tracking-tight">{LEARNING_BUTTON.title}</div>
+                <div className="mt-0.5 text-[12.5px] leading-snug text-muted">{LEARNING_BUTTON.subtitle}</div>
+              </div>
+              <ArrowRight size={18} style={{ color: LEARNING_BUTTON.tint }} className="shrink-0 transition-transform duration-150 group-hover:translate-x-1" />
+            </Link>
+          </motion.div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {GAME_BUTTONS.map(({ href, title, tagline, icon, tint, bg }, i) => (
               <motion.div
                 key={href}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.06, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+                transition={{ delay: 0.14 + i * 0.05, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
                 <Link
                   href={href}
-                  className="group flex h-full items-center gap-3 rounded-2xl p-4 transition-all duration-150 hover:-translate-y-0.5"
+                  className="group flex h-full items-center gap-3 rounded-2xl p-3.5 transition-all duration-150 hover:-translate-y-0.5"
                   style={{
                     background: `color-mix(in srgb, ${tint} 9%, var(--surface))`,
                     border: `1.5px solid color-mix(in srgb, ${tint} 24%, transparent)`,
-                    boxShadow: `0 6px 20px color-mix(in srgb, ${tint} 12%, transparent)`,
+                    boxShadow: `0 6px 18px color-mix(in srgb, ${tint} 11%, transparent)`,
                   }}
                 >
                   <div
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
                     style={{ background: bg }}
                   >
                     {icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-base font-extrabold tracking-tight">{title}</div>
-                    <div className="mt-0.5 truncate text-[11.5px] leading-snug text-muted">{subtitle}</div>
+                    <div className="text-[14px] font-extrabold tracking-tight">{title}</div>
+                    <div className="mt-0.5 truncate text-[11px] leading-snug text-muted">{tagline}</div>
                   </div>
-                  <ArrowRight size={16} style={{ color: tint }} className="shrink-0 transition-transform duration-150 group-hover:translate-x-1" />
+                  <ArrowRight size={14} style={{ color: tint }} className="shrink-0 transition-transform duration-150 group-hover:translate-x-1" />
                 </Link>
               </motion.div>
             ))}
@@ -430,6 +542,65 @@ export default function HubPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function StatsBand() {
+  const streak = useStore(globalStore, (s) => s.streak);
+  const mandarinXp = useStore(mandarinStore, (s) => s.xp);
+  const germanXp = useStore(germanStore, (s) => s.xp);
+  const spanishXp = useStore(spanishStore, (s) => s.xp);
+  const vibeXp = useStore(vibeCodingStore, (s) => s.xp);
+  const brainXp = useStore(brainTrainingStore, (s) => s.xp);
+  const triviaXp = useStore(triviaStore, (s) => s.xp);
+  const mWords = useStore(mandarinStore, (s) => s.seenCardIds.length);
+  const gWords = useStore(germanStore, (s) => s.seenCardIds.length);
+  const sWords = useStore(spanishStore, (s) => s.seenCardIds.length);
+  const vWords = useStore(vibeCodingStore, (s) => s.seenCardIds.length);
+
+  const totalXp = mandarinXp + germanXp + spanishXp + vibeXp + brainXp + triviaXp;
+  const level = levelFromXp(totalXp);
+  const words = mWords + gWords + sWords + vWords;
+
+  const chips = [
+    { icon: <Flame size={14} />, label: "Streak", value: streak === 0 ? "—" : `${streak}d`, tint: "#f97316" },
+    { icon: <Trophy size={14} />, label: "Level", value: `Lv. ${level}`, tint: "var(--accent)" },
+    { icon: <Sparkles size={14} />, label: "Total XP", value: totalXp.toLocaleString(), tint: "#8b5cf6" },
+    { icon: <Library size={14} />, label: "Words", value: words.toLocaleString(), tint: "#10b981" },
+  ];
+
+  return (
+    <motion.div
+      className="grid grid-cols-4 gap-3"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+    >
+      {chips.map((c) => (
+        <div
+          key={c.label}
+          className="flex items-center gap-2.5 rounded-xl px-3 py-2.5"
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <div
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+            style={{
+              color: c.tint,
+              background: `color-mix(in srgb, ${c.tint} 12%, transparent)`,
+            }}
+          >
+            {c.icon}
+          </div>
+          <div className="min-w-0">
+            <div className="text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-muted">{c.label}</div>
+            <div className="truncate text-[14px] font-extrabold tabular-nums leading-tight">{c.value}</div>
+          </div>
+        </div>
+      ))}
+    </motion.div>
   );
 }
 
@@ -446,7 +617,36 @@ function LeagueWidget() {
     return () => { cancelled = true; };
   }, []);
 
-  if (errored || !data || !data.cohort) return null;
+  if (errored || !data) return null;
+
+  if (!data.cohort) {
+    return (
+      <Link
+        href="/leaderboard/league"
+        className="group flex items-center gap-4 rounded-2xl p-5 transition-all duration-150 hover:-translate-y-0.5"
+        style={{
+          background: "color-mix(in srgb, var(--accent) 5%, var(--surface))",
+          border: "1.5px dashed color-mix(in srgb, var(--accent) 32%, transparent)",
+        }}
+      >
+        <div
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
+          style={{
+            background: "color-mix(in srgb, var(--accent) 14%, transparent)",
+            color: "var(--accent)",
+          }}
+        >
+          <Trophy size={22} strokeWidth={2} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[10px] font-extrabold tracking-[0.18em] text-muted uppercase">Your league</div>
+          <div className="mt-0.5 text-[14px] font-extrabold tracking-tight">Earn XP this week to be matched into Bronze</div>
+          <div className="mt-0.5 text-[11.5px] leading-snug text-muted">Complete a lesson or game to join your first cohort.</div>
+        </div>
+        <ArrowRight size={16} style={{ color: "var(--accent)" }} className="shrink-0 transition-transform duration-150 group-hover:translate-x-1" />
+      </Link>
+    );
+  }
 
   const tier = data.tiers.find((t) => t.id === data.cohort!.tierId);
   const me = data.members.find((m) => m.isYou);
