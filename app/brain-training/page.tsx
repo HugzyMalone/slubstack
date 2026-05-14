@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { Brush } from "lucide-react";
+
+function DrawIcon() {
+  return <Brush size={22} strokeWidth={2} />;
+}
 
 function MathIcon() {
   return (
@@ -95,6 +100,14 @@ const LIVE = [
     title: "Connections",
     description: "Daily · group four sets of four",
     badge: "New",
+  },
+  {
+    href: "/brain-training/draw",
+    Icon: DrawIcon,
+    iconBg: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
+    title: "Draw My Thing",
+    description: "Multiplayer Pictionary — invite friends",
+    badge: null,
   },
 ];
 
