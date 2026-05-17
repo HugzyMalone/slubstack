@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Blocks, Brain, Globe, Film, ArrowRight } from "lucide-react";
+import { Blocks, Brain, Brush, Globe, Film, ArrowRight } from "lucide-react";
 
 const GAMES = [
   {
@@ -12,6 +12,15 @@ const GAMES = [
     icon: <Globe size={26} />,
     tint: "#0ea5e9",
     bg: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)",
+    available: true,
+  },
+  {
+    href: "/games/draw",
+    title: "Draw My Thing",
+    subtitle: "Multiplayer Pictionary — invite friends with a 4-char code",
+    icon: <Brush size={26} />,
+    tint: "#ec4899",
+    bg: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
     available: true,
   },
   {

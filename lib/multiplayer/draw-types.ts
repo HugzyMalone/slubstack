@@ -59,7 +59,7 @@ export const drawMyThingAdapter: TurnBasedAdapter = {
   kind: "turn_based",
   gameKind: "draw_my_thing",
   displayName: "Draw My Thing",
-  routePath: "/brain-training/draw",
+  routePath: "/games/draw",
   totalRoundsPerPlayer: 2,
   roundDurationMs: 60000,
   betweenRoundsMs: 6000,
