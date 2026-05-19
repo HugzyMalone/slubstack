@@ -1,0 +1,65 @@
+[
+  {
+    "id": "it-greetings",
+    "index": 0,
+    "title": "Greetings",
+    "subtitle": "Ciao, grazie, prego e altro",
+    "emoji": "👋",
+    "category": "it-greetings",
+    "cardIds": ["it-greet-01","it-greet-02","it-greet-03","it-greet-04","it-greet-05","it-greet-06","it-greet-07","it-greet-08","it-greet-09","it-greet-10","it-greet-11","it-greet-12","it-greet-13","it-greet-14","it-greet-15","it-greet-16"]
+  },
+  {
+    "id": "it-numbers",
+    "index": 1,
+    "title": "Numbers",
+    "subtitle": "Conta da 1 a 15",
+    "emoji": "🔢",
+    "category": "it-numbers",
+    "cardIds": ["it-num-01","it-num-02","it-num-03","it-num-04","it-num-05","it-num-06","it-num-07","it-num-08","it-num-09","it-num-10","it-num-11","it-num-12","it-num-13","it-num-14","it-num-15"]
+  },
+  {
+    "id": "it-colors",
+    "index": 2,
+    "title": "Colours",
+    "subtitle": "Rosso, blu, verde e altri",
+    "emoji": "🎨",
+    "category": "it-colors",
+    "cardIds": ["it-color-01","it-color-02","it-color-03","it-color-04","it-color-05","it-color-06","it-color-07","it-color-08","it-color-09","it-color-10","it-color-11","it-color-12"]
+  },
+  {
+    "id": "it-food",
+    "index": 3,
+    "title": "Food & Drink",
+    "subtitle": "Pane, pasta, caffè e altro",
+    "emoji": "🍽️",
+    "category": "it-food",
+    "cardIds": ["it-food-01","it-food-02","it-food-03","it-food-04","it-food-05","it-food-06","it-food-07","it-food-08","it-food-09","it-food-10","it-food-11","it-food-12","it-food-13","it-food-14","it-food-15","it-food-16"]
+  },
+  {
+    "id": "it-verbs",
+    "index": 4,
+    "title": "Verbs",
+    "subtitle": "Parlare, mangiare, andare e altri",
+    "emoji": "⚡",
+    "category": "it-verbs",
+    "cardIds": ["it-verb-01","it-verb-02","it-verb-03","it-verb-04","it-verb-05","it-verb-06","it-verb-07","it-verb-08","it-verb-09","it-verb-10","it-verb-11","it-verb-12","it-verb-13","it-verb-14","it-verb-15","it-verb-16"]
+  },
+  {
+    "id": "it-family",
+    "index": 5,
+    "title": "Family",
+    "subtitle": "Madre, padre, fratelli",
+    "emoji": "👨‍👩‍👧",
+    "category": "it-family",
+    "cardIds": ["it-fam-01","it-fam-02","it-fam-03","it-fam-04","it-fam-05","it-fam-06","it-fam-07","it-fam-08","it-fam-09","it-fam-10","it-fam-11","it-fam-12","it-fam-13","it-fam-14","it-fam-15","it-fam-16"]
+  },
+  {
+    "id": "it-time",
+    "index": 6,
+    "title": "Days & Time",
+    "subtitle": "Giorni della settimana, oggi, ora",
+    "emoji": "📅",
+    "category": "it-time",
+    "cardIds": ["it-time-01","it-time-02","it-time-03","it-time-04","it-time-05","it-time-06","it-time-07","it-time-08","it-time-09","it-time-10","it-time-11","it-time-12","it-time-13","it-time-14"]
+  }
+]

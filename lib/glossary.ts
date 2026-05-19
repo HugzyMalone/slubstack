@@ -1,5 +1,6 @@
 import germanVocab from "@/content/german/vocab.json";
 import spanishVocab from "@/content/spanish/vocab.json";
+import italianVocab from "@/content/italian/vocab.json";
 import mandarinVocab from "@/content/mandarin/vocab.json";
 import germanGlossary from "@/content/german/glossary.json";
 import type { Card, Language } from "@/lib/content";
@@ -11,6 +12,7 @@ const VOCAB: Record<Language, Card[]> = {
   mandarin: mandarinVocab as Card[],
   german: germanVocab as Card[],
   spanish: spanishVocab as Card[],
+  italian: italianVocab as Card[],
   "vibe-coding": [],
   github: [],
 };
@@ -20,6 +22,7 @@ const GERMAN_GLOSSARY = germanGlossary as Record<string, string>;
 const STEMS: Record<Language, string[]> = {
   german: ["en", "er", "es", "e", "n", "s"],
   spanish: ["es", "s", "as", "ar", "er", "ir"],
+  italian: ["i", "e", "o", "a", "are", "ere", "ire"],
   mandarin: [],
   "vibe-coding": [],
   github: [],
@@ -32,7 +35,7 @@ function stripArticle(s: string): string {
 function fold(word: string, lang: Language): string {
   const lower = word.toLowerCase().replace(/[^\p{L}]/gu, "");
   if (lang === "german") return germanFold(lower);
-  if (lang === "spanish") {
+  if (lang === "spanish" || lang === "italian") {
     return lower.normalize("NFD").replace(/[̀-ͯ]/g, "");
   }
   return lower;

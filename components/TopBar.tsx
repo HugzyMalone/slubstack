@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Flame, User, ChevronLeft, Snowflake, Target } from "lucide-react";
 import { useStore } from "zustand";
-import { mandarinStore, germanStore, spanishStore, vibeCodingStore, githubStore, brainTrainingStore, triviaStore } from "@/lib/store";
+import { mandarinStore, germanStore, spanishStore, italianStore, vibeCodingStore, githubStore, brainTrainingStore, triviaStore } from "@/lib/store";
 import { useHydrated } from "@/lib/hooks";
 import { useGlobalStore, globalStore } from "@/lib/globalStore";
 import { levelFromXp } from "@/lib/xp";
@@ -33,11 +33,12 @@ export function TopBar() {
   const mandarinXp = useStore(mandarinStore, (s) => s.xp);
   const germanXp = useStore(germanStore, (s) => s.xp);
   const spanishXp = useStore(spanishStore, (s) => s.xp);
+  const italianXp = useStore(italianStore, (s) => s.xp);
   const vibeXp = useStore(vibeCodingStore, (s) => s.xp);
   const githubXp = useStore(githubStore, (s) => s.xp);
   const brainXp = useStore(brainTrainingStore, (s) => s.xp);
   const triviaXp = useStore(triviaStore, (s) => s.xp);
-  const xp = mandarinXp + germanXp + spanishXp + vibeXp + githubXp + brainXp + triviaXp;
+  const xp = mandarinXp + germanXp + spanishXp + italianXp + vibeXp + githubXp + brainXp + triviaXp;
   const streak = useGlobalStore((s) => s.streak);
   const streakFreezes = useGlobalStore((s) => s.streakFreezes);
   const questDateKey = useQuestsStore((s) => s.dateKey);
@@ -61,12 +62,14 @@ export function TopBar() {
     const manState = mandarinStore.getState();
     const deState = germanStore.getState();
     const esState = spanishStore.getState();
+    const itState = italianStore.getState();
     const globalState = globalStore.getState();
 
     const candidates = [
       { streak: manState.streak, date: manState.lastActiveDate },
       { streak: deState.streak, date: deState.lastActiveDate },
       { streak: esState.streak, date: esState.lastActiveDate },
+      { streak: itState.streak, date: itState.lastActiveDate },
     ];
     const best = candidates.reduce((a, b) => a.streak >= b.streak ? a : b);
 

@@ -1,8 +1,48 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { getLanguageContent } from "@/lib/content";
+import { getLanguageContent, type Unit } from "@/lib/content";
 import { toneOf, TONE_COLORS } from "@/lib/mandarin";
+
+const HOBBIES_UNIT: Unit = {
+  id: "hobbies",
+  index: -1,
+  title: "Hobbies",
+  subtitle: "Music, sports, TV — what we did most recently",
+  emoji: "🎨",
+  category: "hobbies",
+  cardIds: [
+    "p-food-03",
+    "p-pv-10",
+    "p-pv-07",
+    "p-pv-08",
+    "p-pv-13",
+    "p-pv-09",
+    "p-pv-06",
+    "p-pv-14",
+    "p-pv-20",
+    "p-pv-17",
+    "p-pv-18",
+    "p-pv-15",
+    "p-pv-16",
+    "p-pv-19",
+  ],
+};
+
+const RECENT_ORDER: string[] = [
+  "time",
+  "dates",
+  "family",
+  "numbers",
+  "greetings",
+  "pronouns-verbs",
+  "food",
+  "places",
+  "zh-tones",
+  "zh-measures",
+  "zh-recognition",
+  "zh-grammar",
+];
 
 function TonePinyin({ pinyin }: { pinyin: string }) {
   const parts = pinyin.trim().split(/\s+/);
@@ -32,7 +72,13 @@ export default function MandarinVocabPage() {
 
   const groups = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return units
+    const orderedUnits: Unit[] = [
+      HOBBIES_UNIT,
+      ...RECENT_ORDER
+        .map((id) => units.find((u) => u.id === id))
+        .filter((u): u is Unit => !!u),
+    ];
+    return orderedUnits
       .map((u) => {
         const seen = new Set<string>();
         const cards = u.cardIds

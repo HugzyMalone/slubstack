@@ -6,7 +6,7 @@ import { UserCircle2, Brain, Sparkles, Globe, Film } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { useStore } from "zustand";
 import { cn } from "@/lib/utils";
-import { mandarinStore, germanStore, spanishStore, vibeCodingStore, githubStore } from "@/lib/store";
+import { mandarinStore, germanStore, spanishStore, italianStore, vibeCodingStore, githubStore } from "@/lib/store";
 import { BullMascot } from "@/components/BullMascot";
 
 function GrassBlock() {
@@ -79,11 +79,13 @@ export function AppSidebar() {
   const mandarinDone = useStore(mandarinStore, (s) => s.completedUnits.length);
   const germanDone = useStore(germanStore, (s) => s.completedUnits.length);
   const spanishDone = useStore(spanishStore, (s) => s.completedUnits.length);
+  const italianDone = useStore(italianStore, (s) => s.completedUnits.length);
   const vibeDone = useStore(vibeCodingStore, (s) => s.completedUnits.length);
   const githubDone = useStore(githubStore, (s) => s.completedUnits.length);
 
   const langProgress: Record<string, { done: number; total: number }> = {
     "/spanish":  { done: spanishDone,           total: 8 },
+    "/italian":  { done: italianDone,           total: 7 },
     "/mandarin": { done: mandarinDone,          total: 8 },
     "/german":   { done: germanDone,            total: 7 },
     "/skills":   { done: vibeDone + githubDone, total: 14 },
@@ -206,6 +208,13 @@ export function AppSidebar() {
       kind: "flag",
       flag: "/flags/es.svg",
       match: (p: string) => p.startsWith("/spanish"),
+    },
+    {
+      href: "/italian",
+      label: "Italian",
+      kind: "flag",
+      flag: "/flags/it.svg",
+      match: (p: string) => p.startsWith("/italian"),
     },
     {
       href: "/skills",

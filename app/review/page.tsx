@@ -62,6 +62,7 @@ const LANG_CONFIGS = [
   { key: "slubstack-v1",         label: "Mandarin", flag: "🇨🇳", href: "/mandarin/review", color: "#e11d48", itemLabel: "words" },
   { key: "slubstack-german-v1",  label: "German",   flag: "🇩🇪", href: "/german/review",   color: "#f97316", itemLabel: "words" },
   { key: "slubstack-spanish-v1", label: "Spanish",  flag: "🇪🇸", href: "/spanish/review",  color: "#10b981", itemLabel: "words" },
+  { key: "slubstack-italian-v1", label: "Italian",  flag: "🇮🇹", href: "/italian/review",  color: "#16a34a", itemLabel: "words" },
 ] as const;
 
 const SKILL_CONFIGS = [
@@ -244,7 +245,7 @@ function GameRow({ href, emoji, title, meta, accentColor }: { href: string; emoj
 export default function ReviewHubPage() {
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [langStats, setLangStats] = useState<LangStats[]>([
-    { due: 0, seen: 0 }, { due: 0, seen: 0 }, { due: 0, seen: 0 },
+    { due: 0, seen: 0 }, { due: 0, seen: 0 }, { due: 0, seen: 0 }, { due: 0, seen: 0 },
   ]);
   const [skillStats, setSkillStats] = useState<LangStats[]>([{ due: 0, seen: 0 }, { due: 0, seen: 0 }]);
   const [mathStats, setMathStats] = useState<MathOpStats>({});
@@ -285,7 +286,7 @@ export default function ReviewHubPage() {
   const mathMeta = mathAcc === null ? "Play to track accuracy" : `${math.c + math.w} answered · ${mathAcc}% accuracy`;
   const actorMeta = actor.total === 0 ? "Play to track accuracy" : `${actor.total} actor${actor.total === 1 ? "" : "s"} · ${actorAcc ?? "—"}% accuracy`;
   const langDue = langStats.reduce((a, s) => a + s.due, 0);
-  const langSubtitle = langDue > 0 ? `${langDue} card${langDue === 1 ? "" : "s"} due` : "Mandarin · German · Spanish";
+  const langSubtitle = langDue > 0 ? `${langDue} card${langDue === 1 ? "" : "s"} due` : "Mandarin · German · Spanish · Italian";
   const skillSubtitle = skillDue > 0 ? `${skillDue} card${skillDue === 1 ? "" : "s"} due` : "Vibe Coding · GitHub";
 
   return (

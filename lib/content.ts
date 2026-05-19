@@ -8,6 +8,8 @@ import vibeVocab from "@/content/vibe-coding/vocab.json";
 import vibeUnits from "@/content/vibe-coding/units.json";
 import githubVocab from "@/content/github/vocab.json";
 import githubUnits from "@/content/github/units.json";
+import italianVocab from "@/content/italian/vocab.json";
+import italianUnits from "@/content/italian/units.json";
 
 export type Category = string;
 
@@ -68,11 +70,12 @@ export type Unit = {
   primaryInteraction?: InteractionKind;
 };
 
-export type Language = "mandarin" | "german" | "spanish" | "vibe-coding" | "github";
+export type Language = "mandarin" | "german" | "spanish" | "italian" | "vibe-coding" | "github";
 
 export function langFromCardId(id: string): Language {
   if (id.startsWith("de-")) return "german";
   if (id.startsWith("es-")) return "spanish";
+  if (id.startsWith("it-")) return "italian";
   if (id.startsWith("vc-")) return "vibe-coding";
   if (id.startsWith("gh-")) return "github";
   return "mandarin";
@@ -140,6 +143,12 @@ const SPANISH_CONTENT = buildContent(
   ["multiple-choice", "type", "match"],
 );
 
+const ITALIAN_CONTENT = buildContent(
+  italianVocab,
+  italianUnits,
+  ["multiple-choice", "type", "match"],
+);
+
 const VIBE_CONTENT = buildContent(
   vibeVocab,
   vibeUnits,
@@ -155,6 +164,7 @@ const GITHUB_CONTENT = buildContent(
 export function getLanguageContent(lang: Language): LanguageContent {
   if (lang === "german") return GERMAN_CONTENT;
   if (lang === "spanish") return SPANISH_CONTENT;
+  if (lang === "italian") return ITALIAN_CONTENT;
   if (lang === "vibe-coding") return VIBE_CONTENT;
   if (lang === "github") return GITHUB_CONTENT;
   return MANDARIN_CONTENT;

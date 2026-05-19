@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useStore } from "zustand";
-import { mandarinStore, germanStore, spanishStore } from "@/lib/store";
+import { mandarinStore, germanStore, spanishStore, italianStore } from "@/lib/store";
 import { levelFromXp } from "@/lib/xp";
 import { useHydrated } from "@/lib/hooks";
 
@@ -25,14 +25,14 @@ function ChevronDown() {
 }
 
 type Lang = {
-  code: "es" | "zh" | "de";
+  code: "es" | "zh" | "de" | "it";
   href: string;
   badge: string;
   title: string;
   description: string;
   meta: string;
   gradient: string;
-  xpKey: "spanish" | "mandarin" | "german";
+  xpKey: "spanish" | "mandarin" | "german" | "italian";
   subOptions?: { label: string; href: string; icon: string }[];
 };
 
@@ -71,6 +71,16 @@ const LANGUAGES: Lang[] = [
     gradient: "linear-gradient(135deg, #c2410c 0%, #ea580c 100%)",
     xpKey: "spanish",
   },
+  {
+    code: "it",
+    href: "/italian",
+    badge: "IT",
+    title: "Italian",
+    description: "Greetings, food, family — Romance basics, match & type.",
+    meta: "7 units · 105 cards",
+    gradient: "linear-gradient(135deg, #15803d 0%, #16a34a 100%)",
+    xpKey: "italian",
+  },
 ];
 
 export default function LanguagesPage() {
@@ -78,9 +88,10 @@ export default function LanguagesPage() {
   const spanishXp = useStore(spanishStore, (s) => s.xp);
   const mandarinXp = useStore(mandarinStore, (s) => s.xp);
   const germanXp = useStore(germanStore, (s) => s.xp);
+  const italianXp = useStore(italianStore, (s) => s.xp);
   const [mandarinOpen, setMandarinOpen] = useState(false);
 
-  const xpMap = { spanish: spanishXp, mandarin: mandarinXp, german: germanXp };
+  const xpMap = { spanish: spanishXp, mandarin: mandarinXp, german: germanXp, italian: italianXp };
 
   return (
     <div className="w-full px-4 pb-24 pt-6 lg:max-w-[1200px] lg:mx-auto lg:px-8 lg:py-10 lg:pb-16">

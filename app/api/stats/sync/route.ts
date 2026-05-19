@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 
   const { data } = await supabase
     .from("user_stats")
-    .select("xp, streak, state_json, german_state_json, spanish_state_json, vibe_state_json")
+    .select("xp, streak, state_json, german_state_json, spanish_state_json, italian_state_json, vibe_state_json")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -48,6 +48,7 @@ export async function GET(request: NextRequest) {
 
   if (lang === "german")      return NextResponse.json({ state: data.german_state_json ?? null });
   if (lang === "spanish")     return NextResponse.json({ state: data.spanish_state_json ?? null });
+  if (lang === "italian")     return NextResponse.json({ state: data.italian_state_json ?? null });
   if (lang === "vibe-coding") return NextResponse.json({ state: data.vibe_state_json ?? null });
 
   return NextResponse.json({
@@ -86,6 +87,13 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
       updated_at: new Date().toISOString(),
       spanish_state_json: stateJson(body),
+      ...(totalXp !== undefined && { xp: totalXp }),
+    };
+  } else if (lang === "italian") {
+    upsertData = {
+      user_id: user.id,
+      updated_at: new Date().toISOString(),
+      italian_state_json: stateJson(body),
       ...(totalXp !== undefined && { xp: totalXp }),
     };
   } else if (lang === "vibe-coding") {

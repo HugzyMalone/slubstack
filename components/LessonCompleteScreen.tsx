@@ -18,6 +18,7 @@ const LANG_LABEL: Record<Language, string> = {
   mandarin: "Mandarin",
   german: "German",
   spanish: "Spanish",
+  italian: "Italian",
   "vibe-coding": "Vibe Coding",
   github: "GitHub",
 };

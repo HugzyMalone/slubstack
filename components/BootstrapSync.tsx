@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { germanStore, spanishStore, vibeCodingStore, githubStore } from "@/lib/store";
+import { germanStore, spanishStore, italianStore, vibeCodingStore, githubStore } from "@/lib/store";
 import type { RemoteState } from "@/lib/store";
 
 export function BootstrapSync() {
@@ -18,10 +18,11 @@ export function BootstrapSync() {
       hasPulled.current = true;
 
       await Promise.all(
-        (["german", "spanish", "vibe-coding", "github"] as const).map(async (lang) => {
+        (["german", "spanish", "italian", "vibe-coding", "github"] as const).map(async (lang) => {
           const store =
             lang === "german" ? germanStore :
             lang === "spanish" ? spanishStore :
+            lang === "italian" ? italianStore :
             lang === "vibe-coding" ? vibeCodingStore :
             githubStore;
           try {

@@ -11,7 +11,7 @@ import {
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
 import {
-  mandarinStore, germanStore, spanishStore, vibeCodingStore,
+  mandarinStore, germanStore, spanishStore, italianStore, vibeCodingStore,
   brainTrainingStore, triviaStore,
 } from "@/lib/store";
 import { globalStore } from "@/lib/globalStore";
@@ -576,17 +576,19 @@ function StatsBand() {
   const mandarinXp = useStore(mandarinStore, (s) => s.xp);
   const germanXp = useStore(germanStore, (s) => s.xp);
   const spanishXp = useStore(spanishStore, (s) => s.xp);
+  const italianXp = useStore(italianStore, (s) => s.xp);
   const vibeXp = useStore(vibeCodingStore, (s) => s.xp);
   const brainXp = useStore(brainTrainingStore, (s) => s.xp);
   const triviaXp = useStore(triviaStore, (s) => s.xp);
   const mWords = useStore(mandarinStore, (s) => s.seenCardIds.length);
   const gWords = useStore(germanStore, (s) => s.seenCardIds.length);
   const sWords = useStore(spanishStore, (s) => s.seenCardIds.length);
+  const iWords = useStore(italianStore, (s) => s.seenCardIds.length);
   const vWords = useStore(vibeCodingStore, (s) => s.seenCardIds.length);
 
-  const totalXp = mandarinXp + germanXp + spanishXp + vibeXp + brainXp + triviaXp;
+  const totalXp = mandarinXp + germanXp + spanishXp + italianXp + vibeXp + brainXp + triviaXp;
   const level = levelFromXp(totalXp);
-  const words = mWords + gWords + sWords + vWords;
+  const words = mWords + gWords + sWords + iWords + vWords;
 
   const chips = [
     { icon: <Flame size={14} />, label: "Streak", value: streak === 0 ? "—" : `${streak}d`, tint: "#f97316" },

@@ -47,11 +47,13 @@ export function BottomNav() {
     pathname?.startsWith("/mandarin/learn/") ||
     pathname?.startsWith("/german/learn/") ||
     pathname?.startsWith("/spanish/learn/") ||
+    pathname?.startsWith("/italian/learn/") ||
     pathname?.startsWith("/vibe-coding/learn/") ||
     pathname?.startsWith("/github/learn/") ||
     pathname?.startsWith("/mandarin/review") ||
     pathname?.startsWith("/german/review") ||
     pathname?.startsWith("/spanish/review") ||
+    pathname?.startsWith("/italian/review") ||
     pathname?.startsWith("/vibe-coding/review") ||
     pathname?.startsWith("/github/review") ||
     pathname?.startsWith("/brain-training/wordle") ||
@@ -73,7 +75,7 @@ export function BottomNav() {
       label: "Home",
       Icon: HomeIcon,
       match: (p: string) =>
-        p === "/" || p === "/mandarin" || p === "/german" || p === "/spanish" || p === "/trivia",
+        p === "/" || p === "/mandarin" || p === "/german" || p === "/spanish" || p === "/italian" || p === "/trivia",
     },
     {
       href: "/leaderboard/league",

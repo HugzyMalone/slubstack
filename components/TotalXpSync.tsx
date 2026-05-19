@@ -8,6 +8,7 @@ import {
   mandarinStore,
   germanStore,
   spanishStore,
+  italianStore,
   vibeCodingStore,
   githubStore,
   brainTrainingStore,
@@ -18,6 +19,7 @@ export function TotalXpSync() {
   const mandarinXp = useStore(mandarinStore, (s) => s.xp);
   const germanXp = useStore(germanStore, (s) => s.xp);
   const spanishXp = useStore(spanishStore, (s) => s.xp);
+  const italianXp = useStore(italianStore, (s) => s.xp);
   const vibeXp = useStore(vibeCodingStore, (s) => s.xp);
   const githubXp = useStore(githubStore, (s) => s.xp);
   const brainXp = useStore(brainTrainingStore, (s) => s.xp);
@@ -28,7 +30,7 @@ export function TotalXpSync() {
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
 
-    const totalXp = mandarinXp + germanXp + spanishXp + vibeXp + githubXp + brainXp + triviaXp;
+    const totalXp = mandarinXp + germanXp + spanishXp + italianXp + vibeXp + githubXp + brainXp + triviaXp;
 
     const timeout = window.setTimeout(async () => {
       const { data } = await supabase.auth.getSession();
@@ -42,7 +44,7 @@ export function TotalXpSync() {
     }, 800);
 
     return () => window.clearTimeout(timeout);
-  }, [mandarinXp, germanXp, spanishXp, vibeXp, githubXp, brainXp, triviaXp]);
+  }, [mandarinXp, germanXp, spanishXp, italianXp, vibeXp, githubXp, brainXp, triviaXp]);
 
   return null;
 }
