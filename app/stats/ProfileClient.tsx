@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import {
   Flame, Zap, Trophy, Lock, Mail, Eye, EyeOff, Camera,
   User, Settings, BarChart3, Users, Volume2, Vibrate, Target,
-  MailCheck,
+  MailCheck, Moon, Sun,
 } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { isMuted as isSoundMuted, setMuted as setSoundMuted } from "@/lib/sound";
@@ -30,6 +30,7 @@ function getTier(level: number) {
   return TIERS.find((t) => level >= t.min) ?? TIERS[TIERS.length - 1];
 }
 import { useHydrated } from "@/lib/hooks";
+import { resolvedTheme, setTheme } from "@/lib/theme";
 import { readNativeLanguage, writeNativeLanguage, type NativeLanguage } from "@/lib/native";
 import type { LeaderboardEntry } from "@/lib/supabase/queries";
 import Link from "next/link";
@@ -954,6 +955,34 @@ function WordleSettingsSection() {
   );
 }
 
+// ── AppearanceSection (Dark mode) ──────────────────────────────────────────
+
+function AppearanceSection() {
+  const hydrated = useHydrated();
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => { setDark(resolvedTheme() === "dark"); }, []);
+
+  if (!hydrated) return null;
+
+  return (
+    <section className="rounded-2xl border border-border bg-surface overflow-hidden">
+      <div className="px-4 py-3 border-b border-border">
+        <h3 className="text-sm font-semibold">Appearance</h3>
+      </div>
+      <div className="divide-y divide-border">
+        <FeedbackToggle
+          icon={dark ? <Moon size={16} /> : <Sun size={16} />}
+          label="Dark mode"
+          hint="Switch between light and dark themes"
+          value={dark}
+          onChange={(v) => { setDark(v); setTheme(v ? "dark" : "light"); }}
+        />
+      </div>
+    </section>
+  );
+}
+
 // ── SettingsTab ────────────────────────────────────────────────────────────
 
 function SettingsTab({
@@ -1204,6 +1233,9 @@ function SettingsTab({
           {saving ? "Saving…" : "Save changes"}
         </button>
       </form>
+
+      {/* Appearance */}
+      <AppearanceSection />
 
       {/* Audio & feedback */}
       <FeedbackSection />
