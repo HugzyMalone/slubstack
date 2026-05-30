@@ -32,28 +32,28 @@
 }
 
 :root[data-theme="dark"] {
-    --bg: #1a0e26;
-    --surface: #261538;
-    --elevated: #321b48;
-    --fg: #fff1e0;
-    --muted: #b4a0c8;
-    --border: #3a2052;
-    --border-hi: #523070;
-    --accent: #ffa471;
-    --accent-fg: #1a0e26;
-    --accent-soft: #4a2818;
-    --game: #ff6cb0;
-    --game-soft: #4a1a30;
-    --learn: #a896ff;
-    --learn-soft: #2a1f4a;
-    --danger: #f87171;
-    --success: #4ade80;
-    --success-soft: #1a3a26;
-    --shadow-panel: 0 1px 3px rgb(0 0 0 / 0.4), 0 1px 2px rgb(0 0 0 / 0.3);
-    --shadow-panel-hi: 0 8px 30px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.35);
-    --shadow-soft: 0 2px 0 rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
-    --shadow-bouncy: 0 4px 0 rgb(0 0 0 / 0.5);
-    --ring-accent: 0 0 0 4px rgb(255 164 113 / 0.3);
+  --bg: #1a0e26;
+  --surface: #261538;
+  --elevated: #321b48;
+  --fg: #fff1e0;
+  --muted: #b4a0c8;
+  --border: #3a2052;
+  --border-hi: #523070;
+  --accent: #ffa471;
+  --accent-fg: #1a0e26;
+  --accent-soft: #4a2818;
+  --game: #ff6cb0;
+  --game-soft: #4a1a30;
+  --learn: #a896ff;
+  --learn-soft: #2a1f4a;
+  --danger: #f87171;
+  --success: #4ade80;
+  --success-soft: #1a3a26;
+  --shadow-panel: 0 1px 3px rgb(0 0 0 / 0.4), 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-panel-hi: 0 8px 30px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.35);
+  --shadow-soft: 0 2px 0 rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --shadow-bouncy: 0 4px 0 rgb(0 0 0 / 0.5);
+  --ring-accent: 0 0 0 4px rgb(255 164 113 / 0.3);
 }
 
 @theme inline {
