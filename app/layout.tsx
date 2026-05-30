@@ -60,6 +60,13 @@ export default function RootLayout({
       lang="en"
       className={`${jakarta.variable} ${notoSC.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var m=window.matchMedia("(prefers-color-scheme: dark)");function a(){var t=localStorage.getItem("slubstack_theme");if(t!=="light"&&t!=="dark"){t=m.matches?"dark":"light";}document.documentElement.dataset.theme=t;}a();m.addEventListener("change",a);}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="flex min-h-dvh flex-col">
         <GameStoreProvider store={mandarinStore}>
           <AppSidebar />

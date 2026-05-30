@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
   /* Sunset palette — peach + magenta + violet on warm cream */
   --bg: #fff6ee;
@@ -29,8 +31,7 @@
   --ring-accent: 0 0 0 4px rgb(255 138 76 / 0.25);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+:root[data-theme="dark"] {
     --bg: #1a0e26;
     --surface: #261538;
     --elevated: #321b48;
@@ -53,7 +54,6 @@
     --shadow-soft: 0 2px 0 rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
     --shadow-bouncy: 0 4px 0 rgb(0 0 0 / 0.5);
     --ring-accent: 0 0 0 4px rgb(255 164 113 / 0.3);
-  }
 }
 
 @theme inline {
