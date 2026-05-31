@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import type { ShareCardInput } from "../share";
 import type { BotTuning } from "./bot";
 import type { ScoreResult, ScoringRule } from "./scoring";
 
@@ -16,6 +17,15 @@ export type GameKind =
   | "batman_shakespeare";
 
 export type LadderKind = GameKind | "trivia";
+
+/** End-of-game result a `shareLine` turns into a share card. */
+export type GameResult = {
+  score: number;
+  correct: number;
+  total: number;
+  pb?: boolean;
+  history?: ("correct" | "wrong")[];
+};
 
 export type LevelConfig = {
   id: number;
@@ -43,6 +53,7 @@ export type SprintAdapter<Q, A> = {
   onFeedback?: (result: ScoreResult) => void;
   onGameEnd?: () => void;
   xpFor: (correct: number, points: number) => number;
+  shareLine?: (result: GameResult) => ShareCardInput;
   storeKey: "brainTraining" | "trivia";
 };
 
@@ -57,6 +68,7 @@ export type RoundAdapter<Q, A> = {
   generateLocations: (seed: string, count: number) => Q[];
   scoreFromGuess: (guess: A, target: Q) => { points: number; distanceMeters: number };
   xpFor: (totalPoints: number) => number;
+  shareLine?: (result: GameResult) => ShareCardInput;
   storeKey?: "brainTraining" | "trivia";
 };
 
