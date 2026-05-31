@@ -5,6 +5,46 @@
 
 export type WordleRow = ("correct" | "present" | "absent")[];
 
+export type ShareCardInput = {
+  title: string;
+  score?: number;
+  correct?: number;
+  total?: number;
+  pb?: boolean;
+  history?: ("correct" | "wrong")[];
+  footerTag?: string;
+};
+
+/**
+ * Generic NYT-style share card. New games and the Daily/Ghost end-screens use
+ * this; the bespoke per-game cards above stay for Wordle/Connections.
+ */
+export function buildShareCard({
+  title,
+  score,
+  correct,
+  total,
+  pb,
+  history,
+  footerTag = "slubstack.com",
+}: ShareCardInput): string {
+  const stats: string[] = [];
+  if (score !== undefined) stats.push(`Score: ${score}`);
+  if (correct !== undefined) {
+    stats.push(total !== undefined ? `${correct}/${total} correct` : `${correct} correct`);
+  }
+  const statLine = stats.length ? `\n${stats.join(" · ")}${pb ? " 🏆 NEW BEST" : ""}` : "";
+  const header = `${title}${statLine}`;
+  if (!history || history.length === 0) {
+    return `${header}\n\n${footerTag}`;
+  }
+  const rows: string[] = [];
+  for (let i = 0; i < history.length; i += 10) {
+    rows.push(history.slice(i, i + 10).map((r) => (r === "correct" ? "🟩" : "🟥")).join(""));
+  }
+  return `${header}\n\n${rows.join("\n")}\n\n${footerTag}`;
+}
+
 export function wordleShareCard({
   dayNumber,
   attempts,
