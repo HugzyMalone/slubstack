@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useStore } from "zustand";
 import {
   BookOpen, Gamepad2, ArrowRight, Trophy, Flame, Sparkles, Library,
-  Globe, Brain as BrainIcon, Clapperboard,
+  Globe, Brain as BrainIcon, Clapperboard, CalendarDays,
 } from "lucide-react";
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
@@ -100,6 +100,14 @@ type GameButton = {
 };
 
 const GAME_BUTTONS: GameButton[] = [
+  {
+    href: "/daily",
+    title: "Daily Challenge",
+    tagline: "One game a day · build your streak",
+    icon: <CalendarDays size={22} strokeWidth={2} />,
+    tint: "#f97316",
+    bg: "linear-gradient(135deg, #f97316 0%, #f43f5e 100%)",
+  },
   {
     href: "/trivia/geo-clone",
     title: "GeoClone",
