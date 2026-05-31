@@ -11,12 +11,13 @@ import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
 import { simulateBotTimeline, type BotTickEvent } from "@/lib/multiplayer/bot";
 import { updateRatings, updateRatingsVsBots, botRatingForLevel, type EloPlayer, type EloUpdate } from "@/lib/multiplayer/elo";
-import { RANKED_LADDER, type SprintAdapter, type ScoreResult } from "@/lib/multiplayer/types";
+import { RANKED_LADDER, type GhostRun, type SprintAdapter, type ScoreResult } from "@/lib/multiplayer/types";
+import { GhostChallengeButton } from "@/components/games/GhostChallengeButton";
 import { QueueRoom, type QueueSlot } from "./QueueRoom";
 import { LiveScoreTicker, type TickerPlayer } from "./LiveScoreTicker";
 import { Podium, type PodiumPlayer } from "./Podium";
 
-type Phase = "auth" | "select" | "queue" | "countdown" | "playing" | "submitting" | "result";
+type Phase = "auth" | "select" | "queue" | "countdown" | "playing" | "submitting" | "result" | "ghostIntro";
 
 const GAME_MS = 30_000;
 const QUEUE_GRACE_MS = 5_000;
@@ -65,7 +66,15 @@ function denseRanks(scores: number[]): number[] {
   return scores.map((s) => rankFor.get(s)!);
 }
 
-export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, A> }) {
+export function MultiplayerShell<Q, A>({
+  adapter,
+  mode = "live",
+  ghostRun,
+}: {
+  adapter: SprintAdapter<Q, A>;
+  mode?: "live" | "ghost";
+  ghostRun?: GhostRun;
+}) {
   const router = useRouter();
 
   const [phase, setPhase] = useState<Phase>("auth");
@@ -96,6 +105,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
   const gameActiveRef = useRef(false);
   const submittedRef = useRef(false);
   const botTimelinesRef = useRef<Record<number, BotTickEvent[]>>({});
+  const recordedTimelineRef = useRef<BotTickEvent[]>([]);
   const playStartRef = useRef(0);
   const allocRef = useRef<QueueAlloc | null>(null);
   const presenceRef = useRef<Record<number, PresenceMeta>>({});
@@ -105,6 +115,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
   useEffect(() => { presenceRef.current = presenceSlots; }, [presenceSlots]);
 
   const store = adapter.storeKey === "trivia" ? triviaStore : brainTrainingStore;
+  const myName = profile?.displayName ?? "You";
 
   // ── Auth gate ─────────────────────────────────────────────────────────────
 
@@ -113,6 +124,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
     if (!supabase) {
       setAuthChecked(true);
       setSignedIn(false);
+      if (mode === "ghost") setPhase("ghostIntro");
       return;
     }
     supabase.auth.getSession().then(({ data }) => {
@@ -127,7 +139,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
           displayName: cachedName ?? meta.username ?? `learner-${userId.slice(0, 8)}`,
           avatarUrl: cachedAvatar ?? meta.avatar_url ?? null,
         });
-        setPhase("select");
+        setPhase(mode === "ghost" ? "ghostIntro" : "select");
         fetch("/api/profile", { cache: "no-store" })
           .then((r) => (r.ok ? r.json() : null))
           .then((d) => {
@@ -145,11 +157,11 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
           .catch(() => {});
       } else {
         setSignedIn(false);
-        setPhase("auth");
+        setPhase(mode === "ghost" ? "ghostIntro" : "auth");
       }
       setAuthChecked(true);
     });
-  }, []);
+  }, [mode]);
 
   const teardownChannel = useCallback(() => {
     const ch = channelRef.current;
@@ -417,20 +429,84 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
   const opponentScoresRef = useRef<Record<number, number>>({});
   useEffect(() => { opponentScoresRef.current = opponentScores; }, [opponentScores]);
 
+  // ── Finish a ghost duel (local only — no queue, no rating write) ──────────
+
+  const finishGhost = useCallback(() => {
+    if (!ghostRun) return;
+    const { score, correct } = liveRef.current;
+
+    const xpAward = adapter.xpFor(correct, score);
+    if (signedIn && xpAward > 0) {
+      store.getState().addXp(xpAward);
+      awardQuestProgress("xp", xpAward);
+      if (correct > 0) awardQuestProgress("correct", correct);
+      pushLeagueXp(xpAward);
+    }
+
+    const ranks = denseRanks([score, ghostRun.score]);
+    setFinalResult({
+      matchId: ghostRun.id,
+      status: "finished",
+      level: ghostRun.level,
+      players: [
+        {
+          slot: 0,
+          userId,
+          isBot: false,
+          displayName: myName,
+          avatarUrl: profile?.avatarUrl ?? null,
+          score,
+          correct,
+          rank: ranks[0],
+          eloBefore: null,
+          eloAfter: null,
+        },
+        {
+          slot: 1,
+          userId: null,
+          isBot: false,
+          displayName: ghostRun.displayName,
+          avatarUrl: ghostRun.avatarUrl,
+          score: ghostRun.score,
+          correct: ghostRun.correct,
+          rank: ranks[1],
+          eloBefore: null,
+          eloAfter: null,
+        },
+      ],
+    });
+    setPhase("result");
+  }, [ghostRun, adapter, signedIn, store, userId, myName, profile]);
+
   // ── End game (time up) ────────────────────────────────────────────────────
 
   const endGame = useCallback(() => {
     if (!gameActiveRef.current) return;
     gameActiveRef.current = false;
     adapter.onGameEnd?.();
+    if (mode === "ghost") {
+      finishGhost();
+      return;
+    }
     const a = allocRef.current;
     if (!a) return;
     void submitResult(a);
-  }, [adapter, submitResult]);
+  }, [adapter, submitResult, mode, finishGhost]);
 
   // ── Countdown → playing ───────────────────────────────────────────────────
 
   const startCountdown = useCallback(() => { setPhase("countdown"); }, []);
+
+  const startGhost = useCallback(() => {
+    if (!ghostRun) return;
+    const a: QueueAlloc = { matchId: ghostRun.id, seed: ghostRun.seed, level: ghostRun.level, slotIndex: 0 };
+    setAlloc(a);
+    allocRef.current = a;
+    setLevel(ghostRun.level);
+    setPresenceSlots({});
+    submittedRef.current = false;
+    startCountdown();
+  }, [ghostRun, startCountdown]);
 
   useEffect(() => {
     if (phase !== "countdown") return;
@@ -445,6 +521,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
       } else {
         timeouts.push(setTimeout(() => {
           liveRef.current = { score: 0, correct: 0 };
+          recordedTimelineRef.current = [];
           setDispScore(0);
           setOpponentScores({});
           submittedRef.current = false;
@@ -456,18 +533,23 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
           setQuestions(qs);
           setQuestionIndex(0);
 
-          const tuning = adapter.levels.find((l) => l.id === a.level)?.botTuning;
-          const occupied = new Set(Object.keys(presenceRef.current).map(Number));
-          const botMap: Record<number, BotTickEvent[]> = {};
-          const botInitial: Record<number, number> = {};
-          for (let s = 0; s < 4; s++) {
-            if (!occupied.has(s)) {
-              botMap[s] = tuning ? simulateBotTimeline(a.seed, tuning, GAME_MS, s) : [];
-              botInitial[s] = 0;
+          if (mode === "ghost" && ghostRun) {
+            botTimelinesRef.current = { 1: ghostRun.timeline };
+            setBotScores({ 1: 0 });
+          } else {
+            const tuning = adapter.levels.find((l) => l.id === a.level)?.botTuning;
+            const occupied = new Set(Object.keys(presenceRef.current).map(Number));
+            const botMap: Record<number, BotTickEvent[]> = {};
+            const botInitial: Record<number, number> = {};
+            for (let s = 0; s < 4; s++) {
+              if (!occupied.has(s)) {
+                botMap[s] = tuning ? simulateBotTimeline(a.seed, tuning, GAME_MS, s) : [];
+                botInitial[s] = 0;
+              }
             }
+            botTimelinesRef.current = botMap;
+            setBotScores(botInitial);
           }
-          botTimelinesRef.current = botMap;
-          setBotScores(botInitial);
 
           setRemainingMs(GAME_MS);
           gameActiveRef.current = true;
@@ -478,7 +560,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
     };
     timeouts.push(setTimeout(step, 600));
     return () => timeouts.forEach(clearTimeout);
-  }, [phase, adapter]);
+  }, [phase, adapter, mode, ghostRun]);
 
   // ── Playing phase: timers ─────────────────────────────────────────────────
 
@@ -543,6 +625,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
     const live = liveRef.current;
     live.score += result.points;
     if (result.correct) live.correct++;
+    recordedTimelineRef.current.push({ atMs: Date.now() - playStartRef.current, scoreDelta: result.points });
     setDispScore(live.score);
     setFeedback(result);
 
@@ -700,8 +783,12 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
     setBotScores({});
     setQuestions([]);
     setQuestionIndex(0);
+    if (mode === "ghost") {
+      startGhost();
+      return;
+    }
     void enterQueue(level);
-  }, [teardownChannel, enterQueue, level]);
+  }, [teardownChannel, enterQueue, level, mode, startGhost]);
 
   // ── Derived view models ───────────────────────────────────────────────────
 
@@ -717,6 +804,12 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
 
   const tickerPlayers: TickerPlayer[] = (() => {
     if (!alloc) return [];
+    if (mode === "ghost" && ghostRun) {
+      return [
+        { slot: 0, displayName: myName, avatarUrl: profile?.avatarUrl ?? null, isBot: false, score: dispScore, isMe: true },
+        { slot: 1, displayName: ghostRun.displayName, avatarUrl: ghostRun.avatarUrl, isBot: false, score: botScores[1] ?? 0, isMe: false },
+      ];
+    }
     const out: TickerPlayer[] = [];
     for (let s = 0; s < 4; s++) {
       const presence = presenceSlots[s];
@@ -750,7 +843,39 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
     return <div className="mx-auto max-w-md px-4 pt-12 text-center text-sm text-muted">Loading…</div>;
   }
 
-  if (phase === "auth" || !signedIn) {
+  if (mode === "ghost" && ghostRun && phase === "ghostIntro") {
+    return (
+      <div className="mx-auto max-w-md px-4 pt-10 pb-8">
+        <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--accent)" }}>
+          Ghost duel
+        </p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight">{adapter.displayName}</h1>
+        <p className="mt-2 text-sm text-muted">
+          {ghostRun.displayName} scored{" "}
+          <span className="font-bold text-fg">{ghostRun.score}</span> ({ghostRun.correct} correct). Same
+          questions, same clock — beat it.
+        </p>
+        {!signedIn && (
+          <p className="mt-2 text-xs text-muted">Playing as a guest — sign in to save your stats and challenge back.</p>
+        )}
+        <button
+          onClick={startGhost}
+          className="mt-6 w-full rounded-2xl py-4 text-sm font-bold text-white transition-all active:scale-[0.98]"
+          style={{ background: "var(--accent)" }}
+        >
+          Start the duel
+        </button>
+        <button
+          onClick={() => router.push("/")}
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-3.5 text-sm font-medium"
+        >
+          <ArrowLeft size={15} /> Back to Slubstack
+        </button>
+      </div>
+    );
+  }
+
+  if (mode === "live" && (phase === "auth" || !signedIn)) {
     return (
       <div className="mx-auto max-w-md px-4 pt-10 pb-8">
         <h1 className="text-2xl font-bold tracking-tight">{adapter.displayName}</h1>
@@ -860,13 +985,29 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
       eloBefore: p.eloBefore,
       eloAfter: p.eloAfter,
     }));
+    const canChallenge = signedIn && recordedTimelineRef.current.length > 0 && !!allocRef.current;
     return (
       <Podium
         players={podiumPlayers}
         currentUserId={userId}
         gameDisplayName={adapter.displayName}
         onPlayAgainAction={playAgain}
-        onBackAction={resetToSelect}
+        onBackAction={mode === "ghost" ? () => router.push("/") : resetToSelect}
+        backLabel={mode === "ghost" ? "Back to Slubstack" : undefined}
+        playAgainLabel={mode === "ghost" ? "Rematch this ghost" : undefined}
+        extraAction={
+          canChallenge ? (
+            <GhostChallengeButton
+              gameKind={adapter.gameKind}
+              gameDisplayName={adapter.displayName}
+              level={finalResult.level}
+              seed={allocRef.current!.seed}
+              score={liveRef.current.score}
+              correct={liveRef.current.correct}
+              timeline={recordedTimelineRef.current}
+            />
+          ) : null
+        }
       />
     );
   }
