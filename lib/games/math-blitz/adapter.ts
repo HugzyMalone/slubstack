@@ -9,6 +9,7 @@ const ROUND_QUESTIONS = 60;
 export const mathBlitzAdapter: SprintAdapter<Question, number> = {
   kind: "sprint",
   gameKind: "math_blitz",
+  ratingKind: "ranked",
   displayName: "Math Blitz",
   routePath: "/brain-training",
   storeKey: "brainTraining",

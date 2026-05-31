@@ -19,6 +19,7 @@ const VALID_KINDS: ReadonlySet<GameKind> = new Set([
 const VALID_LADDERS: ReadonlySet<LadderKind> = new Set([
   ...VALID_KINDS,
   "trivia",
+  "ranked",
 ]);
 
 type PlayerRow = {
@@ -85,6 +86,7 @@ export async function POST(request: Request, { params }: Params) {
     bot_inserts?: unknown;
     player_updates?: unknown;
     rating_upserts?: unknown;
+    allow_bot_rating?: unknown;
   };
   try {
     body = await request.json();
@@ -92,7 +94,7 @@ export async function POST(request: Request, { params }: Params) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { game_kind, rating_kind, humans_count, bot_inserts, player_updates, rating_upserts } = body;
+  const { game_kind, rating_kind, humans_count, bot_inserts, player_updates, rating_upserts, allow_bot_rating } = body;
   if (typeof game_kind !== "string" || !VALID_KINDS.has(game_kind as GameKind)) {
     return NextResponse.json({ error: "Invalid game_kind" }, { status: 400 });
   }
@@ -148,6 +150,9 @@ export async function POST(request: Request, { params }: Params) {
   };
   if (ratingKind !== null && ratingKind !== game_kind) {
     rpcParams.p_rating_kind = ratingKind;
+  }
+  if (allow_bot_rating === true) {
+    rpcParams.p_allow_bot_rating = true;
   }
   const { error: rpcError } = await admin.rpc("finalise_live_match", rpcParams);
 

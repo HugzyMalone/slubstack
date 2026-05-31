@@ -16,7 +16,12 @@ export type GameKind =
   | "geo_clone"
   | "batman_shakespeare";
 
-export type LadderKind = GameKind | "trivia";
+export type LadderKind = GameKind | "trivia" | "ranked";
+
+// Single cross-game ladder: every sprint game rates into one shared identity so
+// a player has one rating across all of them. Splitting back to per-game ladders
+// later is a config change — give each adapter its own ratingKind again.
+export const RANKED_LADDER = "ranked" satisfies LadderKind;
 
 /** End-of-game result a `shareLine` turns into a share card. */
 export type GameResult = {

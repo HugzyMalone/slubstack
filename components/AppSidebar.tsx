@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserCircle2, Brain, Sparkles, Globe, Film } from "lucide-react";
+import { UserCircle2, Brain, Sparkles, Globe, Film, Swords } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { useStore } from "zustand";
 import { cn } from "@/lib/utils";
@@ -258,6 +258,14 @@ export function AppSidebar() {
       node: <Film size={18} strokeWidth={2.4} />,
       bg: "linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)",
       match: (p: string) => p.startsWith("/trivia") && !p.startsWith("/trivia/geo-clone"),
+    },
+    {
+      href: "/ranked",
+      label: "Ranked",
+      kind: "badge",
+      node: <Swords size={18} strokeWidth={2.4} />,
+      bg: "linear-gradient(135deg, #6366f1 0%, #4338ca 100%)",
+      match: (p: string) => p.startsWith("/ranked"),
     },
   ];
 

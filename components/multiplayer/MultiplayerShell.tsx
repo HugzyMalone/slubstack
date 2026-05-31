@@ -10,8 +10,8 @@ import { brainTrainingStore, triviaStore } from "@/lib/store";
 import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
 import { simulateBotTimeline, type BotTickEvent } from "@/lib/multiplayer/bot";
-import { updateRatings, type EloPlayer } from "@/lib/multiplayer/elo";
-import type { SprintAdapter, ScoreResult } from "@/lib/multiplayer/types";
+import { updateRatings, updateRatingsVsBots, botRatingForLevel, type EloPlayer, type EloUpdate } from "@/lib/multiplayer/elo";
+import { RANKED_LADDER, type SprintAdapter, type ScoreResult } from "@/lib/multiplayer/types";
 import { QueueRoom, type QueueSlot } from "./QueueRoom";
 import { LiveScoreTicker, type TickerPlayer } from "./LiveScoreTicker";
 import { Podium, type PodiumPlayer } from "./Podium";
@@ -21,6 +21,11 @@ type Phase = "auth" | "select" | "queue" | "countdown" | "playing" | "submitting
 const GAME_MS = 30_000;
 const QUEUE_GRACE_MS = 5_000;
 const DEFAULT_RATING = 1200;
+
+// Rated solo-vs-bot matches are OFF by default — they only write to live
+// ratings when explicitly enabled via env. Flip NEXT_PUBLIC_RANKED_BOT_RATING
+// to "true" in the deployment to let a lone human's rating move against bots.
+const RANKED_BOT_RATING_ENABLED = process.env.NEXT_PUBLIC_RANKED_BOT_RATING === "true";
 
 type MatchPlayerResp = {
   slot: number;
@@ -241,12 +246,15 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
         { rating: number; matches: number; wins: number; draws: number; losses: number }
       >();
       const ratingLadder = adapter.ratingKind ?? adapter.gameKind;
+      // The cross-game ranked ladder is one bracket per player; per-game ladders
+      // keep their per-level brackets. Match level still drives bot difficulty.
+      const ladderLevel = ratingLadder === RANKED_LADDER ? 1 : a.level;
       if (supabase && humanIds.length > 0) {
         const { data: rows } = await supabase
           .from("live_ratings")
           .select("user_id, rating, matches, wins, draws, losses")
           .eq("game_kind", ratingLadder)
-          .eq("level", a.level)
+          .eq("level", ladderLevel)
           .in("user_id", humanIds);
         for (const r of rows ?? []) {
           ratingByUser.set(r.user_id, {
@@ -259,27 +267,58 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
         }
       }
 
-      const eloInput: EloPlayer[] = slotsRanked.map((s) => {
-        if (s.isBot) {
-          return { userId: `bot-${s.slot}`, rating: 0, matches: 0, score: s.score, isBot: true };
-        }
-        const existing = ratingByUser.get(s.userId!);
-        return {
-          userId: s.userId!,
+      const humanSlots = slotsRanked.filter((s) => !s.isBot);
+      // Solo ranked: a lone human is rated against the replay bots so the
+      // ladder still moves when no other humans are queued — but only when the
+      // rated-bot path is explicitly enabled. Off by default, so solo matches
+      // never write bot-influenced ratings to prod.
+      const allowBotRating = RANKED_BOT_RATING_ENABLED && humanSlots.length === 1;
+
+      let eloByUser: Map<string, EloUpdate>;
+      if (allowBotRating) {
+        const me = humanSlots[0];
+        const existing = ratingByUser.get(me.userId!);
+        const human: EloPlayer = {
+          userId: me.userId!,
           rating: existing?.rating ?? DEFAULT_RATING,
           matches: existing?.matches ?? 0,
-          score: s.score,
+          score: me.score,
           isBot: false,
         };
-      });
+        const bots: EloPlayer[] = slotsRanked
+          .filter((s) => s.isBot)
+          .map((s) => ({
+            userId: `bot-${s.slot}`,
+            rating: botRatingForLevel(a.level),
+            matches: 0,
+            score: s.score,
+            isBot: true,
+          }));
+        const update = updateRatingsVsBots(human, bots);
+        eloByUser = new Map([[update.userId, update]]);
+      } else {
+        const eloInput: EloPlayer[] = slotsRanked.map((s) => {
+          if (s.isBot) {
+            return { userId: `bot-${s.slot}`, rating: 0, matches: 0, score: s.score, isBot: true };
+          }
+          const existing = ratingByUser.get(s.userId!);
+          return {
+            userId: s.userId!,
+            rating: existing?.rating ?? DEFAULT_RATING,
+            matches: existing?.matches ?? 0,
+            score: s.score,
+            isBot: false,
+          };
+        });
+        eloByUser = new Map(updateRatings(eloInput).map((u) => [u.userId, u]));
+      }
 
-      const eloUpdates = updateRatings(eloInput);
-      const eloByUser = new Map(eloUpdates.map((u) => [u.userId, u]));
-
-      const humanSlots = slotsRanked.filter((s) => !s.isBot);
       const humanRanks = humanSlots.map((s) => s.rank);
       const minHumanRank = humanRanks.length ? Math.min(...humanRanks) : 0;
       const maxHumanRank = humanRanks.length ? Math.max(...humanRanks) : 0;
+      const allRanks = slotsRanked.map((s) => s.rank);
+      const minRank = allRanks.length ? Math.min(...allRanks) : 0;
+      const maxRank = allRanks.length ? Math.max(...allRanks) : 0;
 
       const botInserts = slotsRanked
         .filter((s) => s.isBot)
@@ -315,7 +354,12 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
         losses: number;
       }> = [];
 
-      if (humansCount >= 2) {
+      if (humansCount >= 2 || allowBotRating) {
+        // vs-bot W/D/L ranks the human against every slot; the human-vs-human
+        // path keeps ranking against humans only.
+        const lo = allowBotRating ? minRank : minHumanRank;
+        const hi = allowBotRating ? maxRank : maxHumanRank;
+        const rankPool = allowBotRating ? slotsRanked : humanSlots;
         for (const s of humanSlots) {
           const elo = eloByUser.get(s.userId!);
           if (!elo) continue;
@@ -325,14 +369,14 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
           const baseDraws = existing?.draws ?? 0;
           const baseLosses = existing?.losses ?? 0;
 
-          const uniquelyHeld = humanRanks.filter((r) => r === s.rank).length === 1;
-          const isWin = uniquelyHeld && s.rank === minHumanRank;
-          const isLoss = uniquelyHeld && s.rank === maxHumanRank;
+          const uniquelyHeld = rankPool.filter((r) => r.rank === s.rank).length === 1;
+          const isWin = uniquelyHeld && s.rank === lo;
+          const isLoss = uniquelyHeld && s.rank === hi;
           const isDraw = !isWin && !isLoss;
 
           ratingUpserts.push({
             user_id: s.userId!,
-            level: a.level,
+            level: ladderLevel,
             rating: elo.after,
             matches: baseMatches + 1,
             wins: baseWins + (isWin ? 1 : 0),
@@ -352,6 +396,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
           bot_inserts: botInserts,
           player_updates: playerUpdates,
           rating_upserts: ratingUpserts,
+          allow_bot_rating: allowBotRating,
         }),
       });
       const data = (await res.json()) as ResultResp | { error: string };

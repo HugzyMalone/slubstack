@@ -12,7 +12,7 @@ const scoring: ScoringRule<HoLQuestion, 0 | 1> = (answer, question) => {
 export const higherLowerAdapter: SprintAdapter<HoLQuestion, 0 | 1> = {
   kind: "sprint",
   gameKind: "higher_lower",
-  ratingKind: "trivia",
+  ratingKind: "ranked",
   displayName: "Higher or Lower",
   routePath: "/trivia",
   storeKey: "trivia",

@@ -12,6 +12,7 @@ const VALID_LADDERS: ReadonlySet<LadderKind> = new Set<LadderKind>([
   "geo_clone",
   "batman_shakespeare",
   "trivia",
+  "ranked",
 ] satisfies (LadderKind | GameKind)[]);
 
 export async function GET(request: NextRequest) {
