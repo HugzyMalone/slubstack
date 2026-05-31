@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { ShareCardInput } from "../share";
-import type { BotTuning } from "./bot";
+import type { BotTickEvent, BotTuning } from "./bot";
 import type { ScoreResult, ScoringRule } from "./scoring";
 
 export type { BotTuning } from "./bot";
@@ -78,3 +78,16 @@ export type RoundAdapter<Q, A> = {
 };
 
 export type GameAdapter<Q, A> = SprintAdapter<Q, A> | RoundAdapter<Q, A>;
+
+/** A recorded sprint run, replayed as a deterministic ghost in a ghost duel. */
+export type GhostRun = {
+  id: string;
+  gameKind: GameKind;
+  level: number;
+  seed: string;
+  score: number;
+  correct: number;
+  timeline: BotTickEvent[];
+  displayName: string;
+  avatarUrl: string | null;
+};

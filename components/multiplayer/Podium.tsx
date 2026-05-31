@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Bot, RotateCcw, ArrowLeft, Trophy } from "lucide-react";
 
 export type PodiumPlayer = {
@@ -23,6 +23,8 @@ type Props = {
   onPlayAgainAction: () => void;
   onBackAction: () => void;
   backLabel?: string;
+  playAgainLabel?: string;
+  extraAction?: ReactNode;
 };
 
 function useCountUp(target: number | null, durationMs = 1200): number | null {
@@ -121,7 +123,7 @@ function EloRow({ before, after }: { before: number; after: number }) {
   );
 }
 
-export function Podium({ players, currentUserId, gameDisplayName, onPlayAgainAction, onBackAction, backLabel }: Props) {
+export function Podium({ players, currentUserId, gameDisplayName, onPlayAgainAction, onBackAction, backLabel, playAgainLabel, extraAction }: Props) {
   const sorted = [...players].sort((a, b) => a.rank - b.rank);
   const allRanks = sorted.map((p) => p.rank);
 
@@ -188,13 +190,14 @@ export function Podium({ players, currentUserId, gameDisplayName, onPlayAgainAct
         </div>
 
         <div className="space-y-2.5">
+          {extraAction}
           <button
             onClick={onPlayAgainAction}
             className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-white transition-all active:scale-[0.98]"
             style={{ background: "var(--accent)" }}
           >
             <RotateCcw size={15} />
-            Play again
+            {playAgainLabel ?? "Play again"}
           </button>
           <button
             onClick={onBackAction}
