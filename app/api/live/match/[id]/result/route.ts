@@ -19,6 +19,7 @@ const VALID_KINDS: ReadonlySet<GameKind> = new Set([
 const VALID_LADDERS: ReadonlySet<LadderKind> = new Set([
   ...VALID_KINDS,
   "trivia",
+  "ranked",
 ]);
 
 type PlayerRow = {

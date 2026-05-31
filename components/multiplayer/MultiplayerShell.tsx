@@ -11,7 +11,7 @@ import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
 import { simulateBotTimeline, type BotTickEvent } from "@/lib/multiplayer/bot";
 import { updateRatings, updateRatingsVsBots, botRatingForLevel, type EloPlayer, type EloUpdate } from "@/lib/multiplayer/elo";
-import type { SprintAdapter, ScoreResult } from "@/lib/multiplayer/types";
+import { RANKED_LADDER, type SprintAdapter, type ScoreResult } from "@/lib/multiplayer/types";
 import { QueueRoom, type QueueSlot } from "./QueueRoom";
 import { LiveScoreTicker, type TickerPlayer } from "./LiveScoreTicker";
 import { Podium, type PodiumPlayer } from "./Podium";
@@ -241,12 +241,15 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
         { rating: number; matches: number; wins: number; draws: number; losses: number }
       >();
       const ratingLadder = adapter.ratingKind ?? adapter.gameKind;
+      // The cross-game ranked ladder is one bracket per player; per-game ladders
+      // keep their per-level brackets. Match level still drives bot difficulty.
+      const ladderLevel = ratingLadder === RANKED_LADDER ? 1 : a.level;
       if (supabase && humanIds.length > 0) {
         const { data: rows } = await supabase
           .from("live_ratings")
           .select("user_id, rating, matches, wins, draws, losses")
           .eq("game_kind", ratingLadder)
-          .eq("level", a.level)
+          .eq("level", ladderLevel)
           .in("user_id", humanIds);
         for (const r of rows ?? []) {
           ratingByUser.set(r.user_id, {
@@ -366,7 +369,7 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
 
           ratingUpserts.push({
             user_id: s.userId!,
-            level: a.level,
+            level: ladderLevel,
             rating: elo.after,
             matches: baseMatches + 1,
             wins: baseWins + (isWin ? 1 : 0),

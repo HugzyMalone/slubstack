@@ -12,7 +12,7 @@ const scoring: ScoringRule<BatShakeQuestion, BatShakeSource> = (answer, question
 export const batmanShakespeareAdapter: SprintAdapter<BatShakeQuestion, BatShakeSource> = {
   kind: "sprint",
   gameKind: "batman_shakespeare",
-  ratingKind: "trivia",
+  ratingKind: "ranked",
   displayName: "Batman or Shakespeare?",
   routePath: "/trivia",
   storeKey: "trivia",

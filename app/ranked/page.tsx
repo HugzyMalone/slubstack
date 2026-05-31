@@ -5,14 +5,11 @@ import Link from "next/link";
 import { ArrowLeft, Swords } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
-type LadderTab = { key: string; label: string };
+// One cross-game ladder today. Splitting per game later = add { mode: "live",
+// kind } tabs here; the board + level controls already handle them.
+type RankedTab = { key: string; label: string; mode: "global" | "live"; kind?: string };
 
-const LADDERS: LadderTab[] = [
-  { key: "global", label: "Global" },
-  { key: "math_blitz", label: "Math Blitz" },
-  { key: "trivia", label: "Trivia" },
-  { key: "geo_clone", label: "GeoClone" },
-];
+const TABS: RankedTab[] = [{ key: "ranked", label: "Ranked", mode: "global" }];
 
 type Entry = {
   rank: number;
@@ -49,11 +46,13 @@ function Avatar({ url, name }: { url: string | null; name: string }) {
 }
 
 export default function RankedPage() {
-  const [tab, setTab] = useState<string>("global");
+  const [tabKey, setTabKey] = useState<string>(TABS[0].key);
   const [level, setLevel] = useState<number>(1);
   const [entries, setEntries] = useState<Entry[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+
+  const tab = TABS.find((t) => t.key === tabKey) ?? TABS[0];
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -65,9 +64,9 @@ export default function RankedPage() {
     setLoading(true);
     setEntries(null);
     const url =
-      tab === "global"
+      tab.mode === "global"
         ? "/api/ranked/global?limit=50"
-        : `/api/live/leaderboard?kind=${tab}&level=${level}&limit=50`;
+        : `/api/live/leaderboard?kind=${tab.kind}&level=${level}&limit=50`;
     try {
       const res = await fetch(url, { cache: "no-store" });
       const data = await res.json();
@@ -94,27 +93,29 @@ export default function RankedPage() {
           <h1 className="text-2xl font-bold tracking-tight">Ranked</h1>
         </div>
         <p className="mt-1 text-sm text-muted">
-          Competitive Elo rating, separate from XP. Win matches to climb — solo games are rated against the bots.
+          One Elo rating across every ranked game, separate from XP. Win matches to climb — solo games are rated against the bots.
         </p>
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-1.5">
-        {LADDERS.map((l) => (
-          <button
-            key={l.key}
-            onClick={() => setTab(l.key)}
-            className="rounded-full px-3 py-1.5 text-[12px] font-semibold transition-colors"
-            style={{
-              background: tab === l.key ? "var(--accent)" : "var(--border)",
-              color: tab === l.key ? "#fff" : "var(--muted)",
-            }}
-          >
-            {l.label}
-          </button>
-        ))}
-      </div>
+      {TABS.length > 1 && (
+        <div className="mb-4 flex flex-wrap gap-1.5">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTabKey(t.key)}
+              className="rounded-full px-3 py-1.5 text-[12px] font-semibold transition-colors"
+              style={{
+                background: tabKey === t.key ? "var(--accent)" : "var(--border)",
+                color: tabKey === t.key ? "#fff" : "var(--muted)",
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {tab !== "global" && (
+      {tab.mode === "live" && (
         <div className="mb-4 flex gap-1.5">
           {[1, 2, 3].map((lv) => (
             <button

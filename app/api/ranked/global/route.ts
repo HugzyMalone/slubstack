@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { RANKED_LADDER } from "@/lib/multiplayer/types";
 
 type RatingRow = {
   user_id: string;
@@ -9,8 +10,9 @@ type RatingRow = {
   profiles: { username: string | null; avatar_url: string | null } | { username: string | null; avatar_url: string | null }[] | null;
 };
 
-// Global rank = each player's single best ladder rating (least gameable of the
-// aggregation options). Derived from live_ratings; no dedicated table.
+// The cross-game ranked ladder: one rating per player. Reads the shared
+// RANKED_LADDER rows from live_ratings; no dedicated table. The max-dedup is a
+// safety net (one row per user is expected).
 export async function GET(request: NextRequest) {
   const supabase = await getSupabaseServerClient();
   if (!supabase) return NextResponse.json({ error: "Not configured" }, { status: 503 });
@@ -21,6 +23,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await supabase
     .from("live_ratings")
     .select("user_id, game_kind, rating, matches, profiles!inner(username, avatar_url)")
+    .eq("game_kind", RANKED_LADDER)
     .order("rating", { ascending: false })
     .limit(300);
 
