@@ -22,6 +22,11 @@ const GAME_MS = 30_000;
 const QUEUE_GRACE_MS = 5_000;
 const DEFAULT_RATING = 1200;
 
+// Rated solo-vs-bot matches are OFF by default — they only write to live
+// ratings when explicitly enabled via env. Flip NEXT_PUBLIC_RANKED_BOT_RATING
+// to "true" in the deployment to let a lone human's rating move against bots.
+const RANKED_BOT_RATING_ENABLED = process.env.NEXT_PUBLIC_RANKED_BOT_RATING === "true";
+
 type MatchPlayerResp = {
   slot: number;
   userId: string | null;
@@ -264,8 +269,10 @@ export function MultiplayerShell<Q, A>({ adapter }: { adapter: SprintAdapter<Q, 
 
       const humanSlots = slotsRanked.filter((s) => !s.isBot);
       // Solo ranked: a lone human is rated against the replay bots so the
-      // ladder still moves when no other humans are queued.
-      const allowBotRating = humanSlots.length === 1;
+      // ladder still moves when no other humans are queued — but only when the
+      // rated-bot path is explicitly enabled. Off by default, so solo matches
+      // never write bot-influenced ratings to prod.
+      const allowBotRating = RANKED_BOT_RATING_ENABLED && humanSlots.length === 1;
 
       let eloByUser: Map<string, EloUpdate>;
       if (allowBotRating) {
