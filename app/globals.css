@@ -196,3 +196,40 @@ input:focus, textarea:focus {
   font-weight: 500;
   letter-spacing: 0.02em;
 }
+
+/* Wikirace rendered article */
+.wiki-race-html {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--fg);
+}
+.wiki-race-html p { margin: 0 0 0.85em; }
+.wiki-race-html h2,
+.wiki-race-html h3 {
+  margin: 1.1em 0 0.4em;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.wiki-race-html h2 { font-size: 1.2em; }
+.wiki-race-html h3 { font-size: 1.05em; }
+.wiki-race-html ul,
+.wiki-race-html ol { margin: 0 0 0.85em 1.2em; }
+.wiki-race-html li { margin-bottom: 0.25em; }
+.wiki-race-html a[href^="/wiki/"] {
+  color: var(--game);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.wiki-race-html a:not([href^="/wiki/"]) {
+  color: inherit;
+  text-decoration: none;
+  pointer-events: none;
+}
+.wiki-race-html img { display: none; }
+.wiki-race-html table,
+.wiki-race-html .infobox,
+.wiki-race-html sup.reference,
+.wiki-race-html .mw-editsection,
+.wiki-race-html style { display: none; }
+.wiki-race-html figure { margin: 0.6em 0; }
