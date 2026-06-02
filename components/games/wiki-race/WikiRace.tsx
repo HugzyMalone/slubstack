@@ -21,7 +21,7 @@ type Mode = "daily" | "random";
 type Best = { mode: Mode; key: string; clicks: number; seconds: number };
 
 function titleFromHref(href: string): string | null {
-  const m = href.match(/\/wiki\/([^#?]+)/);
+  const m = href.match(/\/wiki\/([^#?]+)/) ?? href.match(/^\.\/([^#?]+)/);
   if (!m) return null;
   const raw = decodeURIComponent(m[1]);
   if (/^(Special|File|Help|Category|Template|Portal|Wikipedia|Talk|User|Module|Draft):/i.test(raw)) return null;
