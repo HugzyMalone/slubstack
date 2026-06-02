@@ -38,11 +38,21 @@ export async function signInAsGuest(): Promise<User | null> {
   const user = data.user;
   const username = guestDisplayName(user.id);
 
-  await fetch("/api/profile", {
+  // The guest needs a profiles row before matchmaking: live_match_players.user_id
+  // is FK'd to profiles(id), so entering a match without it fails the insert.
+  const profileOk = await fetch("/api/profile", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username }),
-  }).catch(() => {});
+  })
+    .then((r) => r.ok)
+    .catch(() => false);
+
+  if (!profileOk) {
+    await supabase.auth.signOut();
+    toast.error("Could not start a guest session. Try again, or sign in.");
+    return null;
+  }
 
   if (typeof window !== "undefined") {
     localStorage.setItem("slubstack_username", username);
