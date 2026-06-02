@@ -13,6 +13,8 @@ import { simulateBotTimeline, type BotTickEvent } from "@/lib/multiplayer/bot";
 import { updateRatings, updateRatingsVsBots, botRatingForLevel, type EloPlayer, type EloUpdate } from "@/lib/multiplayer/elo";
 import { RANKED_LADDER, type GhostRun, type SprintAdapter, type ScoreResult } from "@/lib/multiplayer/types";
 import { GhostChallengeButton } from "@/components/games/GhostChallengeButton";
+import { GuestGate } from "./GuestGate";
+import { isAnonymousUser, profileFromUser } from "@/lib/multiplayer/guest";
 import { QueueRoom, type QueueSlot } from "./QueueRoom";
 import { LiveScoreTicker, type TickerPlayer } from "./LiveScoreTicker";
 import { Podium, type PodiumPlayer } from "./Podium";
@@ -81,6 +83,7 @@ export function MultiplayerShell<Q, A>({
   const [level, setLevel] = useState<number>(adapter.levels[0]?.id ?? 1);
   const [authChecked, setAuthChecked] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [profile, setProfile] = useState<{ displayName: string; avatarUrl: string | null } | null>(null);
 
@@ -111,8 +114,10 @@ export function MultiplayerShell<Q, A>({
   const presenceRef = useRef<Record<number, PresenceMeta>>({});
   const phaseRef = useRef(phase);
 
+  const isGuestRef = useRef(false);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { presenceRef.current = presenceSlots; }, [presenceSlots]);
+  useEffect(() => { isGuestRef.current = isGuest; }, [isGuest]);
 
   const store = adapter.storeKey === "trivia" ? triviaStore : brainTrainingStore;
   const myName = profile?.displayName ?? "You";
@@ -130,6 +135,7 @@ export function MultiplayerShell<Q, A>({
     supabase.auth.getSession().then(({ data }) => {
       if (data.session?.user) {
         setSignedIn(true);
+        setIsGuest(isAnonymousUser(data.session.user));
         setUserId(data.session.user.id);
         const userId = data.session.user.id;
         const meta = data.session.user.user_metadata as { username?: string; avatar_url?: string };
@@ -366,7 +372,7 @@ export function MultiplayerShell<Q, A>({
         losses: number;
       }> = [];
 
-      if (humansCount >= 2 || allowBotRating) {
+      if ((humansCount >= 2 || allowBotRating) && !isGuestRef.current) {
         // vs-bot W/D/L ranks the human against every slot; the human-vs-human
         // path keeps ranking against humans only.
         const lo = allowBotRating ? minRank : minHumanRank;
@@ -877,25 +883,18 @@ export function MultiplayerShell<Q, A>({
 
   if (mode === "live" && (phase === "auth" || !signedIn)) {
     return (
-      <div className="mx-auto max-w-md px-4 pt-10 pb-8">
-        <h1 className="text-2xl font-bold tracking-tight">{adapter.displayName}</h1>
-        <p className="mt-2 text-sm text-muted">
-          Real-time head-to-head against three other players or bots. Sign in to play live.
-        </p>
-        <button
-          onClick={() => router.push("/auth")}
-          className="mt-6 w-full rounded-2xl py-4 text-sm font-bold text-white transition-all active:scale-[0.98]"
-          style={{ background: "var(--accent)" }}
-        >
-          Sign in to play live
-        </button>
-        <button
-          onClick={() => router.push(adapter.routePath)}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-3.5 text-sm font-medium"
-        >
-          <ArrowLeft size={15} /> Back
-        </button>
-      </div>
+      <GuestGate
+        title={adapter.displayName}
+        description="Real-time head-to-head against three other players or bots."
+        backPath={adapter.routePath}
+        onGuestAction={(user) => {
+          setSignedIn(true);
+          setIsGuest(isAnonymousUser(user));
+          setUserId(user.id);
+          setProfile(profileFromUser(user));
+          setPhase("select");
+        }}
+      />
     );
   }
 
@@ -991,6 +990,7 @@ export function MultiplayerShell<Q, A>({
         players={podiumPlayers}
         currentUserId={userId}
         gameDisplayName={adapter.displayName}
+        guestPrompt={isGuest}
         onPlayAgainAction={playAgain}
         onBackAction={mode === "ghost" ? () => router.push("/") : resetToSelect}
         backLabel={mode === "ghost" ? "Back to Slubstack" : undefined}

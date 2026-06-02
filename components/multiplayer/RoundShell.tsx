@@ -4,13 +4,14 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import type { RealtimeChannel } from "@supabase/supabase-js";
-import { ArrowLeft } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { brainTrainingStore, triviaStore } from "@/lib/store";
 import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
 import { updateRatings, type EloPlayer } from "@/lib/multiplayer/elo";
 import type { RoundAdapter } from "@/lib/multiplayer/types";
+import { GuestGate } from "./GuestGate";
+import { isAnonymousUser, profileFromUser } from "@/lib/multiplayer/guest";
 import { QueueRoom, type QueueSlot } from "./QueueRoom";
 import { LiveScoreTicker, type TickerPlayer } from "./LiveScoreTicker";
 import { Podium, type PodiumPlayer } from "./Podium";
@@ -107,6 +108,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
   const [phase, setPhase] = useState<Phase>("auth");
   const [authChecked, setAuthChecked] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [profile, setProfile] = useState<{ displayName: string; avatarUrl: string | null } | null>(null);
 
@@ -139,9 +141,11 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
   const roundIndexRef = useRef(0);
   const playStartRef = useRef(0);
 
+  const isGuestRef = useRef(false);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { presenceRef.current = presenceSlots; }, [presenceSlots]);
   useEffect(() => { roundIndexRef.current = roundIndex; }, [roundIndex]);
+  useEffect(() => { isGuestRef.current = isGuest; }, [isGuest]);
 
   const store = adapter.storeKey === "trivia" ? triviaStore : brainTrainingStore;
 
@@ -157,6 +161,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
     supabase.auth.getSession().then(({ data }) => {
       if (data.session?.user) {
         setSignedIn(true);
+        setIsGuest(isAnonymousUser(data.session.user));
         setUserId(data.session.user.id);
         const userId = data.session.user.id;
         const meta = data.session.user.user_metadata as { username?: string; avatar_url?: string };
@@ -326,7 +331,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
         losses: number;
       }> = [];
 
-      if (humansCount >= 2) {
+      if (humansCount >= 2 && !isGuestRef.current) {
         for (const s of slotsRanked) {
           const elo = eloByUser.get(s.userId!);
           if (!elo) continue;
@@ -705,25 +710,18 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
 
   if (phase === "auth" || !signedIn) {
     return (
-      <div className="mx-auto max-w-md px-4 pt-10 pb-8">
-        <h1 className="text-2xl font-bold tracking-tight">{adapter.displayName}</h1>
-        <p className="mt-2 text-sm text-muted">
-          Three rounds of explore-and-guess against up to seven other players. Sign in to play live.
-        </p>
-        <button
-          onClick={() => router.push("/stats")}
-          className="mt-6 w-full rounded-2xl py-4 text-sm font-bold text-white transition-all active:scale-[0.98]"
-          style={{ background: "var(--accent)" }}
-        >
-          Sign in to play live
-        </button>
-        <button
-          onClick={() => router.push("/trivia")}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-3.5 text-sm font-medium"
-        >
-          <ArrowLeft size={15} /> Back
-        </button>
-      </div>
+      <GuestGate
+        title={adapter.displayName}
+        description="Three rounds of explore-and-guess against up to seven other players."
+        backPath="/trivia"
+        onGuestAction={(user) => {
+          setSignedIn(true);
+          setIsGuest(isAnonymousUser(user));
+          setUserId(user.id);
+          setProfile(profileFromUser(user));
+          setPhase("alloc");
+        }}
+      />
     );
   }
 
@@ -786,6 +784,7 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
         players={podiumPlayers}
         currentUserId={userId}
         gameDisplayName={adapter.displayName}
+        guestPrompt={isGuest}
         onPlayAgainAction={playAgain}
         onBackAction={resetToHome}
         backLabel="Back to menu"
