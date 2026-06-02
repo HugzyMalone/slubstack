@@ -60,6 +60,7 @@ export function BottomNav() {
     pathname?.startsWith("/brain-training/math-blitz") ||
     pathname?.startsWith("/brain-training/connections") ||
     pathname?.startsWith("/games/draw") ||
+    pathname?.startsWith("/games/type-racer") ||
     pathname?.startsWith("/trivia/actors") ||
     pathname?.startsWith("/trivia/flags") ||
     pathname?.startsWith("/trivia/albums") ||

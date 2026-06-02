@@ -12,6 +12,7 @@ const VALID_KINDS: ReadonlySet<GameKind> = new Set([
   "year_guesser",
   "geo_clone",
   "batman_shakespeare",
+  "type_racer",
 ]);
 
 const MAX_PLAYERS: Record<GameKind, number> = {
@@ -23,6 +24,7 @@ const MAX_PLAYERS: Record<GameKind, number> = {
   year_guesser: 4,
   geo_clone: 8,
   batman_shakespeare: 4,
+  type_racer: 4,
 };
 
 export async function POST(request: NextRequest) {

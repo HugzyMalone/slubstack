@@ -7,6 +7,7 @@ import { albumsAdapter } from "./albums/adapter";
 import { higherLowerAdapter } from "./higher-lower/adapter";
 import { yearGuesserAdapter } from "./year-guesser/adapter";
 import { batmanShakespeareAdapter } from "./batman-shakespeare/adapter";
+import { typeRacerAdapter } from "./type-racer/adapter";
 
 export type AnySprintAdapter = SprintAdapter<unknown, unknown>;
 
@@ -26,6 +27,7 @@ export const DAILY_ROTATION: DailyRotationEntry[] = [
   { adapter: erase(albumsAdapter), level: 1 },
   { adapter: erase(higherLowerAdapter), level: 1 },
   { adapter: erase(batmanShakespeareAdapter), level: 1 },
+  { adapter: erase(typeRacerAdapter), level: 1 },
 ];
 
 const REGISTRY: Record<string, AnySprintAdapter> = Object.fromEntries(
