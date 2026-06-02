@@ -101,7 +101,7 @@ export function Semantle() {
       return;
     }
     if (guesses.some((g) => g.word === word)) {
-      toast("Already guessed", { icon: "🔁" });
+      toast("Already guessed");
       setInput("");
       return;
     }
@@ -144,7 +144,6 @@ export function Semantle() {
     () =>
       buildShareCard({
         title: `Slubstack Semantle #${dayIdx + 1}`,
-        correct: won ? guesses.length : undefined,
         footerTag: won
           ? `Solved in ${guesses.length} guesses · slubstack.com`
           : "slubstack.com",
