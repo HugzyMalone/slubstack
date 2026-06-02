@@ -27,7 +27,7 @@ export const typeRacerAdapter: SprintAdapter<TypePassage, string> = {
   routePath: "/games/type-racer",
   storeKey: "brainTraining",
   levels: [
-    { id: 1, label: "Race", botTuning: { minGapMs: 4000, maxGapMs: 7000, minDelta: 35, maxDelta: 70 } },
+    { id: 1, label: "Race", botTuning: { minGapMs: 8000, maxGapMs: 12000, minDelta: 40, maxDelta: 75 } },
   ],
   PlayBoard,
   generateQuestions: (_level, seed) => {
@@ -43,6 +43,5 @@ export const typeRacerAdapter: SprintAdapter<TypePassage, string> = {
     total: result.total,
     pb: result.pb,
     history: result.history,
-    footerTag: `${Math.round(result.score / Math.max(1, result.total))} avg WPM · slubstack.com`,
   }),
 };
