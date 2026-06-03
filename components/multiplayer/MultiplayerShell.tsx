@@ -10,6 +10,7 @@ import { brainTrainingStore, triviaStore } from "@/lib/store";
 import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
 import { simulateBotTimeline, type BotTickEvent } from "@/lib/multiplayer/bot";
+import { mulberry32 } from "@/lib/multiplayer/rng";
 import { updateRatings, updateRatingsVsBots, botRatingForLevel, type EloPlayer, type EloUpdate } from "@/lib/multiplayer/elo";
 import { RANKED_LADDER, type GhostRun, type SprintAdapter, type ScoreResult } from "@/lib/multiplayer/types";
 import { GhostChallengeButton } from "@/components/games/GhostChallengeButton";
@@ -59,7 +60,7 @@ type PresenceMeta = {
   userId: string;
 };
 
-type TickPayload = { slot: number; score: number };
+type TickPayload = { slot: number; score: number; progress?: number };
 
 function denseRanks(scores: number[]): number[] {
   const sorted = [...new Set(scores)].sort((a, b) => b - a);
@@ -79,6 +80,9 @@ export function MultiplayerShell<Q, A>({
 }) {
   const router = useRouter();
 
+  const raceMode = adapter.raceMode ?? false;
+  const gameMs = adapter.gameDurationMs ?? GAME_MS;
+
   const [phase, setPhase] = useState<Phase>("auth");
   const [level, setLevel] = useState<number>(adapter.levels[0]?.id ?? 1);
   const [authChecked, setAuthChecked] = useState(false);
@@ -97,9 +101,12 @@ export function MultiplayerShell<Q, A>({
   const [questionIndex, setQuestionIndex] = useState(0);
   const [feedback, setFeedback] = useState<ScoreResult | null>(null);
   const [opponentScores, setOpponentScores] = useState<Record<number, number>>({});
+  const [opponentProgress, setOpponentProgress] = useState<Record<number, number>>({});
   const [botScores, setBotScores] = useState<Record<number, number>>({});
+  const [botProgress, setBotProgress] = useState<Record<number, number>>({});
+  const [myProgress, setMyProgress] = useState(0);
   const [finalResult, setFinalResult] = useState<ResultResp | null>(null);
-  const [remainingMs, setRemainingMs] = useState(GAME_MS);
+  const [remainingMs, setRemainingMs] = useState(gameMs);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const liveRef = useRef({ score: 0, correct: 0 });
@@ -108,6 +115,10 @@ export function MultiplayerShell<Q, A>({
   const gameActiveRef = useRef(false);
   const submittedRef = useRef(false);
   const botTimelinesRef = useRef<Record<number, BotTickEvent[]>>({});
+  // Race-mode bots: a fixed words-per-minute pace + the moment they cross the
+  // finish line. Progress and live WPM are derived from elapsed time.
+  const botRaceRef = useRef<Record<number, { wpm: number; finishMs: number }>>({});
+  const myProgressRef = useRef(0);
   const recordedTimelineRef = useRef<BotTickEvent[]>([]);
   const playStartRef = useRef(0);
   const allocRef = useRef<QueueAlloc | null>(null);
@@ -207,8 +218,11 @@ export function MultiplayerShell<Q, A>({
     try {
       // Snapshot opponents' final tick-broadcast scores plus our own.
       const opponents = opponentScoresRef.current;
+      const oppProgress = opponentProgressRef.current;
       const presence = presenceRef.current;
       const botTimelines = botTimelinesRef.current;
+      const race = botRaceRef.current;
+      const raceElapsed = Date.now() - playStartRef.current;
 
       const allSlots: Array<{
         slot: number;
@@ -225,7 +239,11 @@ export function MultiplayerShell<Q, A>({
         if (meta) {
           const isMe = s === a.slotIndex;
           const slotScore = isMe ? score : (opponents[s] ?? 0);
-          const slotCorrect = isMe ? correct : Math.max(0, Math.round(slotScore / 12));
+          // Race mode: "correct" = crossed the finish line. Classic: rough
+          // correct-count proxy from points.
+          const slotCorrect = raceMode
+            ? (isMe ? correct : ((oppProgress[s] ?? 0) >= 1 ? 1 : 0))
+            : (isMe ? correct : Math.max(0, Math.round(slotScore / 12)));
           allSlots.push({
             slot: s,
             userId: meta.userId,
@@ -234,6 +252,21 @@ export function MultiplayerShell<Q, A>({
             isBot: false,
             score: slotScore,
             correct: slotCorrect,
+          });
+        } else if (raceMode) {
+          // Bot's final WPM is its fixed pace; it "finished" if it crossed the
+          // line before the race ended.
+          const r = race[s];
+          const botScore = r?.wpm ?? 0;
+          const botCorrect = r && r.finishMs <= raceElapsed ? 1 : 0;
+          allSlots.push({
+            slot: s,
+            userId: null,
+            displayName: `Bot ${s + 1}`,
+            avatarUrl: null,
+            isBot: true,
+            score: botScore,
+            correct: botCorrect,
           });
         } else {
           const events = botTimelines[s] ?? [];
@@ -434,6 +467,8 @@ export function MultiplayerShell<Q, A>({
   // mirror of opponentScores so submitResult can read latest without re-deps
   const opponentScoresRef = useRef<Record<number, number>>({});
   useEffect(() => { opponentScoresRef.current = opponentScores; }, [opponentScores]);
+  const opponentProgressRef = useRef<Record<number, number>>({});
+  useEffect(() => { opponentProgressRef.current = opponentProgress; }, [opponentProgress]);
 
   // ── Finish a ghost duel (local only — no queue, no rating write) ──────────
 
@@ -528,8 +563,11 @@ export function MultiplayerShell<Q, A>({
         timeouts.push(setTimeout(() => {
           liveRef.current = { score: 0, correct: 0 };
           recordedTimelineRef.current = [];
+          myProgressRef.current = 0;
+          setMyProgress(0);
           setDispScore(0);
           setOpponentScores({});
+          setOpponentProgress({});
           submittedRef.current = false;
 
           const a = allocRef.current;
@@ -539,17 +577,36 @@ export function MultiplayerShell<Q, A>({
           setQuestions(qs);
           setQuestionIndex(0);
 
-          if (mode === "ghost" && ghostRun) {
+          const occupied = new Set(Object.keys(presenceRef.current).map(Number));
+
+          if (raceMode) {
+            // One shared passage; each empty slot becomes a fixed-pace racer
+            // that crosses the line at finishMs = (chars / 5) / wpm.
+            const passageLen = (qs[0] as { text?: string } | undefined)?.text?.length ?? 200;
+            const wpmRange = adapter.levels.find((l) => l.id === a.level)?.botWpm ?? { min: 32, max: 78 };
+            const race: Record<number, { wpm: number; finishMs: number }> = {};
+            const botInitial: Record<number, number> = {};
+            for (let s = 0; s < 4; s++) {
+              if (occupied.has(s)) continue;
+              const rng = mulberry32(`${a.seed}::tr::${s}`);
+              const wpm = Math.round(wpmRange.min + rng() * (wpmRange.max - wpmRange.min));
+              const finishMs = (passageLen / 5 / wpm) * 60_000;
+              race[s] = { wpm, finishMs };
+              botInitial[s] = 0;
+            }
+            botRaceRef.current = race;
+            setBotScores(botInitial);
+            setBotProgress(botInitial);
+          } else if (mode === "ghost" && ghostRun) {
             botTimelinesRef.current = { 1: ghostRun.timeline };
             setBotScores({ 1: 0 });
           } else {
             const tuning = adapter.levels.find((l) => l.id === a.level)?.botTuning;
-            const occupied = new Set(Object.keys(presenceRef.current).map(Number));
             const botMap: Record<number, BotTickEvent[]> = {};
             const botInitial: Record<number, number> = {};
             for (let s = 0; s < 4; s++) {
               if (!occupied.has(s)) {
-                botMap[s] = tuning ? simulateBotTimeline(a.seed, tuning, GAME_MS, s) : [];
+                botMap[s] = tuning ? simulateBotTimeline(a.seed, tuning, gameMs, s) : [];
                 botInitial[s] = 0;
               }
             }
@@ -557,7 +614,7 @@ export function MultiplayerShell<Q, A>({
             setBotScores(botInitial);
           }
 
-          setRemainingMs(GAME_MS);
+          setRemainingMs(gameMs);
           gameActiveRef.current = true;
           playStartRef.current = Date.now();
           setPhase("playing");
@@ -566,7 +623,7 @@ export function MultiplayerShell<Q, A>({
     };
     timeouts.push(setTimeout(step, 600));
     return () => timeouts.forEach(clearTimeout);
-  }, [phase, adapter, mode, ghostRun]);
+  }, [phase, adapter, mode, ghostRun, raceMode, gameMs]);
 
   // ── Playing phase: timers ─────────────────────────────────────────────────
 
@@ -575,7 +632,7 @@ export function MultiplayerShell<Q, A>({
 
     const tickIv = setInterval(() => {
       const elapsed = Date.now() - playStartRef.current;
-      const remaining = Math.max(0, GAME_MS - elapsed);
+      const remaining = Math.max(0, gameMs - elapsed);
       setRemainingMs(remaining);
       if (remaining <= 0) {
         clearInterval(tickIv);
@@ -590,12 +647,30 @@ export function MultiplayerShell<Q, A>({
       ch.send({
         type: "broadcast",
         event: "tick",
-        payload: { slot: a.slotIndex, score: liveRef.current.score } satisfies TickPayload,
+        payload: {
+          slot: a.slotIndex,
+          score: liveRef.current.score,
+          progress: raceMode ? myProgressRef.current : undefined,
+        } satisfies TickPayload,
       });
     }, 750);
 
     const botIv = setInterval(() => {
       const elapsed = Date.now() - playStartRef.current;
+      if (raceMode) {
+        const race = botRaceRef.current;
+        const score: Record<number, number> = {};
+        const prog: Record<number, number> = {};
+        for (const slotStr of Object.keys(race)) {
+          const slot = Number(slotStr);
+          const { wpm, finishMs } = race[slot];
+          score[slot] = wpm;
+          prog[slot] = Math.min(1, elapsed / finishMs);
+        }
+        setBotScores(score);
+        setBotProgress(prog);
+        return;
+      }
       const timelines = botTimelinesRef.current;
       const next: Record<number, number> = {};
       for (const slotStr of Object.keys(timelines)) {
@@ -616,7 +691,7 @@ export function MultiplayerShell<Q, A>({
       clearInterval(broadcastIv);
       clearInterval(botIv);
     };
-  }, [phase, endGame]);
+  }, [phase, endGame, gameMs, raceMode]);
 
   // ── Answer handler (delegated to adapter scoring) ─────────────────────────
 
@@ -641,6 +716,30 @@ export function MultiplayerShell<Q, A>({
       setQuestionIndex((i) => i + 1);
     }, result.correct ? 300 : 700);
   }, [adapter, questions, questionIndex]);
+
+  // ── Race-mode live handler: WPM is the score, progress drives the lane, and
+  //    crossing the finish line stops your clock and ends your race. ──────────
+
+  const handleLive = useCallback((live: { score: number; progress: number; finished: boolean }) => {
+    if (phaseRef.current !== "playing") return;
+    liveRef.current.score = live.score;
+    myProgressRef.current = live.progress;
+    setDispScore(live.score);
+    setMyProgress(live.progress);
+    if (live.finished && gameActiveRef.current) {
+      liveRef.current.correct = 1;
+      const ch = channelRef.current;
+      const a = allocRef.current;
+      if (ch && a) {
+        ch.send({
+          type: "broadcast",
+          event: "tick",
+          payload: { slot: a.slotIndex, score: live.score, progress: 1 } satisfies TickPayload,
+        });
+      }
+      endGame();
+    }
+  }, [endGame]);
 
   // ── Enter queue ───────────────────────────────────────────────────────────
 
@@ -700,6 +799,9 @@ export function MultiplayerShell<Q, A>({
       if (typeof p?.slot !== "number" || typeof p?.score !== "number") return;
       if (p.slot === data.slotIndex) return;
       setOpponentScores((prev) => ({ ...prev, [p.slot]: p.score }));
+      if (typeof p.progress === "number") {
+        setOpponentProgress((prev) => ({ ...prev, [p.slot]: p.progress! }));
+      }
     });
 
     channel.on("broadcast", { event: "go" }, () => {
@@ -771,7 +873,10 @@ export function MultiplayerShell<Q, A>({
     setFinalResult(null);
     setPresenceSlots({});
     setOpponentScores({});
+    setOpponentProgress({});
     setBotScores({});
+    setBotProgress({});
+    setMyProgress(0);
     setQuestions([]);
     setQuestionIndex(0);
     setPhase("select");
@@ -786,7 +891,10 @@ export function MultiplayerShell<Q, A>({
     setFinalResult(null);
     setPresenceSlots({});
     setOpponentScores({});
+    setOpponentProgress({});
     setBotScores({});
+    setBotProgress({});
+    setMyProgress(0);
     setQuestions([]);
     setQuestionIndex(0);
     if (mode === "ghost") {
@@ -812,8 +920,8 @@ export function MultiplayerShell<Q, A>({
     if (!alloc) return [];
     if (mode === "ghost" && ghostRun) {
       return [
-        { slot: 0, displayName: myName, avatarUrl: profile?.avatarUrl ?? null, isBot: false, score: dispScore, isMe: true },
-        { slot: 1, displayName: ghostRun.displayName, avatarUrl: ghostRun.avatarUrl, isBot: false, score: botScores[1] ?? 0, isMe: false },
+        { slot: 0, displayName: myName, avatarUrl: profile?.avatarUrl ?? null, isBot: false, score: dispScore, isMe: true, progress: raceMode ? myProgress : undefined },
+        { slot: 1, displayName: ghostRun.displayName, avatarUrl: ghostRun.avatarUrl, isBot: false, score: botScores[1] ?? 0, isMe: false, progress: raceMode ? (botProgress[1] ?? 0) : undefined },
       ];
     }
     const out: TickerPlayer[] = [];
@@ -828,6 +936,7 @@ export function MultiplayerShell<Q, A>({
           isBot: false,
           score: isMe ? dispScore : (opponentScores[s] ?? 0),
           isMe,
+          progress: raceMode ? (isMe ? myProgress : (opponentProgress[s] ?? 0)) : undefined,
         });
       } else {
         out.push({
@@ -837,6 +946,7 @@ export function MultiplayerShell<Q, A>({
           isBot: true,
           score: botScores[s] ?? 0,
           isMe: false,
+          progress: raceMode ? (botProgress[s] ?? 0) : undefined,
         });
       }
     }
@@ -991,6 +1101,8 @@ export function MultiplayerShell<Q, A>({
         currentUserId={userId}
         gameDisplayName={adapter.displayName}
         guestPrompt={isGuest}
+        scoreLabel={adapter.scoreLabel}
+        metaFor={raceMode ? (p) => (p.correct > 0 ? "Finished" : "Did not finish") : undefined}
         onPlayAgainAction={playAgain}
         onBackAction={mode === "ghost" ? () => router.push("/") : resetToSelect}
         backLabel={mode === "ghost" ? "Back to Slubstack" : undefined}
@@ -1020,13 +1132,14 @@ export function MultiplayerShell<Q, A>({
   const PlayBoard = adapter.PlayBoard;
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-bg">
-      <LiveScoreTicker players={tickerPlayers} />
+      <LiveScoreTicker players={tickerPlayers} unit={raceMode ? adapter.scoreLabel : undefined} />
       <div className="flex-1 min-h-0">
         <PlayBoard
           question={currentQuestion}
           remainingMs={remainingMs}
           feedback={feedback}
           onAnswerAction={handleAnswer}
+          onLiveAction={raceMode ? handleLive : undefined}
         />
       </div>
     </div>

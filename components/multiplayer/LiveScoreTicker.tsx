@@ -11,9 +11,13 @@ export type TickerPlayer = {
   isBot: boolean;
   score: number;
   isMe: boolean;
+  // 0..1 typing progress. When set (race mode) it drives lane position so the
+  // racers advance toward the finish line as they type, while `score` (WPM)
+  // stays the headline number.
+  progress?: number;
 };
 
-type Props = { players: TickerPlayer[] };
+type Props = { players: TickerPlayer[]; unit?: string };
 
 function useCountUp(target: number, durationMs = 450): number {
   const [value, setValue] = useState(target);
@@ -97,9 +101,12 @@ function HorseAvatar({ p, bumpKey, compact }: { p: TickerPlayer; bumpKey: number
   );
 }
 
-function Lane({ p, maxScore, compact }: { p: TickerPlayer; maxScore: number; compact: boolean }) {
+function Lane({ p, maxScore, compact, unit }: { p: TickerPlayer; maxScore: number; compact: boolean; unit?: string }) {
   const displayedScore = useCountUp(p.score, 450);
-  const pct = Math.min(88, (p.score / maxScore) * 88);
+  const pct =
+    p.progress != null
+      ? Math.min(92, p.progress * 92)
+      : Math.min(88, (p.score / maxScore) * 88);
   const laneHeightClass = compact ? "relative h-5" : "relative h-6";
   const scoreClass = compact
     ? "text-[11px] font-black tabular-nums whitespace-nowrap"
@@ -125,14 +132,14 @@ function Lane({ p, maxScore, compact }: { p: TickerPlayer; maxScore: number; com
           className={scoreClass}
           style={{ color: p.isMe ? "var(--accent)" : "var(--fg)" }}
         >
-          {displayedScore}
+          {displayedScore}{unit ? <span className="ml-0.5 text-[9px] font-bold text-muted">{unit}</span> : null}
         </span>
       </div>
     </div>
   );
 }
 
-export function LiveScoreTicker({ players }: Props) {
+export function LiveScoreTicker({ players, unit }: Props) {
   const lanes = [...players].sort((a, b) => a.slot - b.slot);
   const maxScore = Math.max(1, ...players.map((p) => p.score));
   const compact = players.length > 4;
@@ -158,7 +165,7 @@ export function LiveScoreTicker({ players }: Props) {
 
         <div className="space-y-1">
           {lanes.map((p) => (
-            <Lane key={p.slot} p={p} maxScore={maxScore} compact={compact} />
+            <Lane key={p.slot} p={p} maxScore={maxScore} compact={compact} unit={unit} />
           ))}
         </div>
       </div>

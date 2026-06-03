@@ -3,20 +3,21 @@ import { mulberry32, seedToInt, pickN } from "@/lib/games/geo-clone/seedRng";
 import { PlayBoard, type TypePassage } from "@/components/games/type-racer/PlayBoard";
 import { PASSAGES } from "./passages";
 
-const PASSAGES_PER_RUN = 12;
+// Cap a single race at 60s — long enough for a slow typist to finish the
+// paragraph, short enough that a stall still resolves.
+const RACE_DURATION_MS = 60_000;
 
+// In race mode the live WPM is pushed straight to the shell, so this scoring
+// rule is only a back-compat fallback for the answer payload.
 const scoring: ScoringRule<TypePassage, string> = (answer) => {
-  let wpm = 0;
-  let accuracy = 0;
   try {
     const parsed = JSON.parse(answer) as { wpm?: number; accuracy?: number };
-    wpm = Math.max(0, parsed.wpm ?? 0);
-    accuracy = Math.max(0, Math.min(100, parsed.accuracy ?? 0));
+    const wpm = Math.max(0, parsed.wpm ?? 0);
+    const accuracy = Math.max(0, Math.min(100, parsed.accuracy ?? 0));
+    return { correct: accuracy >= 95, points: wpm };
   } catch {
     return { correct: false, points: 0 };
   }
-  const points = Math.round(wpm * (accuracy / 100));
-  return { correct: accuracy >= 95, points };
 };
 
 export const typeRacerAdapter: SprintAdapter<TypePassage, string> = {
@@ -26,13 +27,21 @@ export const typeRacerAdapter: SprintAdapter<TypePassage, string> = {
   displayName: "Type Racer",
   routePath: "/games/type-racer",
   storeKey: "brainTraining",
+  raceMode: true,
+  gameDurationMs: RACE_DURATION_MS,
+  scoreLabel: "WPM",
   levels: [
-    { id: 1, label: "Race", botTuning: { minGapMs: 8000, maxGapMs: 12000, minDelta: 40, maxDelta: 75 } },
+    {
+      id: 1,
+      label: "Race",
+      botTuning: { minGapMs: 8000, maxGapMs: 12000, minDelta: 40, maxDelta: 75 },
+      botWpm: { min: 32, max: 78 },
+    },
   ],
   PlayBoard,
   generateQuestions: (_level, seed) => {
     const rng = mulberry32(seedToInt(seed));
-    return pickN(PASSAGES, rng, PASSAGES_PER_RUN).map((text) => ({ text }));
+    return pickN(PASSAGES, rng, 1).map((text) => ({ text }));
   },
   scoring,
   xpFor: (_correct, points) => Math.round(points / 4),
