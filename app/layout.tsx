@@ -4,6 +4,7 @@ import { Noto_Sans_SC } from "next/font/google";
 import "./globals.css";
 import { TopBar } from "@/components/TopBar";
 import { BottomNav } from "@/components/BottomNav";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { CloudSync } from "@/components/CloudSync";
 import { TotalXpSync } from "@/components/TotalXpSync";
 import { BootstrapSync } from "@/components/BootstrapSync";
@@ -25,10 +26,14 @@ const notoSC = Noto_Sans_SC({
   display: "swap",
 });
 
+const SITE_TITLE = "Slubstack — Learn languages, play games, build streaks";
+const SITE_DESCRIPTION =
+  "Learn Mandarin, Spanish and German, sharpen your mind with brain training, and compete on daily challenges. Free to play.";
+
 export const metadata: Metadata = {
-  title: "Slubstack — Learn languages",
-  description:
-    "Learn Mandarin and German with short, daily flashcard sessions.",
+  metadataBase: new URL("https://slubstack.com"),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
@@ -38,6 +43,20 @@ export const metadata: Metadata = {
   icons: {
     icon: "/slubstack-logo.png",
     apple: "/slubstack-logo.png",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Slubstack",
+    url: "https://slubstack.com",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Slubstack" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/og-image.png"],
   },
 };
 
@@ -76,6 +95,7 @@ export default function RootLayout({
             <TotalXpSync />
             <BootstrapSync />
             <main className="flex-1">{children}</main>
+            <InstallPrompt />
             <BottomNav />
           </div>
           <Toaster

@@ -6,15 +6,18 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useStore } from "zustand";
 import {
   BookOpen, Gamepad2, ArrowRight, Trophy, Flame, Sparkles, Library,
-  Globe, Brain as BrainIcon, Clapperboard, CalendarDays,
+  Globe, Brain as BrainIcon, Clapperboard, CalendarDays, Target,
 } from "lucide-react";
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
+import { QuestDrawer } from "@/components/QuestDrawer";
 import {
   mandarinStore, germanStore, spanishStore, italianStore, vibeCodingStore,
   brainTrainingStore, triviaStore,
 } from "@/lib/store";
 import { globalStore } from "@/lib/globalStore";
+import { useQuestsStore, questsStore } from "@/lib/questsStore";
+import { dailyQuestsFor } from "@/lib/quests";
 import { levelFromXp } from "@/lib/xp";
 import { todayKey } from "@/lib/utils";
 
@@ -316,6 +319,19 @@ export default function HubPage() {
 
   const streak = useStore(globalStore, (s) => s.streak);
   const lastActiveDate = useStore(globalStore, (s) => s.lastActiveDate);
+  const [mounted, setMounted] = useState(false);
+  const [questsOpen, setQuestsOpen] = useState(false);
+  const questDateKey = useQuestsStore((s) => s.dateKey);
+  const questCompleted = useQuestsStore((s) => s.completed);
+
+  useEffect(() => {
+    setMounted(true);
+    questsStore.getState().rollIfStale();
+  }, []);
+
+  const todaysQuests = mounted ? dailyQuestsFor(questDateKey) : [];
+  const questsDone = todaysQuests.filter((q) => questCompleted[q.id]).length;
+  const questsTotal = mounted ? todaysQuests.length : 3;
 
   useEffect(() => {
     const today = todayKey();
@@ -388,6 +404,39 @@ export default function HubPage() {
         >
           {greeting || " "}
         </motion.p>
+
+        <div className="flex flex-shrink-0 items-center justify-center gap-2 pb-1.5">
+          <div
+            className="flex items-center gap-1.5 rounded-full px-3 py-1"
+            style={{
+              background: "color-mix(in srgb, #ff8a4c 14%, var(--surface))",
+              border: "1.5px solid color-mix(in srgb, #ff8a4c 30%, transparent)",
+            }}
+          >
+            <Flame size={14} strokeWidth={2.5} className="text-[#ff6a1c]" fill="#ff8a4c" />
+            <span className="text-[12px] font-extrabold tabular-nums text-[#c2410c]">{mounted ? streak : 0}</span>
+            <span className="text-[12px] font-bold text-[#c2410c]">day streak</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setQuestsOpen(true)}
+            className="relative flex items-center gap-1.5 rounded-full px-3 py-1 transition-transform duration-100 active:scale-95"
+            style={{
+              background: "color-mix(in srgb, var(--accent) 14%, var(--surface))",
+              border: "1.5px solid color-mix(in srgb, var(--accent) 30%, transparent)",
+            }}
+          >
+            <Target size={13} strokeWidth={2.5} className="text-[var(--accent)]" />
+            <span className="text-[12px] font-extrabold tabular-nums text-[var(--accent)]">{questsDone}/{questsTotal}</span>
+            <span className="text-[12px] font-bold text-[var(--accent)]">quests</span>
+            {mounted && questsDone < questsTotal && (
+              <span
+                className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full"
+                style={{ background: "var(--game)", border: "1.5px solid var(--bg)" }}
+              />
+            )}
+          </button>
+        </div>
 
         <motion.div
           className="relative flex-shrink-0"
@@ -575,6 +624,8 @@ export default function HubPage() {
           </div>
         </div>
       </div>
+
+      <QuestDrawer open={questsOpen} onClose={() => setQuestsOpen(false)} />
     </div>
   );
 }
