@@ -216,14 +216,7 @@ export function TurnBasedShell({ adapter }: TurnBasedShellProps): React.JSX.Elem
       if (data.session?.user) {
         setSignedIn(true);
         setUserId(data.session.user.id);
-        const uid = data.session.user.id;
-        const meta = data.session.user.user_metadata as { username?: string; avatar_url?: string };
-        const cachedName = typeof window !== "undefined" ? localStorage.getItem("slubstack_username") : null;
-        const cachedAvatar = typeof window !== "undefined" ? localStorage.getItem("slubstack_avatar") : null;
-        setProfile({
-          displayName: cachedName ?? meta.username ?? `learner-${uid.slice(0, 8)}`,
-          avatarUrl: cachedAvatar ?? meta.avatar_url ?? null,
-        });
+        setProfile(profileFromUser(data.session.user));
         dispatch({ type: "to-lobby" });
       } else {
         setSignedIn(false);

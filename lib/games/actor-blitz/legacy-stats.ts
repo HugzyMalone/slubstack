@@ -1,3 +1,5 @@
+import { loadJsonField } from "@/lib/local-json";
+
 const ACTOR_STATS_KEY = "slubstack_actorblitz_stats";
 
 export type ActorStatMap = Record<string, { c: number; w: number; img: string }>;
@@ -11,9 +13,5 @@ export type ActorBest = {
 };
 
 export function loadActorStats(): ActorStatMap {
-  try {
-    return JSON.parse(localStorage.getItem(ACTOR_STATS_KEY) ?? "{}").actors ?? {};
-  } catch {
-    return {};
-  }
+  return loadJsonField<ActorStatMap>(ACTOR_STATS_KEY, "actors");
 }

@@ -16,6 +16,7 @@ import { RANKED_LADDER, type GhostRun, type SprintAdapter, type ScoreResult } fr
 import { GhostChallengeButton } from "@/components/games/GhostChallengeButton";
 import { GuestGate } from "./GuestGate";
 import { isAnonymousUser, profileFromUser } from "@/lib/multiplayer/guest";
+import { denseRanks } from "@/lib/multiplayer/ranking";
 import { QueueRoom, type QueueSlot } from "./QueueRoom";
 import { LiveScoreTicker, type TickerPlayer } from "./LiveScoreTicker";
 import { Podium, type PodiumPlayer } from "./Podium";
@@ -61,13 +62,6 @@ type PresenceMeta = {
 };
 
 type TickPayload = { slot: number; score: number; progress?: number };
-
-function denseRanks(scores: number[]): number[] {
-  const sorted = [...new Set(scores)].sort((a, b) => b - a);
-  const rankFor = new Map<number, number>();
-  sorted.forEach((s, i) => rankFor.set(s, i + 1));
-  return scores.map((s) => rankFor.get(s)!);
-}
 
 export function MultiplayerShell<Q, A>({
   adapter,
@@ -148,14 +142,7 @@ export function MultiplayerShell<Q, A>({
         setSignedIn(true);
         setIsGuest(isAnonymousUser(data.session.user));
         setUserId(data.session.user.id);
-        const userId = data.session.user.id;
-        const meta = data.session.user.user_metadata as { username?: string; avatar_url?: string };
-        const cachedName = typeof window !== "undefined" ? localStorage.getItem("slubstack_username") : null;
-        const cachedAvatar = typeof window !== "undefined" ? localStorage.getItem("slubstack_avatar") : null;
-        setProfile({
-          displayName: cachedName ?? meta.username ?? `learner-${userId.slice(0, 8)}`,
-          avatarUrl: cachedAvatar ?? meta.avatar_url ?? null,
-        });
+        setProfile(profileFromUser(data.session.user));
         setPhase(mode === "ghost" ? "ghostIntro" : "select");
         fetch("/api/profile", { cache: "no-store" })
           .then((r) => (r.ok ? r.json() : null))

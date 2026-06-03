@@ -48,7 +48,7 @@ function mergeSrs(
   return merged;
 }
 
-function createGameStore(name: string) {
+export function createGameStore(name: string) {
   return createStore<State & Actions>()(
     persist(
       (set, get) => ({

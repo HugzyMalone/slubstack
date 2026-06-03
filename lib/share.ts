@@ -15,6 +15,15 @@ export type ShareCardInput = {
   footerTag?: string;
 };
 
+/** Render a correct/wrong history as rows of 10 emoji squares. */
+function historyGrid(history: ("correct" | "wrong")[]): string {
+  const rows: string[] = [];
+  for (let i = 0; i < history.length; i += 10) {
+    rows.push(history.slice(i, i + 10).map((r) => (r === "correct" ? "🟩" : "🟥")).join(""));
+  }
+  return rows.join("\n");
+}
+
 /**
  * Generic NYT-style share card. New games and the Daily/Ghost end-screens use
  * this; the bespoke per-game cards above stay for Wordle/Connections.
@@ -38,11 +47,7 @@ export function buildShareCard({
   if (!history || history.length === 0) {
     return `${header}\n\n${footerTag}`;
   }
-  const rows: string[] = [];
-  for (let i = 0; i < history.length; i += 10) {
-    rows.push(history.slice(i, i + 10).map((r) => (r === "correct" ? "🟩" : "🟥")).join(""));
-  }
-  return `${header}\n\n${rows.join("\n")}\n\n${footerTag}`;
+  return `${header}\n\n${historyGrid(history)}\n\n${footerTag}`;
 }
 
 export function wordleShareCard({
@@ -86,11 +91,7 @@ export function mathBlitzShareCard({
   if (!history || history.length === 0) {
     return `${header}\n\nslubstack.com`;
   }
-  const rows: string[] = [];
-  for (let i = 0; i < history.length; i += 10) {
-    rows.push(history.slice(i, i + 10).map((r) => (r === "correct" ? "🟩" : "🟥")).join(""));
-  }
-  return `${header}\n\n${rows.join("\n")}\n\nslubstack.com`;
+  return `${header}\n\n${historyGrid(history)}\n\nslubstack.com`;
 }
 
 export function connectionsShareCard({
@@ -128,11 +129,7 @@ export function actorBlitzShareCard({
   if (!history || history.length === 0) {
     return `${header}\n\nslubstack.com`;
   }
-  const rows: string[] = [];
-  for (let i = 0; i < history.length; i += 10) {
-    rows.push(history.slice(i, i + 10).map((r) => (r === "correct" ? "🟩" : "🟥")).join(""));
-  }
-  return `${header}\n\n${rows.join("\n")}\n\nslubstack.com`;
+  return `${header}\n\n${historyGrid(history)}\n\nslubstack.com`;
 }
 
 export function lessonShareCard({
