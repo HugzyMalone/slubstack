@@ -209,7 +209,7 @@ export function WikiRace() {
   }
 
   return (
-    <div className="flex h-[100dvh] flex-col bg-bg">
+    <div className="flex h-[100svh] flex-col bg-bg">
       <header className="shrink-0 border-b border-border px-4 pt-[calc(env(safe-area-inset-top)+10px)] pb-3 lg:px-6">
         <div className="mx-auto flex max-w-3xl flex-col gap-2">
           <div className="flex items-center justify-between gap-3">
