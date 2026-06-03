@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { Bot, RotateCcw, ArrowLeft, Trophy } from "lucide-react";
 
 export type PodiumPlayer = {
@@ -25,6 +26,7 @@ type Props = {
   backLabel?: string;
   playAgainLabel?: string;
   extraAction?: ReactNode;
+  guestPrompt?: boolean;
 };
 
 function useCountUp(target: number | null, durationMs = 1200): number | null {
@@ -123,7 +125,8 @@ function EloRow({ before, after }: { before: number; after: number }) {
   );
 }
 
-export function Podium({ players, currentUserId, gameDisplayName, onPlayAgainAction, onBackAction, backLabel, playAgainLabel, extraAction }: Props) {
+export function Podium({ players, currentUserId, gameDisplayName, onPlayAgainAction, onBackAction, backLabel, playAgainLabel, extraAction, guestPrompt }: Props) {
+  const router = useRouter();
   const sorted = [...players].sort((a, b) => a.rank - b.rank);
   const allRanks = sorted.map((p) => p.rank);
 
@@ -188,6 +191,15 @@ export function Podium({ players, currentUserId, gameDisplayName, onPlayAgainAct
             );
           })}
         </div>
+
+        {guestPrompt && (
+          <button
+            onClick={() => router.push("/auth")}
+            className="mb-4 block w-full rounded-2xl border border-border bg-surface px-4 py-3 text-left text-xs text-muted transition-colors hover:text-fg"
+          >
+            Create an account to save progress and climb the ranked ladder.
+          </button>
+        )}
 
         <div className="space-y-2.5">
           {extraAction}

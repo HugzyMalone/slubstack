@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { Radar } from "lucide-react";
+
+function SemantleIcon() {
+  return <Radar size={22} strokeWidth={1.8} />;
+}
 
 function MathIcon() {
   return (
@@ -94,6 +99,14 @@ const LIVE = [
     iconBg: "linear-gradient(135deg, #f9e04b 0%, #9b59d0 100%)",
     title: "Connections",
     description: "Daily · group four sets of four",
+    badge: null,
+  },
+  {
+    href: "/brain-training/semantle",
+    Icon: SemantleIcon,
+    iconBg: "linear-gradient(135deg, #f43f5e 0%, #8b5cf6 100%)",
+    title: "Semantle",
+    description: "Daily · guess the word by meaning",
     badge: "New",
   },
 ];

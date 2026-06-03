@@ -5,6 +5,7 @@ import { batmanShakespeareAdapter } from "./batman-shakespeare/adapter";
 import { flagBlitzAdapter } from "./flag-blitz/adapter";
 import { higherLowerAdapter } from "./higher-lower/adapter";
 import { mathBlitzAdapter } from "./math-blitz/adapter";
+import { typeRacerAdapter } from "./type-racer/adapter";
 import { yearGuesserAdapter } from "./year-guesser/adapter";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,6 +18,7 @@ const SPRINT_ADAPTERS: Partial<Record<GameKind, AnySprintAdapter>> = {
   flag_blitz: flagBlitzAdapter,
   higher_lower: higherLowerAdapter,
   math_blitz: mathBlitzAdapter,
+  type_racer: typeRacerAdapter,
   year_guesser: yearGuesserAdapter,
 };
 

@@ -59,7 +59,10 @@ export function BottomNav() {
     pathname?.startsWith("/brain-training/wordle") ||
     pathname?.startsWith("/brain-training/math-blitz") ||
     pathname?.startsWith("/brain-training/connections") ||
+    pathname?.startsWith("/brain-training/semantle") ||
     pathname?.startsWith("/games/draw") ||
+    pathname?.startsWith("/games/type-racer") ||
+    pathname?.startsWith("/games/wiki-race") ||
     pathname?.startsWith("/trivia/actors") ||
     pathname?.startsWith("/trivia/flags") ||
     pathname?.startsWith("/trivia/albums") ||

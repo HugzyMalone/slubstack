@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useReducer, useRef, useState } from "rea
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import type { RealtimeChannel } from "@supabase/supabase-js";
-import { ArrowLeft, Trophy, RotateCcw, Home } from "lucide-react";
+import { Trophy, RotateCcw, Home } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { brainTrainingStore } from "@/lib/store";
 import { awardQuestProgress } from "@/lib/questsStore";
@@ -20,6 +20,8 @@ import type {
   RoundReady,
   Point,
 } from "@/lib/multiplayer/draw-types";
+import { GuestGate } from "./GuestGate";
+import { profileFromUser } from "@/lib/multiplayer/guest";
 import { DrawCanvas } from "@/components/draw/DrawCanvas";
 import { ColorPalette, DRAW_COLORS } from "@/components/draw/ColorPalette";
 import { BrushControls, BRUSH_SIZES } from "@/components/draw/BrushControls";
@@ -713,25 +715,17 @@ export function TurnBasedShell({ adapter }: TurnBasedShellProps): React.JSX.Elem
 
   if (!signedIn) {
     return (
-      <div className="mx-auto max-w-md px-4 pt-10 pb-8">
-        <h1 className="text-2xl font-bold tracking-tight">{adapter.displayName}</h1>
-        <p className="mt-2 text-sm text-muted">
-          Turn-based drawing party game. Sign in to host or join a room.
-        </p>
-        <button
-          onClick={() => router.push("/stats")}
-          className="mt-6 w-full rounded-2xl py-4 text-sm font-bold text-white transition-all active:scale-[0.98]"
-          style={{ background: "var(--accent)" }}
-        >
-          Sign in to play
-        </button>
-        <button
-          onClick={() => router.push(adapter.routePath.replace(/\/[^/]+$/, "") || "/brain-training")}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-3.5 text-sm font-medium"
-        >
-          <ArrowLeft size={15} /> Back
-        </button>
-      </div>
+      <GuestGate
+        title={adapter.displayName}
+        description="Turn-based drawing party game. Host or join a room."
+        backPath={adapter.routePath.replace(/\/[^/]+$/, "") || "/brain-training"}
+        onGuestAction={(user) => {
+          setSignedIn(true);
+          setUserId(user.id);
+          setProfile(profileFromUser(user));
+          dispatch({ type: "to-lobby" });
+        }}
+      />
     );
   }
 

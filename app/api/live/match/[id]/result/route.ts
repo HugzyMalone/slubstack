@@ -14,6 +14,7 @@ const VALID_KINDS: ReadonlySet<GameKind> = new Set([
   "year_guesser",
   "geo_clone",
   "batman_shakespeare",
+  "type_racer",
 ]);
 
 const VALID_LADDERS: ReadonlySet<LadderKind> = new Set([
@@ -117,6 +118,10 @@ export async function POST(request: Request, { params }: Params) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  // Anonymous guests may complete matches but never write to the ranked Elo
+  // ladder — drop any rating upserts server-side so it can't be bypassed.
+  const ratingUpserts = user.is_anonymous ? [] : rating_upserts;
+
   const { data: matchData, error: matchError } = await admin
     .from("live_matches")
     .select("*, live_match_players(*)")
@@ -146,7 +151,7 @@ export async function POST(request: Request, { params }: Params) {
     p_humans_count: humans_count,
     p_bot_inserts: bot_inserts,
     p_player_updates: player_updates,
-    p_rating_upserts: rating_upserts,
+    p_rating_upserts: ratingUpserts,
   };
   if (ratingKind !== null && ratingKind !== game_kind) {
     rpcParams.p_rating_kind = ratingKind;
