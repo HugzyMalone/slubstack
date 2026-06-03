@@ -35,7 +35,7 @@ export const typeRacerAdapter: SprintAdapter<TypePassage, string> = {
       id: 1,
       label: "Race",
       botTuning: { minGapMs: 8000, maxGapMs: 12000, minDelta: 40, maxDelta: 75 },
-      botWpm: { min: 32, max: 78 },
+      botWpm: { min: 20, max: 52 },
     },
   ],
   PlayBoard,
