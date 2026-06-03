@@ -21,6 +21,7 @@ export function PlayBoard({
   const reduceMotion = useReducedMotion();
 
   const [typed, setTyped] = useState("");
+  const [viewportH, setViewportH] = useState<number | null>(null);
   const startRef = useRef<number | null>(null);
   const keystrokesRef = useRef(0);
   const correctKeystrokesRef = useRef(0);
@@ -33,6 +34,21 @@ export function PlayBoard({
     correctKeystrokesRef.current = 0;
     inputRef.current?.focus();
   }, [question]);
+
+  // Track the visual viewport so the play area shrinks to the space the iOS
+  // keyboard leaves visible, instead of the passage sliding behind the keyboard.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const sync = () => setViewportH(vv.height);
+    sync();
+    vv.addEventListener("resize", sync);
+    vv.addEventListener("scroll", sync);
+    return () => {
+      vv.removeEventListener("resize", sync);
+      vv.removeEventListener("scroll", sync);
+    };
+  }, []);
 
   const liveAccuracy =
     keystrokesRef.current > 0
@@ -87,7 +103,11 @@ export function PlayBoard({
   const barColor = secs <= 4 ? "#e11d48" : secs <= 8 ? "#f97316" : "var(--game)";
 
   return (
-    <div className="flex h-full flex-col overflow-hidden px-4 pt-2 pb-3" onClick={() => inputRef.current?.focus()}>
+    <div
+      className="flex h-full flex-col overflow-hidden px-4 pt-2 pb-3"
+      style={viewportH ? { height: viewportH } : undefined}
+      onClick={() => inputRef.current?.focus()}
+    >
       <div className="shrink-0 mb-2">
         <div className="flex items-center justify-between mb-1">
           <span className="text-xs font-bold tabular-nums" style={{ color: barColor }}>
@@ -109,7 +129,7 @@ export function PlayBoard({
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center">
+      <div className="flex flex-1 items-start justify-center overflow-y-auto pt-3">
         <div className="w-full max-w-md rounded-2xl border border-border bg-surface px-5 py-6">
           <p className="text-xl font-medium leading-relaxed tracking-wide">
             {chars.map((ch, i) => {
