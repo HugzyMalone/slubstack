@@ -31,6 +31,7 @@ export function PlayBoard({
   const finishedRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const cursorRef = useRef<HTMLSpanElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const liveActionRef = useRef(onLiveAction);
   liveActionRef.current = onLiveAction;
 
@@ -85,9 +86,17 @@ export function PlayBoard({
   }, [target.length]);
 
   // Keep the character you're on parked in the middle of the visible area, so
-  // the line you're typing never slides down behind the keyboard.
+  // the line you're typing never slides down behind the keyboard. We scroll the
+  // text container directly (not scrollIntoView, which on iOS can yank the whole
+  // fixed page) by the delta needed to park the cursor in the middle.
   useEffect(() => {
-    cursorRef.current?.scrollIntoView({ block: "center", behavior: "auto" });
+    const c = scrollRef.current;
+    const cur = cursorRef.current;
+    if (!c || !cur) return;
+    const cRect = c.getBoundingClientRect();
+    const curRect = cur.getBoundingClientRect();
+    const delta = curRect.top - cRect.top - (c.clientHeight / 2 - curRect.height / 2);
+    if (Math.abs(delta) > 4) c.scrollBy({ top: delta, behavior: "auto" });
   }, [typed]);
 
   const liveAccuracy =
@@ -167,8 +176,8 @@ export function PlayBoard({
         </div>
       </div>
 
-      <div className="flex flex-1 items-start justify-center overflow-y-auto pt-3">
-        <div className="w-full max-w-md rounded-2xl border border-border bg-surface px-5 py-6">
+      <div ref={scrollRef} className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto pt-3">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-surface px-5 py-6 pb-24">
           {finished && (
             <p className="mb-3 text-sm font-bold" style={{ color: "var(--game)" }}>
               Finished — {liveWpm} WPM · {liveAccuracy}%
