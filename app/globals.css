@@ -202,7 +202,10 @@ input:focus, textarea:focus {
   font-size: 15px;
   line-height: 1.6;
   color: var(--fg);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
+.wiki-race-html pre { white-space: pre-wrap; }
 .wiki-race-html p { margin: 0 0 0.85em; }
 .wiki-race-html h2,
 .wiki-race-html h3 {

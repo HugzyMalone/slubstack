@@ -261,7 +261,7 @@ export function WikiRace() {
       <div
         ref={scrollRef}
         onClick={onContentClick}
-        className="wiki-race-body flex-1 overflow-y-auto px-4 py-4 lg:px-6"
+        className="wiki-race-body flex-1 overflow-x-hidden overflow-y-auto overscroll-x-none px-4 py-4 lg:px-6"
       >
         <div className="mx-auto max-w-3xl">
           <h1 className="mb-3 text-2xl font-bold">{current}</h1>
