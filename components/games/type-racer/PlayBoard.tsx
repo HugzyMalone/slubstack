@@ -7,6 +7,9 @@ import type { PlayBoardProps } from "@/lib/multiplayer/types";
 export type TypePassage = { text: string };
 
 const TOTAL_MS = 30_000;
+// Caps WPM at a superhuman-but-finite ceiling so paste / instant-entry can't
+// mint an absurd score and dominate the ranked ladder.
+const MAX_WPM = 250;
 
 export function PlayBoard({
   question,
@@ -40,7 +43,7 @@ export function PlayBoard({
     if (startRef.current === null || typed.length === 0) return 0;
     const minutes = (Date.now() - startRef.current) / 60_000;
     if (minutes <= 0) return 0;
-    return Math.round(typed.length / 5 / minutes);
+    return Math.min(MAX_WPM, Math.round(typed.length / 5 / minutes));
   })();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -67,7 +70,7 @@ export function PlayBoard({
 
     if (valid === target) {
       const minutes = startRef.current ? (Date.now() - startRef.current) / 60_000 : 0;
-      const wpm = minutes > 0 ? Math.round(target.length / 5 / minutes) : 0;
+      const wpm = minutes > 0 ? Math.min(MAX_WPM, Math.round(target.length / 5 / minutes)) : 0;
       const accuracy =
         keystrokesRef.current > 0
           ? Math.round((correctKeystrokesRef.current / keystrokesRef.current) * 100)
@@ -133,6 +136,7 @@ export function PlayBoard({
         ref={inputRef}
         value={typed}
         onChange={handleChange}
+        onPaste={(e) => e.preventDefault()}
         autoFocus
         autoCapitalize="off"
         autoCorrect="off"

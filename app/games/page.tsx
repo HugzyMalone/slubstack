@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Blocks, Brain, Brush, Globe, Film, Keyboard, ArrowRight } from "lucide-react";
+import { Blocks, Brain, Brush, Globe, Film, Keyboard, Compass, ArrowRight } from "lucide-react";
 
 const GAMES = [
   {
@@ -39,6 +39,15 @@ const GAMES = [
     icon: <Keyboard size={26} />,
     tint: "#14b8a6",
     bg: "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)",
+    available: true,
+  },
+  {
+    href: "/games/wiki-race",
+    title: "Wikirace",
+    subtitle: "Race from one Wikipedia article to another in the fewest clicks",
+    icon: <Compass size={26} />,
+    tint: "#6366f1",
+    bg: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
     available: true,
   },
   {

@@ -14,6 +14,7 @@ const VALID_KINDS: ReadonlySet<GameKind> = new Set([
   "year_guesser",
   "geo_clone",
   "batman_shakespeare",
+  "type_racer",
 ]);
 
 const VALID_LADDERS: ReadonlySet<LadderKind> = new Set([
