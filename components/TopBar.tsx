@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Flame, User, ChevronLeft, Snowflake, Target } from "lucide-react";
@@ -144,8 +145,7 @@ export function TopBar() {
             href="/"
             className="lg:hidden flex items-center gap-2 select-none"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/slubstack-logo.png" alt="" className="h-7 w-7 rounded-lg object-contain" />
+            <Image src="/slubstack-logo.png" alt="" width={28} height={28} className="h-7 w-7 rounded-lg object-contain" />
             <span
               className="font-display text-[20px] font-extrabold"
               style={{

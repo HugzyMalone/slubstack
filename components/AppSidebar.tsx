@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { UserCircle2, Brain, Sparkles, Globe, Film, Swords } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
@@ -63,10 +64,11 @@ function Mascot({ kind, active }: { kind: MascotKind; active: boolean }) {
       {kind === "bull" ? (
         <BullMascot size={28} />
       ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={kind === "panda" ? "/3dpanda.png" : "/happy-bear1.png"}
+        <Image
+          src={kind === "panda" ? "/3dpanda.webp" : "/happy-bear1.webp"}
           alt=""
+          width={28}
+          height={28}
           className="h-7 w-7 object-contain"
         />
       )}
@@ -276,8 +278,7 @@ export function AppSidebar() {
         href="/"
         className="flex items-center gap-1 px-2 py-1 border-b border-border"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/slubstack-logo.png" alt="" className="h-24 w-24 -my-2 -mx-1 object-contain" />
+        <Image src="/slubstack-logo.png" alt="" width={96} height={96} className="h-24 w-24 -my-2 -mx-1 object-contain" />
         <Wordmark size="md" />
       </Link>
 

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 function HomeIcon() {
@@ -118,14 +117,14 @@ export function BottomNav() {
               prefetch
               className="relative flex flex-col items-center gap-0.5 rounded-full px-3 py-1.5"
             >
-              <motion.div
-                className="absolute inset-0 rounded-full"
+              <div
+                className="absolute inset-0 rounded-full transition-all duration-[220ms]"
                 style={{
                   background: "linear-gradient(135deg, var(--accent-soft) 0%, var(--game-soft) 100%)",
+                  opacity: active ? 1 : 0,
+                  transform: active ? "scale(1)" : "scale(0.8)",
+                  transitionTimingFunction: "cubic-bezier(0.34, 1.56, 0.64, 1)",
                 }}
-                initial={false}
-                animate={{ opacity: active ? 1 : 0, scale: active ? 1 : 0.8 }}
-                transition={{ duration: 0.22, ease: [0.34, 1.56, 0.64, 1] }}
               />
               <span
                 className={cn(

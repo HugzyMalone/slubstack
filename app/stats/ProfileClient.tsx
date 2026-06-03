@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 import {
   Flame, Zap, Trophy, Lock, Mail, Eye, EyeOff, Camera,
@@ -194,8 +195,7 @@ function AuthPage() {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden px-4 lg:static lg:min-h-dvh lg:overflow-visible lg:px-6 lg:py-10">
       <div className="mb-5 flex items-center justify-center gap-1 select-none lg:mb-8">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/slubstack-logo.png" alt="" className="h-28 w-28 object-contain lg:h-36 lg:w-36" />
+        <Image src="/slubstack-logo.png" alt="" width={144} height={144} className="h-28 w-28 object-contain lg:h-36 lg:w-36" />
         <Wordmark size="lg" className="lg:!h-[84px]" />
       </div>
       <p className="mb-5 hidden text-center text-sm text-muted lg:block">Learn languages. Track progress. Compete.</p>

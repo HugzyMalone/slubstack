@@ -6,12 +6,12 @@ import { cn } from "@/lib/utils";
 export type PandaMood = "idle" | "happy" | "sad" | "celebrating" | "sleeping" | "wrong";
 
 const MOOD_IMAGE: Record<PandaMood, string> = {
-  idle:        "/3dpanda.png",
-  happy:       "/3dpanda-wink.png",
-  celebrating: "/3dpanda-wink2.png",
-  sad:         "/3dpanda-sad.png",
-  sleeping:    "/3dpanda-sad.png",
-  wrong:       "/3dpanda-angry.png",
+  idle:        "/3dpanda.webp",
+  happy:       "/3dpanda-wink.webp",
+  celebrating: "/3dpanda-wink2.webp",
+  sad:         "/3dpanda-sad.webp",
+  sleeping:    "/3dpanda-sad.webp",
+  wrong:       "/3dpanda-angry.webp",
 };
 
 type Props = {
