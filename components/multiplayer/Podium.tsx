@@ -27,6 +27,8 @@ type Props = {
   playAgainLabel?: string;
   extraAction?: ReactNode;
   guestPrompt?: boolean;
+  scoreLabel?: string;
+  metaFor?: (p: PodiumPlayer) => string;
 };
 
 function useCountUp(target: number | null, durationMs = 1200): number | null {
@@ -125,7 +127,7 @@ function EloRow({ before, after }: { before: number; after: number }) {
   );
 }
 
-export function Podium({ players, currentUserId, gameDisplayName, onPlayAgainAction, onBackAction, backLabel, playAgainLabel, extraAction, guestPrompt }: Props) {
+export function Podium({ players, currentUserId, gameDisplayName, onPlayAgainAction, onBackAction, backLabel, playAgainLabel, extraAction, guestPrompt, scoreLabel, metaFor }: Props) {
   const router = useRouter();
   const sorted = [...players].sort((a, b) => a.rank - b.rank);
   const allRanks = sorted.map((p) => p.rank);
@@ -176,7 +178,7 @@ export function Podium({ players, currentUserId, gameDisplayName, onPlayAgainAct
                       </span>
                     )}
                   </div>
-                  <div className="text-xs text-muted">{p.correct} correct</div>
+                  <div className="text-xs text-muted">{metaFor ? metaFor(p) : `${p.correct} correct`}</div>
                   {!p.isBot && p.eloBefore !== null && p.eloAfter !== null && (
                     <EloRow before={p.eloBefore} after={p.eloAfter} />
                   )}
@@ -185,7 +187,7 @@ export function Podium({ players, currentUserId, gameDisplayName, onPlayAgainAct
                   <div className="text-xl font-black tabular-nums" style={{ color: rankColor(p.rank) }}>
                     {p.score}
                   </div>
-                  <div className="text-[10px] uppercase tracking-wider text-muted">pts</div>
+                  <div className="text-[10px] uppercase tracking-wider text-muted">{scoreLabel ?? "pts"}</div>
                 </div>
               </div>
             );

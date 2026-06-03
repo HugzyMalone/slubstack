@@ -37,13 +37,25 @@ export type LevelConfig = {
   id: number;
   label: string;
   botTuning: BotTuning;
+  // Race-mode (Type Racer) bots: target words-per-minute range instead of the
+  // points-per-tick tuning above.
+  botWpm?: { min: number; max: number };
 };
+
+/**
+ * Continuous live state a race-mode PlayBoard pushes to the shell every frame:
+ * `score` is the headline number raced on (WPM), `progress` (0..1) drives the
+ * lane position, and `finished` stops the player's clock and ends their race.
+ */
+export type LiveUpdate = { score: number; progress: number; finished: boolean };
 
 export type PlayBoardProps<Q, A> = {
   question: Q;
   remainingMs: number;
   feedback: ScoreResult | null;
   onAnswerAction: (answer: A) => void;
+  // Only supplied in race mode; classic sprint boards ignore it.
+  onLiveAction?: (live: LiveUpdate) => void;
 };
 
 export type SprintAdapter<Q, A> = {
@@ -52,6 +64,14 @@ export type SprintAdapter<Q, A> = {
   ratingKind?: LadderKind;
   displayName: string;
   routePath: string;
+  // Race mode: one shared passage, live-WPM lanes, first-to-finish wins. The
+  // shell switches to progress-driven bots and ends a player's clock the moment
+  // their board reports `finished`. Defaults off (classic 30s sprint).
+  raceMode?: boolean;
+  // Match length override. Defaults to 30_000ms.
+  gameDurationMs?: number;
+  // Unit shown next to the headline number (ticker + podium). Defaults to "pts".
+  scoreLabel?: string;
   levels: LevelConfig[];
   PlayBoard: ComponentType<PlayBoardProps<Q, A>>;
   generateQuestions: (level: number, seed: string) => Q[];
