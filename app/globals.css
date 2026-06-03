@@ -215,13 +215,14 @@ input:focus, textarea:focus {
 .wiki-race-html ul,
 .wiki-race-html ol { margin: 0 0 0.85em 1.2em; }
 .wiki-race-html li { margin-bottom: 0.25em; }
+.wiki-race-html a[href^="./"],
 .wiki-race-html a[href^="/wiki/"] {
   color: var(--game);
   font-weight: 600;
-  text-decoration: none;
+  text-decoration: underline;
   cursor: pointer;
 }
-.wiki-race-html a:not([href^="/wiki/"]) {
+.wiki-race-html a:not([href^="./"]):not([href^="/wiki/"]) {
   color: inherit;
   text-decoration: none;
   pointer-events: none;
