@@ -30,6 +30,7 @@ export function PlayBoard({
   const typedLenRef = useRef(0);
   const finishedRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const cursorRef = useRef<HTMLSpanElement>(null);
   const liveActionRef = useRef(onLiveAction);
   liveActionRef.current = onLiveAction;
 
@@ -82,6 +83,12 @@ export function PlayBoard({
     }, 250);
     return () => clearInterval(iv);
   }, [target.length]);
+
+  // Keep the character you're on parked in the middle of the visible area, so
+  // the line you're typing never slides down behind the keyboard.
+  useEffect(() => {
+    cursorRef.current?.scrollIntoView({ block: "center", behavior: "auto" });
+  }, [typed]);
 
   const liveAccuracy =
     keystrokesRef.current > 0
@@ -177,6 +184,7 @@ export function PlayBoard({
               return (
                 <span
                   key={i}
+                  ref={isCursor ? cursorRef : undefined}
                   className={className}
                   style={isCursor ? { background: "color-mix(in srgb, var(--game) 18%, transparent)" } : undefined}
                 >
