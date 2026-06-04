@@ -24,10 +24,27 @@ function ChevronDown() {
   );
 }
 
+function Flag({ src, size = 22 }: { src: string; size?: number }) {
+  return (
+    <span
+      className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[5px]"
+      style={{
+        width: size,
+        height: size * 0.72,
+        boxShadow: "0 1px 2px rgba(0,0,0,0.12), inset 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent)",
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt="" className="h-full w-full object-cover" />
+    </span>
+  );
+}
+
 type Lang = {
   code: "es" | "zh" | "de" | "it";
   href: string;
   badge: string;
+  flag: string;
   title: string;
   description: string;
   meta: string;
@@ -41,6 +58,7 @@ const LANGUAGES: Lang[] = [
     code: "de",
     href: "/german",
     badge: "DE",
+    flag: "/flags/de.svg",
     title: "German",
     description: "Gender, cases, verbs — grammar-first drills.",
     meta: "18 units · 287 cards",
@@ -51,6 +69,7 @@ const LANGUAGES: Lang[] = [
     code: "zh",
     href: "/mandarin",
     badge: "中",
+    flag: "/flags/cn.svg",
     title: "Mandarin",
     description: "Characters, pinyin, tones, grammar drills & phrases.",
     meta: "12 units · 249 cards",
@@ -65,6 +84,7 @@ const LANGUAGES: Lang[] = [
     code: "es",
     href: "/spanish",
     badge: "ES",
+    flag: "/flags/es.svg",
     title: "Spanish",
     description: "Match, quiz & type through the core vocab tree.",
     meta: "8 units · 116 cards",
@@ -75,6 +95,7 @@ const LANGUAGES: Lang[] = [
     code: "it",
     href: "/italian",
     badge: "IT",
+    flag: "/flags/it.svg",
     title: "Italian",
     description: "Greetings, food, family — Romance basics, match & type.",
     meta: "7 units · 105 cards",
@@ -132,6 +153,7 @@ export default function LanguagesPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
+                      <Flag src={lang.flag} size={20} />
                       <span className="text-[15px] font-semibold">{lang.title}</span>
                       {hydrated && (
                         <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-muted/70 bg-border/60">
@@ -197,6 +219,7 @@ export default function LanguagesPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
+                  <Flag src={lang.flag} size={20} />
                   <span className="text-[15px] font-semibold">{lang.title}</span>
                   {hydrated && (
                     <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-muted/70 bg-border/60">
@@ -254,7 +277,10 @@ export default function LanguagesPage() {
 
               {/* Body */}
               <div className="px-6 pb-4">
-                <h2 className="text-xl font-bold tracking-tight">{lang.title}</h2>
+                <div className="flex items-center gap-2.5">
+                  <Flag src={lang.flag} size={26} />
+                  <h2 className="text-xl font-bold tracking-tight">{lang.title}</h2>
+                </div>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted">{lang.description}</p>
                 <p className="mt-3 text-xs text-muted/70">{lang.meta}</p>
               </div>
