@@ -9,6 +9,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { brainTrainingStore, triviaStore } from "@/lib/store";
 import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
+import { XP_GAME_COMPLETE } from "@/lib/xp";
 import { simulateBotTimeline, type BotTickEvent } from "@/lib/multiplayer/bot";
 import { mulberry32 } from "@/lib/multiplayer/rng";
 import { updateRatings, updateRatingsVsBots, botRatingForLevel, type EloPlayer, type EloUpdate } from "@/lib/multiplayer/elo";
@@ -192,7 +193,7 @@ export function MultiplayerShell<Q, A>({
 
     const { score, correct } = liveRef.current;
 
-    const xpAward = adapter.xpFor(correct, score);
+    const xpAward = Math.max(XP_GAME_COMPLETE, adapter.xpFor(correct, score));
     if (xpAward > 0) {
       store.getState().addXp(xpAward);
       awardQuestProgress("xp", xpAward);
@@ -463,7 +464,7 @@ export function MultiplayerShell<Q, A>({
     if (!ghostRun) return;
     const { score, correct } = liveRef.current;
 
-    const xpAward = adapter.xpFor(correct, score);
+    const xpAward = Math.max(XP_GAME_COMPLETE, adapter.xpFor(correct, score));
     if (signedIn && xpAward > 0) {
       store.getState().addXp(xpAward);
       awardQuestProgress("xp", xpAward);

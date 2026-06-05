@@ -9,6 +9,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { brainTrainingStore } from "@/lib/store";
 import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
+import { XP_GAME_COMPLETE } from "@/lib/xp";
 import { useStrokeBroadcast } from "@/hooks/useStrokeBroadcast";
 import { judge } from "@/lib/multiplayer/draw-scoring";
 import type {
@@ -579,7 +580,7 @@ export function TurnBasedShell({ adapter }: TurnBasedShellProps): React.JSX.Elem
     if (state.phase !== "result" || xpAwardedRef.current) return;
     xpAwardedRef.current = true;
     const myScore = scoresRef.current.find((s) => s.slot === slotIndexRef.current)?.points ?? 0;
-    const xp = adapter.xpFor(myScore);
+    const xp = Math.max(XP_GAME_COMPLETE, adapter.xpFor(myScore));
     if (xp > 0) {
       brainTrainingStore.getState().addXp(xp);
       awardQuestProgress("xp", xp);

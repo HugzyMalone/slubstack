@@ -17,3 +17,8 @@ export function xpToNextLevel(xp: number): { current: number; next: number; prog
 export const XP_CORRECT_FIRST_TRY = 10;
 export const XP_CORRECT_AFTER_RETRY = 5;
 export const XP_SESSION_COMPLETE = 25;
+
+// Guaranteed floor for finishing any game, so a low/zero-correct run still
+// earns something for showing up. Applied as a floor, not a bonus: a strong
+// run keeps its performance XP unchanged.
+export const XP_GAME_COMPLETE = 10;
