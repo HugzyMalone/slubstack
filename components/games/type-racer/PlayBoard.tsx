@@ -176,7 +176,11 @@ export function PlayBoard({
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto pt-3">
+      <div
+        ref={scrollRef}
+        className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto pt-3"
+        style={{ overflowAnchor: "none" }}
+      >
         <div className="w-full max-w-md rounded-2xl border border-border bg-surface px-5 py-6 pb-24">
           {finished && (
             <p className="mb-3 text-sm font-bold" style={{ color: "var(--game)" }}>
@@ -217,7 +221,7 @@ export function PlayBoard({
         spellCheck={false}
         inputMode="text"
         aria-label="Type the passage"
-        className="absolute -z-10 h-px w-px opacity-0"
+        className="fixed left-0 top-0 -z-10 h-px w-px opacity-0"
       />
     </div>
   );
