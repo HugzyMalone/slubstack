@@ -32,6 +32,7 @@ export function PlayBoard({
   const inputRef = useRef<HTMLInputElement>(null);
   const cursorRef = useRef<HTMLSpanElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const liveActionRef = useRef(onLiveAction);
   liveActionRef.current = onLiveAction;
 
@@ -59,7 +60,13 @@ export function PlayBoard({
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
-    const sync = () => setViewportH(vv.height);
+    // Size to the space above the keyboard, measured from this board's own top
+    // (it sits below the score-ticker, so vv.height alone overshoots the
+    // keyboard by the ticker's height and pushes the active line out of sight).
+    const sync = () => {
+      const top = rootRef.current?.getBoundingClientRect().top ?? 0;
+      setViewportH(Math.max(0, vv.height - top));
+    };
     sync();
     vv.addEventListener("resize", sync);
     vv.addEventListener("scroll", sync);
@@ -147,6 +154,7 @@ export function PlayBoard({
 
   return (
     <div
+      ref={rootRef}
       className="flex h-full flex-col overflow-hidden px-4 pt-2 pb-3"
       style={viewportH ? { height: viewportH } : undefined}
       onClick={() => inputRef.current?.focus()}
