@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, User } from "lucide-react";
+import { ArrowLeft, Bot, User } from "lucide-react";
 
 export type QueueSlot = {
   slot: number;
@@ -15,6 +15,8 @@ type Props = {
   secondsRemaining: number;
   level: number;
   title?: string;
+  showLevel?: boolean;
+  onLeave?: () => void;
 };
 
 function Avatar({ slot, compact }: { slot: NonNullable<QueueSlot>; compact: boolean }) {
@@ -51,7 +53,7 @@ function Avatar({ slot, compact }: { slot: NonNullable<QueueSlot>; compact: bool
   );
 }
 
-export function QueueRoom({ players, secondsRemaining, level, title = "Math Blitz" }: Props) {
+export function QueueRoom({ players, secondsRemaining, level, title = "Math Blitz", showLevel = true, onLeave }: Props) {
   const compact = players.length > 4;
   const gridClass = compact
     ? "grid w-full max-w-md grid-cols-4 gap-2 lg:max-w-2xl lg:grid-cols-4"
@@ -69,10 +71,18 @@ export function QueueRoom({ players, secondsRemaining, level, title = "Math Blit
   const emptyIconSize = compact ? 16 : 20;
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-bg">
+      {onLeave && (
+        <button
+          onClick={onLeave}
+          className="absolute left-4 top-4 z-10 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-fg"
+        >
+          <ArrowLeft size={16} /> Back
+        </button>
+      )}
       <div className="flex flex-1 flex-col items-center justify-center px-5">
         <div className="mb-8 text-center">
           <div className="text-xs font-semibold uppercase tracking-widest text-muted">{title}</div>
-          <div className="mt-1 text-3xl font-black tracking-tight">Level {level}</div>
+          {showLevel && <div className="mt-1 text-3xl font-black tracking-tight">Level {level}</div>}
           <p className="mt-2 text-sm text-muted">Looking for opponents…</p>
         </div>
 

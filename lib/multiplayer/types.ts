@@ -72,6 +72,9 @@ export type SprintAdapter<Q, A> = {
   gameDurationMs?: number;
   // Unit shown next to the headline number (ticker + podium). Defaults to "pts".
   scoreLabel?: string;
+  // Skip the level-select screen and queue straight into the only level. For
+  // games where the picker would just be a single button. Defaults off.
+  skipLevelSelect?: boolean;
   levels: LevelConfig[];
   PlayBoard: ComponentType<PlayBoardProps<Q, A>>;
   generateQuestions: (level: number, seed: string) => Q[];

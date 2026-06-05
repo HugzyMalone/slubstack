@@ -78,6 +78,12 @@ export function MultiplayerShell<Q, A>({
   const raceMode = adapter.raceMode ?? false;
   const gameMs = adapter.gameDurationMs ?? GAME_MS;
 
+  // Opt-in: skip the level-select screen and queue straight into the only level
+  // (the picker would just be a single button). "Back" then exits to the game's
+  // entry page rather than a one-option picker.
+  const skipSelect = adapter.skipLevelSelect ?? false;
+  const soleLevelId = adapter.levels[0]?.id ?? 1;
+
   const [phase, setPhase] = useState<Phase>("auth");
   const [level, setLevel] = useState<number>(adapter.levels[0]?.id ?? 1);
   const [authChecked, setAuthChecked] = useState(false);
@@ -119,6 +125,7 @@ export function MultiplayerShell<Q, A>({
   const allocRef = useRef<QueueAlloc | null>(null);
   const presenceRef = useRef<Record<number, PresenceMeta>>({});
   const phaseRef = useRef(phase);
+  const autoQueuedRef = useRef(false);
 
   const isGuestRef = useRef(false);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
@@ -850,12 +857,22 @@ export function MultiplayerShell<Q, A>({
     }
   }, [phase, alloc, presenceSlots, startCountdown]);
 
+  // ── Single-level games: skip the picker, queue straight away ──────────────
+
+  useEffect(() => {
+    if (phase === "select" && skipSelect && profile && userId && !autoQueuedRef.current) {
+      autoQueuedRef.current = true;
+      void enterQueue(soleLevelId);
+    }
+  }, [phase, skipSelect, soleLevelId, profile, userId, enterQueue]);
+
   // ── Reset / Play again ────────────────────────────────────────────────────
 
   const resetToSelect = useCallback(() => {
     teardownChannel();
     gameActiveRef.current = false;
     submittedRef.current = false;
+    autoQueuedRef.current = false;
     setAlloc(null);
     allocRef.current = null;
     setFinalResult(null);
@@ -867,8 +884,13 @@ export function MultiplayerShell<Q, A>({
     setMyProgress(0);
     setQuestions([]);
     setQuestionIndex(0);
+    // No picker to fall back to — leave to the entry page.
+    if (skipSelect) {
+      router.push(adapter.routePath);
+      return;
+    }
     setPhase("select");
-  }, [teardownChannel]);
+  }, [teardownChannel, skipSelect, router, adapter.routePath]);
 
   const playAgain = useCallback(() => {
     teardownChannel();
@@ -996,6 +1018,10 @@ export function MultiplayerShell<Q, A>({
     );
   }
 
+  if (phase === "select" && skipSelect) {
+    return <div className="mx-auto max-w-md px-4 pt-12 text-center text-sm text-muted">Loading…</div>;
+  }
+
   if (phase === "select") {
     return (
       <div className="mx-auto max-w-md px-4 pt-6 pb-8">
@@ -1033,7 +1059,16 @@ export function MultiplayerShell<Q, A>({
   }
 
   if (phase === "queue") {
-    return <QueueRoom players={queueSlots} secondsRemaining={queueSecs} level={level} title={adapter.displayName} />;
+    return (
+      <QueueRoom
+        players={queueSlots}
+        secondsRemaining={queueSecs}
+        level={level}
+        showLevel={!skipSelect}
+        title={adapter.displayName}
+        onLeave={resetToSelect}
+      />
+    );
   }
 
   if (phase === "countdown") {

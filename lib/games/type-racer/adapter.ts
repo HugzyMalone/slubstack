@@ -25,11 +25,12 @@ export const typeRacerAdapter: SprintAdapter<TypePassage, string> = {
   gameKind: "type_racer",
   ratingKind: "ranked",
   displayName: "Type Racer",
-  routePath: "/games/type-racer",
+  routePath: "/games",
   storeKey: "brainTraining",
   raceMode: true,
   gameDurationMs: RACE_DURATION_MS,
   scoreLabel: "WPM",
+  skipLevelSelect: true,
   levels: [
     {
       id: 1,
