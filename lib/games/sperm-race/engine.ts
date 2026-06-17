@@ -12,6 +12,13 @@ export const TAPS_TO_FINISH: Record<Track, number> = {
 // Humans top out around here on a two-button rhythm; the gap is the test.
 export const MAX_TAPS_PER_SEC = 12;
 
+// Hard ceiling on a single race. Without a finisher no client ever posts the
+// finalise, so the match would hang in `waiting` forever; this forces every
+// client to the result screen and one of them to finalise standings. Generous
+// vs the human floor (the slowest track's floor is ~10.6s) so a genuine slow
+// finisher is never cut off mid-run.
+export const RACE_MAX_MS = 45_000;
+
 // Per-track minimum plausible finish time. A uniform run at just under the 12/s
 // ceiling passes the per-interval check yet implies a superhuman, unbeatable
 // time, so we also floor the total. The floor derives from 7 taps/s — a cadence

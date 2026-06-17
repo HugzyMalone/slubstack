@@ -6,6 +6,7 @@ import {
   validateTapTimeline,
   TAPS_TO_FINISH,
   MIN_MS_PER_TRACK,
+  RACE_MAX_MS,
 } from "@/lib/games/sperm-race/engine";
 
 describe("registerTap", () => {
@@ -72,5 +73,16 @@ describe("validateTapTimeline", () => {
     const finish = (TAPS_TO_FINISH[1] - 1) * 150;
     expect(finish).toBeGreaterThanOrEqual(MIN_MS_PER_TRACK[1]);
     expect(validateTapTimeline(taps, 1).validMs).toBe(finish);
+  });
+});
+
+describe("RACE_MAX_MS", () => {
+  it("never cuts off a genuine slow finisher on any track", () => {
+    // The no-finisher clock must sit above the slowest plausible human finish so
+    // a real racer is never forced to DNF mid-run. Each track's floor is the
+    // *fastest* allowed time; a human can take several times longer, so require a
+    // comfortable margin over the slowest track's floor.
+    const slowestFloor = Math.max(...([1, 2, 3] as const).map((t) => MIN_MS_PER_TRACK[t]));
+    expect(RACE_MAX_MS).toBeGreaterThan(slowestFloor * 2);
   });
 });

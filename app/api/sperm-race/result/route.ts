@@ -46,7 +46,12 @@ type MatchRow = {
 };
 
 function buildResponse(match: MatchRow, validMs: number, improved: boolean) {
+  // Drop ghost rows: a player who left mid-race keeps their join-time row with a
+  // null score (finalise_live_match only updates present racers' rows), and a
+  // null-score player would otherwise surface as a phantom DNF in any downstream
+  // leaderboard/podium read of this match.
   const players = [...match.live_match_players]
+    .filter((p) => p.score !== null)
     .sort((a, b) => a.slot - b.slot)
     .map((p) => ({
       slot: p.slot,
@@ -123,10 +128,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload arrays" }, { status: 400 });
   }
 
-  // Never trust a client-supplied finish time: recompute from the tap timeline
-  // and reject any run that implies an impossible tap rate or wrong tap count.
-  const { validMs } = validateTapTimeline(taps as number[], track as Track);
-  if (validMs === null) {
+  // A DNF finalise carries an empty timeline: the racer never crossed the line
+  // (forced to results by the client's RACE_MAX_MS clock) so there's no best
+  // time to validate or record — but standings still need finalising. A
+  // non-empty timeline is never trusted: recompute it and reject any run that
+  // implies an impossible tap rate or wrong tap count.
+  const isDnf = (taps as number[]).length === 0;
+  const { validMs } = isDnf
+    ? { validMs: null }
+    : validateTapTimeline(taps as number[], track as Track);
+  if (!isDnf && validMs === null) {
     return NextResponse.json({ error: "Run rejected" }, { status: 400 });
   }
 
@@ -155,16 +166,21 @@ export async function POST(request: Request) {
   if (!callerRow) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   // Best-time board write runs under the service-role client with the server-derived
-  // user id and the server-recomputed validMs — never a client-supplied time.
-  const { data: improved, error: timesError } = await admin.rpc("record_race_times", {
-    p_user_id: user.id,
-    p_track: track,
-    p_best_ms: validMs,
-  });
-  if (timesError) return NextResponse.json({ error: timesError.message }, { status: 500 });
+  // user id and the server-recomputed validMs — never a client-supplied time. A
+  // DNF (validMs null) has no best time, so the board write is skipped entirely.
+  let improved = false;
+  if (validMs !== null) {
+    const { data: improvedData, error: timesError } = await admin.rpc("record_race_times", {
+      p_user_id: user.id,
+      p_track: track,
+      p_best_ms: validMs,
+    });
+    if (timesError) return NextResponse.json({ error: timesError.message }, { status: 500 });
+    improved = improvedData === true;
+  }
 
   if (match.status === "finished") {
-    return NextResponse.json(buildResponse(match, validMs, improved === true));
+    return NextResponse.json(buildResponse(match, validMs ?? 0, improved));
   }
 
   const rpcParams: Record<string, unknown> = {
@@ -194,5 +210,5 @@ export async function POST(request: Request) {
   if (finalError) return NextResponse.json({ error: finalError.message }, { status: 500 });
   if (!finalData) return NextResponse.json({ error: "Match not found" }, { status: 404 });
 
-  return NextResponse.json(buildResponse(finalData as unknown as MatchRow, validMs, improved === true));
+  return NextResponse.json(buildResponse(finalData as unknown as MatchRow, validMs ?? 0, improved));
 }

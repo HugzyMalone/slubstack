@@ -17,6 +17,7 @@ import { XP_GAME_COMPLETE } from "@/lib/xp";
 import {
   createRaceState,
   registerTap,
+  RACE_MAX_MS,
   type Button,
   type RaceState,
   type Track,
@@ -46,6 +47,11 @@ type RoomResp = {
 
 const POS_BROADCAST_MS = 100;
 const DEFAULT_RATING = 1200;
+// Standings-snapshot window: wait for every present racer's `finish` broadcast
+// to land before computing placements, but resolve early once they all have so
+// fast rooms aren't penalised. The cap bounds a slow-broadcast straggler.
+const SNAPSHOT_POLL_MS = 150;
+const SNAPSHOT_MAX_MS = 4_000;
 
 export function RaceShell(): React.JSX.Element {
   const router = useRouter();
@@ -79,9 +85,13 @@ export function RaceShell(): React.JSX.Element {
   const xpAwardedRef = useRef(false);
   const lastSentPosRef = useRef(-1);
   const isGuestRef = useRef(false);
+  const finishersRef = useRef<FinishPayload[]>([]);
+  const presenceSlotsRef = useRef<Record<number, PresenceMeta>>({});
 
   useEffect(() => { slotRef.current = slot; }, [slot]);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
+  useEffect(() => { finishersRef.current = finishers; }, [finishers]);
+  useEffect(() => { presenceSlotsRef.current = presenceSlots; }, [presenceSlots]);
 
   // ── Auth gate ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -233,8 +243,13 @@ export function RaceShell(): React.JSX.Element {
     }
   }, [busy, profile, userId, codeInput, subscribeChannel]);
 
+  // The host is whoever holds the lowest present slot, not strictly slot 0 — so
+  // if the original host (slot 0) leaves the lobby, the next remaining racer
+  // inherits the start control instead of the room becoming unstartable.
   const handleStart = useCallback(() => {
-    if (slotRef.current !== 0) return;
+    const presentSlotNums = Object.keys(presenceSlotsRef.current).map(Number);
+    const hostSlot = presentSlotNums.length ? Math.min(...presentSlotNums) : -1;
+    if (slotRef.current !== hostSlot) return;
     const ch = channelRef.current;
     if (!ch) return;
     ch.send({ type: "broadcast", event: "go", payload: { track } });
@@ -270,6 +285,17 @@ export function RaceShell(): React.JSX.Element {
     return () => clearInterval(iv);
   }, [phase]);
 
+  // Terminal race clock: if the local player never crosses the line, force the
+  // result screen anyway so the match can't hang in `racing` forever. The
+  // result POST then finalises standings as a DNF (no best-time write).
+  useEffect(() => {
+    if (phase !== "racing") return;
+    const t = setTimeout(() => {
+      if (phaseRef.current === "racing") setPhase("result");
+    }, RACE_MAX_MS);
+    return () => clearTimeout(t);
+  }, [phase]);
+
   const onTap = useCallback((button: Button) => {
     if (phaseRef.current !== "racing") return;
     const before = raceRef.current;
@@ -300,24 +326,40 @@ export function RaceShell(): React.JSX.Element {
   }, [phase]);
 
   // ── Result POST (finalise standings + ELO, plus the tap timeline) ───────────
-  // Deferred ~1.2s after the local finish so every racer's `finish` broadcast has
-  // landed and the standings are complete before we compute placements. Only the
-  // racer who finished holds a valid tap timeline, which the route revalidates.
+  // Fires on every racer reaching the result screen — whether they finished or
+  // were forced there by the RACE_MAX_MS clock (DNF). One racer's POST wins the
+  // finalise advisory lock and writes standings; later ones are idempotent via
+  // the route's status=finished short-circuit, but each still records their own
+  // best-time before that. The snapshot is deferred until all present racers'
+  // `finish` broadcasts have landed (or SNAPSHOT_MAX_MS) so a slow-broadcast
+  // finisher isn't mis-ranked as DNF. Only a finisher holds a tap timeline; a
+  // DNF posts an empty one and the route finalises without a best-time write.
   useEffect(() => {
-    if (phase !== "result" || !finishedRef.current || submittedRef.current) return;
+    if (phase !== "result" || submittedRef.current) return;
     submittedRef.current = true;
     const mId = matchId;
     const trackVal = raceRef.current.track;
     const taps = myTapsRef.current;
-    if (!mId || taps.length === 0) return;
+    if (!mId) return;
 
-    const t = setTimeout(() => {
-      void (async () => {
-        const present = Object.values(presenceSlots);
+    let poll: ReturnType<typeof setInterval> | null = null;
+    let settled = false;
+    const startedAt = performance.now();
+
+    const run = () => {
+      if (settled) return;
+      settled = true;
+      if (poll) clearInterval(poll);
+      void submitResult();
+    };
+
+    const submitResult = async () => {
+      {
+        const present = Object.values(presenceSlotsRef.current);
         // A racer's "score" is their placement value: finishers ranked by finish
         // time (faster = higher score), non-finishers (DNF) score 0. This feeds
         // the same denseRanks → updateRatings path the other shells use.
-        const finishMs = new Map(finishers.map((f) => [f.slot, f.ms]));
+        const finishMs = new Map(finishersRef.current.map((f) => [f.slot, f.ms]));
         const slots = present.map((meta) => {
           const ms = finishMs.get(meta.slotIndex);
           const score = ms === undefined ? 0 : Math.max(1, 1_000_000 - Math.round(ms));
@@ -442,11 +484,22 @@ export function RaceShell(): React.JSX.Element {
           if (attempt < 2) await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
         }
         toast.error("Couldn't save your result. Check your connection.");
-      })();
-    }, 1200);
+      }
+    };
 
-    return () => clearTimeout(t);
-  }, [phase, matchId, finishers, presenceSlots]);
+    poll = setInterval(() => {
+      const presentCount = Object.keys(presenceSlotsRef.current).length;
+      const finishedCount = finishersRef.current.length;
+      const elapsed = performance.now() - startedAt;
+      if ((presentCount > 0 && finishedCount >= presentCount) || elapsed >= SNAPSHOT_MAX_MS) {
+        run();
+      }
+    }, SNAPSHOT_POLL_MS);
+
+    return () => {
+      if (poll) clearInterval(poll);
+    };
+  }, [phase, matchId]);
 
   // ── Reset ──────────────────────────────────────────────────────────────────
   const playAgain = useCallback(() => {
@@ -479,6 +532,8 @@ export function RaceShell(): React.JSX.Element {
 
   // ── Derived ────────────────────────────────────────────────────────────────
   const presentSlots = Object.keys(presenceSlots).map(Number).sort((a, b) => a - b);
+  const hostSlot = presentSlots.length ? presentSlots[0] : -1;
+  const isHost = slot === hostSlot;
   const racers: Racer[] = presentSlots.map((s) => {
     const meta = presenceSlots[s];
     return {
@@ -632,7 +687,7 @@ export function RaceShell(): React.JSX.Element {
                   </div>
                 )}
                 <span className="text-sm font-medium">{p.displayName}</span>
-                {p.slot === 0 && (
+                {p.slot === hostSlot && (
                   <span className="rounded-full bg-[var(--accent)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--accent)]">host</span>
                 )}
               </li>
@@ -641,7 +696,7 @@ export function RaceShell(): React.JSX.Element {
           </ul>
         </div>
 
-        {slot === 0 ? (
+        {isHost ? (
           <button
             onClick={handleStart}
             disabled={racers.length < 2}
