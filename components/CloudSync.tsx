@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useStore } from "zustand";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { hasPullCompleted } from "@/lib/syncGate";
 import {
   useGameStore,
   mandarinStore,
@@ -72,6 +73,7 @@ export function CloudSync({ lang = "mandarin" }: Props) {
 
     const totalXp = mandarinXp + germanXp + spanishXp + italianXp + vibeXp + githubXp + brainXp + triviaXp;
     const timeout = window.setTimeout(async () => {
+      if (!hasPullCompleted()) return;
       const { data } = await supabase.auth.getSession();
       if (!data.session) return;
 

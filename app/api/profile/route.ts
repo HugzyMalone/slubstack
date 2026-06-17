@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { isAllowedAvatarUrl } from "@/lib/avatar";
 
 const USERNAME_RE = /^[a-zA-Z0-9_-]{3,20}$/;
 
@@ -68,6 +69,10 @@ export async function POST(request: Request) {
       { error: "Username must be 3–20 characters: letters, numbers, dashes, or underscores." },
       { status: 400 },
     );
+  }
+
+  if (avatar && !isAllowedAvatarUrl(avatar)) {
+    return NextResponse.json({ error: "Invalid avatar URL." }, { status: 400 });
   }
 
   const { error } = await supabase.from("profiles").upsert(

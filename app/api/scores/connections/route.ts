@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getUtcTodayStr } from "@/lib/wordle-words";
 
 export async function GET(request: NextRequest) {
   const supabase = await getSupabaseServerClient();
@@ -40,13 +41,12 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { date, solved, mistakes } = (await request.json()) as {
-    date: string; solved: boolean; mistakes: number;
+  const { solved, mistakes } = (await request.json()) as {
+    solved: boolean; mistakes: number;
   };
 
-  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return NextResponse.json({ error: "Invalid date" }, { status: 400 });
-  }
+  const date = getUtcTodayStr();
+
   if (!Number.isInteger(mistakes) || mistakes < 0 || mistakes > 4) {
     return NextResponse.json({ error: "Invalid mistakes" }, { status: 400 });
   }

@@ -5,6 +5,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { germanStore, spanishStore, italianStore, vibeCodingStore, githubStore } from "@/lib/store";
 import type { RemoteState } from "@/lib/store";
+import { markPullComplete, resetPullGate } from "@/lib/syncGate";
 
 export function BootstrapSync() {
   const hasPulled = useRef(false);
@@ -34,6 +35,8 @@ export function BootstrapSync() {
           } catch {}
         })
       );
+
+      markPullComplete();
     }
 
     supabase.auth.getSession().then(({ data }) => {
@@ -42,6 +45,7 @@ export function BootstrapSync() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_IN") {
+        resetPullGate();
         hasPulled.current = false;
         pullAll();
       }

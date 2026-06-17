@@ -73,7 +73,16 @@ export async function POST(request: NextRequest) {
 
   let upsertData: Record<string, unknown>;
 
-  const totalXp = body.totalXp !== undefined ? Math.max(0, Math.floor(body.totalXp)) : undefined;
+  // xp is monotonic server-side: a fresh/cleared device must never lower it.
+  const { data: existing } = await supabase
+    .from("user_stats")
+    .select("xp")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const existingXp = existing?.xp ?? 0;
+
+  const rawTotalXp = body.totalXp !== undefined ? Math.max(0, Math.floor(body.totalXp)) : undefined;
+  const totalXp = rawTotalXp !== undefined ? Math.max(rawTotalXp, existingXp) : undefined;
 
   if (lang === "german") {
     upsertData = {
@@ -106,7 +115,7 @@ export async function POST(request: NextRequest) {
   } else {
     upsertData = {
       user_id: user.id,
-      xp: totalXp ?? Math.max(0, Math.floor(body.xp ?? 0)),
+      xp: totalXp ?? Math.max(existingXp, Math.floor(body.xp ?? 0)),
       streak: Math.max(0, Math.floor(body.streak ?? 0)),
       words_learned: Math.max(0, Math.floor(body.wordsLearned ?? 0)),
       units_done: Math.max(0, Math.floor(body.unitsDone ?? 0)),

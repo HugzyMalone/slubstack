@@ -3,6 +3,7 @@
 import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { isAllowedAvatarUrl } from "@/lib/avatar";
 
 export function guestDisplayName(userId: string) {
   return `Guest-${userId.replace(/-/g, "").slice(0, 6)}`;
@@ -16,9 +17,12 @@ export function profileFromUser(user: User): { displayName: string; avatarUrl: s
   const meta = user.user_metadata as { username?: string; avatar_url?: string };
   const cachedName = typeof window !== "undefined" ? localStorage.getItem("slubstack_username") : null;
   const cachedAvatar = typeof window !== "undefined" ? localStorage.getItem("slubstack_avatar") : null;
+  // meta.avatar_url is attacker-settable via Supabase auth updateUser, bypassing
+  // the /api/profile allow-list, so it must be re-validated before it is shown.
+  const metaAvatar = meta.avatar_url && isAllowedAvatarUrl(meta.avatar_url) ? meta.avatar_url : null;
   return {
     displayName: cachedName ?? meta.username ?? `learner-${user.id.slice(0, 8)}`,
-    avatarUrl: cachedAvatar ?? meta.avatar_url ?? null,
+    avatarUrl: cachedAvatar ?? metaAvatar,
   };
 }
 

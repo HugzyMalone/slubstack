@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function GET() {
   const supabase = await getSupabaseServerClient();
   if (!supabase) return NextResponse.json({ error: "Not configured" }, { status: 503 });
@@ -105,7 +107,9 @@ export async function DELETE(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const friendId = request.nextUrl.searchParams.get("id");
-  if (!friendId) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  if (!friendId || !UUID_RE.test(friendId)) {
+    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+  }
 
   await supabase
     .from("friendships")

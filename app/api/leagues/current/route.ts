@@ -31,7 +31,7 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: cohortIdData, error: assignErr } = await supabase.rpc("assign_cohort", { uid: user.id });
+  const { data: cohortIdData, error: assignErr } = await supabase.rpc("assign_cohort");
   if (assignErr) return NextResponse.json({ error: assignErr.message }, { status: 500 });
   const cohortId = cohortIdData as string;
 

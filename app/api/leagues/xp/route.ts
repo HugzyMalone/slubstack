@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   const amount = Math.max(0, Math.floor(body.amount ?? 0));
   if (amount === 0) return NextResponse.json({ ok: true, skipped: true });
 
-  const { error } = await supabase.rpc("award_league_xp", { uid: user.id, amount });
+  const { error } = await supabase.rpc("award_league_xp", { amount });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   return NextResponse.json({ ok: true });

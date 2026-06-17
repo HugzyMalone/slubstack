@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useStore } from "zustand";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { hasPullCompleted } from "@/lib/syncGate";
 import {
   mandarinStore,
   germanStore,
@@ -33,6 +34,7 @@ export function TotalXpSync() {
     const totalXp = mandarinXp + germanXp + spanishXp + italianXp + vibeXp + githubXp + brainXp + triviaXp;
 
     const timeout = window.setTimeout(async () => {
+      if (!hasPullCompleted()) return;
       const { data } = await supabase.auth.getSession();
       if (!data.session) return;
 

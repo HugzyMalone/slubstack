@@ -148,6 +148,11 @@ export function getTodayStr(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+// Server-authoritative puzzle date: UTC so all players share one board regardless of timezone.
+export function getUtcTodayStr(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export function getDayIndex(dateStr = getTodayStr()): number {
   const [ey, em, ed] = EPOCH.split("-").map(Number);
   const [dy, dm, dd] = dateStr.split("-").map(Number);

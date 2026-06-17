@@ -11,7 +11,7 @@ import { Wordmark } from "@/components/Wordmark";
 import { isMuted as isSoundMuted, setMuted as setSoundMuted } from "@/lib/sound";
 import { isHapticMuted, setHapticMuted } from "@/lib/haptics";
 import { useStore } from "zustand";
-import { mandarinStore, germanStore, spanishStore, vibeCodingStore, brainTrainingStore, triviaStore } from "@/lib/store";
+import { mandarinStore, germanStore, spanishStore, italianStore, vibeCodingStore, githubStore, brainTrainingStore, triviaStore } from "@/lib/store";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -393,7 +393,9 @@ function ProfileTab({ user, avatar, username, status }: {
   const mandarinXp = useStore(mandarinStore, (s) => s.xp);
   const germanXp = useStore(germanStore, (s) => s.xp);
   const spanishXp = useStore(spanishStore, (s) => s.xp);
+  const italianXp = useStore(italianStore, (s) => s.xp);
   const vibeXp = useStore(vibeCodingStore, (s) => s.xp);
+  const githubXp = useStore(githubStore, (s) => s.xp);
   const brainXp = useStore(brainTrainingStore, (s) => s.xp);
   const triviaXp = useStore(triviaStore, (s) => s.xp);
 
@@ -413,7 +415,7 @@ function ProfileTab({ user, avatar, username, status }: {
 
   if (!hydrated) return null;
 
-  const xp = mandarinXp + germanXp + spanishXp + vibeXp + brainXp + triviaXp;
+  const xp = mandarinXp + germanXp + spanishXp + italianXp + vibeXp + githubXp + brainXp + triviaXp;
   const level = levelFromXp(xp);
   const { current, next, progress } = xpToNextLevel(xp);
   const tier = getTier(level);
@@ -525,6 +527,7 @@ function ProfileTab({ user, avatar, username, status }: {
               { label: "Spanish",  xp: spanishXp,  code: "ES",  iconBg: "linear-gradient(135deg, #c2410c 0%, #ea580c 100%)" },
               { label: "Mandarin", xp: mandarinXp, code: "中",  iconBg: "linear-gradient(135deg, #be123c 0%, #e11d48 100%)" },
               { label: "German",   xp: germanXp,   code: "DE",  iconBg: "linear-gradient(135deg, #c2410c 0%, #f97316 100%)" },
+              { label: "Italian",  xp: italianXp,  code: "IT",  iconBg: "linear-gradient(135deg, #15803d 0%, #16a34a 100%)" },
             ].map(({ label, xp: langXp, code, iconBg }) => {
               const langLevel = levelFromXp(langXp);
               const langTier = getTier(langLevel);
@@ -553,6 +556,7 @@ function ProfileTab({ user, avatar, username, status }: {
           <div className="divide-y divide-border">
             {[
               { label: "Vibe Coding", xp: vibeXp, code: "🪄", iconBg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)" },
+              { label: "GitHub", xp: githubXp, code: "🐙", iconBg: "linear-gradient(135deg, #334155 0%, #0f172a 100%)" },
             ].map(({ label, xp: langXp, code, iconBg }) => {
               const langLevel = levelFromXp(langXp);
               const langTier = getTier(langLevel);
