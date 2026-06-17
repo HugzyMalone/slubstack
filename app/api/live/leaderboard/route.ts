@@ -11,6 +11,7 @@ const VALID_LADDERS: ReadonlySet<LadderKind> = new Set<LadderKind>([
   "year_guesser",
   "geo_clone",
   "batman_shakespeare",
+  "sperm_race",
   "trivia",
   "ranked",
 ] satisfies (LadderKind | GameKind)[]);

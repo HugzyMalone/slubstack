@@ -25,6 +25,7 @@ const MAX_PLAYERS: Record<GameKind, number> = {
   geo_clone: 8,
   batman_shakespeare: 4,
   type_racer: 4,
+  sperm_race: 4,
 };
 
 export async function POST(request: NextRequest) {
