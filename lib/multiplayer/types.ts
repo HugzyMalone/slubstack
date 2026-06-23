@@ -15,7 +15,8 @@ export type GameKind =
   | "year_guesser"
   | "geo_clone"
   | "batman_shakespeare"
-  | "type_racer";
+  | "type_racer"
+  | "sperm_race";
 
 export type LadderKind = GameKind | "trivia" | "ranked";
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Blocks, Brain, Brush, Globe, Film, Keyboard, Compass, ArrowRight } from "lucide-react";
+import { Blocks, Brain, Brush, Globe, Film, Keyboard, Compass, FlaskConical, ArrowRight } from "lucide-react";
 
 const GAMES = [
   {
@@ -39,6 +39,15 @@ const GAMES = [
     icon: <Keyboard size={26} />,
     tint: "#14b8a6",
     bg: "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)",
+    available: true,
+  },
+  {
+    href: "/games/sperm-race",
+    title: "Sperm Race",
+    subtitle: "Four-player tap race — join a private room by code and alternate A/B to the egg",
+    icon: <FlaskConical size={26} />,
+    tint: "#22c55e",
+    bg: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
     available: true,
   },
   {
