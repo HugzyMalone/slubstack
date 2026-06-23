@@ -9,6 +9,7 @@ import { brainTrainingStore, triviaStore } from "@/lib/store";
 import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
 import { buildShareCard } from "@/lib/share";
+import { track } from "@/lib/analytics";
 import { ShareButton } from "@/components/games/ShareButton";
 import type { ScoreResult } from "@/lib/multiplayer/types";
 import { getDailyAdapter } from "@/lib/games/daily";
@@ -113,7 +114,8 @@ export function DailyRunner({ gameKind, level, seed, date, alreadyPlayed, initia
     }
     setPlayed(true);
     setPhase("done");
-  }, [adapter, store, date]);
+    track("first_game_complete", { game: gameKind });
+  }, [adapter, store, date, gameKind]);
 
   const endGame = useCallback(() => {
     if (!gameActiveRef.current) return;

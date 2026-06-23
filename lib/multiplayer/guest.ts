@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isAllowedAvatarUrl } from "@/lib/avatar";
+import { track } from "@/lib/analytics";
 
 export function guestDisplayName(userId: string) {
   return `Guest-${userId.replace(/-/g, "").slice(0, 6)}`;
@@ -62,6 +63,8 @@ export async function signInAsGuest(): Promise<User | null> {
     localStorage.setItem("slubstack_username", username);
     localStorage.removeItem("slubstack_avatar");
   }
+
+  track("guest_play_start");
 
   return user;
 }

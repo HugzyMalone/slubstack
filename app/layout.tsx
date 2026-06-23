@@ -9,7 +9,10 @@ import { CloudSync } from "@/components/CloudSync";
 import { TotalXpSync } from "@/components/TotalXpSync";
 import { BootstrapSync } from "@/components/BootstrapSync";
 import { AppSidebar } from "@/components/AppSidebar";
+import { PostHogProvider } from "@/components/PostHogProvider";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GameStoreProvider, mandarinStore } from "@/lib/store";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -98,6 +101,9 @@ export default function RootLayout({
             <InstallPrompt />
             <BottomNav />
           </div>
+          <PostHogProvider />
+          <Analytics />
+          <SpeedInsights />
           <Toaster
             position="top-center"
             offset={72}

@@ -3,6 +3,8 @@
  * Returned strings are copied to clipboard; no images, no API.
  */
 
+import { track } from "@/lib/analytics";
+
 export type WordleRow = ("correct" | "present" | "absent")[];
 
 export type ShareCardInput = {
@@ -147,6 +149,7 @@ export function lessonShareCard({
 /** Tries native share, falls back to clipboard. Returns "shared" | "copied" | "failed". */
 export async function shareOrCopy(text: string): Promise<"shared" | "copied" | "failed"> {
   if (typeof navigator === "undefined") return "failed";
+  track("share_clicked");
   const nav = navigator as Navigator & { share?: (data: ShareData) => Promise<void> };
   if (nav.share) {
     try {

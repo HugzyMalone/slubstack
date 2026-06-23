@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { track } from "@/lib/analytics";
 
 const STAY_KEY = "slubstack_stay_signed_in";
 function markStaySignedIn() {
@@ -73,6 +74,7 @@ export default function OnboardingPage() {
     localStorage.setItem("slubstack_username", username);
     localStorage.setItem("slubstack_avatar", avatar);
     markStaySignedIn();
+    track("signup");
     router.replace("/");
   }
 
