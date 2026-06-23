@@ -38,6 +38,13 @@ type PresenceMeta = {
 type PosPayload = { slot: number; pos: number };
 type FinishPayload = { slot: number; ms: number };
 
+type StandingEntry = {
+  slot: number;
+  displayName: string;
+  rank: number | null;
+  score: number | null;
+};
+
 type RoomResp = {
   matchId: string;
   seed: string;
@@ -73,6 +80,7 @@ export function RaceShell(): React.JSX.Element {
   const [presenceSlots, setPresenceSlots] = useState<Record<number, PresenceMeta>>({});
   const [positions, setPositions] = useState<Record<number, number>>({});
   const [finishers, setFinishers] = useState<FinishPayload[]>([]);
+  const [standings, setStandings] = useState<StandingEntry[] | null>(null);
   const [countNum, setCountNum] = useState(3);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -135,6 +143,7 @@ export function RaceShell(): React.JSX.Element {
     xpAwardedRef.current = false;
     setPositions({});
     setFinishers([]);
+    setStandings(null);
     setPhase("countdown");
   }, []);
 
@@ -477,7 +486,11 @@ export function RaceShell(): React.JSX.Element {
               body,
               keepalive: true,
             });
-            if (res.ok) return;
+            if (res.ok) {
+              const data = await res.json() as { players?: StandingEntry[] };
+              if (Array.isArray(data?.players)) setStandings(data.players);
+              return;
+            }
           } catch {
             // fall through to retry / final toast
           }
@@ -751,9 +764,21 @@ export function RaceShell(): React.JSX.Element {
   }
 
   // result
-  const finishOrder = [...finishers].sort((a, b) => a.ms - b.ms);
+  const finishMsMap = new Map(finishers.map((f) => [f.slot, f.ms]));
   const myFinish = finishers.find((f) => f.slot === slot);
-  const won = finishOrder.length > 0 && finishOrder[0].slot === slot;
+
+  // Server standings include all racers (DNFs too) once the result POST resolves.
+  // Fall back to local finishers (finishers-only, no DNFs) until the fetch completes.
+  const displayOrder: Array<{ slot: number; rank: number; name: string; ms: number | null }> =
+    standings
+      ? [...standings]
+          .sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999))
+          .map((s) => ({ slot: s.slot, rank: s.rank ?? 999, name: s.displayName, ms: finishMsMap.get(s.slot) ?? null }))
+      : [...finishers]
+          .sort((a, b) => a.ms - b.ms)
+          .map((f, i) => ({ slot: f.slot, rank: i + 1, name: presenceSlots[f.slot]?.displayName ?? `Player ${f.slot + 1}`, ms: f.ms }));
+
+  const won = displayOrder.some((e) => e.slot === slot && e.rank === 1);
 
   return (
     <div className="mx-auto max-w-md px-4 pt-8 pb-10">
@@ -763,18 +788,18 @@ export function RaceShell(): React.JSX.Element {
         {myFinish && <p className="text-sm text-muted">Your time: {(myFinish.ms / 1000).toFixed(2)}s</p>}
       </div>
       <ul className="mt-6 flex flex-col gap-2">
-        {finishOrder.map((f, i) => {
-          const meta = presenceSlots[f.slot];
-          const name = meta?.displayName ?? `Player ${f.slot + 1}`;
-          const isMe = f.slot === slot;
+        {displayOrder.map((entry) => {
+          const isMe = entry.slot === slot;
           return (
             <li
-              key={f.slot}
+              key={entry.slot}
               className={`flex items-center gap-3 rounded-2xl border px-4 py-3 ${isMe ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-border bg-surface"}`}
             >
-              <span className="w-6 shrink-0 text-center text-base font-black text-muted">{i + 1}</span>
-              <span className="flex-1 truncate text-sm font-bold">{name}{isMe ? " (you)" : ""}</span>
-              <span className="text-base font-black tabular-nums">{(f.ms / 1000).toFixed(2)}s</span>
+              <span className="w-6 shrink-0 text-center text-base font-black text-muted">{entry.rank}</span>
+              <span className="flex-1 truncate text-sm font-bold">{entry.name}{isMe ? " (you)" : ""}</span>
+              <span className="text-base font-black tabular-nums">
+                {entry.ms !== null ? `${(entry.ms / 1000).toFixed(2)}s` : "DNF"}
+              </span>
             </li>
           );
         })}

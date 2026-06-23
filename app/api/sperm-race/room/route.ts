@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  let body: { level?: unknown } = {};
+  let body: { track?: unknown } = {};
   try {
     const text = await request.text();
     body = text ? JSON.parse(text) : {};
@@ -73,8 +73,8 @@ export async function POST(request: NextRequest) {
   }
 
   const level =
-    typeof body.level === "number" && Number.isInteger(body.level) && body.level >= 1 && body.level <= 3
-      ? body.level
+    typeof body.track === "number" && Number.isInteger(body.track) && body.track >= 1 && body.track <= 3
+      ? body.track
       : 1;
 
   const { data, error } = await admin.rpc("create_private_live_match", {
