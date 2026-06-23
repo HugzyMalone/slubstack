@@ -196,7 +196,7 @@ export function Podium({ players, currentUserId, gameDisplayName, onPlayAgainAct
 
         {guestPrompt && (
           <button
-            onClick={() => router.push("/auth")}
+            onClick={() => router.push("/stats")}
             className="mb-4 block w-full rounded-2xl border border-border bg-surface px-4 py-3 text-left text-xs text-muted transition-colors hover:text-fg"
           >
             Create an account to save progress and climb the ranked ladder.

@@ -43,7 +43,7 @@ export function GuestGate({ title, description, backPath, onGuestAction }: Guest
         {busy ? "Starting…" : "Play as guest"}
       </button>
       <button
-        onClick={() => router.push("/auth")}
+        onClick={() => router.push("/stats")}
         className="mt-3 block w-full text-center text-sm font-medium text-muted hover:text-fg transition-colors"
       >
         Sign in to save your stats

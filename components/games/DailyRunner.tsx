@@ -208,7 +208,7 @@ export function DailyRunner({ gameKind, level, seed, date, alreadyPlayed, initia
         <h1 className="text-2xl font-bold tracking-tight">Daily Challenge</h1>
         <p className="mt-2 text-sm text-muted">One game a day, the same for everyone. Sign in to play and build your streak.</p>
         <button
-          onClick={() => router.push("/auth")}
+          onClick={() => router.push("/stats")}
           className="mt-6 w-full rounded-2xl py-4 text-sm font-bold text-white transition-all active:scale-[0.98]"
           style={{ background: "var(--accent)" }}
         >
