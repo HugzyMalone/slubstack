@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import type { RealtimeChannel } from "@supabase/supabase-js";
-import { ArrowLeft, Check, Copy, Play, Trophy, RotateCcw, Home, Users } from "lucide-react";
+import { ArrowLeft, Bot, Check, Copy, Play, Trophy, RotateCcw, Home, Users } from "lucide-react";
 import { toast } from "sonner";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isAnonymousUser, profileFromUser } from "@/lib/multiplayer/guest";
@@ -22,6 +22,7 @@ import {
   type RaceState,
   type Track,
 } from "@/lib/games/sperm-race/engine";
+import { makePracticeBots, type PracticeBot } from "@/lib/games/sperm-race/bots";
 import { GuestGate } from "@/components/multiplayer/GuestGate";
 import { RaceTrack, type Racer } from "./RaceTrack";
 import { TapPad } from "./TapPad";
@@ -82,6 +83,11 @@ export function RaceShell(): React.JSX.Element {
   const [finishers, setFinishers] = useState<FinishPayload[]>([]);
   const [standings, setStandings] = useState<StandingEntry[] | null>(null);
   const [countNum, setCountNum] = useState(3);
+
+  const [practiceBots, setPracticeBots] = useState<PracticeBot[]>([]);
+  const practiceRef = useRef(false);
+  const practiceBotsRef = useRef<PracticeBot[]>([]);
+  useEffect(() => { practiceBotsRef.current = practiceBots; }, [practiceBots]);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const slotRef = useRef(-1);
@@ -146,6 +152,20 @@ export function RaceShell(): React.JSX.Element {
     setStandings(null);
     setPhase("countdown");
   }, []);
+
+  // ── Practice vs bots (local-only, no channel / no result POST) ──────────────
+  const startPractice = useCallback(() => {
+    if (busy || !profile) return;
+    const bots = makePracticeBots(track, `practice:${track}:${Date.now()}`, 3);
+    practiceRef.current = true;
+    practiceBotsRef.current = bots;
+    setPracticeBots(bots);
+    setSlot(0);
+    setMatchId(null);
+    setJoinCode(null);
+    setFinishers([]);
+    startRace(track);
+  }, [busy, profile, track, startRace]);
 
   // ── Realtime channel ──────────────────────────────────────────────────────
   const subscribeChannel = useCallback(
@@ -294,6 +314,34 @@ export function RaceShell(): React.JSX.Element {
     return () => clearInterval(iv);
   }, [phase]);
 
+  // Bot lanes in practice mode: drive each bot's position from elapsed/finishMs
+  // with mild per-tick jitter so lanes don't move in lockstep, and record a
+  // `finish` locally when a bot crosses. Entirely client-side — no broadcast.
+  useEffect(() => {
+    if (phase !== "racing" || !practiceRef.current) return;
+    const startedAt = performance.now();
+    const finished = new Set<number>();
+    const iv = setInterval(() => {
+      const elapsed = performance.now() - startedAt;
+      setPositions((prev) => {
+        const next = { ...prev };
+        for (const bot of practiceBotsRef.current) {
+          if (finished.has(bot.slot)) continue;
+          const base = elapsed / bot.finishMs;
+          const jitter = (Math.random() - 0.5) * 0.02;
+          const pos = Math.min(1, Math.max(next[bot.slot] ?? 0, base + jitter));
+          next[bot.slot] = pos;
+          if (pos >= 1) {
+            finished.add(bot.slot);
+            setFinishers((f) => (f.some((x) => x.slot === bot.slot) ? f : [...f, { slot: bot.slot, ms: bot.finishMs }]));
+          }
+        }
+        return next;
+      });
+    }, 50);
+    return () => clearInterval(iv);
+  }, [phase]);
+
   // Terminal race clock: if the local player never crosses the line, force the
   // result screen anyway so the match can't hang in `racing` forever. The
   // result POST then finalises standings as a DNF (no best-time write).
@@ -328,6 +376,7 @@ export function RaceShell(): React.JSX.Element {
   // ── XP at finish ───────────────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== "result" || xpAwardedRef.current) return;
+    if (practiceRef.current) return;
     xpAwardedRef.current = true;
     brainTrainingStore.getState().addXp(XP_GAME_COMPLETE);
     awardQuestProgress("xp", XP_GAME_COMPLETE);
@@ -345,6 +394,7 @@ export function RaceShell(): React.JSX.Element {
   // DNF posts an empty one and the route finalises without a best-time write.
   useEffect(() => {
     if (phase !== "result" || submittedRef.current) return;
+    if (practiceRef.current) return;
     submittedRef.current = true;
     const mId = matchId;
     const trackVal = raceRef.current.track;
@@ -517,6 +567,9 @@ export function RaceShell(): React.JSX.Element {
   // ── Reset ──────────────────────────────────────────────────────────────────
   const playAgain = useCallback(() => {
     teardownChannel();
+    practiceRef.current = false;
+    practiceBotsRef.current = [];
+    setPracticeBots([]);
     setMatchId(null);
     setJoinCode(null);
     setSlot(-1);
@@ -547,16 +600,33 @@ export function RaceShell(): React.JSX.Element {
   const presentSlots = Object.keys(presenceSlots).map(Number).sort((a, b) => a - b);
   const hostSlot = presentSlots.length ? presentSlots[0] : -1;
   const isHost = slot === hostSlot;
-  const racers: Racer[] = presentSlots.map((s) => {
-    const meta = presenceSlots[s];
-    return {
-      slot: s,
-      displayName: meta.displayName,
-      avatarUrl: meta.avatarUrl,
-      pos: positions[s] ?? 0,
-      isMe: s === slot,
-    };
-  });
+  const racers: Racer[] = practiceRef.current
+    ? [
+        {
+          slot: 0,
+          displayName: profile?.displayName ?? "You",
+          avatarUrl: profile?.avatarUrl ?? null,
+          pos: positions[0] ?? 0,
+          isMe: true,
+        },
+        ...practiceBots.map((bot) => ({
+          slot: bot.slot,
+          displayName: bot.displayName,
+          avatarUrl: null,
+          pos: positions[bot.slot] ?? 0,
+          isMe: false,
+        })),
+      ]
+    : presentSlots.map((s) => {
+        const meta = presenceSlots[s];
+        return {
+          slot: s,
+          displayName: meta.displayName,
+          avatarUrl: meta.avatarUrl,
+          pos: positions[s] ?? 0,
+          isMe: s === slot,
+        };
+      });
 
   // ── Render ─────────────────────────────────────────────────────────────────
   if (!authChecked) {
@@ -623,6 +693,13 @@ export function RaceShell(): React.JSX.Element {
         >
           <Users className="h-5 w-5" /> Join with code
         </button>
+        <button
+          onClick={startPractice}
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border py-4 text-sm font-bold text-muted hover:border-[var(--accent)]/40 hover:text-fg"
+        >
+          <Bot className="h-5 w-5" /> Practice vs bots
+        </button>
+        <p className="mt-2 text-center text-xs text-muted">Solo warm-up — not ranked, no XP.</p>
       </div>
     );
   }
@@ -764,19 +841,33 @@ export function RaceShell(): React.JSX.Element {
   }
 
   // result
+  const isPractice = practiceRef.current;
   const finishMsMap = new Map(finishers.map((f) => [f.slot, f.ms]));
   const myFinish = finishers.find((f) => f.slot === slot);
 
+  // Practice names come from the local roster (no presence); a slot lookup that
+  // covers me (slot 0) and each bot.
+  const practiceName = (s: number): string =>
+    s === 0
+      ? profile?.displayName ?? "You"
+      : practiceBots.find((b) => b.slot === s)?.displayName ?? `Player ${s + 1}`;
+
   // Server standings include all racers (DNFs too) once the result POST resolves.
-  // Fall back to local finishers (finishers-only, no DNFs) until the fetch completes.
+  // Fall back to local finishers (finishers-only, no DNFs) until the fetch
+  // completes. Practice mode is always the local path — it never posts.
   const displayOrder: Array<{ slot: number; rank: number; name: string; ms: number | null }> =
-    standings
+    standings && !isPractice
       ? [...standings]
           .sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999))
           .map((s) => ({ slot: s.slot, rank: s.rank ?? 999, name: s.displayName, ms: finishMsMap.get(s.slot) ?? null }))
       : [...finishers]
           .sort((a, b) => a.ms - b.ms)
-          .map((f, i) => ({ slot: f.slot, rank: i + 1, name: presenceSlots[f.slot]?.displayName ?? `Player ${f.slot + 1}`, ms: f.ms }));
+          .map((f, i) => ({
+            slot: f.slot,
+            rank: i + 1,
+            name: isPractice ? practiceName(f.slot) : presenceSlots[f.slot]?.displayName ?? `Player ${f.slot + 1}`,
+            ms: f.ms,
+          }));
 
   const won = displayOrder.some((e) => e.slot === slot && e.rank === 1);
 
@@ -784,6 +875,11 @@ export function RaceShell(): React.JSX.Element {
     <div className="mx-auto max-w-md px-4 pt-8 pb-10">
       <div className="flex flex-col items-center gap-2 text-center">
         <Trophy className="h-10 w-10 text-[var(--accent)]" />
+        {isPractice && (
+          <span className="rounded-full bg-[var(--accent)]/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--accent)]">
+            Practice · not ranked
+          </span>
+        )}
         <h1 className="text-2xl font-bold tracking-tight">{won ? "You won!" : "Finished"}</h1>
         {myFinish && <p className="text-sm text-muted">Your time: {(myFinish.ms / 1000).toFixed(2)}s</p>}
       </div>
