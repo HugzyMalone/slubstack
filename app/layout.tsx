@@ -14,6 +14,7 @@ import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GameStoreProvider, mandarinStore } from "@/lib/store";
+import { SITE_URL } from "@/lib/games/catalog";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -34,7 +35,7 @@ const SITE_DESCRIPTION =
   "Learn Mandarin, Spanish and German, sharpen your mind with brain training, and compete on daily challenges. Free to play.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://slubstack.com"),
+  metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
   manifest: "/manifest.webmanifest",
