@@ -11,8 +11,11 @@ import { pushLeagueXp } from "@/lib/leagues";
 import { buildShareCard } from "@/lib/share";
 import { track } from "@/lib/analytics";
 import { ShareButton } from "@/components/games/ShareButton";
-import type { ScoreResult } from "@/lib/multiplayer/types";
+import { GhostChallengeButton } from "@/components/games/GhostChallengeButton";
+import type { GameKind, ScoreResult } from "@/lib/multiplayer/types";
+import type { BotTickEvent } from "@/lib/multiplayer/bot";
 import { getDailyAdapter } from "@/lib/games/daily";
+import { getSprintAdapter } from "@/lib/games/registry";
 
 type Phase = "ready" | "countdown" | "playing" | "submitting" | "done";
 
@@ -50,6 +53,7 @@ export function DailyRunner({ gameKind, level, seed, date, alreadyPlayed, initia
 
   const liveRef = useRef({ score: 0, correct: 0 });
   const historyRef = useRef<("correct" | "wrong")[]>([]);
+  const recordedTimelineRef = useRef<BotTickEvent[]>([]);
   const inFeedbackRef = useRef(false);
   const gameActiveRef = useRef(false);
   const submittedRef = useRef(false);
@@ -127,6 +131,7 @@ export function DailyRunner({ gameKind, level, seed, date, alreadyPlayed, initia
   const startCountdown = useCallback(() => {
     liveRef.current = { score: 0, correct: 0 };
     historyRef.current = [];
+    recordedTimelineRef.current = [];
     submittedRef.current = false;
     setDispScore(0);
     setPhase("countdown");
@@ -190,6 +195,7 @@ export function DailyRunner({ gameKind, level, seed, date, alreadyPlayed, initia
     live.score += result.points;
     if (result.correct) live.correct++;
     historyRef.current.push(result.correct ? "correct" : "wrong");
+    recordedTimelineRef.current.push({ atMs: Date.now() - playStartRef.current, scoreDelta: result.points });
     setDispScore(live.score);
     setFeedback(result);
 
@@ -314,6 +320,19 @@ export function DailyRunner({ gameKind, level, seed, date, alreadyPlayed, initia
         <div className="mt-4">
           <ShareButton text={shareText} label="Share your result" />
         </div>
+        {getSprintAdapter(gameKind) && (
+          <div className="mt-2">
+            <GhostChallengeButton
+              gameKind={gameKind as GameKind}
+              gameDisplayName={adapter.displayName}
+              level={level}
+              seed={seed}
+              score={score}
+              correct={correct}
+              timeline={recordedTimelineRef.current}
+            />
+          </div>
+        )}
         <button
           onClick={() => router.push("/")}
           className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-3.5 text-sm font-medium"
