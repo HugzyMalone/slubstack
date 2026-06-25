@@ -1,3 +1,5 @@
+import { ALLOWED_GUESSES } from "./wordle-allowed";
+
 export const ANSWERS: readonly string[] = [
   // A
   "about","above","abuse","actor","acute","admit","adopt","adult","after","agree",
@@ -135,7 +137,7 @@ const VALID_EXTRAS: readonly string[] = [
   "whelp","wispy","wimpy","yokel",
 ];
 
-const VALID_SET = new Set([...ANSWERS, ...VALID_EXTRAS]);
+const VALID_SET = new Set([...ANSWERS, ...VALID_EXTRAS, ...ALLOWED_GUESSES]);
 
 export function isValidGuess(word: string): boolean {
   return VALID_SET.has(word.toLowerCase());
