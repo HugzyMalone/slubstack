@@ -44,19 +44,6 @@ function SparkleIcon() {
   );
 }
 
-function GrassBlock({ size = 44 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.18))" }}>
-      <polygon points="12,2 22,7 12,12 2,7" fill="#6cc24a" />
-      <polygon points="12,3.5 20,7 12,10.5 4,7" fill="#7fd35a" opacity="0.55" />
-      <polygon points="22,7 22,18 12,23 12,12" fill="#8b5a3c" />
-      <polygon points="22,7 22,9 12,14 12,12" fill="#5cb85c" />
-      <polygon points="2,7 2,18 12,23 12,12" fill="#6f4626" />
-      <polygon points="2,7 2,9 12,14 12,12" fill="#4a8b3c" />
-    </svg>
-  );
-}
-
 type HomeButton = {
   href: string;
   title: string;
@@ -78,7 +65,7 @@ const HOME_BUTTONS: HomeButton[] = [
   {
     href: "/games",
     title: "Games",
-    subtitle: "GeoClone, BlockYard, Brain Training, Trivia",
+    subtitle: "Brain Training, Trivia, GeoClone & more",
     icon: <Gamepad2 size={32} strokeWidth={2} />,
     tint: "#a855f7",
     bg: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
@@ -120,15 +107,6 @@ const GAME_BUTTONS: GameButton[] = [
     icon: <Globe size={22} strokeWidth={2} />,
     tint: "#3b82f6",
     bg: "linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)",
-  },
-  {
-    href: "/games/block-yard",
-    title: "BlockYard",
-    tagline: "Stack, fit, beat the clock",
-    icon: <GrassBlock size={44} />,
-    iconStyle: "raw",
-    tint: "#10b981",
-    bg: "linear-gradient(135deg, #10b981 0%, #84cc16 100%)",
   },
   {
     href: "/brain-training",
