@@ -73,16 +73,28 @@ export async function POST(request: NextRequest) {
 
   let upsertData: Record<string, unknown>;
 
-  // xp is monotonic server-side: a fresh/cleared device must never lower it.
   const { data: existing } = await supabase
     .from("user_stats")
-    .select("xp")
+    .select("xp, streak, state_json")
     .eq("user_id", user.id)
     .maybeSingle();
-  const existingXp = existing?.xp ?? 0;
 
-  const rawTotalXp = body.totalXp !== undefined ? Math.max(0, Math.floor(body.totalXp)) : undefined;
-  const totalXp = rawTotalXp !== undefined ? Math.max(rawTotalXp, existingXp) : undefined;
+  // xp reflects the real current total of all canonical stores; it is not an
+  // ever-ratcheting max, so it can fall when activity is removed/reset.
+  const totalXp = body.totalXp !== undefined ? Math.max(0, Math.floor(body.totalXp)) : undefined;
+
+  // Streak is keyed off the most recent last-active date, not the larger number:
+  // a stale client must never re-inflate a streak the server has already lapsed.
+  const existingState = existing?.state_json as { lastActiveDate?: string | null } | null;
+  const existingDate = existingState?.lastActiveDate ?? null;
+  const incomingDate = body.lastActiveDate ?? null;
+  const incomingNewer =
+    !existingDate ? !!incomingDate :
+    !incomingDate ? false :
+    incomingDate > existingDate;
+  const streak = incomingNewer
+    ? Math.max(0, Math.floor(body.streak ?? 0))
+    : Math.max(0, Math.floor(existing?.streak ?? 0));
 
   if (lang === "german") {
     upsertData = {
@@ -115,8 +127,8 @@ export async function POST(request: NextRequest) {
   } else {
     upsertData = {
       user_id: user.id,
-      xp: totalXp ?? Math.max(existingXp, Math.floor(body.xp ?? 0)),
-      streak: Math.max(0, Math.floor(body.streak ?? 0)),
+      xp: totalXp ?? Math.max(0, Math.floor(body.xp ?? 0)),
+      streak,
       words_learned: Math.max(0, Math.floor(body.wordsLearned ?? 0)),
       units_done: Math.max(0, Math.floor(body.unitsDone ?? 0)),
       updated_at: new Date().toISOString(),

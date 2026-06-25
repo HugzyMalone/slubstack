@@ -20,16 +20,10 @@ export async function POST(request: NextRequest) {
     { onConflict: "id", ignoreDuplicates: true },
   );
 
-  // xp is monotonic server-side: a fresh/cleared device must never lower it.
-  const { data: existing } = await supabase
-    .from("user_stats")
-    .select("xp")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  const nextXp = Math.max(totalXp, existing?.xp ?? 0);
-
+  // xp reflects the real current total of all canonical stores, not an
+  // ever-ratcheting max, so it stays in lockstep with what the client shows.
   const { error } = await supabase.from("user_stats").upsert(
-    { user_id: user.id, xp: nextXp, updated_at: new Date().toISOString() },
+    { user_id: user.id, xp: totalXp, updated_at: new Date().toISOString() },
     { onConflict: "user_id" },
   );
 

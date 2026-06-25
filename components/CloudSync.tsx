@@ -16,6 +16,7 @@ import {
   brainTrainingStore,
   triviaStore,
 } from "@/lib/store";
+import { globalStore } from "@/lib/globalStore";
 
 type Props = { lang?: "mandarin" | "german" | "spanish" | "italian" | "vibe-coding" | "github" };
 
@@ -45,6 +46,13 @@ export function CloudSync({ lang = "mandarin" }: Props) {
         const { state } = (await res.json()) as { state: Record<string, unknown> | null };
         if (state && typeof state === "object") {
           mergeFromServer(state as Parameters<typeof mergeFromServer>[0]);
+          if (lang === "mandarin") {
+            const remote = state as { streak?: number; lastActiveDate?: string | null };
+            globalStore.getState().hydrateStreak({
+              streak: Math.max(0, Math.floor(remote.streak ?? 0)),
+              lastActiveDate: remote.lastActiveDate ?? null,
+            });
+          }
         }
       } catch (err) {
         console.error("[CloudSync] pull failed:", err);

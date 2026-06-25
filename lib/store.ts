@@ -88,7 +88,7 @@ export function createGameStore(name: string) {
           }
           const gained = bonus + firstTryCorrect * 10 + (totalCorrect - firstTryCorrect) * 5;
           set((s) => ({ xp: s.xp + gained, streak: newStreak, lastActiveDate: today }));
-          const { streakIncremented, freezeUsed, freezeGranted } = globalStore.getState().touchStreak();
+          const { streakIncremented, freezeUsed, freezeGranted } = globalStore.getState().recordActivity();
           return { gained, streakIncremented, freezeUsed, freezeGranted };
         },
 
@@ -110,17 +110,22 @@ export function createGameStore(name: string) {
           }),
 
         mergeFromServer: (remote) =>
-          set((local) => ({
-            xp: Math.max(local.xp, remote.xp),
-            streak: Math.max(local.streak, remote.streak),
-            lastActiveDate:
-              !local.lastActiveDate ? remote.lastActiveDate :
-              !remote.lastActiveDate ? local.lastActiveDate :
-              local.lastActiveDate > remote.lastActiveDate ? local.lastActiveDate : remote.lastActiveDate,
-            completedUnits: [...new Set([...local.completedUnits, ...remote.completedUnits])],
-            seenCardIds: [...new Set([...local.seenCardIds, ...remote.seenCardIds])],
-            srs: mergeSrs(local.srs, remote.srs),
-          })),
+          set((local) => {
+            // Streak is not ratcheted: adopt the streak tied to the most recent
+            // activity date so a lapsed run resets instead of persisting forever.
+            const remoteNewer =
+              !local.lastActiveDate ? !!remote.lastActiveDate :
+              !remote.lastActiveDate ? false :
+              remote.lastActiveDate > local.lastActiveDate;
+            return {
+              xp: Math.max(local.xp, remote.xp),
+              streak: remoteNewer ? remote.streak : local.streak,
+              lastActiveDate: remoteNewer ? remote.lastActiveDate : local.lastActiveDate,
+              completedUnits: [...new Set([...local.completedUnits, ...remote.completedUnits])],
+              seenCardIds: [...new Set([...local.seenCardIds, ...remote.seenCardIds])],
+              srs: mergeSrs(local.srs, remote.srs),
+            };
+          }),
       }),
       {
         name,
@@ -139,6 +144,27 @@ export const vibeCodingStore = createGameStore("slubstack-vibe-v1");
 export const githubStore = createGameStore("slubstack-github-v1");
 export const brainTrainingStore = createGameStore("slubstack-brain-v1");
 export const triviaStore = createGameStore("slubstack-trivia-v1");
+
+// Canonical set of XP-bearing stores. Every screen that shows a total XP or a
+// derived level MUST sum exactly these, so Home, Profile and sync never diverge.
+export const XP_STORES = [
+  mandarinStore,
+  germanStore,
+  spanishStore,
+  italianStore,
+  vibeCodingStore,
+  githubStore,
+  brainTrainingStore,
+  triviaStore,
+] as const;
+
+export function getTotalXp(): number {
+  return XP_STORES.reduce((sum, s) => sum + s.getState().xp, 0);
+}
+
+export function useTotalXp(): number {
+  return XP_STORES.reduce((sum, s) => sum + useStore(s, (st) => st.xp), 0);
+}
 
 type GameStoreInstance = ReturnType<typeof createGameStore>;
 

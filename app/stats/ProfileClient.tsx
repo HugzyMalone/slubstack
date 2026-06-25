@@ -11,12 +11,43 @@ import { Wordmark } from "@/components/Wordmark";
 import { isMuted as isSoundMuted, setMuted as setSoundMuted } from "@/lib/sound";
 import { isHapticMuted, setHapticMuted } from "@/lib/haptics";
 import { useStore } from "zustand";
-import { mandarinStore, germanStore, spanishStore, italianStore, vibeCodingStore, githubStore, brainTrainingStore, triviaStore } from "@/lib/store";
+import { mandarinStore, germanStore, spanishStore, italianStore, vibeCodingStore, githubStore, brainTrainingStore, triviaStore, useTotalXp } from "@/lib/store";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { useGlobalStore } from "@/lib/globalStore";
+import { useEffectiveStreak } from "@/lib/globalStore";
 import { levelFromXp, xpToNextLevel } from "@/lib/xp";
+
+const LEAGUE_TIER_COLOURS: Record<string, string> = {
+  Bronze: "#cd7c54",
+  Silver: "#94a3b8",
+  Gold: "#f59e0b",
+  Platinum: "#b0bec5",
+  Diamond: "#60d5fa",
+  Emerald: "#10b981",
+  Obsidian: "#8b5cf6",
+};
+
+type LeagueTier = { name: string } | "unauthed" | null;
+
+function useLeagueTier(): LeagueTier {
+  const [tier, setTier] = useState<LeagueTier>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/leagues/current")
+      .then((r) => {
+        if (r.status === 401) { if (!cancelled) setTier("unauthed"); return null; }
+        if (!r.ok) return null;
+        return r.json();
+      })
+      .then((d: { tier?: { name: string } } | null) => {
+        if (d?.tier && !cancelled) setTier({ name: d.tier.name });
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+  return tier;
+}
 
 const TIERS = [
   { min: 50, name: "Obsidian",  color: "#8b5cf6" },
@@ -389,7 +420,7 @@ function ProfileTab({ user, avatar, username, status }: {
   user: SupaUser; avatar: string | null; username: string; status: string | null;
 }) {
   const hydrated = useHydrated();
-  const streak = useGlobalStore((s) => s.streak);
+  const streak = useEffectiveStreak();
   const mandarinXp = useStore(mandarinStore, (s) => s.xp);
   const germanXp = useStore(germanStore, (s) => s.xp);
   const spanishXp = useStore(spanishStore, (s) => s.xp);
@@ -398,6 +429,8 @@ function ProfileTab({ user, avatar, username, status }: {
   const githubXp = useStore(githubStore, (s) => s.xp);
   const brainXp = useStore(brainTrainingStore, (s) => s.xp);
   const triviaXp = useStore(triviaStore, (s) => s.xp);
+  const totalXp = useTotalXp();
+  const leagueTier = useLeagueTier();
 
   const [levelTab, setLevelTab] = useState<LevelCategory>("languages");
   const [mathBests, setMathBests] = useState<MathBests>({ easy: 0, medium: 0, hard: 0 });
@@ -415,10 +448,11 @@ function ProfileTab({ user, avatar, username, status }: {
 
   if (!hydrated) return null;
 
-  const xp = mandarinXp + germanXp + spanishXp + italianXp + vibeXp + githubXp + brainXp + triviaXp;
+  const xp = totalXp;
   const level = levelFromXp(xp);
   const { current, next, progress } = xpToNextLevel(xp);
-  const tier = getTier(level);
+  const leagueTierName = leagueTier && leagueTier !== "unauthed" ? leagueTier.name : null;
+  const leagueTierColor = leagueTierName ? (LEAGUE_TIER_COLOURS[leagueTierName] ?? "var(--accent)") : "var(--muted)";
 
   return (
     <div className="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-[minmax(320px,380px)_1fr] lg:gap-6 lg:items-start">
@@ -430,19 +464,19 @@ function ProfileTab({ user, avatar, username, status }: {
             <AvatarDisplay avatar={avatar} size="xl" />
           </div>
 
-          {/* Name + level badge */}
+          {/* Name + league tier badge (matches Home + League) */}
           <div className="flex items-center justify-center gap-2">
             <span className="font-display text-xl font-extrabold leading-none">{username || "Learner"}</span>
             <span
               className="font-display rounded-full px-2.5 py-1 text-[12px] font-extrabold leading-none"
               style={{
-                background: `color-mix(in srgb, ${tier.color} 16%, var(--surface))`,
-                color: tier.color,
-                border: `1.5px solid color-mix(in srgb, ${tier.color} 38%, transparent)`,
-                boxShadow: `0 2px 0 color-mix(in srgb, ${tier.color} 30%, transparent)`,
+                background: `color-mix(in srgb, ${leagueTierColor} 16%, var(--surface))`,
+                color: leagueTierColor,
+                border: `1.5px solid color-mix(in srgb, ${leagueTierColor} 38%, transparent)`,
+                boxShadow: `0 2px 0 color-mix(in srgb, ${leagueTierColor} 30%, transparent)`,
               }}
             >
-              {tier.name} · Lv. {level}
+              {leagueTierName ? `${leagueTierName} · Lv. ${level}` : `Lv. ${level}`}
             </span>
           </div>
 

@@ -15,18 +15,30 @@ import { Bear } from "@/components/Bear";
 import { QuestDrawer } from "@/components/QuestDrawer";
 import {
   mandarinStore, germanStore, spanishStore, italianStore, vibeCodingStore,
-  brainTrainingStore, triviaStore,
+  useTotalXp,
 } from "@/lib/store";
-import { globalStore } from "@/lib/globalStore";
+import { globalStore, useEffectiveStreak } from "@/lib/globalStore";
 import { useQuestsStore, questsStore } from "@/lib/questsStore";
 import { dailyQuestsFor } from "@/lib/quests";
 import { levelFromXp } from "@/lib/xp";
 import { todayKey } from "@/lib/utils";
 
+type Member = { rank: number; userId: string; username: string; avatar: string | null; lifetimeXp: number; isYou: boolean };
 type LeagueData = {
-  cohort: { id: string; tierId: number; weekStart: string } | null;
-  tiers: { id: number; name: string; rank: number }[];
-  members: { rank: number; userId: string; username: string; avatar: string | null; weeklyXp: number; isYou: boolean }[];
+  tier: { id: number; name: string; rank: number; minXp: number };
+  lifetimeXp: number;
+  members: Member[];
+  tiers: { id: number; name: string; rank: number; minXp: number }[];
+};
+
+const LEAGUE_TIER_COLOURS: Record<string, string> = {
+  Bronze: "#cd7c54",
+  Silver: "#94a3b8",
+  Gold: "#f59e0b",
+  Platinum: "#b0bec5",
+  Diamond: "#60d5fa",
+  Emerald: "#10b981",
+  Obsidian: "#8b5cf6",
 };
 
 function SparkleIcon() {
@@ -342,7 +354,7 @@ export default function HubPage() {
   const [greeting, setGreeting] = useState("");
   const prefersReducedMotion = useReducedMotion();
 
-  const streak = useStore(globalStore, (s) => s.streak);
+  const streak = useEffectiveStreak();
   const lastActiveDate = useStore(globalStore, (s) => s.lastActiveDate);
   const [mounted, setMounted] = useState(false);
   const [questsOpen, setQuestsOpen] = useState(false);
@@ -660,21 +672,14 @@ export default function HubPage() {
 }
 
 function StatsBand() {
-  const streak = useStore(globalStore, (s) => s.streak);
-  const mandarinXp = useStore(mandarinStore, (s) => s.xp);
-  const germanXp = useStore(germanStore, (s) => s.xp);
-  const spanishXp = useStore(spanishStore, (s) => s.xp);
-  const italianXp = useStore(italianStore, (s) => s.xp);
-  const vibeXp = useStore(vibeCodingStore, (s) => s.xp);
-  const brainXp = useStore(brainTrainingStore, (s) => s.xp);
-  const triviaXp = useStore(triviaStore, (s) => s.xp);
+  const streak = useEffectiveStreak();
   const mWords = useStore(mandarinStore, (s) => s.seenCardIds.length);
   const gWords = useStore(germanStore, (s) => s.seenCardIds.length);
   const sWords = useStore(spanishStore, (s) => s.seenCardIds.length);
   const iWords = useStore(italianStore, (s) => s.seenCardIds.length);
   const vWords = useStore(vibeCodingStore, (s) => s.seenCardIds.length);
 
-  const totalXp = mandarinXp + germanXp + spanishXp + italianXp + vibeXp + brainXp + triviaXp;
+  const totalXp = useTotalXp();
   const level = levelFromXp(totalXp);
   const words = mWords + gWords + sWords + iWords + vWords;
 
@@ -722,20 +727,52 @@ function StatsBand() {
 
 function LeagueWidget() {
   const [data, setData] = useState<LeagueData | null>(null);
+  const [unauthed, setUnauthed] = useState(false);
   const [errored, setErrored] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     fetch("/api/leagues/current")
-      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-      .then((d: LeagueData) => { if (!cancelled) setData(d); })
+      .then((r) => {
+        if (r.status === 401) { if (!cancelled) setUnauthed(true); return null; }
+        if (!r.ok) return Promise.reject(r.status);
+        return r.json();
+      })
+      .then((d: LeagueData | null) => { if (d && !cancelled) setData(d); })
       .catch(() => { if (!cancelled) setErrored(true); });
     return () => { cancelled = true; };
   }, []);
 
+  if (unauthed) {
+    return (
+      <Link
+        href="/stats"
+        className="group flex items-center gap-4 rounded-2xl p-5 transition-all duration-150 hover:-translate-y-0.5"
+        style={{
+          background: "color-mix(in srgb, var(--accent) 5%, var(--surface))",
+          border: "1.5px dashed color-mix(in srgb, var(--accent) 32%, transparent)",
+        }}
+      >
+        <div
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
+          style={{ background: "color-mix(in srgb, var(--accent) 14%, transparent)", color: "var(--accent)" }}
+        >
+          <Trophy size={22} strokeWidth={2} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[10px] font-extrabold tracking-[0.18em] text-muted uppercase">Your league</div>
+          <div className="mt-0.5 text-[14px] font-extrabold tracking-tight">Sign in to join the league</div>
+          <div className="mt-0.5 text-[11.5px] leading-snug text-muted">Climb the all-time XP ladder against other learners.</div>
+        </div>
+        <ArrowRight size={16} style={{ color: "var(--accent)" }} className="shrink-0 transition-transform duration-150 group-hover:translate-x-1" />
+      </Link>
+    );
+  }
+
   if (errored || !data) return null;
 
-  if (!data.cohort) {
+  const newUser = data.lifetimeXp === 0 || data.members.length === 0;
+  if (newUser) {
     return (
       <Link
         href="/leaderboard/league"
@@ -747,34 +784,24 @@ function LeagueWidget() {
       >
         <div
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
-          style={{
-            background: "color-mix(in srgb, var(--accent) 14%, transparent)",
-            color: "var(--accent)",
-          }}
+          style={{ background: "color-mix(in srgb, var(--accent) 14%, transparent)", color: "var(--accent)" }}
         >
           <Trophy size={22} strokeWidth={2} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-[10px] font-extrabold tracking-[0.18em] text-muted uppercase">Your league</div>
-          <div className="mt-0.5 text-[14px] font-extrabold tracking-tight">Earn XP this week to be matched into Bronze</div>
-          <div className="mt-0.5 text-[11.5px] leading-snug text-muted">Complete a lesson or game to join your first cohort.</div>
+          <div className="mt-0.5 text-[14px] font-extrabold tracking-tight">Earn XP to climb into {data.tier.name}</div>
+          <div className="mt-0.5 text-[11.5px] leading-snug text-muted">Complete a lesson or game to claim your spot on the ladder.</div>
         </div>
         <ArrowRight size={16} style={{ color: "var(--accent)" }} className="shrink-0 transition-transform duration-150 group-hover:translate-x-1" />
       </Link>
     );
   }
 
-  const tier = data.tiers.find((t) => t.id === data.cohort!.tierId);
+  const tierName = data.tier.name;
   const me = data.members.find((m) => m.isYou);
   const top = data.members.slice(0, 3);
-  const tierColor = tier?.name === "Gold" ? "#f59e0b"
-    : tier?.name === "Silver" ? "#94a3b8"
-    : tier?.name === "Bronze" ? "#cd7c54"
-    : tier?.name === "Platinum" ? "#b0bec5"
-    : tier?.name === "Diamond" ? "#60d5fa"
-    : tier?.name === "Emerald" ? "#10b981"
-    : tier?.name === "Obsidian" ? "#8b5cf6"
-    : "var(--accent)";
+  const tierColor = LEAGUE_TIER_COLOURS[tierName] ?? "var(--accent)";
 
   return (
     <Link
@@ -793,22 +820,22 @@ function LeagueWidget() {
         </div>
         {me && (
           <span className="text-[12px] font-bold tabular-nums text-muted">
-            #{me.rank} · {me.weeklyXp} XP
+            #{me.rank} · {me.lifetimeXp} XP
           </span>
         )}
       </div>
       <div className="mb-3 flex items-baseline gap-2">
         <span className="text-2xl font-extrabold tracking-tight" style={{ color: tierColor }}>
-          {tier?.name ?? "Bronze"}
+          {tierName}
         </span>
-        <span className="text-[12px] text-muted">this week</span>
+        <span className="text-[12px] text-muted">{data.lifetimeXp} XP all-time</span>
       </div>
       <div className="space-y-1.5">
         {top.map((m) => (
           <div key={m.userId} className="flex items-center gap-2.5 text-[12.5px]">
             <span className="w-5 tabular-nums" style={{ color: m.rank === 1 ? "#f59e0b" : m.rank === 2 ? "#94a3b8" : "#b45309" }}>#{m.rank}</span>
             <span className={`flex-1 truncate ${m.isYou ? "font-bold" : "font-medium"}`}>{m.username}{m.isYou ? " (you)" : ""}</span>
-            <span className="font-bold tabular-nums text-muted">{m.weeklyXp}</span>
+            <span className="font-bold tabular-nums text-muted">{m.lifetimeXp}</span>
           </div>
         ))}
       </div>

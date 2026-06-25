@@ -171,11 +171,18 @@ describe('Game Store', () => {
       expect(store.getState().xp).toBe(200)
     })
 
-    it('should take max streak between local and remote', () => {
+    it('should adopt the streak tied to the more recent activity date', () => {
       const store = freshStore()
-      store.setState({ streak: 3 })
-      store.getState().mergeFromServer({ ...emptyRemote, streak: 7 })
+      store.setState({ streak: 3, lastActiveDate: '2026-04-19' })
+      store.getState().mergeFromServer({ ...emptyRemote, streak: 7, lastActiveDate: '2026-04-20' })
       expect(store.getState().streak).toBe(7)
+    })
+
+    it('should keep the local streak when local activity is more recent', () => {
+      const store = freshStore()
+      store.setState({ streak: 9, lastActiveDate: '2026-04-21' })
+      store.getState().mergeFromServer({ ...emptyRemote, streak: 2, lastActiveDate: '2026-04-20' })
+      expect(store.getState().streak).toBe(9)
     })
 
     it('should merge completedUnits (union)', () => {

@@ -25,12 +25,22 @@ type GlobalState = {
 };
 
 type GlobalActions = {
-  touchStreak: () => { streakIncremented: boolean; newStreak: number; freezeUsed: boolean; freezeGranted: boolean };
+  recordActivity: () => { streakIncremented: boolean; newStreak: number; freezeUsed: boolean; freezeGranted: boolean };
+  hydrateStreak: (remote: { streak: number; lastActiveDate: string | null }) => void;
   awardMedal: (type: keyof MedalCounts) => void;
   addStreakFreeze: () => void;
   setLastUnit: (unit: LastUnit) => void;
   recordBeat: () => void;
 };
+
+// A stored streak is only "alive" if the last qualifying activity was today or
+// yesterday. Anything older has lapsed, so the displayed streak is 0 regardless
+// of the stale stored number.
+export function effectiveStreak(streak: number, lastActiveDate: string | null): number {
+  if (!lastActiveDate) return 0;
+  const gap = daysBetween(lastActiveDate, todayKey());
+  return gap >= 0 && gap <= 1 ? streak : 0;
+}
 
 const FREEZE_GRANT_INTERVAL = 7;
 const FREEZE_MAX = 5;
@@ -46,7 +56,7 @@ export const globalStore = createStore<GlobalState & GlobalActions>()(
       beats: 0,
       beatsMonthKey: null,
 
-      touchStreak() {
+      recordActivity() {
         const today = todayKey();
         const { lastActiveDate, streak, streakFreezes } = get();
         if (lastActiveDate === today) {
@@ -74,6 +84,21 @@ export const globalStore = createStore<GlobalState & GlobalActions>()(
           freezeUsed: false,
           freezeGranted: crossedMilestone,
         };
+      },
+
+      hydrateStreak(remote) {
+        // Server is authoritative for the streak: adopt the row tied to the most
+        // recent activity rather than ratcheting to whichever number is larger.
+        const local = get();
+        const localDate = local.lastActiveDate;
+        const remoteDate = remote.lastActiveDate;
+        const remoteIsNewer =
+          !localDate ? !!remoteDate :
+          !remoteDate ? false :
+          daysBetween(localDate, remoteDate) > 0;
+        if (remoteIsNewer) {
+          set({ streak: remote.streak, lastActiveDate: remoteDate });
+        }
       },
 
       awardMedal(type) {
@@ -109,4 +134,10 @@ export const globalStore = createStore<GlobalState & GlobalActions>()(
 
 export function useGlobalStore<T>(selector: (s: GlobalState & GlobalActions) => T): T {
   return useStore(globalStore, selector);
+}
+
+export function useEffectiveStreak(): number {
+  const streak = useStore(globalStore, (s) => s.streak);
+  const lastActiveDate = useStore(globalStore, (s) => s.lastActiveDate);
+  return effectiveStreak(streak, lastActiveDate);
 }

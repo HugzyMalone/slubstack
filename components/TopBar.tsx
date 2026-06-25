@@ -8,7 +8,7 @@ import { Flame, User, ChevronLeft, Snowflake, Target } from "lucide-react";
 import { useStore } from "zustand";
 import { mandarinStore, germanStore, spanishStore, italianStore, vibeCodingStore, githubStore, brainTrainingStore, triviaStore } from "@/lib/store";
 import { useHydrated } from "@/lib/hooks";
-import { useGlobalStore, globalStore } from "@/lib/globalStore";
+import { useGlobalStore, useEffectiveStreak } from "@/lib/globalStore";
 import { levelFromXp } from "@/lib/xp";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { QuestDrawer } from "@/components/QuestDrawer";
@@ -40,7 +40,7 @@ export function TopBar() {
   const brainXp = useStore(brainTrainingStore, (s) => s.xp);
   const triviaXp = useStore(triviaStore, (s) => s.xp);
   const xp = mandarinXp + germanXp + spanishXp + italianXp + vibeXp + githubXp + brainXp + triviaXp;
-  const streak = useGlobalStore((s) => s.streak);
+  const streak = useEffectiveStreak();
   const streakFreezes = useGlobalStore((s) => s.streakFreezes);
   const questDateKey = useQuestsStore((s) => s.dateKey);
   const questCompleted = useQuestsStore((s) => s.completed);
@@ -58,26 +58,6 @@ export function TopBar() {
   const router = useRouter();
   const isHome = pathname === "/";
   const hideBack = isHome || pathname === "/stats" || pathname.endsWith("/review");
-
-  useEffect(() => {
-    const manState = mandarinStore.getState();
-    const deState = germanStore.getState();
-    const esState = spanishStore.getState();
-    const itState = italianStore.getState();
-    const globalState = globalStore.getState();
-
-    const candidates = [
-      { streak: manState.streak, date: manState.lastActiveDate },
-      { streak: deState.streak, date: deState.lastActiveDate },
-      { streak: esState.streak, date: esState.lastActiveDate },
-      { streak: itState.streak, date: itState.lastActiveDate },
-    ];
-    const best = candidates.reduce((a, b) => a.streak >= b.streak ? a : b);
-
-    if (best.streak > globalState.streak) {
-      globalStore.setState({ streak: best.streak, lastActiveDate: best.date });
-    }
-  }, []);
 
   function isAvatarUrl(v: string | null): v is string {
     return !!v && (v.startsWith("http") || v.startsWith("data:") || v.startsWith("/"));

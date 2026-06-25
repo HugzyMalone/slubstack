@@ -14,9 +14,9 @@ describe('Global Store', () => {
     })
   })
 
-  describe('touchStreak()', () => {
+  describe('recordActivity()', () => {
     it('should initialize streak to 1 on first touch', () => {
-      const result = globalStore.getState().touchStreak()
+      const result = globalStore.getState().recordActivity()
       expect(result.newStreak).toBe(1)
       expect(result.streakIncremented).toBe(true)
       expect(globalStore.getState().streak).toBe(1)
@@ -24,8 +24,8 @@ describe('Global Store', () => {
     })
 
     it('should not increment streak if already touched today', () => {
-      globalStore.getState().touchStreak() // First touch
-      const result = globalStore.getState().touchStreak() // Second touch same day
+      globalStore.getState().recordActivity() // First touch
+      const result = globalStore.getState().recordActivity() // Second touch same day
       expect(result.streakIncremented).toBe(false)
       expect(result.newStreak).toBe(1)
     })
@@ -34,7 +34,7 @@ describe('Global Store', () => {
       const yesterday = todayKey(new Date(Date.now() - 86400000))
       globalStore.setState({ streak: 5, lastActiveDate: yesterday })
 
-      const result = globalStore.getState().touchStreak()
+      const result = globalStore.getState().recordActivity()
       expect(result.newStreak).toBe(6)
       expect(result.streakIncremented).toBe(true)
     })
@@ -43,7 +43,7 @@ describe('Global Store', () => {
       const threeDaysAgo = todayKey(new Date(Date.now() - 3 * 86400000))
       globalStore.setState({ streak: 10, lastActiveDate: threeDaysAgo })
 
-      const result = globalStore.getState().touchStreak()
+      const result = globalStore.getState().recordActivity()
       expect(result.newStreak).toBe(1)
       expect(result.streakIncremented).toBe(false)
     })
@@ -56,7 +56,7 @@ describe('Global Store', () => {
         streakFreezes: 2
       })
 
-      const result = globalStore.getState().touchStreak()
+      const result = globalStore.getState().recordActivity()
       expect(result.newStreak).toBe(10) // Streak preserved
       expect(result.streakIncremented).toBe(false)
       expect(globalStore.getState().streakFreezes).toBe(1) // One freeze consumed
@@ -71,7 +71,7 @@ describe('Global Store', () => {
         streakFreezes: 1
       })
 
-      globalStore.getState().touchStreak()
+      globalStore.getState().recordActivity()
       expect(globalStore.getState().streakFreezes).toBe(1) // Freeze not used
       expect(globalStore.getState().streak).toBe(6)
     })
@@ -83,7 +83,7 @@ describe('Global Store', () => {
         streakFreezes: 1
       })
 
-      globalStore.getState().touchStreak()
+      globalStore.getState().recordActivity()
       expect(globalStore.getState().streakFreezes).toBe(1) // Freeze not used
     })
   })
@@ -178,7 +178,7 @@ describe('Global Store', () => {
   describe('Edge Cases', () => {
     it('should handle rapid successive touches', () => {
       for (let i = 0; i < 5; i++) {
-        globalStore.getState().touchStreak()
+        globalStore.getState().recordActivity()
       }
       expect(globalStore.getState().streak).toBe(1)
     })
