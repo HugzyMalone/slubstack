@@ -7,7 +7,9 @@ import { useStore } from "zustand";
 import {
   BookOpen, Gamepad2, ArrowRight, Trophy, Flame, Sparkles, Library,
   Globe, Brain as BrainIcon, Clapperboard, CalendarDays, Target,
+  Type, Grid3x3, Spline,
 } from "lucide-react";
+import { getGameBySlug } from "@/lib/games/catalog";
 import { Panda } from "@/components/Panda";
 import { Bear } from "@/components/Bear";
 import { QuestDrawer } from "@/components/QuestDrawer";
@@ -145,6 +147,51 @@ const GAME_BUTTONS: GameButton[] = [
     bg: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
   },
 ];
+
+type DailyTile = { slug: string; name: string; href: string; tint: string; icon: React.ReactNode };
+
+const DAILY_TILES: DailyTile[] = [
+  { slug: "wordle", icon: <Type size={20} strokeWidth={2.5} /> },
+  { slug: "connections", icon: <Grid3x3 size={20} strokeWidth={2.5} /> },
+  { slug: "semantle", icon: <Spline size={20} strokeWidth={2.5} /> },
+].map(({ slug, icon }) => {
+  const g = getGameBySlug(slug)!;
+  return { slug, name: g.name, href: g.playHref, tint: g.accent, icon };
+});
+
+function DailyPuzzlesRow({ size = "mobile" }: { size?: "mobile" | "desktop" }) {
+  const compact = size === "mobile";
+  return (
+    <div className={compact ? "flex-shrink-0 pt-1 pb-2" : ""}>
+      <h2 className="mb-1.5 text-[11px] font-extrabold tracking-[0.16em] text-muted uppercase">
+        Today's puzzles
+      </h2>
+      <div className="grid grid-cols-3 gap-2">
+        {DAILY_TILES.map(({ slug, name, href, tint, icon }) => (
+          <Link
+            key={slug}
+            href={href}
+            className="group flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2.5 transition-transform duration-150 active:scale-[0.97] hover:-translate-y-0.5"
+            style={{
+              background: `color-mix(in srgb, ${tint} 12%, var(--surface))`,
+              border: `1.5px solid color-mix(in srgb, ${tint} 30%, transparent)`,
+            }}
+          >
+            <span
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-sm"
+              style={{ background: tint }}
+            >
+              {icon}
+            </span>
+            <span className="text-[12px] font-extrabold leading-tight" style={{ color: tint }}>
+              {name}
+            </span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const FACTS = [
   // Languages
@@ -440,7 +487,7 @@ export default function HubPage() {
 
         <motion.div
           className="relative flex-shrink-0"
-          style={{ height: "26vh", maxHeight: 210 }}
+          style={{ height: "19vh", maxHeight: 162 }}
           animate={prefersReducedMotion ? {} : { y: [0, -7, 0] }}
           transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
         >
@@ -450,14 +497,14 @@ export default function HubPage() {
         </motion.div>
 
         <motion.div
-          className="flex-shrink-0 mb-2.5"
+          className="flex-shrink-0 mb-2"
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <button onClick={cycleFact} className="w-full text-left" aria-label="Show another fact">
             <div
-              className="flex items-start gap-2.5 rounded-2xl px-4 py-2.5 transition-opacity duration-150 active:opacity-70"
+              className="flex items-start gap-2.5 rounded-2xl px-4 py-2 transition-opacity duration-150 active:opacity-70"
               style={{
                 background: "color-mix(in srgb, var(--accent) 8%, var(--surface))",
                 border: "1px solid color-mix(in srgb, var(--accent) 18%, transparent)",
@@ -481,6 +528,8 @@ export default function HubPage() {
             </div>
           </button>
         </motion.div>
+
+        <DailyPuzzlesRow size="mobile" />
 
         <div className="flex flex-1 min-h-0 flex-col gap-3 pb-[max(calc(env(safe-area-inset-bottom,0px)+72px),88px)]">
           {HOME_BUTTONS.map(({ href, title, subtitle, icon, tint, bg }, i) => (
@@ -548,6 +597,8 @@ export default function HubPage() {
 
         <div className="flex flex-col gap-5">
           <StatsBand />
+
+          <DailyPuzzlesRow size="desktop" />
 
           <motion.div
             initial={{ opacity: 0, y: 12 }}

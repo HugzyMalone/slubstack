@@ -6,6 +6,24 @@ import { Blocks, Brain, Brush, Globe, Film, Keyboard, Compass, FlaskConical, Arr
 
 const GAMES = [
   {
+    href: "/brain-training",
+    title: "Brain Training",
+    subtitle: "Math Blitz, Wordle, Connections",
+    icon: <Brain size={26} />,
+    tint: "#ec4899",
+    bg: "linear-gradient(135deg, #f472b6 0%, #ec4899 100%)",
+    available: true,
+  },
+  {
+    href: "/trivia",
+    title: "Trivia",
+    subtitle: "Actors, flags, albums, year guesser & more",
+    icon: <Film size={26} />,
+    tint: "#a855f7",
+    bg: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)",
+    available: true,
+  },
+  {
     href: "/trivia/geo-clone",
     title: "GeoClone",
     subtitle: "8-player live geo-guessing, 3 rounds × 30s",
@@ -13,24 +31,6 @@ const GAMES = [
     tint: "#0ea5e9",
     bg: "linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)",
     available: true,
-  },
-  {
-    href: "/games/draw",
-    title: "Draw My Thing",
-    subtitle: "Multiplayer Pictionary — invite friends with a 4-char code",
-    icon: <Brush size={26} />,
-    tint: "#ec4899",
-    bg: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
-    available: true,
-  },
-  {
-    href: "/games/block-yard",
-    title: "BlockYard",
-    subtitle: "In development — slotting in soon",
-    icon: <Blocks size={26} />,
-    tint: "#f59e0b",
-    bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-    available: false,
   },
   {
     href: "/games/type-racer",
@@ -60,22 +60,22 @@ const GAMES = [
     available: true,
   },
   {
-    href: "/brain-training",
-    title: "Brain Training",
-    subtitle: "Math Blitz, Wordle, Connections",
-    icon: <Brain size={26} />,
+    href: "/games/draw",
+    title: "Draw My Thing",
+    subtitle: "Multiplayer Pictionary — invite friends with a 4-char code",
+    icon: <Brush size={26} />,
     tint: "#ec4899",
-    bg: "linear-gradient(135deg, #f472b6 0%, #ec4899 100%)",
+    bg: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
     available: true,
   },
   {
-    href: "/trivia",
-    title: "Trivia",
-    subtitle: "Actors, flags, albums, year guesser & more",
-    icon: <Film size={26} />,
-    tint: "#a855f7",
-    bg: "linear-gradient(135deg, #7c3aed 0%, #a21caf 100%)",
-    available: true,
+    href: "/games/block-yard",
+    title: "BlockYard",
+    subtitle: "In development — slotting in soon",
+    icon: <Blocks size={26} />,
+    tint: "#f59e0b",
+    bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+    available: false,
   },
 ];
 
@@ -91,7 +91,7 @@ export default function GamesPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {GAMES.map(({ href, title, subtitle, icon, tint, bg, available }, i) => (
+        {GAMES.filter((g) => g.available).map(({ href, title, subtitle, icon, tint, bg, available }, i) => (
           <motion.div
             key={href}
             initial={{ opacity: 0, y: 12 }}
