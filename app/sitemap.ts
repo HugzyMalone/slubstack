@@ -6,6 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: SITE_URL, lastModified: now, changeFrequency: "weekly", priority: 1 },
     { url: `${SITE_URL}/games`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${SITE_URL}/play`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     ...GAME_CATALOG.map((g) => ({
       url: `${SITE_URL}/play/${g.slug}`,
       lastModified: now,
