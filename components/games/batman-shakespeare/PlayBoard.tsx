@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { PlayBoardProps } from "@/lib/multiplayer/types";
 import type { BatShakeQuestion, BatShakeSource } from "@/lib/games/batman-shakespeare/questions";
 
@@ -15,10 +15,11 @@ export function PlayBoard({
   onAnswerAction,
 }: PlayBoardProps<BatShakeQuestion, BatShakeSource>) {
   const [picked, setPicked] = useState<BatShakeSource | null>(null);
-
-  useEffect(() => {
+  const [prevQuestion, setPrevQuestion] = useState(question);
+  if (question !== prevQuestion) {
+    setPrevQuestion(question);
     setPicked(null);
-  }, [question]);
+  }
 
   const inFeedback = feedback !== null;
 

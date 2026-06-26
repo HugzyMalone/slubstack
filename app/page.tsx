@@ -22,6 +22,7 @@ import { useQuestsStore, questsStore } from "@/lib/questsStore";
 import { dailyQuestsFor } from "@/lib/quests";
 import { levelFromXp } from "@/lib/xp";
 import { todayKey } from "@/lib/utils";
+import { useHydrated } from "@/lib/hooks";
 import { hasActiveSession } from "@/lib/supabase/browser";
 
 type Member = { rank: number; userId: string; username: string; avatar: string | null; lifetimeXp: number; isYou: boolean };
@@ -155,7 +156,7 @@ function DailyPuzzlesRow({ size = "mobile" }: { size?: "mobile" | "desktop" }) {
   return (
     <div className={compact ? "flex-shrink-0 pt-1 pb-2" : ""}>
       <h2 className="mb-1.5 text-[11px] font-extrabold tracking-[0.16em] text-muted uppercase">
-        Today's puzzles
+        Today&apos;s puzzles
       </h2>
       <div className="grid grid-cols-3 gap-2">
         {DAILY_TILES.map(({ slug, name, href, tint, icon }) => (
@@ -357,13 +358,12 @@ export default function HubPage() {
 
   const streak = useEffectiveStreak();
   const lastActiveDate = useStore(globalStore, (s) => s.lastActiveDate);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHydrated();
   const [questsOpen, setQuestsOpen] = useState(false);
   const questDateKey = useQuestsStore((s) => s.dateKey);
   const questCompleted = useQuestsStore((s) => s.completed);
 
   useEffect(() => {
-    setMounted(true);
     questsStore.getState().rollIfStale();
   }, []);
 
@@ -375,6 +375,9 @@ export default function HubPage() {
     const today = todayKey();
     const activeToday = lastActiveDate === today;
 
+    // Hero choice falls through to a Math.random()/sessionStorage neutral pick,
+    // which is browser-only and must be resolved after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (streak >= 7) { setHero({ char: "bear", mood: "celebrating" }); return; }
     if (streak >= 3) { setHero({ char: "bear", mood: "happy" }); return; }
     if (streak === 0 && lastActiveDate && !activeToday) {
@@ -397,6 +400,9 @@ export default function HubPage() {
   }, [streak, lastActiveDate]);
 
   useEffect(() => {
+    // Time-of-day fact index and greeting must be computed after hydration to
+    // avoid an SSR mismatch against the server clock.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFactIdx(Math.floor(Date.now() / (1000 * 60 * 60)) % FACTS.length);
     setGreeting(getGreeting());
   }, []);

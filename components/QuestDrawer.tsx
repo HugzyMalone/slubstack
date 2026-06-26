@@ -2,9 +2,10 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { QuestCard } from "@/components/QuestCard";
+import { useHydrated } from "@/lib/hooks";
 import { spring } from "@/lib/motion";
 
 type Props = {
@@ -13,11 +14,7 @@ type Props = {
 };
 
 export function QuestDrawer({ open, onClose }: Props) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useHydrated();
 
   useEffect(() => {
     if (!open) return;

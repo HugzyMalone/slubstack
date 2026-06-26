@@ -32,17 +32,25 @@ export default function MathBlitzStatsPage() {
   const [bests, setBests] = useState<Bests | null>(null);
   const [diff, setDiff] = useState<"easy" | "medium" | "hard">("medium");
   const [leaderboard, setLeaderboard] = useState<LBEntry[] | null>(null);
-  const [lbLoading, setLbLoading] = useState(false);
+  const [lbLoading, setLbLoading] = useState(true);
 
   useEffect(() => {
     try {
       const s = localStorage.getItem("slubstack_mathblitz_best");
+      // Read the persisted bests after hydration; a lazy initial value would
+      // read localStorage during render and mismatch the server markup.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (s) setBests(JSON.parse(s));
     } catch {}
   }, []);
 
-  useEffect(() => {
+  const [prevDiff, setPrevDiff] = useState(diff);
+  if (diff !== prevDiff) {
+    setPrevDiff(diff);
     setLbLoading(true);
+  }
+
+  useEffect(() => {
     fetch(`/api/scores/math-blitz?difficulty=${diff}`)
       .then((r) => r.json())
       .then(({ leaderboard }) => setLeaderboard(leaderboard ?? []))

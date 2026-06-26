@@ -29,11 +29,12 @@ export function PlayBoard({ location, roundIndex, roundCount, timeLeftMs, locked
   const [overlayOpen, setOverlayOpen] = useState(true);
   const [panelLarge, setPanelLarge] = useState(false);
   const expandTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
+  const [prevRoundIndex, setPrevRoundIndex] = useState(roundIndex);
+  if (roundIndex !== prevRoundIndex) {
+    setPrevRoundIndex(roundIndex);
     setPendingGuess(null);
     setSheetOpen(false);
-  }, [roundIndex]);
+  }
 
   useEffect(() => () => {
     if (expandTimerRef.current) clearTimeout(expandTimerRef.current);

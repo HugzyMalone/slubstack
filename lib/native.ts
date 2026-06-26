@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import type { Card } from "@/lib/content";
 
 export type NativeLanguage = "en" | "de";
@@ -20,21 +20,17 @@ export function writeNativeLanguage(native: NativeLanguage) {
   window.dispatchEvent(new CustomEvent(EVENT, { detail: native }));
 }
 
+function subscribeNativeLanguage(onChange: () => void) {
+  window.addEventListener(EVENT, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
 export function useNativeLanguage(): NativeLanguage {
-  const [native, setNative] = useState<NativeLanguage>("en");
-
-  useEffect(() => {
-    setNative(readNativeLanguage());
-    const onChange = () => setNative(readNativeLanguage());
-    window.addEventListener(EVENT, onChange);
-    window.addEventListener("storage", onChange);
-    return () => {
-      window.removeEventListener(EVENT, onChange);
-      window.removeEventListener("storage", onChange);
-    };
-  }, []);
-
-  return native;
+  return useSyncExternalStore(subscribeNativeLanguage, readNativeLanguage, () => "en");
 }
 
 export function meaningOf(card: Card, native: NativeLanguage): string {

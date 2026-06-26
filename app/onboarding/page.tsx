@@ -146,7 +146,7 @@ export default function OnboardingPage() {
               required
               className="w-full rounded-2xl border border-border bg-surface px-4 py-3 text-sm outline-none placeholder:text-muted"
             />
-            <p className="mt-1 text-xs text-muted">You'll use this to sign in next time.</p>
+            <p className="mt-1 text-xs text-muted">You&apos;ll use this to sign in next time.</p>
           </div>
 
           {error && <p className="text-sm text-[var(--danger)]">{error}</p>}

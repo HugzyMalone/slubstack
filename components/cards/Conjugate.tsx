@@ -42,6 +42,8 @@ export function Conjugate({ card, onResult, onFeedback, strictTypos = true }: Pr
   const pronoun: Pronoun = useMemo(() => {
     if (!conj) return "ich";
     const keys = PRONOUNS.filter((p) => conj[p]);
+    // Intentionally random: pick a pronoun to quiz once per card (memoised on conj).
+    // eslint-disable-next-line react-hooks/purity
     return keys[Math.floor(Math.random() * keys.length)] ?? "ich";
   }, [conj]);
 

@@ -443,6 +443,9 @@ function ProfileTab({ user, avatar, username, status }: {
   const [wordleToday, setWordleToday] = useState<WordleToday | null>(null);
 
   useEffect(() => {
+    // Hydrate game bests from localStorage after mount; lazy initial values
+    // would read storage during render and mismatch the server markup.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     try { setMathBests({ easy: 0, medium: 0, hard: 0, ...JSON.parse(localStorage.getItem("slubstack_mathblitz_best") ?? "{}") }); } catch {}
     try { const s = localStorage.getItem("slubstack_actorblitz_best"); if (s) setActorBest(JSON.parse(s)); } catch {}
     try {
@@ -932,6 +935,8 @@ function FeedbackSection() {
   const [haptics, setHaptics] = useState(true);
 
   useEffect(() => {
+    // Read the persisted mute flags after hydration (browser-only state).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSound(!isSoundMuted());
     setHaptics(!isHapticMuted());
   }, []);
@@ -972,6 +977,8 @@ function WordleSettingsSection() {
   const [hard, setHard] = useState(false);
 
   useEffect(() => {
+    // Read the persisted hard-mode flag after hydration (browser-only state).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     try { setHard(localStorage.getItem(WORDLE_HARD_KEY) === "1"); } catch {}
   }, []);
 
@@ -1004,6 +1011,8 @@ function AppearanceSection() {
   const hydrated = useHydrated();
   const [dark, setDark] = useState(false);
 
+  // Read the resolved theme after hydration (browser-only state).
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setDark(resolvedTheme() === "dark"); }, []);
 
   if (!hydrated) return null;
@@ -1366,8 +1375,13 @@ function LanguageLeaderboard({ language }: { language: "mandarin" | "german" | "
   };
   const { name, accent } = labels[language];
 
-  useEffect(() => {
+  const [prevLanguage, setPrevLanguage] = useState(language);
+  if (language !== prevLanguage) {
+    setPrevLanguage(language);
     setLoading(true);
+  }
+
+  useEffect(() => {
     fetch(`/api/leaderboard?lang=${language}`)
       .then((r) => r.json())
       .then((d) => setEntries(d.entries ?? []))
@@ -1426,10 +1440,15 @@ function MathBlitzLeaderboard() {
   const [loading, setLoading] = useState(true);
   const fetchedRef = useRef<string | null>(null);
 
+  const [prevDiff, setPrevDiff] = useState(diff);
+  if (diff !== prevDiff) {
+    setPrevDiff(diff);
+    setLoading(true);
+  }
+
   useEffect(() => {
     if (fetchedRef.current === diff) return;
     fetchedRef.current = diff;
-    setLoading(true);
     fetch(`/api/scores/math-blitz?difficulty=${diff}`)
       .then((r) => r.json())
       .then(({ leaderboard }) => setEntries(leaderboard ?? []))
@@ -1570,9 +1589,14 @@ function LiveMathLeaderboard() {
   const [entries, setEntries] = useState<LiveMathEntry[] | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const [prevLevel, setPrevLevel] = useState(level);
+  if (level !== prevLevel) {
+    setPrevLevel(level);
     setLoading(true);
     setEntries(null);
+  }
+
+  useEffect(() => {
     fetch(`/api/live-math/leaderboard?level=${level}`)
       .then((r) => r.json())
       .then(({ entries }) => setEntries(entries ?? []))
@@ -1773,9 +1797,11 @@ export function ProfileClient() {
   const [lbFilter, setLbFilter] = useState<LBFilter>("overall");
   const lbFetchedRef = useRef(false);
 
-  // Eagerly load avatar + username from cache so they appear instantly
+  // Eagerly load avatar + username from cache so they appear instantly.
+  // Read after hydration; lazy initial values would mismatch the server markup.
   useEffect(() => {
     const cachedAvatar = localStorage.getItem("slubstack_avatar");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (cachedAvatar) setAvatar(cachedAvatar);
     const cachedUsername = localStorage.getItem("slubstack_username");
     if (cachedUsername) setUsername(cachedUsername);
@@ -1784,6 +1810,9 @@ export function ProfileClient() {
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
+    // No client configured means there is nothing async to await; mark the
+    // auth check resolved as part of this effect's lifecycle.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!supabase) { setAuthChecked(true); return; }
 
     supabase.auth.getUser().then(({ data }) => {

@@ -44,7 +44,7 @@ export default function GeoClonePage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">GeoClone</h1>
         <p className="mt-1 text-sm text-muted">
-          Pick where you're dropping in. 5 rounds × 60 seconds.
+          Pick where you&apos;re dropping in. 5 rounds × 60 seconds.
         </p>
       </div>
 

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Target, CheckCircle2 } from "lucide-react";
 import { questsStore, useQuestsStore } from "@/lib/questsStore";
-import { dailyQuestsFor, QUEST_KIND_LABEL, type QuestTemplate } from "@/lib/quests";
+import { dailyQuestsFor, QUEST_KIND_LABEL } from "@/lib/quests";
 import { useHydrated } from "@/lib/hooks";
 import { springy } from "@/lib/motion";
 
@@ -13,11 +13,10 @@ export function QuestCard() {
   const dateKey = useQuestsStore((s) => s.dateKey);
   const progress = useQuestsStore((s) => s.progress);
   const completed = useQuestsStore((s) => s.completed);
-  const [quests, setQuests] = useState<QuestTemplate[]>([]);
+  const quests = dailyQuestsFor(dateKey);
 
   useEffect(() => {
     questsStore.getState().rollIfStale();
-    setQuests(dailyQuestsFor(questsStore.getState().dateKey));
   }, [dateKey]);
 
   if (!hydrated || quests.length === 0) return null;

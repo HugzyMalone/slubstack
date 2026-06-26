@@ -50,9 +50,14 @@ export default function FriendsPage() {
     setRequests(r.requests ?? []);
   }, []);
 
+  // On-mount data load; friends/requests are set after the awaited fetch.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { refresh(); }, [refresh]);
 
   useEffect(() => {
+    // Debounced search: clearing stale results on a too-short query is part of
+    // the async search lifecycle this effect owns.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (query.trim().length < 2) { setResults([]); return; }
     setSearching(true);
     const t = setTimeout(async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { PlayBoardProps } from "@/lib/multiplayer/types";
 
 export type YearQuestion = {
@@ -20,10 +20,11 @@ export function PlayBoard({
   onAnswerAction,
 }: PlayBoardProps<YearQuestion, number>) {
   const [picked, setPicked] = useState<number | null>(null);
-
-  useEffect(() => {
+  const [prevQuestion, setPrevQuestion] = useState(question);
+  if (question !== prevQuestion) {
+    setPrevQuestion(question);
     setPicked(null);
-  }, [question]);
+  }
 
   const inFeedback = feedback !== null;
 

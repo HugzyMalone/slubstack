@@ -25,6 +25,8 @@ export function TonePick({ card, onResult, onFeedback }: Props) {
     const tones: Tone[] = card.tones && card.tones.length > 0 ? card.tones : tonesOf(card.pinyin);
     const parts = card.pinyin.split(/\s+|'/).filter(Boolean);
     const chars = Array.from(card.hanzi);
+    // Intentionally random: pick a syllable to quiz once per card (memoised on card).
+    // eslint-disable-next-line react-hooks/purity
     const idx = Math.floor(Math.random() * Math.max(1, tones.length));
     return {
       syllableIdx: idx,

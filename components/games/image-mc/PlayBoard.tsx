@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { PlayBoardProps } from "@/lib/multiplayer/types";
 
 export type ImageMCQuestion = {
@@ -21,11 +21,12 @@ export function PlayBoard({
 }: PlayBoardProps<ImageMCQuestion, number>) {
   const [picked, setPicked] = useState<number | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
-
-  useEffect(() => {
+  const [prevQuestion, setPrevQuestion] = useState(question);
+  if (question !== prevQuestion) {
+    setPrevQuestion(question);
     setPicked(null);
     setImageLoaded(false);
-  }, [question]);
+  }
 
   const inFeedback = feedback !== null;
 

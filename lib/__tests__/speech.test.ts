@@ -1,3 +1,6 @@
+// Test stubs the SpeechSynthesis browser globals, where `any` casts are the
+// pragmatic way to mock window/SpeechSynthesisUtterance.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { cardLang, speak } from '../speech'
 

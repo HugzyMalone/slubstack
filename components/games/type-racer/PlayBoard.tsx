@@ -34,7 +34,9 @@ export function PlayBoard({
   const scrollRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const liveActionRef = useRef(onLiveAction);
-  liveActionRef.current = onLiveAction;
+  useEffect(() => {
+    liveActionRef.current = onLiveAction;
+  });
 
   const wpmFor = (len: number) => {
     if (startRef.current === null || len === 0) return 0;
@@ -106,10 +108,10 @@ export function PlayBoard({
     if (Math.abs(delta) > 4) c.scrollBy({ top: delta, behavior: "auto" });
   }, [typed]);
 
-  const liveAccuracy =
-    keystrokesRef.current > 0
-      ? Math.round((correctKeystrokesRef.current / keystrokesRef.current) * 100)
-      : 100;
+  // Keystroke counters are deliberately refs (mutated per keystroke without a
+  // re-render); this display value is recomputed on each keystroke-driven render.
+  // eslint-disable-next-line react-hooks/refs
+  const liveAccuracy = keystrokesRef.current > 0 ? Math.round((correctKeystrokesRef.current / keystrokesRef.current) * 100) : 100;
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (feedback !== null || finishedRef.current) return;

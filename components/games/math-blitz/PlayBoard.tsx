@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import type { PlayBoardProps } from "@/lib/multiplayer/types";
 import type { Question } from "@/lib/math-blitz/engine";
@@ -52,11 +52,12 @@ function TimerRing({ secs, total }: { secs: number; total: number }) {
 
 export function PlayBoard({ question, remainingMs, feedback, onAnswerAction }: PlayBoardProps<Question, number>) {
   const [answer, setAnswer] = useState("");
-  const secsLeft = Math.ceil(remainingMs / 1000);
-
-  useEffect(() => {
+  const [prevQuestion, setPrevQuestion] = useState(question);
+  if (question !== prevQuestion) {
+    setPrevQuestion(question);
     setAnswer("");
-  }, [question]);
+  }
+  const secsLeft = Math.ceil(remainingMs / 1000);
 
   const fb: "correct" | "wrong" | null = feedback?.correct ? "correct" : feedback ? "wrong" : null;
 

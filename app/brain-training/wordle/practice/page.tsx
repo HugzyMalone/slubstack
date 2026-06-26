@@ -67,6 +67,9 @@ export default function WordlePracticePage() {
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
+    // Random word + persisted hard-mode flag must be chosen after hydration; a
+    // lazy initial value would diverge between server and client render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSolution(getRandomWord());
     try { setHardMode(localStorage.getItem(HARD_KEY) === "1"); } catch {}
   }, []);

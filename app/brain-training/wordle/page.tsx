@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -198,10 +198,10 @@ function WordleLeaderboard({ date }: { date: string }) {
 }
 
 export default function WordlePage() {
-  const todayStr = useRef(getTodayStr()).current;
-  const solution  = useRef(getDailyWord(todayStr)).current;
-  const dayIdx    = useRef(getDayIndex(todayStr)).current;
-  const season    = useRef(getSeason(new Date())).current;
+  const [todayStr] = useState(() => getTodayStr());
+  const [solution] = useState(() => getDailyWord(todayStr));
+  const [dayIdx]   = useState(() => getDayIndex(todayStr));
+  const [season]   = useState(() => getSeason(new Date()));
   const backdrop  = SEASON_BACKDROPS[season];
   const definition = getDefinition(solution);
 
@@ -220,6 +220,9 @@ export default function WordlePage() {
   useEffect(() => {
     const saved = loadSaved(todayStr);
     if (saved) {
+      // Hydrate the saved game from localStorage after mount; a lazy initial
+      // value would read storage during render and mismatch the server markup.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setGuesses(saved.guesses);
       setPhase(saved.phase);
       const revealed = new Set<number>();

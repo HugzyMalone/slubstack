@@ -138,6 +138,8 @@ export function DrawCanvas({
         lastFlushRef.current = now;
         flushBuffer();
       } else if (bufferRef.current.length > 0) {
+        // Self-reschedule onto the next frame to re-check the flush window.
+        // eslint-disable-next-line react-hooks/immutability
         scheduleFlush();
       }
     });

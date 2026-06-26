@@ -35,6 +35,9 @@ export function InstallPrompt() {
     };
     window.addEventListener("beforeinstallprompt", onPrompt);
 
+    // One-time read of a browser-only capability (userAgent) after hydration;
+    // it cannot be derived on the server.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isIos()) setIosHint(true);
 
     return () => window.removeEventListener("beforeinstallprompt", onPrompt);

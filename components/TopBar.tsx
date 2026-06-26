@@ -67,7 +67,10 @@ export function TopBar() {
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
 
+    // Show the cached avatar after hydration; a lazy initial value would read
+    // localStorage during render and mismatch the server-rendered markup.
     const cached = localStorage.getItem("slubstack_avatar");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (cached) setAvatar(cached);
 
     supabase.auth.getSession().then(({ data }) => {

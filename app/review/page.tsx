@@ -253,6 +253,9 @@ export default function ReviewHubPage() {
   const [wordleState, setWordleState] = useState<{ phase: WordlePhase; attempts: number }>({ phase: "none", attempts: 0 });
 
   useEffect(() => {
+    // Hydrate all stats from localStorage after mount; the zero-valued initial
+    // state keeps the server and client markup in sync.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLangStats(LANG_CONFIGS.map((cfg) => readLangStats(cfg.key)));
     setSkillStats(SKILL_CONFIGS.map((cfg) => readLangStats(cfg.key)));
     setMathStats(loadMathOpStats());

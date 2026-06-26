@@ -36,6 +36,8 @@ export function CasePick({ card, onResult, onFeedback }: Props) {
   const { chosenCase, correctArticle, options } = useMemo(() => {
     const cases = card.cases ?? {};
     const caseKeys = Object.keys(cases) as GermanCase[];
+    // Intentionally random: pick a case to quiz once per card (memoised on card).
+    // eslint-disable-next-line react-hooks/purity
     const pick = caseKeys[Math.floor(Math.random() * caseKeys.length)] ?? "nom";
     const phrase = cases[pick] ?? "";
     const article = phrase.trim().split(/\s+/)[0] ?? "der";

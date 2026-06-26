@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import type { PlayBoardProps } from "@/lib/multiplayer/types";
 import type { HoLQuestion } from "@/lib/games/higher-lower/questions";
@@ -16,10 +16,11 @@ export function PlayBoard({
   onAnswerAction,
 }: PlayBoardProps<HoLQuestion, 0 | 1>) {
   const [picked, setPicked] = useState<0 | 1 | null>(null);
-
-  useEffect(() => {
+  const [prevQuestion, setPrevQuestion] = useState(question);
+  if (question !== prevQuestion) {
+    setPrevQuestion(question);
     setPicked(null);
-  }, [question]);
+  }
 
   const inFeedback = feedback !== null;
 

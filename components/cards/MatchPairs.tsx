@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import type { Card } from "@/lib/content";
 import type { Quality } from "@/lib/srs";
@@ -19,8 +19,8 @@ type Props = {
 export function MatchPairs({ card, distractors, onResult, onFeedback }: Props) {
   const native = useNativeLanguage();
   // Shuffle once on mount — stable for the lifetime of this game
-  const allCards = useRef(shuffle([card, ...distractors].slice(0, 4))).current;
-  const rightOrder = useRef(shuffle([...allCards])).current;
+  const [allCards] = useState(() => shuffle([card, ...distractors].slice(0, 4)));
+  const [rightOrder] = useState(() => shuffle([...allCards]));
 
   const [leftSel, setLeftSel] = useState<string | null>(null);
   const [rightSel, setRightSel] = useState<string | null>(null);

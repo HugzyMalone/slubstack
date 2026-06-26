@@ -10,6 +10,9 @@ export default function ActorBlitzStatsPage() {
   useEffect(() => {
     try {
       const s = localStorage.getItem("slubstack_actorblitz_best");
+      // Read the persisted best after hydration; a lazy initial value would
+      // read localStorage during render and mismatch the server markup.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (s) setBest(JSON.parse(s));
     } catch {}
   }, []);

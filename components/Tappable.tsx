@@ -94,7 +94,10 @@ function HintPopover({ word, card, lang, anchor, onClose }: PopoverProps) {
   const [pos, setPos] = useState<{ top: number; left: number; flipped: boolean } | null>(null);
   const [mounted, setMounted] = useState(false);
 
+  // createPortal needs a client mount; the deferred flag also gates the first
+  // layout measurement below until the portal DOM exists.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

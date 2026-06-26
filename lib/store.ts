@@ -163,6 +163,9 @@ export function getTotalXp(): number {
 }
 
 export function useTotalXp(): number {
+  // XP_STORES is a fixed-length module constant, so useStore is called in the
+  // same order on every render; the rule can't prove the array is constant.
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   return XP_STORES.reduce((sum, s) => sum + useStore(s, (st) => st.xp), 0);
 }
 

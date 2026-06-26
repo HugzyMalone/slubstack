@@ -17,6 +17,16 @@ export function StreetViewPanel({ location }: StreetViewPanelProps) {
   const [panoStatus, setPanoStatus] = useState<PanoStatus>("loading");
   const [panoId, setPanoId] = useState<string | null>(null);
 
+  // Reset to the loading state the moment the round changes, before the new
+  // metadata fetch fires below.
+  const locKey = `${location.lat},${location.lng},${location.name}`;
+  const [prevLocKey, setPrevLocKey] = useState(locKey);
+  if (locKey !== prevLocKey) {
+    setPrevLocKey(locKey);
+    setPanoStatus("loading");
+    setPanoId(null);
+  }
+
   // Block iOS rubber-band only when the touch originates inside the pano container,
   // so the GuessMap's touch panning still works.
   useEffect(() => {
@@ -32,8 +42,6 @@ export function StreetViewPanel({ location }: StreetViewPanelProps) {
 
   useEffect(() => {
     if (!apiKey) return;
-    setPanoStatus("loading");
-    setPanoId(null);
     const ctrl = new AbortController();
     // source=outdoor rejects indoor/user-contributed Photo Spheres so the iframe
     // can't snap to them. radius=80 gives some flex around the listed coord but
@@ -114,7 +122,7 @@ export function StreetViewPanel({ location }: StreetViewPanelProps) {
           </div>
           <div className="text-base font-black tracking-tight">Street View unavailable here</div>
           <div className="max-w-xs text-sm text-muted">
-            This pano isn't loading. Make your best guess on the map below — everyone playing is in the same boat for this round.
+            This pano isn&apos;t loading. Make your best guess on the map below — everyone playing is in the same boat for this round.
           </div>
         </div>
       )}

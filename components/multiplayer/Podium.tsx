@@ -35,6 +35,9 @@ function useCountUp(target: number | null, durationMs = 1200): number | null {
   const [value, setValue] = useState<number | null>(target);
   useEffect(() => {
     if (target === null) {
+      // rAF count-up animation: resetting on a null target is part of driving
+      // the animated value from a timer, the legitimate use of setState here.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setValue(null);
       return;
     }
