@@ -67,6 +67,7 @@ export function WikiRace() {
   const [won, setWon] = useState(false);
   const [best, setBest] = useState<Best | null>(null);
   const [isPb, setIsPb] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const awardedRef = useRef(false);
@@ -95,6 +96,8 @@ export function WikiRace() {
     fetchArticle(pair.start);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pair.start]);
+
+  useEffect(() => setHydrated(true), []);
 
   useEffect(() => {
     if (startedAt === null || won) return;
@@ -207,6 +210,8 @@ export function WikiRace() {
       () => toast.error("Could not copy"),
     );
   }
+
+  if (!hydrated) return null;
 
   return (
     <div className="flex h-[100svh] flex-col bg-bg">

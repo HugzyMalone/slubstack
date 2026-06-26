@@ -173,7 +173,7 @@ export function Semantle() {
             SEMANTLE
           </h1>
         </div>
-        <span className="font-display text-[13px] font-extrabold text-muted">#{dayIdx + 1}</span>
+        <span className="font-display text-[13px] font-extrabold text-muted">{hydrated ? `#${dayIdx + 1}` : " "}</span>
       </div>
 
       <p className="mb-3 text-center text-xs text-muted">

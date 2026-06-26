@@ -104,6 +104,7 @@ export default function ConnectionsPage() {
   const [solvingColor, setSolvingColor] = useState<DifficultyColor | null>(null);
   const [drainedDot, setDrainedDot] = useState<number | null>(null);
   const perfectPlayedRef = useRef(false);
+  const [hydrated, setHydrated] = useState(false);
 
   // Init or restore
   useEffect(() => {
@@ -117,6 +118,7 @@ export default function ConnectionsPage() {
       const remaining = allWords.filter(w => !solved.includes(categoryByWord[w].color));
       setShuffled(shuffle(remaining));
     }
+    setHydrated(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -328,7 +330,7 @@ export default function ConnectionsPage() {
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Connections</h1>
-          <p className="text-xs text-muted">#{puzzleNumber} · {todayStr}</p>
+          <p className="text-xs text-muted">{hydrated ? `#${puzzleNumber} · ${todayStr}` : " "}</p>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-muted">Mistakes:</span>
