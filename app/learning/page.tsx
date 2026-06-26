@@ -8,7 +8,7 @@ const LEARNING = [
   {
     href: "/languages",
     title: "Languages",
-    subtitle: "German · Mandarin · Spanish",
+    subtitle: "German · Mandarin · Spanish · Italian",
     icon: <Globe size={26} />,
     tint: "#6366f1",
     bg: "linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)",
