@@ -44,7 +44,7 @@ export function GuestGate({ title, description, backPath, onGuestAction }: Guest
       </button>
       <button
         onClick={() => router.push("/stats")}
-        className="mt-3 block w-full text-center text-sm font-medium text-muted hover:text-fg transition-colors"
+        className="mt-3 w-full rounded-2xl border border-[var(--accent)]/40 py-4 text-sm font-bold text-[var(--accent)] transition-all hover:border-[var(--accent)] active:scale-[0.98]"
       >
         Sign in to save your stats
       </button>
