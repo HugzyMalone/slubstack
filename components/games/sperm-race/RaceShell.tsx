@@ -582,7 +582,7 @@ export function RaceShell(): React.JSX.Element {
 
   const backToHub = useCallback(() => {
     teardownChannel();
-    router.push("/brain-training");
+    router.push("/games");
   }, [teardownChannel, router]);
 
   const copyCode = useCallback(async () => {
@@ -852,21 +852,27 @@ export function RaceShell(): React.JSX.Element {
       ? profile?.displayName ?? "You"
       : practiceBots.find((b) => b.slot === s)?.displayName ?? `Player ${s + 1}`;
 
+  // Every racer in the room, finished or not, so DNFs (including the local
+  // player when they never cross the line) still appear in the standings.
+  const localRoster: number[] = isPractice
+    ? [0, ...practiceBots.map((b) => b.slot)]
+    : presentSlots;
+
   // Server standings include all racers (DNFs too) once the result POST resolves.
-  // Fall back to local finishers (finishers-only, no DNFs) until the fetch
-  // completes. Practice mode is always the local path — it never posts.
+  // Fall back to the local roster until the fetch completes. Finishers sort by
+  // time ahead of DNFs; practice mode is always the local path — it never posts.
   const displayOrder: Array<{ slot: number; rank: number; name: string; ms: number | null }> =
     standings && !isPractice
       ? [...standings]
           .sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999))
           .map((s) => ({ slot: s.slot, rank: s.rank ?? 999, name: s.displayName, ms: finishMsMap.get(s.slot) ?? null }))
-      : [...finishers]
-          .sort((a, b) => a.ms - b.ms)
-          .map((f, i) => ({
-            slot: f.slot,
+      : [...localRoster]
+          .sort((a, b) => (finishMsMap.get(a) ?? Infinity) - (finishMsMap.get(b) ?? Infinity))
+          .map((s, i) => ({
+            slot: s,
             rank: i + 1,
-            name: isPractice ? practiceName(f.slot) : presenceSlots[f.slot]?.displayName ?? `Player ${f.slot + 1}`,
-            ms: f.ms,
+            name: isPractice ? practiceName(s) : presenceSlots[s]?.displayName ?? `Player ${s + 1}`,
+            ms: finishMsMap.get(s) ?? null,
           }));
 
   const won = displayOrder.some((e) => e.slot === slot && e.rank === 1);
@@ -911,7 +917,7 @@ export function RaceShell(): React.JSX.Element {
         onClick={backToHub}
         className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-3.5 text-sm font-medium"
       >
-        <Home className="h-4 w-4" /> Back to brain training
+        <Home className="h-4 w-4" /> Back to Games
       </button>
     </div>
   );
