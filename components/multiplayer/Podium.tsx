@@ -53,9 +53,17 @@ function useCountUp(target: number | null, durationMs = 1200): number | null {
   return value;
 }
 
+// Ranks arrive dense (1, 2, 2, 3); display them with standard competition
+// ranking so a tie skips the next position (1, 2, 2, 4). The competition rank of
+// an entry is the count of entries placed strictly above it, plus one.
+function competitionRank(rank: number, allRanks: number[]) {
+  return allRanks.filter((r) => r < rank).length + 1;
+}
+
 function rankBadge(rank: number, allRanks: number[]) {
   const shared = allRanks.filter((r) => r === rank).length > 1;
-  return shared ? `=${rank}` : `${rank}`;
+  const display = competitionRank(rank, allRanks);
+  return shared ? `=${display}` : `${display}`;
 }
 
 function rankColor(rank: number): string {
@@ -161,7 +169,7 @@ export function Podium({ players, currentUserId, gameDisplayName, onPlayAgainAct
               >
                 <span
                   className="w-7 shrink-0 text-center text-sm font-black tabular-nums"
-                  style={{ color: rankColor(p.rank) }}
+                  style={{ color: rankColor(competitionRank(p.rank, allRanks)) }}
                 >
                   {rankBadge(p.rank, allRanks)}
                 </span>
