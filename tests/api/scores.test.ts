@@ -1,5 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest'
-import type { NextRequest } from 'next/server'
+import { describe, it, expect } from 'vitest'
 
 /**
  * API Route Tests - Score Endpoints
@@ -71,7 +70,7 @@ describe('Score API Endpoints', () => {
       const res = await fetch(`${baseUrl}/api/scores/math-blitz?difficulty=hard`)
       if (res.status === 200) {
         const data = await res.json()
-        const userIds = data.leaderboard.map((entry: any) => entry.username)
+        const userIds = data.leaderboard.map((entry: { username: string }) => entry.username)
         const uniqueUsers = new Set(userIds)
         expect(uniqueUsers.size).toBe(userIds.length)
       }
@@ -147,7 +146,7 @@ describe('Leaderboard API', () => {
       const res = await fetch(`${baseUrl}/api/leaderboard`)
       if (res.status === 200) {
         const data = await res.json()
-        const xpValues = data.leaderboard.map((entry: any) => entry.xp || 0)
+        const xpValues = data.leaderboard.map((entry: { xp?: number }) => entry.xp || 0)
         const sorted = [...xpValues].sort((a, b) => b - a)
         expect(xpValues).toEqual(sorted)
       }
