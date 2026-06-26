@@ -22,6 +22,7 @@ import { useQuestsStore, questsStore } from "@/lib/questsStore";
 import { dailyQuestsFor } from "@/lib/quests";
 import { levelFromXp } from "@/lib/xp";
 import { todayKey } from "@/lib/utils";
+import { hasActiveSession } from "@/lib/supabase/browser";
 
 type Member = { rank: number; userId: string; username: string; avatar: string | null; lifetimeXp: number; isYou: boolean };
 type LeagueData = {
@@ -87,7 +88,7 @@ const HOME_BUTTONS: HomeButton[] = [
 const LEARNING_BUTTON: HomeButton = {
   href: "/learning",
   title: "Learning",
-  subtitle: "Mandarin · Spanish · German · Skills",
+  subtitle: "Mandarin · Spanish · German · Italian · Skills",
   icon: <BookOpen size={28} strokeWidth={2} />,
   tint: "#6366f1",
   bg: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
@@ -732,14 +733,20 @@ function LeagueWidget() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/leagues/current")
-      .then((r) => {
-        if (r.status === 401) { if (!cancelled) setUnauthed(true); return null; }
-        if (!r.ok) return Promise.reject(r.status);
-        return r.json();
-      })
-      .then((d: LeagueData | null) => { if (d && !cancelled) setData(d); })
-      .catch(() => { if (!cancelled) setErrored(true); });
+    async function load() {
+      // Skip the fetch for guests — it would 401 and log a red console error;
+      // show the sign-in prompt directly instead.
+      if (!(await hasActiveSession())) { if (!cancelled) setUnauthed(true); return; }
+      fetch("/api/leagues/current")
+        .then((r) => {
+          if (r.status === 401) { if (!cancelled) setUnauthed(true); return null; }
+          if (!r.ok) return Promise.reject(r.status);
+          return r.json();
+        })
+        .then((d: LeagueData | null) => { if (d && !cancelled) setData(d); })
+        .catch(() => { if (!cancelled) setErrored(true); });
+    }
+    load();
     return () => { cancelled = true; };
   }, []);
 

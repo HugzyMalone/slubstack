@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { spring, springy } from "@/lib/motion";
 import { playLeaguePromote } from "@/lib/sound";
 import { levelUp as hapticLevelUp } from "@/lib/haptics";
+import { hasActiveSession } from "@/lib/supabase/browser";
 
 const TIER_SEEN_KEY = "league_last_seen_tier";
 
@@ -41,13 +42,24 @@ function isAvatarUrl(v: string | null): v is string {
 
 export function LeagueClient() {
   const [data, setData] = useState<LeagueData | null>(null);
+  const [unauthed, setUnauthed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
+      // Guests have no session, so skip the fetch (which would 401 and log a red
+      // console error) and show the sign-in prompt directly.
+      if (!(await hasActiveSession())) {
+        if (!cancelled) setUnauthed(true);
+        return;
+      }
       try {
         const res = await fetch("/api/leagues/current", { cache: "no-store" });
+        if (res.status === 401) {
+          if (!cancelled) setUnauthed(true);
+          return;
+        }
         if (!res.ok) {
           const body = (await res.json().catch(() => ({}))) as { error?: string };
           if (!cancelled) setError(body.error ?? `HTTP ${res.status}`);
@@ -62,6 +74,22 @@ export function LeagueClient() {
     load();
     return () => { cancelled = true; };
   }, []);
+
+  if (unauthed) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-12 text-center">
+        <h1 className="font-display text-2xl font-extrabold">Join the league</h1>
+        <p className="mt-2 text-sm text-muted">Sign in to climb the all-time XP ladder.</p>
+        <Link
+          href="/stats"
+          className="mt-5 inline-block rounded-2xl px-5 py-3 font-display text-sm font-extrabold uppercase tracking-wide text-[var(--accent-fg)]"
+          style={{ background: "var(--accent)", boxShadow: "0 4px 0 color-mix(in srgb, var(--accent) 70%, black)" }}
+        >
+          Sign in
+        </Link>
+      </div>
+    );
+  }
 
   if (error) {
     return (

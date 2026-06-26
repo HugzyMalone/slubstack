@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Users } from "lucide-react";
+import { hasActiveSession } from "@/lib/supabase/browser";
 
 type Game = "wordle" | "connections" | "math-blitz";
 type Score = {
@@ -36,12 +37,19 @@ export function FriendsCompare({ game, date, title = "Friends today" }: Props) {
   const [scores, setScores] = useState<Score[] | null>(null);
 
   useEffect(() => {
-    const params = new URLSearchParams({ game });
-    if (date) params.set("date", date);
-    fetch(`/api/friends/today?${params}`)
-      .then((r) => (r.ok ? r.json() : { scores: [] }))
-      .then((d) => setScores(d.scores ?? []))
-      .catch(() => setScores([]));
+    let cancelled = false;
+    async function load() {
+      // Skip the fetch for guests — it would 401 and log a red console error.
+      if (!(await hasActiveSession())) { if (!cancelled) setScores([]); return; }
+      const params = new URLSearchParams({ game });
+      if (date) params.set("date", date);
+      fetch(`/api/friends/today?${params}`)
+        .then((r) => (r.ok ? r.json() : { scores: [] }))
+        .then((d) => { if (!cancelled) setScores(d.scores ?? []); })
+        .catch(() => { if (!cancelled) setScores([]); });
+    }
+    load();
+    return () => { cancelled = true; };
   }, [game, date]);
 
   if (scores === null) return null;

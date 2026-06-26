@@ -13,7 +13,7 @@ import { isHapticMuted, setHapticMuted } from "@/lib/haptics";
 import { useStore } from "zustand";
 import { mandarinStore, germanStore, spanishStore, italianStore, vibeCodingStore, githubStore, brainTrainingStore, triviaStore, useTotalXp } from "@/lib/store";
 import type { User as SupaUser } from "@supabase/supabase-js";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { getSupabaseBrowserClient, hasActiveSession } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { useEffectiveStreak } from "@/lib/globalStore";
 import { levelFromXp, xpToNextLevel } from "@/lib/xp";
@@ -34,16 +34,21 @@ function useLeagueTier(): LeagueTier {
   const [tier, setTier] = useState<LeagueTier>(null);
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/leagues/current")
-      .then((r) => {
-        if (r.status === 401) { if (!cancelled) setTier("unauthed"); return null; }
-        if (!r.ok) return null;
-        return r.json();
-      })
-      .then((d: { tier?: { name: string } } | null) => {
-        if (d?.tier && !cancelled) setTier({ name: d.tier.name });
-      })
-      .catch(() => {});
+    async function load() {
+      // Skip the fetch for guests — it would 401 and log a red console error.
+      if (!(await hasActiveSession())) { if (!cancelled) setTier("unauthed"); return; }
+      fetch("/api/leagues/current")
+        .then((r) => {
+          if (r.status === 401) { if (!cancelled) setTier("unauthed"); return null; }
+          if (!r.ok) return null;
+          return r.json();
+        })
+        .then((d: { tier?: { name: string } } | null) => {
+          if (d?.tier && !cancelled) setTier({ name: d.tier.name });
+        })
+        .catch(() => {});
+    }
+    load();
     return () => { cancelled = true; };
   }, []);
   return tier;
