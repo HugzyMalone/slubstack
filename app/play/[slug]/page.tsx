@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { GAME_CATALOG, getGameBySlug, SITE_URL } from "@/lib/games/catalog";
 
 type Props = { params: Promise<{ slug: string }> };
+
+const FEATURES = ["Free to play", "No sign-up needed", "Plays in your browser"];
 
 export function generateStaticParams() {
   return GAME_CATALOG.map((g) => ({ slug: g.slug }));
@@ -39,45 +41,125 @@ export default async function PlayLandingPage({ params }: Props) {
   const game = getGameBySlug(slug);
   if (!game) notFound();
 
+  const accent = game.accent;
+  const idx = GAME_CATALOG.findIndex((g) => g.slug === game.slug);
+  const more = Array.from({ length: 4 }, (_, k) => GAME_CATALOG[(idx + k + 1) % GAME_CATALOG.length]);
+
   return (
-    <div className="px-4 pt-10 pb-24 lg:max-w-[760px] lg:mx-auto lg:px-8 lg:py-16">
-      <p className="text-[12px] font-semibold tracking-widest text-muted uppercase">Slubstack</p>
-      <h1 className="mt-1 text-3xl font-bold tracking-tight lg:text-4xl">{game.name}</h1>
-      <p className="mt-4 text-base leading-relaxed text-muted lg:text-lg">{game.intro}</p>
-
-      <Link
-        href={game.playHref}
-        className="mt-6 inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-[15px] font-bold text-white shadow-sm transition-all hover:-translate-y-0.5"
-        style={{ background: game.accent }}
+    <div className="mx-auto w-full max-w-[760px] px-4 pt-6 pb-24 lg:max-w-[940px] lg:px-8 lg:py-12">
+      <section
+        className="relative overflow-hidden rounded-3xl p-7 lg:p-12"
+        style={{
+          background: `linear-gradient(160deg, color-mix(in srgb, ${accent} 18%, var(--surface)) 0%, var(--surface) 72%)`,
+          border: `1.5px solid color-mix(in srgb, ${accent} 26%, transparent)`,
+          boxShadow: `0 20px 55px -20px color-mix(in srgb, ${accent} 45%, transparent)`,
+        }}
       >
-        Play {game.name} <ArrowRight size={18} />
-      </Link>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-24 -right-20 h-72 w-72 rounded-full blur-3xl"
+          style={{ background: `color-mix(in srgb, ${accent} 32%, transparent)` }}
+        />
 
-      <h2 className="mt-12 text-lg font-bold tracking-tight">How to play</h2>
-      <ul className="mt-4 flex flex-col gap-3">
-        {game.how.map((step) => (
-          <li key={step} className="flex items-start gap-3 text-[15px] leading-relaxed text-muted">
-            <span
-              className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white"
-              style={{ background: game.accent }}
+        <div className="relative">
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-bold tracking-widest uppercase"
+            style={{
+              background: `color-mix(in srgb, ${accent} 14%, var(--surface))`,
+              color: accent,
+              border: `1px solid color-mix(in srgb, ${accent} 28%, transparent)`,
+            }}
+          >
+            <Sparkles size={13} strokeWidth={2.5} /> Free game
+          </span>
+
+          <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-fg lg:text-6xl">{game.name}</h1>
+
+          <p className="mt-4 max-w-[56ch] text-base leading-relaxed text-muted lg:text-lg">{game.intro}</p>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            {FEATURES.map((f) => (
+              <span
+                key={f}
+                className="rounded-full px-3 py-1 text-[12.5px] font-semibold text-muted"
+                style={{ background: "var(--elevated)", border: "1px solid var(--border)" }}
+              >
+                {f}
+              </span>
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <Link
+              href={game.playHref}
+              className="inline-flex items-center gap-2 rounded-2xl px-7 py-3.5 text-[16px] font-bold text-white transition-transform duration-150 hover:-translate-y-0.5 active:scale-[0.98]"
+              style={{ background: accent, boxShadow: `0 12px 30px -8px color-mix(in srgb, ${accent} 60%, transparent)` }}
             >
-              <Check size={14} strokeWidth={3} />
-            </span>
-            {step}
-          </li>
-        ))}
-      </ul>
+              Play {game.name} <ArrowRight size={18} />
+            </Link>
+            <Link
+              href="/games"
+              className="inline-flex items-center rounded-2xl px-5 py-3.5 text-[15px] font-semibold text-muted transition-colors hover:text-fg"
+              style={{ border: "1.5px solid var(--border)" }}
+            >
+              Browse all games
+            </Link>
+          </div>
+        </div>
+      </section>
 
-      <div className="mt-12 rounded-2xl border border-border bg-[var(--surface)] p-6">
-        <p className="text-sm leading-relaxed text-muted">
-          {game.name} is free to play on Slubstack, with no sign-up needed to start.
-          Browse the rest of the{" "}
-          <Link href="/games" className="font-semibold underline" style={{ color: game.accent }}>
-            games
-          </Link>{" "}
-          while you are here.
-        </p>
-      </div>
+      <section className="mt-14">
+        <h2 className="text-xl font-bold tracking-tight text-fg lg:text-2xl">How to play</h2>
+        <ol className="mt-5 grid gap-3 lg:grid-cols-3">
+          {game.how.map((step, i) => (
+            <li
+              key={step}
+              className="rounded-2xl p-5"
+              style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+            >
+              <div
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-[15px] font-extrabold text-white"
+                style={{ background: accent }}
+              >
+                {i + 1}
+              </div>
+              <p className="mt-3 text-[14.5px] leading-relaxed text-muted">{step}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="mt-14">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-xl font-bold tracking-tight text-fg lg:text-2xl">More free games</h2>
+          <Link href="/play" className="text-[14px] font-semibold" style={{ color: accent }}>
+            See all
+          </Link>
+        </div>
+        <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {more.map((g) => (
+            <Link
+              key={g.slug}
+              href={`/play/${g.slug}`}
+              className="group rounded-2xl p-4 transition-transform duration-150 hover:-translate-y-0.5"
+              style={{
+                background: `color-mix(in srgb, ${g.accent} 8%, var(--surface))`,
+                border: `1px solid color-mix(in srgb, ${g.accent} 22%, transparent)`,
+              }}
+            >
+              <div className="h-8 w-8 rounded-xl shadow-sm" style={{ background: g.accent }} />
+              <div className="mt-3 text-[14px] font-bold leading-tight text-fg">{g.name}</div>
+              <div className="mt-1 flex items-center gap-1 text-[12px] font-semibold text-muted">
+                Play <ArrowRight size={12} className="transition-transform duration-150 group-hover:translate-x-0.5" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <p className="mt-12 text-center text-[13px] leading-relaxed text-muted">
+        {game.name} is free to play on Slubstack, no sign-up needed to start.
+      </p>
     </div>
   );
 }

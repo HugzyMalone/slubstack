@@ -35,7 +35,7 @@ const GAMES = [
   {
     href: "/games/type-racer",
     title: "Type Racer",
-    subtitle: "Live typing sprint — race four players on speed and accuracy",
+    subtitle: "Live typing sprint, race four players on speed and accuracy",
     icon: <Keyboard size={26} />,
     tint: "#14b8a6",
     bg: "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)",
@@ -44,7 +44,7 @@ const GAMES = [
   {
     href: "/games/sperm-race",
     title: "Sperm Race",
-    subtitle: "Four-player tap race — join a private room by code and alternate A/B to the egg",
+    subtitle: "Four-player tap race, join a private room and alternate A/B to the egg",
     icon: <FlaskConical size={26} />,
     tint: "#22c55e",
     bg: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
@@ -62,7 +62,7 @@ const GAMES = [
   {
     href: "/games/draw",
     title: "Draw My Thing",
-    subtitle: "Multiplayer Pictionary — invite friends with a 4-char code",
+    subtitle: "Multiplayer Pictionary, invite friends with a four-character code",
     icon: <Brush size={26} />,
     tint: "#ec4899",
     bg: "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)",
@@ -71,7 +71,7 @@ const GAMES = [
   {
     href: "/games/block-yard",
     title: "BlockYard",
-    subtitle: "In development — slotting in soon",
+    subtitle: "In development, slotting in soon",
     icon: <Blocks size={26} />,
     tint: "#f59e0b",
     bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
