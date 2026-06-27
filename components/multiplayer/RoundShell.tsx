@@ -570,6 +570,21 @@ export function RoundShell<Q, A>({ adapter, level, PlayBoard, RevealBoard }: Rou
     };
   }, [phase, adapter.roundDurationMs, adapter.revealDurationMs]);
 
+  // ── Early round end: every active player has guessed ──────────────────────
+  // Each client converges on its own from shared inputs (presence + the
+  // guess-locked broadcasts that populate roundGuesses), so no extra signal is
+  // needed. The phase guard makes the transition fire exactly once.
+
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const activeSlots = Object.keys(presenceSlots).map(Number);
+    if (activeSlots.length === 0) return;
+    const allGuessed = activeSlots.every((slot) => roundGuesses[slot]);
+    if (!allGuessed) return;
+    setRevealMs(adapter.revealDurationMs);
+    setPhase("reveal");
+  }, [phase, presenceSlots, roundGuesses, adapter.revealDurationMs]);
+
   // ── Reveal phase: timer → next round or result ────────────────────────────
 
   useEffect(() => {
