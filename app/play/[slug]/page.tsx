@@ -25,13 +25,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url,
       title: game.seoTitle,
       description: game.seoDescription,
-      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: game.name }],
     },
     twitter: {
       card: "summary_large_image",
       title: game.seoTitle,
       description: game.seoDescription,
-      images: ["/og-image.png"],
     },
   };
 }
