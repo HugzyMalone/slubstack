@@ -16,13 +16,11 @@ export const metadata: Metadata = {
     url: `${SITE_URL}/play`,
     title: TITLE,
     description: DESCRIPTION,
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Slubstack" }],
   },
   twitter: {
     card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
-    images: ["/og-image.png"],
   },
 };
 
