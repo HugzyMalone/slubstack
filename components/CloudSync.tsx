@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useStore } from "zustand";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { getSupabaseBrowserClient, hasActiveSession } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { hasPullCompleted } from "@/lib/syncGate";
 import {
@@ -59,8 +59,8 @@ export function CloudSync({ lang = "mandarin" }: Props) {
       }
     }
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) pull();
+    hasActiveSession().then((ok) => {
+      if (ok) pull();
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {

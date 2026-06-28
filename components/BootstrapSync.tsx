@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { getSupabaseBrowserClient, hasActiveSession } from "@/lib/supabase/browser";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { germanStore, spanishStore, italianStore, vibeCodingStore, githubStore } from "@/lib/store";
 import type { RemoteState } from "@/lib/store";
@@ -39,8 +39,8 @@ export function BootstrapSync() {
       markPullComplete();
     }
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) pullAll();
+    hasActiveSession().then((ok) => {
+      if (ok) pullAll();
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {

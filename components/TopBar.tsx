@@ -10,7 +10,7 @@ import { mandarinStore, germanStore, spanishStore, italianStore, vibeCodingStore
 import { useHydrated } from "@/lib/hooks";
 import { useGlobalStore, useEffectiveStreak } from "@/lib/globalStore";
 import { levelFromXp } from "@/lib/xp";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { getSupabaseBrowserClient, hasActiveSession } from "@/lib/supabase/browser";
 import { QuestDrawer } from "@/components/QuestDrawer";
 import { questsStore, useQuestsStore } from "@/lib/questsStore";
 import { dailyQuestsFor } from "@/lib/quests";
@@ -73,8 +73,8 @@ export function TopBar() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (cached) setAvatar(cached);
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) { setAvatar(null); setLoggedIn(false); localStorage.removeItem("slubstack_avatar"); return; }
+    hasActiveSession().then((ok) => {
+      if (!ok) { setAvatar(null); setLoggedIn(false); localStorage.removeItem("slubstack_avatar"); return; }
       setLoggedIn(true);
       if (!cached) {
         fetch("/api/profile", { cache: "no-store" })

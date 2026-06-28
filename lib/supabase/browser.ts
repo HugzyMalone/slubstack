@@ -18,10 +18,13 @@ export function getSupabaseBrowserClient() {
 // Guests have no session, so endpoints that require auth would 401 — and the
 // browser logs every 401 as a red console error. Call this before such fetches
 // so signed-out visitors skip the request entirely instead of cluttering the
-// console with expected failures.
+// console with expected failures. Uses getUser() rather than getSession() so the
+// token is validated against the Auth server: a stale/expired local session
+// (which getSession trusts) would otherwise pass the gate and still 401 — the
+// same path that auth routes take, so the gate and the route agree.
 export async function hasActiveSession(): Promise<boolean> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return false;
-  const { data } = await supabase.auth.getSession();
-  return !!data.session;
+  const { data } = await supabase.auth.getUser();
+  return !!data.user;
 }
