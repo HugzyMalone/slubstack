@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { GAME_CATALOG, SITE_URL } from "@/lib/games/catalog";
+import { JsonLd } from "@/components/JsonLd";
 
 const TITLE = "Free Online Games — Word, Trivia & Party Games | Slubstack";
 const DESCRIPTION =
@@ -24,9 +25,39 @@ export const metadata: Metadata = {
   },
 };
 
+const HUB_JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollectionPage",
+      name: TITLE,
+      description: DESCRIPTION,
+      url: `${SITE_URL}/play`,
+      mainEntity: {
+        "@type": "ItemList",
+        numberOfItems: GAME_CATALOG.length,
+        itemListElement: GAME_CATALOG.map((game, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: game.name,
+          url: `${SITE_URL}/play/${game.slug}`,
+        })),
+      },
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: "Games", item: `${SITE_URL}/play` },
+      ],
+    },
+  ],
+};
+
 export default function PlayHubPage() {
   return (
     <div className="px-4 pt-10 pb-24 lg:max-w-[960px] lg:mx-auto lg:px-8 lg:py-16">
+      <JsonLd data={HUB_JSON_LD} />
       <p className="text-[12px] font-semibold tracking-widest text-muted uppercase">Slubstack</p>
       <h1 className="mt-1 text-3xl font-bold tracking-tight lg:text-4xl">Free online games</h1>
       <p className="mt-4 max-w-[640px] text-base leading-relaxed text-muted lg:text-lg">

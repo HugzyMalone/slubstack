@@ -15,6 +15,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GameStoreProvider, mandarinStore } from "@/lib/store";
 import { SITE_URL } from "@/lib/games/catalog";
+import { JsonLd } from "@/components/JsonLd";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -62,6 +63,27 @@ export const metadata: Metadata = {
   },
 };
 
+const SITE_JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "Slubstack",
+      url: SITE_URL,
+      logo: `${SITE_URL}/slubstack-logo.png`,
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      name: "Slubstack",
+      description: SITE_DESCRIPTION,
+      url: SITE_URL,
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+  ],
+};
+
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#fff6ee" },
@@ -87,6 +109,7 @@ export default function RootLayout({
             __html: `(function(){try{var m=window.matchMedia("(prefers-color-scheme: dark)");function a(){var t=localStorage.getItem("slubstack_theme");if(t!=="light"&&t!=="dark"){t=m.matches?"dark":"light";}document.documentElement.dataset.theme=t;}a();m.addEventListener("change",a);}catch(e){}})();`,
           }}
         />
+        <JsonLd data={SITE_JSON_LD} />
       </head>
       <body className="flex min-h-dvh flex-col">
         <GameStoreProvider store={mandarinStore}>

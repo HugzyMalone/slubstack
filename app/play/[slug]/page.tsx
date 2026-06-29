@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { GAME_CATALOG, getGameBySlug, SITE_URL } from "@/lib/games/catalog";
+import { JsonLd } from "@/components/JsonLd";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -45,8 +46,41 @@ export default async function PlayLandingPage({ params }: Props) {
   const idx = GAME_CATALOG.findIndex((g) => g.slug === game.slug);
   const more = Array.from({ length: 4 }, (_, k) => GAME_CATALOG[(idx + k + 1) % GAME_CATALOG.length]);
 
+  const url = `${SITE_URL}/play/${game.slug}`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "VideoGame",
+        name: game.name,
+        url,
+        description: game.seoDescription,
+        image: `${SITE_URL}/play/${game.slug}/opengraph-image`,
+        applicationCategory: "GameApplication",
+        operatingSystem: "Web browser",
+        isAccessibleForFree: true,
+        publisher: { "@id": `${SITE_URL}/#organization` },
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "GBP",
+          availability: "https://schema.org/InStock",
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Games", item: `${SITE_URL}/play` },
+          { "@type": "ListItem", position: 3, name: game.name, item: url },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="mx-auto w-full max-w-[760px] px-4 pt-6 pb-24 lg:max-w-[940px] lg:px-8 lg:py-12">
+      <JsonLd data={jsonLd} />
       <section
         className="relative overflow-hidden rounded-3xl p-7 lg:p-12"
         style={{
