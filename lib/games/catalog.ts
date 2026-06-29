@@ -65,7 +65,7 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
     slug: "math-blitz",
     name: "Math Blitz",
     playHref: "/brain-training/math-blitz",
-    accent: "#10b981",
+    accent: "#047857",
     seoTitle: "Math Blitz — Free Daily Mental Maths Game | Slubstack",
     seoDescription:
       "A fast free maths game: solve as many sums as you can in thirty seconds. Sharpen mental arithmetic, beat your best and climb the daily leaderboard.",
@@ -113,7 +113,7 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
     slug: "sperm-race",
     name: "Sperm Race",
     playHref: "/games/sperm-race",
-    accent: "#22c55e",
+    accent: "#15803d",
     seoTitle: "Sperm Race — Multiplayer Tap Racing Party Game | Slubstack",
     seoDescription:
       "A four-player tap-racing party game. Join a private room by code and hammer A and B to reach the egg first. Free, quick and silly. Play with friends.",
