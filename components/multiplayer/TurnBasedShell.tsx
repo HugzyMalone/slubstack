@@ -624,11 +624,30 @@ export function TurnBasedShell({ adapter }: TurnBasedShellProps): React.JSX.Elem
   });
 
   const onStrokeSegment = useCallback(
-    (seg: StrokeDelta) => sendStrokeDelta(seg),
+    (seg: StrokeDelta) => {
+      sendStrokeDelta(seg);
+      setIncomingStrokes((prev) => {
+        const idx = prev.findIndex((s) => s.id === seg.strokeId);
+        if (idx === -1) {
+          return [
+            ...prev,
+            { id: seg.strokeId, color: seg.color, size: seg.size, points: [...seg.points], complete: false },
+          ];
+        }
+        const merged = [...prev];
+        merged[idx] = { ...merged[idx], points: [...merged[idx].points, ...seg.points] };
+        return merged;
+      });
+    },
     [sendStrokeDelta],
   );
   const onStrokeEnd = useCallback(
-    (end: StrokeEnd) => sendStrokeEnd(end),
+    (end: StrokeEnd) => {
+      sendStrokeEnd(end);
+      setIncomingStrokes((prev) =>
+        prev.map((s) => (s.id === end.strokeId ? { ...s, complete: true } : s)),
+      );
+    },
     [sendStrokeEnd],
   );
 
