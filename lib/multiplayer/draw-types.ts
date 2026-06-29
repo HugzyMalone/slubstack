@@ -26,6 +26,7 @@ export type CorrectMessage = {
   guesserSlot: number;
   msElapsed: number;
   roundIndex: number;
+  word: string | null;
 };
 
 export type RoundReady = {

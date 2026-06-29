@@ -104,7 +104,7 @@ type ReducerAction =
   | { type: "to-lobby" }
   | { type: "to-countdown"; totalRounds: number }
   | { type: "start-round"; round: RoundState }
-  | { type: "win-round"; winnerSlot: number; drawerSlot: number; points: { drawer: number; guesser: number } }
+  | { type: "win-round"; winnerSlot: number; drawerSlot: number; points: { drawer: number; guesser: number }; word?: string | null }
   | { type: "to-between" }
   | { type: "to-result" }
   | { type: "reset" };
@@ -135,7 +135,7 @@ function reducer(state: ReducerState, action: ReducerAction): ReducerState {
       return {
         ...state,
         phase: "between",
-        round: { ...state.round, winnerSlot: action.winnerSlot },
+        round: { ...state.round, winnerSlot: action.winnerSlot, word: action.word ?? state.round.word },
         scores,
       };
     }
@@ -338,6 +338,7 @@ export function TurnBasedShell({ adapter }: TurnBasedShellProps): React.JSX.Elem
               guesserSlot: p.slot,
               msElapsed,
               roundIndex: r.roundIndex,
+              word: r.word,
             };
             const ch = channelRef.current;
             if (ch) ch.send({ type: "broadcast", event: "correct", payload: correctPayload });
@@ -348,6 +349,7 @@ export function TurnBasedShell({ adapter }: TurnBasedShellProps): React.JSX.Elem
               winnerSlot: p.slot,
               drawerSlot: r.drawerSlot,
               points: { drawer: adapter.pointsForDrawerOnCorrect, guesser: guesserPts },
+              word: r.word,
             });
             setGuessFeed((prev) => {
               const next = [...prev, { slot: p.slot, displayName, text: p.text, correct: true, tsMs: Date.now() }];
@@ -371,6 +373,7 @@ export function TurnBasedShell({ adapter }: TurnBasedShellProps): React.JSX.Elem
           winnerSlot: p.guesserSlot,
           drawerSlot: r.drawerSlot,
           points: { drawer: drawerPts, guesser: guesserPts },
+          word: p.word,
         });
       });
 
@@ -539,7 +542,7 @@ export function TurnBasedShell({ adapter }: TurnBasedShellProps): React.JSX.Elem
         if (r.drawerSlot === slotIndexRef.current) {
           const ch = channelRef.current;
           if (ch) {
-            const payload: CorrectMessage = { guesserSlot: -1, msElapsed: roundDurationMs, roundIndex: r.roundIndex };
+            const payload: CorrectMessage = { guesserSlot: -1, msElapsed: roundDurationMs, roundIndex: r.roundIndex, word: r.word };
             ch.send({ type: "broadcast", event: "correct", payload });
           }
           dispatch({
@@ -547,6 +550,7 @@ export function TurnBasedShell({ adapter }: TurnBasedShellProps): React.JSX.Elem
             winnerSlot: -1,
             drawerSlot: r.drawerSlot,
             points: { drawer: 0, guesser: 0 },
+            word: r.word,
           });
         }
       }
