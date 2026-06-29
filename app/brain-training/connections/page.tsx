@@ -302,6 +302,10 @@ export default function ConnectionsPage() {
     .filter(c => solved.includes(c))
     .map(c => puzzle.categories.find(cat => cat.color === c)!);
 
+  const revealedCategories = phase === "lost"
+    ? [...solvedCategories, ...puzzle.categories.filter(c => !solved.includes(c.color))]
+    : solvedCategories;
+
   const colourGrid: DifficultyColor[][] = solveOrder.map(c => [c, c, c, c]);
   const shareText = connectionsShareCard({
     dayNumber: puzzleNumber,
@@ -359,11 +363,11 @@ export default function ConnectionsPage() {
 
       {/* Solved categories */}
       <div className="flex flex-col gap-2 mb-2">
-        {solvedCategories.map(cat => (
+        {revealedCategories.map(cat => (
           <motion.div
             key={cat.color}
             initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={{ opacity: solved.includes(cat.color) ? 1 : 0.82, scale: 1 }}
             className="rounded-xl px-4 py-3 text-center"
             style={{ background: COLOR_STYLES[cat.color].bg, color: COLOR_STYLES[cat.color].text }}
           >
