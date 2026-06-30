@@ -162,7 +162,7 @@ export function RoomLobby({
           spellCheck={false}
           maxLength={4}
           value={code}
-          onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z2-9]/g, ""))}
+          onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z]/g, ""))}
           placeholder="ABCD"
           className="mt-5 w-full rounded-2xl border border-border bg-surface px-4 py-4 text-center text-2xl font-black tracking-[0.4em] text-fg placeholder:text-muted/40 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30"
         />

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 
-const ROOM_CODE_RE = /^[A-Z2-9]{4}$/i;
+const ROOM_CODE_RE = /^[A-Z]{4}$/i;
 
 type CreateRow = {
   match_id: string;

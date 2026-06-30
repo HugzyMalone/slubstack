@@ -711,7 +711,7 @@ export function RaceShell(): React.JSX.Element {
           <ArrowLeft size={14} /> Back
         </button>
         <h1 className="text-2xl font-bold tracking-tight">Join a race</h1>
-        <p className="mt-1 text-sm text-muted">Enter the 4-character code from your host.</p>
+        <p className="mt-1 text-sm text-muted">Enter the 4-letter code from your host.</p>
         <input
           type="text"
           inputMode="text"
@@ -720,7 +720,7 @@ export function RaceShell(): React.JSX.Element {
           spellCheck={false}
           maxLength={4}
           value={codeInput}
-          onChange={(e) => setCodeInput(e.target.value.toUpperCase().replace(/[^A-Z2-9]/g, ""))}
+          onChange={(e) => setCodeInput(e.target.value.toUpperCase().replace(/[^A-Z]/g, ""))}
           placeholder="ABCD"
           className="mt-5 w-full rounded-2xl border border-border bg-surface px-4 py-4 text-center text-2xl font-black tracking-[0.4em] text-fg placeholder:text-muted/40 focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30"
         />
