@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from("connections_scores")
-    .select("user_id, solved, mistakes, profiles!inner(username, avatar_url)")
+    .select("user_id, solved, mistakes")
     .eq("date", date)
     .order("solved", { ascending: false })
     .order("mistakes", { ascending: true })
@@ -21,8 +21,17 @@ export async function GET(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  const leaderboard = (data ?? []).map((row) => {
-    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+  // connections_scores.user_id is FK'd to auth.users, not profiles, so PostgREST
+  // can't embed the profiles relationship — join it in app code instead.
+  const rows = data ?? [];
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, username, avatar_url")
+    .in("id", [...new Set(rows.map((row) => row.user_id))]);
+  const byId = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
+
+  const leaderboard = rows.map((row) => {
+    const profile = byId.get(row.user_id);
     return {
       username: profile?.username ?? "Learner",
       avatar: profile?.avatar_url ?? null,
