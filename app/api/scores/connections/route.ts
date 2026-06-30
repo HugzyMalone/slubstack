@@ -74,7 +74,11 @@ export async function POST(request: NextRequest) {
 
   // 23505 = unique_violation: score already recorded for this user+date — treat as success.
   if (error && error.code !== "23505") {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    // Payload is validated above, so a failure here is a server/DB fault (transient
+    // or RLS), not a bad request. Log it and return 500 so a recurrence is
+    // diagnosable rather than a silent, unlogged 400 that leaks the raw DB message.
+    console.error("[scores/connections] insert failed", { userId: user.id, date, code: error.code, message: error.message });
+    return NextResponse.json({ error: "Could not record score" }, { status: 500 });
   }
   return NextResponse.json({ ok: true });
 }
