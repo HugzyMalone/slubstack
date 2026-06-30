@@ -59,11 +59,13 @@ export async function POST(request: NextRequest) {
     { onConflict: "id", ignoreDuplicates: true },
   );
 
-  const { error } = await supabase.from("connections_scores").upsert(
+  const { error } = await supabase.from("connections_scores").insert(
     { user_id: user.id, date, solved, mistakes },
-    { onConflict: "user_id,date", ignoreDuplicates: true },
   );
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  // 23505 = unique_violation: score already recorded for this user+date — treat as success.
+  if (error && error.code !== "23505") {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
   return NextResponse.json({ ok: true });
 }

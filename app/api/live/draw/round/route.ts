@@ -27,15 +27,15 @@ export async function POST(request: Request) {
   if (typeof matchId !== "string" || !UUID_RE.test(matchId)) {
     return NextResponse.json({ error: "Invalid matchId" }, { status: 400 });
   }
-  if (typeof roundIndex !== "number" || !Number.isInteger(roundIndex) || roundIndex < 0) {
+  if (typeof roundIndex !== "number" || !Number.isInteger(roundIndex) || roundIndex < 0 || roundIndex > 32767) {
     return NextResponse.json({ error: "Invalid roundIndex" }, { status: 400 });
   }
-  if (typeof callerSlot !== "number" || !Number.isInteger(callerSlot) || callerSlot < 0) {
+  if (typeof callerSlot !== "number" || !Number.isInteger(callerSlot) || callerSlot < 0 || callerSlot > 7) {
     return NextResponse.json({ error: "Invalid callerSlot" }, { status: 400 });
   }
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: callerRow, error: callerError } = await admin
     .from("live_match_players")
@@ -53,10 +53,23 @@ export async function POST(request: Request) {
     p_caller_slot: callerSlot,
   });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    const msg = error.message ?? "";
+    if (
+      msg.includes("caller slot does not match") ||
+      msg.includes("only host or drawer may start")
+    ) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    console.error("[draw/round] start_draw_round RPC error", { matchId, roundIndex, callerSlot, error });
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 
   const row = (Array.isArray(data) ? data[0] : data) as RoundRow | null | undefined;
-  if (!row) return NextResponse.json({ error: "Round start failed" }, { status: 500 });
+  if (!row) {
+    console.error("[draw/round] RPC returned no row", { matchId, roundIndex, callerSlot });
+    return NextResponse.json({ error: "Round start failed" }, { status: 500 });
+  }
 
   const isDrawer = callerRow.slot === row.drawer_slot;
   return NextResponse.json({
