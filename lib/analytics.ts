@@ -31,3 +31,13 @@ export function track(event: AnalyticsEvent, props?: Record<string, unknown>) {
   if (!initialised || !POSTHOG_KEY) return;
   posthog.capture(event, props);
 }
+
+export function identify(userId: string, props?: Record<string, unknown>) {
+  if (!initialised || !POSTHOG_KEY) return;
+  posthog.identify(userId, props);
+}
+
+export function resetAnalytics() {
+  if (!initialised || !POSTHOG_KEY) return;
+  posthog.reset();
+}
