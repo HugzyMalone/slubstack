@@ -11,6 +11,26 @@ const nextConfig: NextConfig = {
         destination: "/games/draw",
         permanent: true,
       },
+      {
+        source: "/league",
+        destination: "/leaderboard/league",
+        permanent: false,
+      },
+      {
+        source: "/wordle",
+        destination: "/brain-training/wordle",
+        permanent: false,
+      },
+      {
+        source: "/connections",
+        destination: "/brain-training/connections",
+        permanent: false,
+      },
+      {
+        source: "/semantle",
+        destination: "/brain-training/semantle",
+        permanent: false,
+      },
     ];
   },
 };
