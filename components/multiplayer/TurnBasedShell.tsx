@@ -490,12 +490,21 @@ export function TurnBasedShell({ adapter }: TurnBasedShellProps): React.JSX.Elem
       requestedRoundRef.current = roundIndex;
 
       try {
-        const res = await fetch("/api/live/draw/round", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ matchId: mId, roundIndex, callerSlot: slot }),
-        });
-        if (!res.ok) throw new Error(`status ${res.status}`);
+        let res: Response | null = null;
+        // The round-start RPC serialises all callers on an advisory lock, so a
+        // queued caller can get a transient 503. Retry with jittered backoff so
+        // retries fan out in time instead of re-synchronising into a fresh herd.
+        for (let attempt = 0; attempt < 4; attempt++) {
+          res = await fetch("/api/live/draw/round", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ matchId: mId, roundIndex, callerSlot: slot }),
+          });
+          if (res.status !== 503 || attempt === 3) break;
+          const backoff = 200 * 2 ** attempt + Math.random() * 200;
+          await new Promise((r) => setTimeout(r, backoff));
+        }
+        if (!res || !res.ok) throw new Error(`status ${res?.status ?? "none"}`);
         const data = (await res.json()) as RoundResp;
 
         const isMeDrawer = data.drawerSlot === slot;

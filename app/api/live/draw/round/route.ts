@@ -61,6 +61,13 @@ export async function POST(request: Request) {
     ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+    // 57014 = statement_timeout. On round start every client POSTs the same
+    // round and they serialise on the RPC's pg_advisory_xact_lock; queued
+    // callers can hit the timeout. That is transient contention, not a real
+    // failure, so surface it as retryable rather than a hard 500.
+    if (error.code === "57014" || msg.includes("statement timeout")) {
+      return NextResponse.json({ error: "Round start busy, retry" }, { status: 503 });
+    }
     console.error("[draw/round] start_draw_round RPC error", { matchId, roundIndex, callerSlot, error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
