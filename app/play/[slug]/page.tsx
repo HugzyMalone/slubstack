@@ -47,6 +47,26 @@ export default async function PlayLandingPage({ params }: Props) {
   const more = Array.from({ length: 4 }, (_, k) => GAME_CATALOG[(idx + k + 1) % GAME_CATALOG.length]);
 
   const url = `${SITE_URL}/play/${game.slug}`;
+
+  const faqs = [
+    {
+      q: `Is ${game.name} free to play?`,
+      a: `Yes. ${game.name} is completely free to play on Slubstack, with no sign-up needed to start.`,
+    },
+    {
+      q: `Do I need an account to play ${game.name}?`,
+      a: `No. You can start playing ${game.name} as a guest straight away. A free account lets you save your daily streak, track your stats and climb the league.`,
+    },
+    {
+      q: `How do I play ${game.name}?`,
+      a: game.how.join(" "),
+    },
+    {
+      q: `Can I play ${game.name} on mobile?`,
+      a: `Yes. ${game.name} runs in any modern browser, and Slubstack is a progressive web app you can add to your home screen to play like an app on iOS or Android.`,
+    },
+  ];
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -74,6 +94,14 @@ export default async function PlayLandingPage({ params }: Props) {
           { "@type": "ListItem", position: 2, name: "Games", item: `${SITE_URL}/play` },
           { "@type": "ListItem", position: 3, name: game.name, item: url },
         ],
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
       },
     ],
   };
@@ -161,6 +189,22 @@ export default async function PlayLandingPage({ params }: Props) {
             </li>
           ))}
         </ol>
+      </section>
+
+      <section className="mt-14">
+        <h2 className="text-xl font-bold tracking-tight text-fg lg:text-2xl">Frequently asked questions</h2>
+        <div className="mt-5 grid gap-3">
+          {faqs.map((f) => (
+            <div
+              key={f.q}
+              className="rounded-2xl p-5"
+              style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+            >
+              <h3 className="text-[15px] font-bold text-fg">{f.q}</h3>
+              <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{f.a}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="mt-14">
