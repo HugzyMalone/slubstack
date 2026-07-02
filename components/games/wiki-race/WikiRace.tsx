@@ -252,7 +252,7 @@ export function WikiRace() {
             {best && <span className="flex items-center gap-1"><Trophy size={13} /> best {best.clicks}</span>}
           </div>
 
-          <div className="truncate text-[11px] text-muted">
+          <div className="break-words text-[11px] text-muted">
             {path.map((t, i) => (
               <span key={i}>
                 {i > 0 && " › "}
@@ -307,7 +307,7 @@ export function WikiRace() {
                 </div>
               </div>
               <div className="mt-3 text-[11px] text-muted">+{XP_WIN} XP</div>
-              <div className="mt-2 truncate text-[11px] text-muted">{path.join(" › ")}</div>
+              <div className="mt-2 max-h-32 overflow-y-auto break-words text-[11px] text-muted">{path.join(" › ")}</div>
 
               <button
                 onClick={handleShare}
