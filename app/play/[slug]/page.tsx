@@ -48,22 +48,23 @@ export default async function PlayLandingPage({ params }: Props) {
 
   const url = `${SITE_URL}/play/${game.slug}`;
 
+  const gameName = game.name.replace(/\?+$/, "");
   const faqs = [
     {
-      q: `Is ${game.name} free to play?`,
-      a: `Yes. ${game.name} is completely free to play on Slubstack, with no sign-up needed to start.`,
+      q: `Is ${gameName} free to play?`,
+      a: `Yes. ${gameName} is completely free to play on Slubstack, with no sign-up needed to start.`,
     },
     {
-      q: `Do I need an account to play ${game.name}?`,
-      a: `No. You can start playing ${game.name} as a guest straight away. A free account lets you save your daily streak, track your stats and climb the league.`,
+      q: `Do I need an account to play ${gameName}?`,
+      a: `No. You can start playing ${gameName} as a guest straight away. A free account lets you save your daily streak, track your stats and climb the league.`,
     },
     {
-      q: `How do I play ${game.name}?`,
+      q: `How do I play ${gameName}?`,
       a: game.how.join(" "),
     },
     {
-      q: `Can I play ${game.name} on mobile?`,
-      a: `Yes. ${game.name} runs in any modern browser, and Slubstack is a progressive web app you can add to your home screen to play like an app on iOS or Android.`,
+      q: `Can I play ${gameName} on mobile?`,
+      a: `Yes. ${gameName} runs in any modern browser, and Slubstack is a progressive web app you can add to your home screen to play like an app on iOS or Android.`,
     },
   ];
 
