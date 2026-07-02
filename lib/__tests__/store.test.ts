@@ -225,6 +225,18 @@ describe('Game Store', () => {
       store.getState().mergeFromServer({ ...emptyRemote, lastActiveDate: '2026-04-20' })
       expect(store.getState().lastActiveDate).toBe('2026-04-20')
     })
+
+    it('should tolerate a partial remote missing arrays and srs (server state_json null)', () => {
+      const store = freshStore()
+      store.setState({ completedUnits: ['unit-1'], seenCardIds: ['a'], srs: { 'card-1': { ...INITIAL_SRS, reps: 4 } } })
+      // The /api/stats/sync GET falls back to `{ xp, streak }` when state_json is null,
+      // so completedUnits/seenCardIds/srs arrive undefined. The merge must not throw.
+      expect(() => store.getState().mergeFromServer({ xp: 50, streak: 3 })).not.toThrow()
+      expect(store.getState().completedUnits).toEqual(['unit-1'])
+      expect(store.getState().seenCardIds).toEqual(['a'])
+      expect(store.getState().srs['card-1'].reps).toBe(4)
+      expect(store.getState().xp).toBe(50)
+    })
   })
 
   describe('getSrs()', () => {

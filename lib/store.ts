@@ -20,10 +20,10 @@ type State = {
 export type RemoteState = {
   xp: number;
   streak: number;
-  lastActiveDate: string | null;
-  completedUnits: string[];
-  seenCardIds: string[];
-  srs: Record<string, SrsState>;
+  lastActiveDate?: string | null;
+  completedUnits?: string[];
+  seenCardIds?: string[];
+  srs?: Record<string, SrsState>;
 };
 
 type Actions = {
@@ -121,9 +121,9 @@ export function createGameStore(name: string) {
               xp: Math.max(local.xp, remote.xp),
               streak: remoteNewer ? remote.streak : local.streak,
               lastActiveDate: remoteNewer ? remote.lastActiveDate : local.lastActiveDate,
-              completedUnits: [...new Set([...local.completedUnits, ...remote.completedUnits])],
-              seenCardIds: [...new Set([...local.seenCardIds, ...remote.seenCardIds])],
-              srs: mergeSrs(local.srs, remote.srs),
+              completedUnits: [...new Set([...local.completedUnits, ...(remote.completedUnits ?? [])])],
+              seenCardIds: [...new Set([...local.seenCardIds, ...(remote.seenCardIds ?? [])])],
+              srs: mergeSrs(local.srs, remote.srs ?? {}),
             };
           }),
       }),
