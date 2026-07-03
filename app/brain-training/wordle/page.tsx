@@ -12,7 +12,7 @@ import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
 import { globalStore } from "@/lib/globalStore";
 import { PBCelebration } from "@/components/PBCelebration";
-import { wordleShareCard, type WordleRow } from "@/lib/share";
+import { wordleShareCard, shareOrCopy, type WordleRow } from "@/lib/share";
 import { FriendsCompare } from "@/components/FriendsCompare";
 import { playWordleTap, playWordleSubmit, playWordleInvalid, playCorrect, playWrong } from "@/lib/sound";
 import { WordleGame, type GamePhase, type TileState } from "./WordleGame";
@@ -491,12 +491,10 @@ export default function WordlePage() {
 
         <div className="mt-6 w-full space-y-4">
           <button
-            onClick={() => {
-              navigator.clipboard.writeText(wordleShareText).then(() => {
-                toast.success("Copied to clipboard");
-              }).catch(() => {
-                toast.error("Couldn't copy");
-              });
+            onClick={async () => {
+              const result = await shareOrCopy(wordleShareText);
+              if (result === "copied") toast.success("Copied to clipboard");
+              else if (result === "failed") toast.error("Couldn't share");
             }}
             className="w-full rounded-2xl py-3.5 text-sm font-bold text-white transition-all active:scale-[0.98]"
             style={{ background: "var(--game)" }}

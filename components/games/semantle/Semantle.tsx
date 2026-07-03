@@ -145,8 +145,8 @@ export function Semantle() {
       buildShareCard({
         title: `Slubstack Semantle #${dayIdx + 1}`,
         footerTag: won
-          ? `Solved in ${guesses.length} guesses · slubstack.com`
-          : "slubstack.com",
+          ? `Solved in ${guesses.length} guesses · slubstack.com/semantle`
+          : "slubstack.com/semantle",
       }),
     [dayIdx, won, guesses.length],
   );

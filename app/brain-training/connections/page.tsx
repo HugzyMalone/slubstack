@@ -11,7 +11,7 @@ import { awardQuestProgress } from "@/lib/questsStore";
 import { pushLeagueXp } from "@/lib/leagues";
 import { globalStore } from "@/lib/globalStore";
 import { PBCelebration } from "@/components/PBCelebration";
-import { connectionsShareCard } from "@/lib/share";
+import { connectionsShareCard, shareOrCopy } from "@/lib/share";
 import { FriendsCompare } from "@/components/FriendsCompare";
 import { playConnectionsSolve, playConnectionsMistake, playConnectionsPerfect } from "@/lib/sound";
 
@@ -314,10 +314,10 @@ export default function ConnectionsPage() {
     groupColours: colourGrid.length ? colourGrid : [[]],
   });
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(shareText)
-      .then(() => toast.success("Copied to clipboard"))
-      .catch(() => toast.error("Couldn't copy"));
+  const handleShare = async () => {
+    const result = await shareOrCopy(shareText);
+    if (result === "copied") toast.success("Copied to clipboard");
+    else if (result === "failed") toast.error("Couldn't share");
   };
 
   return (

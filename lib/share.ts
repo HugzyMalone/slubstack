@@ -71,7 +71,7 @@ export function wordleShareCard({
         .join("")
     )
     .join("\n");
-  return `${header}\n\n${grid}\n\nslubstack.com`;
+  return `${header}\n\n${grid}\n\nslubstack.com/wordle`;
 }
 
 export function mathBlitzShareCard({
@@ -110,7 +110,7 @@ export function connectionsShareCard({
   const map = { yellow: "🟨", green: "🟩", blue: "🟦", purple: "🟪" };
   const grid = groupColours.map((row) => row.map((c) => map[c]).join("")).join("\n");
   const header = `Slubstack Connections #${dayNumber}\n${solved ? "✅" : "❌"} · ${mistakes}/4 mistakes`;
-  return `${header}\n\n${grid}\n\nslubstack.com`;
+  return `${header}\n\n${grid}\n\nslubstack.com/connections`;
 }
 
 export function actorBlitzShareCard({
