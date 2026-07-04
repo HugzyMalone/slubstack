@@ -8,6 +8,7 @@ import { Radar, Flame, Snowflake, Trophy, ArrowLeft } from "lucide-react";
 import { getTodayStr, getDayIndex } from "@/lib/wordle-words";
 import { getSecretForDate } from "@/lib/games/semantle/data";
 import { buildShareCard, shareOrCopy } from "@/lib/share";
+import { track } from "@/lib/analytics";
 
 interface Guess {
   word: string;
@@ -127,6 +128,7 @@ export function Semantle() {
       setInput("");
       if (data.win) {
         setWon(true);
+        track("daily_complete", { game: "semantle", won: true, guesses: guesses.length + 1 });
         toast.success("You got it!");
       }
     } catch {
@@ -138,6 +140,7 @@ export function Semantle() {
 
   const giveUp = useCallback(() => {
     setGaveUp(true);
+    track("daily_complete", { game: "semantle", won: false });
   }, []);
 
   const shareText = useMemo(

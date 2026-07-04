@@ -14,6 +14,7 @@ import { PBCelebration } from "@/components/PBCelebration";
 import { connectionsShareCard, shareOrCopy } from "@/lib/share";
 import { FriendsCompare } from "@/components/FriendsCompare";
 import { playConnectionsSolve, playConnectionsMistake, playConnectionsPerfect } from "@/lib/sound";
+import { track } from "@/lib/analytics";
 
 const MAX_MISTAKES = 4;
 const STORAGE_KEY = "slubstack_connections";
@@ -114,6 +115,7 @@ export default function ConnectionsPage() {
       setMistakes(saved.mistakes);
       setPhase(saved.phase);
       setShuffled(saved.shuffled);
+      if (saved.phase === "won" || saved.phase === "lost") setXpAwarded(true);
     } else {
       const remaining = allWords.filter(w => !solved.includes(categoryByWord[w].color));
       setShuffled(shuffle(remaining));
@@ -141,6 +143,7 @@ export default function ConnectionsPage() {
   useEffect(() => {
     if ((phase === "won" || phase === "lost") && !xpAwarded) {
       setXpAwarded(true);
+      track("daily_complete", { game: "connections", won: phase === "won", mistakes });
       const xp = phase === "won" ? XP_WIN : XP_LOSE;
       brainTrainingStore.getState().addXp(xp);
       awardQuestProgress("xp", xp);

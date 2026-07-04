@@ -16,6 +16,7 @@ import { wordleShareCard, shareOrCopy, type WordleRow } from "@/lib/share";
 import { FriendsCompare } from "@/components/FriendsCompare";
 import { playWordleTap, playWordleSubmit, playWordleInvalid, playCorrect, playWrong } from "@/lib/sound";
 import { WordleGame, type GamePhase, type TileState } from "./WordleGame";
+import { track } from "@/lib/analytics";
 
 const MAX_GUESSES = 6;
 const WORD_LEN = 5;
@@ -303,6 +304,7 @@ export default function WordlePage() {
           showToast(`The word was ${solution}`, 3000);
         }
         submitScore(newGuesses.length, won);
+        track("daily_complete", { game: "wordle", won });
         {
           const wordleXp = won ? 75 : 15;
           brainTrainingStore.getState().addXp(wordleXp);

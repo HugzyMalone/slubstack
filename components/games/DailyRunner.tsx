@@ -119,6 +119,7 @@ export function DailyRunner({ gameKind, level, seed, date, alreadyPlayed, initia
     setPlayed(true);
     setPhase("done");
     track("first_game_complete", { game: gameKind });
+    track("daily_complete", { game: gameKind, score, correct });
   }, [adapter, store, date, gameKind]);
 
   const endGame = useCallback(() => {
