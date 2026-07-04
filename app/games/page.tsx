@@ -71,11 +71,11 @@ const GAMES = [
   {
     href: "/games/block-yard",
     title: "BlockYard",
-    subtitle: "In development, slotting in soon",
+    subtitle: "Build together on a shared multiplayer island, up to 8 players",
     icon: <Blocks size={26} />,
     tint: "#f59e0b",
     bg: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-    available: false,
+    available: true,
   },
 ];
 

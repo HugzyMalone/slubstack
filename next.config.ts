@@ -4,6 +4,13 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  async rewrites() {
+    return {
+      afterFiles: [{ source: "/blockyard", destination: "/blockyard/index.html" }],
+      beforeFiles: [],
+      fallback: [],
+    };
+  },
   async redirects() {
     return [
       {
