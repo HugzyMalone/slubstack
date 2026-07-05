@@ -7,8 +7,6 @@ import { JsonLd } from "@/components/JsonLd";
 
 type Props = { params: Promise<{ slug: string }> };
 
-const FEATURES = ["Free to play", "No sign-up needed", "Plays in your browser"];
-
 export function generateStaticParams() {
   return GAME_CATALOG.map((g) => ({ slug: g.slug }));
 }
@@ -49,14 +47,21 @@ export default async function PlayLandingPage({ params }: Props) {
   const url = `${SITE_URL}/play/${game.slug}`;
 
   const gameName = game.name.replace(/\?+$/, "");
+  const features = game.requiresAccount
+    ? ["Free to play", "Free account needed", "Plays in your browser"]
+    : ["Free to play", "No sign-up needed", "Plays in your browser"];
   const faqs = [
     {
       q: `Is ${gameName} free to play?`,
-      a: `Yes. ${gameName} is completely free to play on Slubstack, with no sign-up needed to start.`,
+      a: game.requiresAccount
+        ? `Yes. ${gameName} is completely free to play on Slubstack. You sign in with a free account to build with other players on the shared island.`
+        : `Yes. ${gameName} is completely free to play on Slubstack, with no sign-up needed to start.`,
     },
     {
       q: `Do I need an account to play ${gameName}?`,
-      a: `No. You can start playing ${gameName} as a guest straight away. A free account lets you save your daily streak, track your stats and climb the league.`,
+      a: game.requiresAccount
+        ? `Yes. ${gameName} is a shared multiplayer world, so you sign in with a free Slubstack account before you join. Your account also saves your progress and stats across Slubstack.`
+        : `No. You can start playing ${gameName} as a guest straight away. A free account lets you save your daily streak, track your stats and climb the league.`,
     },
     {
       q: `How do I play ${gameName}?`,
@@ -141,7 +146,7 @@ export default async function PlayLandingPage({ params }: Props) {
           <p className="mt-4 max-w-[56ch] text-base leading-relaxed text-muted lg:text-lg">{game.intro}</p>
 
           <div className="mt-6 flex flex-wrap gap-2">
-            {FEATURES.map((f) => (
+            {features.map((f) => (
               <span
                 key={f}
                 className="rounded-full px-3 py-1 text-[12.5px] font-semibold text-muted"
@@ -237,7 +242,9 @@ export default async function PlayLandingPage({ params }: Props) {
       </section>
 
       <p className="mt-12 text-center text-[13px] leading-relaxed text-muted">
-        {game.name} is free to play on Slubstack, no sign-up needed to start.
+        {game.requiresAccount
+          ? `${game.name} is free to play on Slubstack with a free account.`
+          : `${game.name} is free to play on Slubstack, no sign-up needed to start.`}
       </p>
     </div>
   );

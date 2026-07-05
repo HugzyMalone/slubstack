@@ -14,12 +14,14 @@ type OgCardOptions = {
   name?: string;
   accent?: string;
   tagline?: string;
+  pill?: string;
 };
 
 export function renderOgCard({
   name = "Slubstack",
   accent = DEFAULT_ACCENT,
   tagline = "Free daily games on",
+  pill = "Play free, no sign-up",
 }: OgCardOptions = {}) {
   return new ImageResponse(
     (
@@ -89,7 +91,7 @@ export function renderOgCard({
               borderRadius: 999,
             }}
           >
-            Play free, no sign-up
+            {pill}
           </div>
           <div
             style={{

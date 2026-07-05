@@ -7,6 +7,7 @@ export type GameCatalogEntry = {
   seoDescription: string;
   intro: string;
   how: string[];
+  requiresAccount?: boolean;
 };
 
 export const SITE_URL =
@@ -251,6 +252,23 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
       "Read the quote on screen.",
       "Choose whether Batman or Shakespeare said it.",
       "Score on speed and accuracy across the rounds.",
+    ],
+  },
+  {
+    slug: "block-yard",
+    name: "BlockYard",
+    playHref: "/blockyard",
+    accent: "#f59e0b",
+    requiresAccount: true,
+    seoTitle: "BlockYard — Free Multiplayer Voxel Sandbox Game | Slubstack",
+    seoDescription:
+      "Build together in BlockYard, a free multiplayer voxel sandbox. Fly around a shared island and place blocks with up to eight players in creative mode, right in your browser. Sign in with a free account to join.",
+    intro:
+      "A shared voxel island where up to eight players build side by side in creative mode. Fly around, place and break blocks, and watch everyone's creations go up live. It runs in your browser, so sign in with a free Slubstack account and jump straight in.",
+    how: [
+      "Sign in with your free Slubstack account.",
+      "Join the shared island with up to eight players.",
+      "Fly around and place or break blocks to build together.",
     ],
   },
 ];

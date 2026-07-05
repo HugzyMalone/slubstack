@@ -10,6 +10,13 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const game = getGameBySlug(slug);
 
   return renderOgCard(
-    game ? { name: game.name, accent: game.accent, tagline: "Free daily game on" } : undefined,
+    game
+      ? {
+          name: game.name,
+          accent: game.accent,
+          tagline: game.requiresAccount ? "Free multiplayer game on" : "Free daily game on",
+          pill: game.requiresAccount ? "Play free · sign in to build" : undefined,
+        }
+      : undefined,
   );
 }
