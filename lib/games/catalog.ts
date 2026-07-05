@@ -238,6 +238,22 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
     ],
   },
   {
+    slug: "block-ops",
+    name: "Block Ops",
+    playHref: "/games/block-ops",
+    accent: "#8b5cf6",
+    seoTitle: "Block Ops — Free Browser FPS, 3v3 Team Deathmatch | Slubstack",
+    seoDescription:
+      "A free browser FPS. Fight 3v3 team deathmatch in a blocky arena — host a private room, share the code with friends, and bots fill the empty slots. No download, no sign-up.",
+    intro:
+      "A fast 3v3 team deathmatch shooter that runs straight in your browser. Host a room and share the four-letter code, or jump into practice against bots. First team to thirty eliminations takes the match.",
+    how: [
+      "Create a room and share the code, or practise against bots.",
+      "Move with WASD, aim with the mouse, and hold right-click to aim down sights.",
+      "Rack up eliminations — first team to thirty wins the match.",
+    ],
+  },
+  {
     slug: "batman-or-shakespeare",
     name: "Batman or Shakespeare?",
     playHref: "/trivia/batman-or-shakespeare",

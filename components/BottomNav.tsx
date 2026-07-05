@@ -63,6 +63,7 @@ export function BottomNav() {
     pathname?.startsWith("/games/type-racer") ||
     pathname?.startsWith("/games/wiki-race") ||
     pathname?.startsWith("/games/sperm-race") ||
+    pathname?.startsWith("/games/block-ops") ||
     pathname?.startsWith("/trivia/actors") ||
     pathname?.startsWith("/trivia/flags") ||
     pathname?.startsWith("/trivia/albums") ||

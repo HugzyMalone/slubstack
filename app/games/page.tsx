@@ -2,9 +2,18 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Blocks, Brain, Brush, Globe, Film, Keyboard, Compass, FlaskConical, ArrowRight } from "lucide-react";
+import { Blocks, Brain, Brush, Globe, Film, Keyboard, Compass, Crosshair, FlaskConical, ArrowRight } from "lucide-react";
 
 const GAMES = [
+  {
+    href: "/games/block-ops",
+    title: "Block Ops",
+    subtitle: "3v3 team deathmatch FPS — host a room, bots fill the gaps",
+    icon: <Crosshair size={26} />,
+    tint: "#8b5cf6",
+    bg: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
+    available: true,
+  },
   {
     href: "/brain-training",
     title: "Brain Training",
