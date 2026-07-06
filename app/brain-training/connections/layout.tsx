@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { getGameBySlug } from "@/lib/games/catalog";
-import { Semantle } from "@/components/games/semantle/Semantle";
 
-const game = getGameBySlug("semantle")!;
+const game = getGameBySlug("connections")!;
 
 export const metadata: Metadata = {
   title: game.seoTitle,
@@ -22,6 +22,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SemantlePage() {
-  return <Semantle />;
+export default function ConnectionsLayout({ children }: { children: ReactNode }) {
+  return children;
 }
