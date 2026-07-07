@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { getGameBySlug } from "@/lib/games/catalog";
+import { dailyGameJsonLd } from "@/lib/games/structured-data";
+import { JsonLd } from "@/components/JsonLd";
 
 const game = getGameBySlug("connections")!;
 
@@ -23,5 +25,10 @@ export const metadata: Metadata = {
 };
 
 export default function ConnectionsLayout({ children }: { children: ReactNode }) {
-  return children;
+  return (
+    <>
+      {children}
+      <JsonLd data={dailyGameJsonLd(game)} />
+    </>
+  );
 }
