@@ -81,6 +81,11 @@ export function Semantle() {
     setHydrated(true);
   }, [today]);
 
+  // Funnel denominator: one open event per mount so open→daily_complete conversion is measurable.
+  useEffect(() => {
+    track("daily_start", { game: "semantle" });
+  }, []);
+
   useEffect(() => {
     if (!hydrated) return;
     save({ date: today, guesses, won, gaveUp });

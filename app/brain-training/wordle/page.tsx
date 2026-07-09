@@ -235,6 +235,11 @@ export default function WordlePage() {
     setHydrated(true);
   }, [todayStr]);
 
+  // Funnel denominator: one open event per mount so open→daily_complete conversion is measurable.
+  useEffect(() => {
+    track("daily_start", { game: "wordle" });
+  }, []);
+
   const showToast = useCallback((msg: string, ms = 1800) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), ms);

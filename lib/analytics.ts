@@ -24,6 +24,7 @@ export type AnalyticsEvent =
   | "signup"
   | "guest_play_start"
   | "first_game_complete"
+  | "daily_start"
   | "daily_complete"
   | "share_clicked"
   | "app_open";

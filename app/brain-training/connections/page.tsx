@@ -124,6 +124,11 @@ export default function ConnectionsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Funnel denominator: one open event per mount so open→daily_complete conversion is measurable.
+  useEffect(() => {
+    track("daily_start", { game: "connections" });
+  }, []);
+
   // Persist on state change
   useEffect(() => {
     if (shuffled.length === 0) return;
