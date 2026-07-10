@@ -8,7 +8,6 @@ import { Radar, Flame, Snowflake, Trophy, ArrowLeft } from "lucide-react";
 import { getTodayStr, getDayIndex } from "@/lib/wordle-words";
 import { getSecretForDate } from "@/lib/games/semantle/data";
 import { buildShareCard, shareOrCopy } from "@/lib/share";
-import { GuestSaveNudge } from "@/components/games/GuestSaveNudge";
 import { track } from "@/lib/analytics";
 
 interface Guess {
@@ -296,15 +295,15 @@ export function Semantle() {
           >
             Share result
           </button>
-        ) : null}
-        {won && <GuestSaveNudge game="semantle" />}
-        {!finished && guesses.length > 0 && (
-          <button
-            onClick={giveUp}
-            className="w-full rounded-2xl border border-border bg-surface py-3 text-sm font-semibold text-muted transition-colors hover:text-fg"
-          >
-            Give up
-          </button>
+        ) : (
+          guesses.length > 0 && (
+            <button
+              onClick={giveUp}
+              className="w-full rounded-2xl border border-border bg-surface py-3 text-sm font-semibold text-muted transition-colors hover:text-fg"
+            >
+              Give up
+            </button>
+          )
         )}
       </div>
     </div>
