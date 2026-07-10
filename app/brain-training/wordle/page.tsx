@@ -14,6 +14,7 @@ import { globalStore } from "@/lib/globalStore";
 import { PBCelebration } from "@/components/PBCelebration";
 import { wordleShareCard, shareOrCopy, type WordleRow } from "@/lib/share";
 import { FriendsCompare } from "@/components/FriendsCompare";
+import { GuestSaveNudge } from "@/components/games/GuestSaveNudge";
 import { playWordleTap, playWordleSubmit, playWordleInvalid, playCorrect, playWrong } from "@/lib/sound";
 import { WordleGame, type GamePhase, type TileState } from "./WordleGame";
 import { track } from "@/lib/analytics";
@@ -522,6 +523,8 @@ export default function WordlePage() {
             </div>
             <WordleLeaderboard date={todayStr} />
           </div>
+
+          {phase === "won" && <GuestSaveNudge game="wordle" />}
         </div>
       </div>
     </>

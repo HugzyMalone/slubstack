@@ -13,6 +13,7 @@ import { globalStore } from "@/lib/globalStore";
 import { PBCelebration } from "@/components/PBCelebration";
 import { connectionsShareCard, shareOrCopy } from "@/lib/share";
 import { FriendsCompare } from "@/components/FriendsCompare";
+import { GuestSaveNudge } from "@/components/games/GuestSaveNudge";
 import { playConnectionsSolve, playConnectionsMistake, playConnectionsPerfect } from "@/lib/sound";
 import { track } from "@/lib/analytics";
 
@@ -516,6 +517,8 @@ export default function ConnectionsPage() {
                 ))}
               </div>
             )}
+
+            {phase === "won" && <GuestSaveNudge game="connections" />}
           </motion.div>
         )}
       </AnimatePresence>

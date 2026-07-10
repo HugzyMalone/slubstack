@@ -27,6 +27,8 @@ export type AnalyticsEvent =
   | "daily_start"
   | "daily_complete"
   | "share_clicked"
+  | "guest_nudge_shown"
+  | "guest_nudge_clicked"
   | "app_open";
 
 export function track(event: AnalyticsEvent, props?: Record<string, unknown>) {
