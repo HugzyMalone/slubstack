@@ -425,7 +425,7 @@ export default function HubPage() {
   return (
     <div
       className="relative overflow-hidden px-4 lg:h-auto lg:overflow-visible lg:px-8 lg:py-10 lg:max-w-[1200px] lg:mx-auto"
-      style={{ height: "calc(100dvh - 52px - env(safe-area-inset-top, 0px))" }}
+      style={{ height: "calc(100dvh - 52px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 66px)" }}
     >
       {/* Subtle accent glow behind hero */}
       <div
@@ -484,7 +484,7 @@ export default function HubPage() {
 
         <motion.div
           className="relative flex-shrink-0"
-          style={{ height: "19vh", maxHeight: 162 }}
+          style={{ height: "17vh", maxHeight: 148 }}
           animate={prefersReducedMotion ? {} : { y: [0, -7, 0] }}
           transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
         >
@@ -528,11 +528,11 @@ export default function HubPage() {
 
         <DailyPuzzlesRow size="mobile" />
 
-        <div className="flex flex-1 min-h-0 flex-col gap-3 pb-[max(calc(env(safe-area-inset-bottom,0px)+72px),88px)]">
+        <div className="flex flex-1 min-h-0 flex-col gap-3 pb-3">
           {HOME_BUTTONS.map(({ href, title, subtitle, icon, tint, bg }, i) => (
             <motion.div
               key={href}
-              className="flex-1"
+              className="min-h-0 flex-1"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 + i * 0.08, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
